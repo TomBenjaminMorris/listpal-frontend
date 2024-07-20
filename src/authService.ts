@@ -1,8 +1,6 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: Apache-2.0
-
 import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
 import config from "./config.json";
+import { useNavigate } from 'react-router-dom';
 
 export const cognitoClient = new CognitoIdentityProviderClient({
   region: config.region,
@@ -99,6 +97,11 @@ export const refreshTokens = async (refreshToken: string) => {
         sessionStorage.setItem("refreshToken", AuthenticationResult.RefreshToken || '');
       }
       return AuthenticationResult;
+    }
+    else {
+      sessionStorage.clear();
+      const navigate = useNavigate();
+      navigate('/login');
     }
   } catch (error) {
     console.error("Error refreshing token: ", error);
