@@ -79,3 +79,29 @@ export const confirmSignUp = async (email: string, code: string) => {
     throw error;
   }
 };
+
+export const refreshTokens = async (refreshToken: string) => {
+  const params = {
+    AuthFlow: "REFRESH_TOKEN_AUTH",
+    ClientId: config.clientId,
+    AuthParameters: {
+      REFRESH_TOKEN: refreshToken,
+    },
+  };
+  try {
+    const command = new InitiateAuthCommand(params);
+    const { AuthenticationResult } = await cognitoClient.send(command);
+    if (AuthenticationResult) {
+      console.log("TTTT refreshing tokens")
+      sessionStorage.setItem("idToken", AuthenticationResult.IdToken || '');
+      sessionStorage.setItem("accessToken", AuthenticationResult.AccessToken || '');
+      if (AuthenticationResult.RefreshToken) {
+        sessionStorage.setItem("refreshToken", AuthenticationResult.RefreshToken || '');
+      }
+      return AuthenticationResult;
+    }
+  } catch (error) {
+    console.error("Error refreshing token: ", error);
+    throw error;
+  }
+};

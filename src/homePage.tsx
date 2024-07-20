@@ -15,11 +15,12 @@ function parseJwt (token) {
 }
 
 // const tasks = getAllTasks(sessionStorage.accessToken.toString())
+import { refreshTokens } from './authService';
 
 const HomePage = () => {
   const navigate = useNavigate();
   var idToken = parseJwt(sessionStorage.idToken.toString());
-  var accessToken = parseJwt(sessionStorage.accessToken.toString());
+  // var accessToken = parseJwt(sessionStorage.accessToken.toString());
   // console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
   // console.log ("Amazon Cognito ID token decoded: ");
   // console.log ( idToken );
@@ -34,12 +35,17 @@ const HomePage = () => {
     navigate('/login');
   };
 
-  function toTitleCase(str) {
-    return str.replace(
-      /\w\S*/g,
-      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-    );
-  }
+  const handleRefreshTokens = () => {
+    refreshTokens(sessionStorage.refreshToken).then((tokens) => {
+      console.log("TTTT tokens refreshed successfully")
+      // console.log("TTTT tokens after refresh: ")
+      // console.log(tokens);
+      // console.log ("TTTT id token after refresh: ");
+      // console.log(parseJwt(sessionStorage.idToken.toString()));
+      // console.log ("TTTT access token after refresh: ");
+      // console.log(parseJwt(sessionStorage.accessToken.toString()));
+    });
+  };
   
 /*eslint-enable*/
 
@@ -50,6 +56,7 @@ const HomePage = () => {
       <h2>id: {idToken.sub}</h2>
       {/* <p>{tasks}</p> */}
       <button onClick={handleLogout}>Logout</button>
+      <button onClick={handleRefreshTokens}>Refresh Tokens</button>
     </div>
   );
 };
