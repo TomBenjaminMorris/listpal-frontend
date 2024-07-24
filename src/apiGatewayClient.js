@@ -2,19 +2,39 @@ import axios from 'axios';
 axios.defaults.baseURL = 'https://api.vinsp.in';
 
 const instance = axios.create({
-    baseURL: 'https://api.vinsp.in'
+  baseURL: 'https://api.vinsp.in'
 });
 
-export function getAllTasks(accessToken) {
-    const headers = {
-      'Authorization': 'Bearer ' + accessToken
-    }
+export const getAllTasks = async () => {
+  const accessToken = sessionStorage.accessToken
+  const headers = {
+    'Authorization': 'Bearer ' + accessToken
+  }
 
-    axios.get('/all-tasks', { headers: headers }).then((response) => {
-      const item = response.data.data[0].Description.S
-      console.log(item);
-      return item
-    }).catch(function (error) {
-      console.error(error);
-    });
-}
+  try {
+    const response = await axios.get('/all-tasks', { headers: headers });
+    if (response) {
+      return response.data.data;;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", error);
+    throw error;
+  }
+};
+
+export const getActiveTasks = async () => {
+  const accessToken = sessionStorage.accessToken
+  const headers = {
+    'Authorization': 'Bearer ' + accessToken
+  }
+
+  try {
+    const response = await axios.get('/active-tasks?boardID=b%2312345', { headers: headers });
+    if (response) {
+      return response.data.data;;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", error);
+    throw error;
+  }
+};
