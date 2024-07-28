@@ -38,3 +38,20 @@ export const getActiveTasks = async () => {
     throw error;
   }
 };
+
+export const getBoards = async () => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken
+  }
+
+  try {
+    const response = await axios.get('/boards', { headers: headers });
+    if (response) {
+      // console.log(response);
+      return response.data.data;;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", error);
+    throw error;
+  }
+};

@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './loginPage';
-import HomePage from './homePage';
+import LoginPage from './LoginPage';
+import HomePage from './HomePage';
 import ConfirmUserPage from './confirmUserPage';
 import './App.css'
 
 const App = () => {
+  console.log("rendering: App")
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
     return !!accessToken;

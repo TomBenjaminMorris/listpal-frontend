@@ -15,7 +15,7 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const session = await signIn(email, password);
-      console.log('Sign in successful', session);
+      // console.log('Sign in successful', session);
       if (session && typeof session.AccessToken !== 'undefined') {
         sessionStorage.setItem('accessToken', session.AccessToken);
         if (sessionStorage.getItem('accessToken')) {
@@ -47,7 +47,7 @@ const LoginPage = () => {
 
   return (
     <div className="loginForm">
-      <h1>Welcome</h1>
+      {/* <h1>Welcome</h1> */}
       <h4>{isSignUp ? 'Sign up to create an account' : 'Sign in to your account'}</h4>
       <form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
         {isSignUp && (
@@ -60,7 +60,7 @@ const LoginPage = () => {
               onChange={(e) => setGivenName(e.target.value)}
               placeholder="First Name"
               required
-              />
+            />
           </div>
         )}
         {isSignUp && (
@@ -73,7 +73,7 @@ const LoginPage = () => {
               onChange={(e) => setFamilyName(e.target.value)}
               placeholder="Last Name"
               required
-              />
+            />
           </div>
         )}
         <div>
@@ -85,7 +85,7 @@ const LoginPage = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            />
+          />
         </div>
         <div>
           <input
