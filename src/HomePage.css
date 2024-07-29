@@ -58,22 +58,3 @@
         float: none;
     }
 }
-
-.flex-container {
-    display: flex;
-    justify-content: center;
-}
-
-.flex-container>div {
-    background-color: #f1f1f1;
-    color: black;
-    width: 300px;
-    margin: 15px;
-    text-align: center;
-    line-height: 100px;
-    font-size: 30px;
-}
-
-.flex-container>div:hover {
-    background-color: #a39999;
-}

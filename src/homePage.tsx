@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getBoards } from './apiGatewayClient';
 import { refreshTokens } from './authService';
 import './HomePage.css'
+import Boards from './components/Boards';
 
 /*eslint-disable*/
 function parseJwt(token) {
@@ -33,10 +34,8 @@ const HomePage = () => {
 
   const handleGetBoards = async () => {
     console.log("TTT triggered: handleGetBoards")
-    if (boards.length === 0) {
-      const data = await getBoards();
-      setBoards(data);
-    }
+    const data = await getBoards();
+    setBoards(data);
   }
 
   const handleLogout = () => {
@@ -49,11 +48,13 @@ const HomePage = () => {
     console.log("TTTT triggered: handleRefreshTokens")
     refreshTokens(sessionStorage.refreshToken).then((tokens) => {
       console.log("TTTT tokens refreshed successfully")
+      handleGetBoards();
     });
   };
 
   const handleBoardSelection = (id: string) => {
-    alert(id);
+    // alert(id);
+    navigate('/board?id='+id);
   };
 
   if (isTokenExpired(accessToken)) {
@@ -79,13 +80,14 @@ const HomePage = () => {
         </div>
       </div>
       <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2>
-      <div className="flex-container">
+      <Boards onClick={handleBoardSelection} boards={boards} />
+      {/* <div className="flex-container">
         {boards.map((b) => {
           return (
             <div key={b.SK} onClick={() => handleBoardSelection(b.SK)}>{b.Board}</div>
           )
         })}
-      </div>
+      </div> */}
       {/* <h2>email: {idToken.email}</h2>
       <h2>id: {idToken.sub}</h2> */}
       {/* {tasks}

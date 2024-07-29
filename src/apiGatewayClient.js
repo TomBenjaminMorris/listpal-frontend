@@ -22,15 +22,20 @@ export const getAllTasks = async () => {
   }
 };
 
-export const getActiveTasks = async () => {
+export const getActiveTasks = async (boardID) => {
   const accessToken = sessionStorage.accessToken
   const headers = {
     'Authorization': 'Bearer ' + accessToken
   }
 
+  const params = {
+    boardID
+  }
+
   try {
-    const response = await axios.get('/active-tasks?boardID=b%2312345', { headers: headers });
+    const response = await axios.get('/active-tasks', { headers: headers, params: params });
     if (response) {
+      // console.log(response);
       return response.data.data;;
     }
   } catch (err) {
@@ -47,7 +52,6 @@ export const getBoards = async () => {
   try {
     const response = await axios.get('/boards', { headers: headers });
     if (response) {
-      // console.log(response);
       return response.data.data;;
     }
   } catch (err) {
