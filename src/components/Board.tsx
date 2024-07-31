@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getActiveTasks } from '../apiGatewayClient';
+import { getActiveTasks } from '../utils/apiGatewayClient';
 import './Board.css'
 
 // Board
@@ -28,7 +28,13 @@ const Board = () => {
           <Link to="/home" >{"Back"}</Link>
         </div>
       </div>
-      {JSON.stringify(activeTasks)}
+      <div className="flex-container">
+        {activeTasks.map((t) => {
+          return (
+            <div key={t.SK} className="task">{t.Description}</div>
+          )
+        })}
+      </div>
     </div >
   );
 };

@@ -17,8 +17,8 @@ export const getAllTasks = async () => {
       return response.data.data;;
     }
   } catch (err) {
-    console.error("Error getting data: ", error);
-    throw error;
+    console.error("Error getting data: ", err);
+    throw err;
   }
 };
 
@@ -39,8 +39,8 @@ export const getActiveTasks = async (boardID) => {
       return response.data.data;;
     }
   } catch (err) {
-    console.error("Error getting data: ", error);
-    throw error;
+    console.error("Error getting data: ", err);
+    throw err;
   }
 };
 
@@ -55,7 +55,7 @@ export const getBoards = async () => {
       return response.data.data;;
     }
   } catch (err) {
-    console.error("Error getting data: ", error);
-    throw error;
+    console.error("Error getting data: ", err);
+    throw err;
   }
 };

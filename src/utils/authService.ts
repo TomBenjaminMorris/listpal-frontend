@@ -1,5 +1,5 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
-import config from "./config.json";
+import config from "../config.json";
 import { useNavigate } from 'react-router-dom';
 
 export const cognitoClient = new CognitoIdentityProviderClient({

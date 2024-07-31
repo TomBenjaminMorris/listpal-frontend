@@ -1,26 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBoards } from './apiGatewayClient';
-import { refreshTokens } from './authService';
+import { getBoards } from './utils/apiGatewayClient';
+import { parseJwt, isTokenExpired } from './utils/utils';
+import { refreshTokens } from './utils/authService';
 import './HomePage.css'
-import Boards from './components/Boards';
+import BoardList from './components/BoardList';
+import Header from './components/Header';
 
 /*eslint-disable*/
-function parseJwt(token) {
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
-  return JSON.parse(jsonPayload);
-}
-
-function isTokenExpired(accessToken: string) {
-  const now = Math.floor(Date.now() / 1000);
-  const expiry = accessToken.exp;
-  return now > expiry;
-}
-
 // const BOARDS = [{ Board: "my lists", SK: 1234 }, { Board: "work lists", SK: 1235 }, { Board: "other lists", SK: 1236 }]
 const BOARDS = []
 
@@ -49,12 +36,10 @@ const HomePage = () => {
     refreshTokens(sessionStorage.refreshToken).then((tokens) => {
       console.log("TTTT tokens refreshed successfully")
       handleGetBoards();
-    });
-  };
-
-  const handleBoardSelection = (id: string) => {
-    // alert(id);
-    navigate('/board?id='+id);
+    })
+      .catch((err) => {
+        handleLogout()
+      });
   };
 
   if (isTokenExpired(accessToken)) {
@@ -74,36 +59,19 @@ const HomePage = () => {
   /*eslint-enable*/
   return (
     <div className="wrapper">
-      <div className="header">
-        <div className="header-right">
-          <a onClick={handleLogout}>Logout</a>
-        </div>
-      </div>
+      <Header handleLogout={handleLogout} />
       <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2>
-      <Boards onClick={handleBoardSelection} boards={boards} />
-      {/* <div className="flex-container">
-        {boards.map((b) => {
-          return (
-            <div key={b.SK} onClick={() => handleBoardSelection(b.SK)}>{b.Board}</div>
-          )
-        })}
-      </div> */}
-      {/* <h2>email: {idToken.email}</h2>
-      <h2>id: {idToken.sub}</h2> */}
-      {/* {tasks}
-      <button onClick={handleLogout}>Logout</button>
-      <button onClick={handleRefreshTokens}>Refresh Tokens</button>
-      <button onClick={handleGetAllData}>Get All Tasks</button>
-      <button onClick={handleGetActiveData}>Get Active Tasks</button> */}
+      <BoardList boards={boards} />
     </div>
   );
 };
 
 export default HomePage;
 
-
-
-
+/* <button onClick={handleLogout}>Logout</button>
+<button onClick={handleRefreshTokens}>Refresh Tokens</button>
+<button onClick={handleGetAllData}>Get All Tasks</button>
+<button onClick={handleGetActiveData}>Get Active Tasks</button> */
 
 // console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
 // console.log ("Amazon Cognito ID token decoded: ");
