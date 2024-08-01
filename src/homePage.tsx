@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBoards } from './utils/apiGatewayClient';
 import { parseJwt, isTokenExpired } from './utils/utils';
@@ -8,13 +8,9 @@ import BoardList from './components/BoardList';
 import Header from './components/Header';
 
 /*eslint-disable*/
-// const BOARDS = [{ Board: "my lists", SK: 1234 }, { Board: "work lists", SK: 1235 }, { Board: "other lists", SK: 1236 }]
-const BOARDS = []
-
 // HomePage
-const HomePage = () => {
+const HomePage = ({ boards, setBoards, setActiveTasks }) => {
   console.log("rendering: HomePage")
-  const [boards, setBoards] = useState(BOARDS);
   const navigate = useNavigate();
   var idToken = parseJwt(sessionStorage.idToken.toString());
   var accessToken = parseJwt(sessionStorage.accessToken.toString());
@@ -27,19 +23,31 @@ const HomePage = () => {
 
   const handleLogout = () => {
     console.log("TTT triggered: handleLogout")
+    setBoards([]);
+    setActiveTasks([]);
     sessionStorage.clear();
     navigate('/login');
   };
 
-  const handleRefreshTokens = () => {
+  // const handleRefreshTokens = () => {
+  //   console.log("TTTT triggered: handleRefreshTokens")
+  //   refreshTokens(sessionStorage.refreshToken).then((tokens) => {
+  //     console.log("TTTT tokens refreshed successfully")
+  //     handleGetBoards();
+  //   })
+  //     .catch((err) => {
+  //       handleLogout()
+  //     });
+  // };
+  const handleRefreshTokens = async () => {
     console.log("TTTT triggered: handleRefreshTokens")
-    refreshTokens(sessionStorage.refreshToken).then((tokens) => {
-      console.log("TTTT tokens refreshed successfully")
+    const token = await refreshTokens(sessionStorage.refreshToken)
+    if (token) {
+      console.log("TTTT tokens refreshed successfully");
       handleGetBoards();
-    })
-      .catch((err) => {
-        handleLogout()
-      });
+    } else {
+      handleLogout()
+    }
   };
 
   if (isTokenExpired(accessToken)) {
@@ -53,7 +61,9 @@ const HomePage = () => {
   }
 
   useEffect(() => {
-    handleGetBoards();
+    if (boards.length === 0) {
+      handleGetBoards();
+    }
   }, [])
 
   /*eslint-enable*/
@@ -67,11 +77,6 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-/* <button onClick={handleLogout}>Logout</button>
-<button onClick={handleRefreshTokens}>Refresh Tokens</button>
-<button onClick={handleGetAllData}>Get All Tasks</button>
-<button onClick={handleGetActiveData}>Get Active Tasks</button> */
 
 // console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
 // console.log ("Amazon Cognito ID token decoded: ");

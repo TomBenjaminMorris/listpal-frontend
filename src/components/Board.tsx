@@ -4,9 +4,8 @@ import { getActiveTasks } from '../utils/apiGatewayClient';
 import './Board.css'
 
 // Board
-const Board = () => {
+const Board = ({ activeTasks, setActiveTasks }) => {
   console.log("rendering: Board")
-  const [activeTasks, setActiveTasks] = useState([]);
 
   const handleGetActiveTasks = async (boardID) => {
     console.log("TTT triggered: handleGetActiveTasks")
@@ -17,7 +16,9 @@ const Board = () => {
   useEffect(() => {
     const url = window.location.href;
     const boardID = url.split('/').pop();
-    handleGetActiveTasks(boardID);
+    if (activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID) {
+      handleGetActiveTasks(boardID);
+    }
   }, [])
 
   /*eslint-enable*/
