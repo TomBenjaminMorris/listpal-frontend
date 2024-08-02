@@ -6,6 +6,7 @@ import './Board.css'
 // Board
 const Board = ({ activeTasks, setActiveTasks }) => {
   console.log("rendering: Board")
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleGetActiveTasks = async (boardID) => {
     console.log("TTT triggered: handleGetActiveTasks")
@@ -17,7 +18,11 @@ const Board = ({ activeTasks, setActiveTasks }) => {
     const url = window.location.href;
     const boardID = url.split('/').pop();
     if (activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID) {
-      handleGetActiveTasks(boardID);
+      handleGetActiveTasks(boardID).then(() => {
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
     }
   }, [])
 
@@ -30,7 +35,8 @@ const Board = ({ activeTasks, setActiveTasks }) => {
         </div>
       </div>
       <div className="flex-container">
-        {activeTasks.map((t) => {
+        {isLoading && "loading..."}
+        {!isLoading && activeTasks.map((t) => {
           return (
             <div key={t.SK} className="task">{t.Description}</div>
           )

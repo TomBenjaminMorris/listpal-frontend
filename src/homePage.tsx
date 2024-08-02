@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBoards } from './utils/apiGatewayClient';
 import { parseJwt, isTokenExpired } from './utils/utils';
@@ -11,6 +11,7 @@ import Header from './components/Header';
 // HomePage
 const HomePage = ({ boards, setBoards, setActiveTasks }) => {
   console.log("rendering: HomePage")
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   var idToken = parseJwt(sessionStorage.idToken.toString());
   var accessToken = parseJwt(sessionStorage.accessToken.toString());
@@ -49,20 +50,26 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
       handleLogout()
     }
   };
-
-  if (isTokenExpired(accessToken)) {
-    console.log("TTTT token expired, renewing...");
-    try {
-      handleRefreshTokens()
-    }
-    catch (err) {
-      handleLogout()
-    }
-  }
-
+  
   useEffect(() => {
-    if (boards.length === 0) {
-      handleGetBoards();
+    if (isTokenExpired(accessToken)) {
+      console.log("TTTT token expired, renewing...");
+      try {
+        handleRefreshTokens().then(() => {
+          handleGetBoards().then(() => {
+            setIsLoading(false);
+          });
+        })
+      }
+      catch (err) {
+        handleLogout()
+      }
+    } else if (boards.length === 0) {
+      handleGetBoards().then(() => {
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
     }
   }, [])
 
@@ -71,7 +78,7 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
       <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2>
-      <BoardList boards={boards} />
+      {!isLoading ? <BoardList boards={boards} /> : "loading..."}
     </div>
   );
 };
