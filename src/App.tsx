@@ -8,12 +8,12 @@ import Board from './components/Board';
 
 const App = () => {
   console.log("rendering: App")
+  const [boards, setBoards] = useState([]);
+  const [activeTasks, setActiveTasks] = useState([]);
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
     return !!accessToken;
   };
-  const [boards, setBoards] = useState([]);
-  const [activeTasks, setActiveTasks] = useState([]);
 
   return (
     <BrowserRouter>

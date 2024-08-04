@@ -1,7 +1,13 @@
+import PulseLoader from "react-spinners/PulseLoader";
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, CSSProperties } from 'react';
 import { getActiveTasks } from '../utils/apiGatewayClient';
 import './Board.css'
+
+const override: CSSProperties = {
+  paddingTop: "50px",
+  opacity: "0.8",
+};
 
 // Board
 const Board = ({ activeTasks, setActiveTasks }) => {
@@ -35,12 +41,21 @@ const Board = ({ activeTasks, setActiveTasks }) => {
         </div>
       </div>
       <div className="flex-container">
-        {isLoading && "loading..."}
-        {!isLoading && activeTasks.map((t) => {
-          return (
-            <div key={t.SK} className="task">{t.Description}</div>
-          )
-        })}
+        {
+          isLoading ? <PulseLoader
+            cssOverride={override}
+            size={10}
+            color={"#fff"}
+            speedMultiplier={1}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          /> : 
+          activeTasks.map((t) => {
+            return (
+              <div key={t.SK} className="task">{t.Description}</div>
+            )
+          })
+        }
       </div>
     </div >
   );

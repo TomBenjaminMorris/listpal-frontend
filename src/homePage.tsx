@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBoards } from './utils/apiGatewayClient';
 import { parseJwt, isTokenExpired } from './utils/utils';
 import { refreshTokens } from './utils/authService';
+import PulseLoader from "react-spinners/PulseLoader";
 import './HomePage.css'
 import BoardList from './components/BoardList';
 import Header from './components/Header';
+
+const override: CSSProperties = {
+  paddingTop: "50px",
+  opacity: "0.8",
+};
 
 /*eslint-disable*/
 // HomePage
@@ -13,7 +19,7 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
   console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  var idToken = parseJwt(sessionStorage.idToken.toString());
+  // var idToken = parseJwt(sessionStorage.idToken.toString());
   var accessToken = parseJwt(sessionStorage.accessToken.toString());
 
   const handleGetBoards = async () => {
@@ -30,16 +36,6 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
     navigate('/login');
   };
 
-  // const handleRefreshTokens = () => {
-  //   console.log("TTTT triggered: handleRefreshTokens")
-  //   refreshTokens(sessionStorage.refreshToken).then((tokens) => {
-  //     console.log("TTTT tokens refreshed successfully")
-  //     handleGetBoards();
-  //   })
-  //     .catch((err) => {
-  //       handleLogout()
-  //     });
-  // };
   const handleRefreshTokens = async () => {
     console.log("TTTT triggered: handleRefreshTokens")
     const token = await refreshTokens(sessionStorage.refreshToken)
@@ -50,7 +46,7 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
       handleLogout()
     }
   };
-  
+
   useEffect(() => {
     if (isTokenExpired(accessToken)) {
       console.log("TTTT token expired, renewing...");
@@ -77,14 +73,27 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
   return (
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
-      <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2>
-      {!isLoading ? <BoardList boards={boards} /> : "loading..."}
+      <div className="homePageContent">
+        {
+          isLoading ?
+            <PulseLoader
+            cssOverride={override}
+            size={10}
+            color={"#fff"}
+            speedMultiplier={1}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+            /> :
+            <BoardList boards={boards} />
+          }
+      </div>
     </div>
   );
 };
 
 export default HomePage;
 
+{/* <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2> */}
 // console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
 // console.log ("Amazon Cognito ID token decoded: ");
 // console.log ( idToken );

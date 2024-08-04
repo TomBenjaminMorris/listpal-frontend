@@ -47,7 +47,6 @@ const LoginPage = () => {
 
   return (
     <div className="loginForm">
-      {/* <h1>Welcome</h1> */}
       <h4>{isSignUp ? 'Sign up to create an account' : 'Sign in to your account'}</h4>
       <form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
         {isSignUp && (
