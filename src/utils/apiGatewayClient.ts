@@ -24,19 +24,16 @@ export const getAllTasks = async () => {
 
 export const getActiveTasks = async (boardID) => {
   const accessToken = sessionStorage.accessToken
+  const params = { boardID }
   const headers = {
     'Authorization': 'Bearer ' + accessToken
-  }
-
-  const params = {
-    boardID
   }
 
   try {
     const response = await axios.get('/active-tasks', { headers: headers, params: params });
     if (response) {
       // console.log(response);
-      return response.data.data;;
+      return response.data.data;
     }
   } catch (err) {
     console.error("Error getting data: ", err);
