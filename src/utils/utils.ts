@@ -8,7 +8,8 @@ export function parseJwt(token) {
     return JSON.parse(jsonPayload);
 }
 
-export function isTokenExpired(accessToken: string) {
+export function isTokenExpired() { 
+    const accessToken = parseJwt(sessionStorage.accessToken.toString());
     const now = Math.floor(Date.now() / 1000);
     const expiry = accessToken.exp;
     return now > expiry;

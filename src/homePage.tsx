@@ -1,8 +1,8 @@
 import { useEffect, useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBoards } from './utils/apiGatewayClient';
-import { parseJwt, isTokenExpired } from './utils/utils';
-import { refreshTokens } from './utils/authService';
+// import { parseJwt, isTokenExpired } from './utils/utils';
+// import { refreshTokens } from './utils/authService';
 import PulseLoader from "react-spinners/PulseLoader";
 import './HomePage.css'
 import BoardList from './components/BoardList';
@@ -20,7 +20,7 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   // var idToken = parseJwt(sessionStorage.idToken.toString());
-  var accessToken = parseJwt(sessionStorage.accessToken.toString());
+  // var accessToken = parseJwt(sessionStorage.accessToken.toString());
 
   const handleGetBoards = async () => {
     console.log("TTT triggered: handleGetBoards")
@@ -36,31 +36,32 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
     navigate('/login');
   };
 
-  const handleRefreshTokens = async () => {
-    console.log("TTTT triggered: handleRefreshTokens")
-    const token = await refreshTokens(sessionStorage.refreshToken)
-    if (token) {
-      console.log("TTTT tokens refreshed successfully");
-      handleGetBoards();
-    } else {
-      handleLogout()
-    }
-  };
+  // const handleRefreshTokens = async () => {
+  //   console.log("TTTT triggered: handleRefreshTokens")
+  //   const token = await refreshTokens(sessionStorage.refreshToken)
+  //   if (token) {
+  //     console.log("TTTT tokens refreshed successfully");
+  //     handleGetBoards();
+  //   } else {
+  //     handleLogout()
+  //   }
+  // };
 
   useEffect(() => {
-    if (isTokenExpired(accessToken)) {
-      console.log("TTTT token expired, renewing...");
-      try {
-        handleRefreshTokens().then(() => {
-          handleGetBoards().then(() => {
-            setIsLoading(false);
-          });
-        })
-      }
-      catch (err) {
-        handleLogout()
-      }
-    } else if (boards.length === 0) {
+    // if (isTokenExpired(accessToken)) {
+    //   console.log("TTTT token expired, renewing...");
+    //   try {
+    //     handleRefreshTokens().then(() => {
+    //       handleGetBoards().then(() => {
+    //         setIsLoading(false);
+    //       });
+    //     })
+    //   }
+    //   catch (err) {
+    //     handleLogout()
+    //   }
+    // } else 
+    if (boards.length === 0) {
       handleGetBoards().then(() => {
         setIsLoading(false);
       });
