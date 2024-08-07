@@ -1,12 +1,11 @@
 import { useEffect, useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBoards } from './utils/apiGatewayClient';
-// import { parseJwt, isTokenExpired } from './utils/utils';
-// import { refreshTokens } from './utils/authService';
+import { isTokenExpired } from './utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
-import './HomePage.css'
 import BoardList from './components/BoardList';
 import Header from './components/Header';
+import './HomePage.css'
 
 const override: CSSProperties = {
   paddingTop: "50px",
@@ -14,13 +13,10 @@ const override: CSSProperties = {
 };
 
 /*eslint-disable*/
-// HomePage
 const HomePage = ({ boards, setBoards, setActiveTasks }) => {
   console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  // var idToken = parseJwt(sessionStorage.idToken.toString());
-  // var accessToken = parseJwt(sessionStorage.accessToken.toString());
 
   const handleGetBoards = async () => {
     console.log("TTT triggered: handleGetBoards")
@@ -36,37 +32,17 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
     navigate('/login');
   };
 
-  // const handleRefreshTokens = async () => {
-  //   console.log("TTTT triggered: handleRefreshTokens")
-  //   const token = await refreshTokens(sessionStorage.refreshToken)
-  //   if (token) {
-  //     console.log("TTTT tokens refreshed successfully");
-  //     handleGetBoards();
-  //   } else {
-  //     handleLogout()
-  //   }
-  // };
-
   useEffect(() => {
-    // if (isTokenExpired(accessToken)) {
-    //   console.log("TTTT token expired, renewing...");
-    //   try {
-    //     handleRefreshTokens().then(() => {
-    //       handleGetBoards().then(() => {
-    //         setIsLoading(false);
-    //       });
-    //     })
-    //   }
-    //   catch (err) {
-    //     handleLogout()
-    //   }
-    // } else 
-    if (boards.length === 0) {
-      handleGetBoards().then(() => {
+    if (!isTokenExpired()) {
+      if (boards.length === 0) {
+        handleGetBoards().then(() => {
+          setIsLoading(false);
+        });
+      } else {
         setIsLoading(false);
-      });
+      }
     } else {
-      setIsLoading(false);
+      console.log("TTT HomePage load: token is exipred...");
     }
   }, [])
 
@@ -103,3 +79,5 @@ export default HomePage;
 // console.log ( accessToken );
 // console.log ("Amazon Cognito refresh token: ");
 // console.log ( sessionStorage.refreshToken );
+// var idToken = parseJwt(sessionStorage.idToken.toString());
+// var accessToken = parseJwt(sessionStorage.accessToken.toString());

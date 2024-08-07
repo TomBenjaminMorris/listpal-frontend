@@ -2,6 +2,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 import { Link } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
 import { getActiveTasks } from '../utils/apiGatewayClient';
+import { isTokenExpired } from '../utils/utils';
 import './Board.css'
 import CardList from './CardList';
 
@@ -10,7 +11,6 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-// Board
 const Board = ({ activeTasks, setActiveTasks }) => {
   console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
@@ -38,13 +38,18 @@ const Board = ({ activeTasks, setActiveTasks }) => {
   useEffect(() => {
     const url = window.location.href;
     const boardID = url.split('/').pop();
-    if (activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID) {
-      handleGetActiveTasks(boardID).then((data) => {
+    if (!isTokenExpired()) {
+      if ( activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID ) {
+        handleGetActiveTasks(boardID).then((data) => {
+          setIsLoading(false);
+          sortTasks(data);
+        });
+      } else {
         setIsLoading(false);
-        sortTasks(data);
-      });
+        sortTasks(activeTasks);
+      }
     } else {
-      setIsLoading(false);
+      console.log("TTT Board load: token is exipred...");
     }
   }, [])
 
@@ -66,11 +71,6 @@ const Board = ({ activeTasks, setActiveTasks }) => {
             aria-label="Loading Spinner"
             data-testid="loader"
           /> :
-            // activeTasks.map((t) => {
-            //   return (
-            //     <div key={t.SK} className="task">{t.Description}</div>
-            //   )
-            // })
             <CardList sortedTasks={sortedTasks}></CardList>
         }
       </div>

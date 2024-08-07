@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useReducer } from 'react';
 import { isTokenExpired } from './utils/utils';
 import { refreshTokens } from './utils/authService';
 import LoginPage from './LoginPage';
 import HomePage from './HomePage';
-import ConfirmUserPage from './confirmUserPage';
+import ConfirmUserPage from './ConfirmUserPage';
 import './App.css'
 import Board from './components/Board';
 
@@ -12,6 +12,7 @@ const App = () => {
   console.log("rendering: App")
   const [boards, setBoards] = useState([]);
   const [activeTasks, setActiveTasks] = useState([]);
+  const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -29,11 +30,12 @@ const App = () => {
   };
 
   useEffect(() => {
-    // if (sessionStorage.accessToken && isTokenExpired()) {
     if (isTokenExpired()) {
       console.log("TTTT token expired, renewing...");
       try {
-        handleRefreshTokens()
+        handleRefreshTokens().then(() => {
+          forceUpdate();
+        })
       }
       catch (err) {
       }
