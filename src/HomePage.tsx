@@ -12,9 +12,8 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-/*eslint-disable*/
-const HomePage = ({ boards, setBoards, setActiveTasks }) => {
-  console.log("rendering: HomePage")
+const HomePage = ({ setActiveBoard, boards, setBoards, setActiveTasks }) => {
+  // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -28,6 +27,7 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
     console.log("TTT triggered: handleLogout")
     setBoards([]);
     setActiveTasks([]);
+    setActiveBoard("");
     sessionStorage.clear();
     navigate('/login');
   };
@@ -46,7 +46,6 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
     }
   }, [])
 
-  /*eslint-enable*/
   return (
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
@@ -61,7 +60,7 @@ const HomePage = ({ boards, setBoards, setActiveTasks }) => {
             aria-label="Loading Spinner"
             data-testid="loader"
             /> :
-            <BoardList boards={boards} />
+            <BoardList boards={boards} setActiveBoard={setActiveBoard}/>
           }
       </div>
     </div>

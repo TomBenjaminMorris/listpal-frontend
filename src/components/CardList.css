@@ -4,3 +4,23 @@
     justify-content: flex-start;
     width: 95%;
 }
+
+#addCardButton{
+    min-width: 450px;
+    height: 200px;
+    margin: 20px;
+    border-radius: 10px;
+    /* background-color: rgb(27, 27, 27); */
+    color: white;
+    border: white;
+    border-style: dashed;
+    border-width: 4px;
+    font-size: 80px;
+    font-family: none;
+	display: grid;
+	align-items: center;
+}
+
+#addCardButton:hover{
+    background-color: rgb(86, 86, 86);
+}

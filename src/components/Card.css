@@ -1,10 +1,58 @@
 .card-container {
     background-color: #f1f1f1;
     color: black;
-    min-width: 400px;
-    max-height: 1000px;
+    min-width: 450px;
     min-height: 400px;
+    /* min-height: 400px; */
     margin: 20px;
     padding: 5px;
     border-radius: 5px;
+}
+
+.card-container h2 {
+    font-size: 25px;
+    margin: 0;
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    text-align: left;
+    line-height: normal;
+}
+
+/* #addTaskButton{
+    width: 80%;
+    background-color: #f1f1f1;
+    color: black;
+    border: black;
+    border-style: dashed;
+    border-width: 3px;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 5px;
+    margin: 30px;
+    font-family: none; 
+}
+
+#addTaskButton:hover{
+    background-color: beige;
+} */
+
+#addTask {
+    font-size: 30px;
+    margin-top: -20px;
+}
+
+#addTask:hover {
+    color: rgb(67, 240, 64);
+    cursor: pointer;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #00000034;
+    margin-bottom: 30px;
+    padding: 0;
+    width: 90%;
 }

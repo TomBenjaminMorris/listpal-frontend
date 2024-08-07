@@ -11,8 +11,8 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ activeTasks, setActiveTasks }) => {
-  console.log("rendering: Board")
+const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
+  // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
   const [sortedTasks, setSortedTasks] = useState({});
 
@@ -53,12 +53,11 @@ const Board = ({ activeTasks, setActiveTasks }) => {
     }
   }, [])
 
-  /*eslint-enable*/
   return (
     <div className="wrapper">
       <div className="header">
         <div className="header-left">
-          <Link to="/home" >{"Back"}</Link>
+          <Link to="/home" >{activeBoard ? "Home | " + activeBoard : "Home"}</Link>
         </div>
       </div>
       <div className="flex-container">

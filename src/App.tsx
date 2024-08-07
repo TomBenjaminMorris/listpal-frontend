@@ -9,10 +9,10 @@ import './App.css'
 import Board from './components/Board';
 
 const App = () => {
-  console.log("rendering: App")
+  // console.log("rendering: App")
   const [boards, setBoards] = useState([]);
   const [activeTasks, setActiveTasks] = useState([]);
-  const [, forceUpdate] = useReducer(x => x + 1, 0);
+  const [activeBoard, setActiveBoard] = useState("");
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -34,7 +34,7 @@ const App = () => {
       console.log("TTTT token expired, renewing...");
       try {
         handleRefreshTokens().then(() => {
-          forceUpdate();
+          window.location.reload();
         })
       }
       catch (err) {
@@ -48,8 +48,8 @@ const App = () => {
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
-        <Route path="/home" element={isAuthenticated() ? <HomePage boards={boards} setBoards={setBoards} setActiveTasks={setActiveTasks} /> : <Navigate replace to="/login" />} />
-        <Route path="/board/*" element={isAuthenticated() ? <Board activeTasks={activeTasks} setActiveTasks={setActiveTasks} /> : <Navigate replace to="/login" />} />
+        <Route path="/home" element={isAuthenticated() ? <HomePage setActiveBoard={setActiveBoard} boards={boards} setBoards={setBoards} setActiveTasks={setActiveTasks} /> : <Navigate replace to="/login" />} />
+        <Route path="/board/*" element={isAuthenticated() ? <Board activeBoard={activeBoard} activeTasks={activeTasks} setActiveTasks={setActiveTasks} /> : <Navigate replace to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

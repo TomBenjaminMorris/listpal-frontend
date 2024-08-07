@@ -1,10 +1,8 @@
 import './Header.css'
 
-// Header
 const Header = ({ handleLogout }) => {
-  console.log("rendering: Header")
+  // console.log("rendering: Header")
 
-  /*eslint-enable*/
   return (
     <div className="header">
       <div className="header-right">
