@@ -11,7 +11,10 @@ const Card = ({ title, tasks }) => {
 
     return (
         <div className="card-container">
-            <h2>{title}</h2>
+            <div className="headingWrapper">
+                <h2>{title}</h2>
+                <h3 className="score">{"20"}</h3>
+            </div>
             <hr />
             {tasksRendered}
             <div className="task-container">

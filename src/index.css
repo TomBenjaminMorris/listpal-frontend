@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: CircularMedium, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -71,3 +71,47 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@font-face {
+  font-family: "CircularBook";
+  src: local("CircularBook"),
+    url("./fonts/circular-book.otf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "CircularBold";
+  src: local("CircularBold"),
+    url("./fonts/circular-bold.otf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "CircularBlack";
+  src: local("CircularBlack"),
+    url("./fonts/circular-black.otf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "CircularMedium";
+  src: local("CircularMedium"),
+    url("./fonts/circular-medium.otf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "CircularBookItalic";
+  src: local("CircularBookItalic"),
+    url("./fonts/circular-bold-italic.otf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Circular";
+  src: local("Circular"),
+    url("./fonts/circular-black.otf") format("opentype");
+  font-weight: bolder;
+}
+
+
