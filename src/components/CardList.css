@@ -3,6 +3,7 @@
     flex-wrap: wrap;
     justify-content: flex-start;
     width: 95%;
+    align-items: flex-start;
 }
 
 #addCardButton{
@@ -19,8 +20,10 @@
     font-family: none;
 	display: grid;
 	align-items: center;
+    opacity: 0.7;
 }
 
 #addCardButton:hover{
     background-color: rgb(86, 86, 86);
+    opacity: 1;
 }

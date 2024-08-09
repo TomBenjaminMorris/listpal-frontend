@@ -70,7 +70,7 @@ const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
             aria-label="Loading Spinner"
             data-testid="loader"
           /> :
-            <CardList sortedTasks={sortedTasks}></CardList>
+            <CardList activeTasks={activeTasks} sortedTasks={sortedTasks} setActiveTasks={setActiveTasks}></CardList>
         }
       </div>
     </div >

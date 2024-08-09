@@ -17,10 +17,6 @@
     font-family: CircularBook;
 }
 
-.task-text-box:hover {
-    /* opacity: 0.5; */
-}
-
 .task-text-box:focus {
     outline: none;
 }
@@ -28,6 +24,7 @@
 .deleteTask {
     display: none;
     margin-left: 5px;
+    margin-top: 1px;
 }
 
 .deleteTask:hover {
@@ -46,12 +43,6 @@
     --form-control-color: rgb(255, 255, 255);
     --form-control-disabled: #959495;
 }
-
-/* *,
-*:before,
-*:after {
-    box-sizing: border-box;
-} */
 
 input[type="checkbox"] {
     cursor: pointer;

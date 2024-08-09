@@ -3,14 +3,16 @@ import './BoardList.css'
 
 const BoardList = ({ boards, setActiveBoard }) => {
   // console.log("rendering: BoardList")
+  const boardsRendered = boards.map((b) => {
+    return (
+      <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => setActiveBoard(b.Board)}>{b.Board}</Link>
+    )
+  });
 
   return (
     <div className="flex-container">
-      {boards.map((b) => {
-        return (
-          <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => setActiveBoard(b.Board)}>{b.Board}</Link>
-        )
-      })}
+      {boardsRendered}
+      <div id="addBoardButton">+</div>
     </div>
   );
 };

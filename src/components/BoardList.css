@@ -2,6 +2,7 @@
     background-color: #f1f1f1;
     color: black;
     width: 300px;
+    padding: 40px;
     margin: 15px;
     text-align: center;
     line-height: 100px;
@@ -11,4 +12,26 @@
 
 .flex-container>.boardLink:hover {
     background-color: #b5b5b5;
+}
+
+#addBoardButton{
+    color: white;
+    width: 300px;
+    padding: 37px;
+    margin: 15px;
+    text-align: center;
+    line-height: 100px;
+    font-size: 30px;
+    border-radius: 10px;
+    border: white;
+    border-style: dashed;
+    border-width: 4px;
+    font-size: 80px;
+    font-family: none;
+    opacity: 0.7;
+}
+
+#addBoardButton:hover{
+    background-color: rgb(86, 86, 86);
+    opacity: 1;
 }
