@@ -3,9 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import Task from './Task';
 import './Card.css'
 
+const fakeApi = (titleEdited) => console.log('Renaming title to: ' + titleEdited)
+
 const Card = ({ title, tasks, setActiveTasks, activeTasks }) => {
     // console.log("rendering: Card")
     const [titleEdited, setTitleEdited] = useState(title);
+    const [timer, setTimer] = useState(null);
     const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     const tasksRendered = tasks.map((task) => {
@@ -14,8 +17,24 @@ const Card = ({ title, tasks, setActiveTasks, activeTasks }) => {
         )
     });
 
-    const handleEditTitle = (e) => {
-        setTitleEdited(e.target.value);
+    const handleEditTitle = e => {
+        setTitleEdited(e.target.value)
+        clearTimeout(timer)
+        const newTimer = setTimeout(() => {
+            fakeApi(e.target.value)
+            renameCategory(e.target.value)
+        }, 4000)
+        setTimer(newTimer);
+    }
+
+    const renameCategory = (newTitle) => {
+        const activeTasksTmp = activeTasks.map((t) => {
+            if (t.Category === title) {
+                t.Category = newTitle;
+            }
+            return t
+        });
+        setActiveTasks(activeTasksTmp);
     }
 
     const handleNewTask = async () => {
@@ -44,7 +63,7 @@ const Card = ({ title, tasks, setActiveTasks, activeTasks }) => {
             <div className="headingWrapper">
                 <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
                 {/* <h2 onClick={handleEditTitle}>{title}</h2> */}
-                <h3 className="score">{"0"}</h3>
+                {/* <h3 className="score">{"0"}</h3> */}
             </div>
             <hr />
             {tasksRendered}

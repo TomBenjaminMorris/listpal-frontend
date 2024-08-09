@@ -1,10 +1,10 @@
-import PulseLoader from "react-spinners/PulseLoader";
 import { Link } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
 import { getActiveTasks } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
-import './Board.css'
+import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
+import './Board.css'
 
 const override: CSSProperties = {
   paddingTop: "50px",
@@ -39,7 +39,7 @@ const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
     const url = window.location.href;
     const boardID = url.split('/').pop();
     if (!isTokenExpired()) {
-      if ( activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID ) {
+      if (activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID) {
         handleGetActiveTasks(boardID).then((data) => {
           setIsLoading(false);
           sortTasks(data);

@@ -3,17 +3,12 @@
   text-align: center;
 }
 
-.loginForm {
-  /* min-width: 18em */
+:root {
+  --red: rgb(230, 70, 70);
 }
 
 .smallButton {
   font-size: 0.8em;
-}
-
-.inputText {
-  font-size: 1.3em;
-  width: 100%
 }
 
 button {

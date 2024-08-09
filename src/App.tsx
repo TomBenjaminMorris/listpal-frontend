@@ -5,8 +5,8 @@ import { refreshTokens } from './utils/authService';
 import LoginPage from './LoginPage';
 import HomePage from './HomePage';
 import ConfirmUserPage from './ConfirmUserPage';
-import './App.css'
 import Board from './components/Board';
+import './App.css'
 
 const App = () => {
   // console.log("rendering: App")

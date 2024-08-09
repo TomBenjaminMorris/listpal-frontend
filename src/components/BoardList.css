@@ -11,10 +11,11 @@
 }
 
 .flex-container>.boardLink:hover {
-    background-color: #b5b5b5;
+    background-color: var(--red);
+    color: white;
 }
 
-#addBoardButton{
+#addBoardButton {
     color: white;
     width: 300px;
     padding: 37px;
@@ -31,7 +32,7 @@
     opacity: 0.7;
 }
 
-#addBoardButton:hover{
+#addBoardButton:hover {
     background-color: rgb(86, 86, 86);
     opacity: 1;
 }

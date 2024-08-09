@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from './utils/authService';
+import "./LoginPage.css";
 
 const LoginPage = () => {
   const [given_name, setGivenName] = useState('');
@@ -47,7 +48,8 @@ const LoginPage = () => {
 
   return (
     <div className="loginForm">
-      <h4>{isSignUp ? 'Sign up to create an account' : 'Sign in to your account'}</h4>
+      <h3>{isSignUp ? 'Sign up to create an account' : 'Sign in to your account'}</h3>
+      <br />
       <form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
         {isSignUp && (
           <div>
@@ -110,9 +112,10 @@ const LoginPage = () => {
             />
           </div>
         )}
-        <button type="submit">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
+        <br />
+        <button className="login-buttons" type="submit">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
       </form>
-      <button onClick={() => setIsSignUp(!isSignUp)}>
+      <button className="login-buttons" onClick={() => setIsSignUp(!isSignUp)}>
         {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
       </button>
     </div>

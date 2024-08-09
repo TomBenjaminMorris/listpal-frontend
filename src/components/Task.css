@@ -13,8 +13,8 @@
     width: 350px;
     resize: vertical;
     margin-left: 10px;
-    margin-top: -2px;
-    font-family: CircularBook;
+    margin-top: -1px;
+    font-family: CircularMedium;
 }
 
 .task-text-box:focus {
@@ -55,6 +55,7 @@ input[type="checkbox"] {
     width: 1.2em;
     height: 1.2em;
     border: 0.15em solid currentColor;
+    border-color: var(--red);
     border-radius: 0.3em;
     transform: translateY(-0.075em);
     display: grid;
@@ -63,7 +64,8 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    background-color: black;
+    /* background-color: black; */
+    background-color: var(--red);
 }
 
 input[type="checkbox"]::before {
@@ -89,7 +91,8 @@ input[type="checkbox"]:disabled {
 }
 
 input[type="checkbox"]:hover {
-    background-color: black;
+    /* background-color: black; */
+    background-color: var(--red);
 }
 
 
@@ -113,19 +116,20 @@ input[type="checkbox"]:hover {
 /* Strikethrough */
 
 @keyframes strikethrough {
-	from {
-		transform: scaleX(0);
-	}
-	to {
-		transform: scaleX(1);
-	}
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
 }
 
-.strikethrough {
+/* .strikethrough {
 	display: inline-block;
 	position: relative;
 	transition: all 0.5s cubic-bezier(.55, 0, .1, 1);
-}
+} */
 
 /* .strikethrough:after {
 	content: '';

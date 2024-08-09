@@ -1,0 +1,23 @@
+.login-buttons {
+    background-color: var(--red);
+}
+
+.login-buttons:focus {
+    outline-color: transparent;
+    outline-style: solid;
+    box-shadow: 0 0 0 1px #eaeaea8a;
+}
+
+.loginForm {
+    min-width: 18em
+}
+
+.inputText {
+    font-size: 1.3em;
+    width: 100%;
+    padding: 5px
+}
+
+.inputText:focus {
+    outline-color: var(--red);
+}

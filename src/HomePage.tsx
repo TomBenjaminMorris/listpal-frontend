@@ -53,15 +53,15 @@ const HomePage = ({ setActiveBoard, boards, setBoards, setActiveTasks }) => {
         {
           isLoading ?
             <PulseLoader
-            cssOverride={override}
-            size={10}
-            color={"#fff"}
-            speedMultiplier={1}
-            aria-label="Loading Spinner"
-            data-testid="loader"
+              cssOverride={override}
+              size={10}
+              color={"#fff"}
+              speedMultiplier={1}
+              aria-label="Loading Spinner"
+              data-testid="loader"
             /> :
-            <BoardList boards={boards} setActiveBoard={setActiveBoard}/>
-          }
+            <BoardList boards={boards} setActiveBoard={setActiveBoard} />
+        }
       </div>
     </div>
   );
@@ -69,7 +69,7 @@ const HomePage = ({ setActiveBoard, boards, setBoards, setActiveTasks }) => {
 
 export default HomePage;
 
-{/* <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2> */}
+{/* <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2> */ }
 // console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
 // console.log ("Amazon Cognito ID token decoded: ");
 // console.log ( idToken );

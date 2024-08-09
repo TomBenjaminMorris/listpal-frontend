@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import binIcon from "../assets/icons8-delete-24.png"
 import './Task.css'
+
 // const fakeApi = () => console.log('Api is called')
 
 const Task = ({ task, activeTasks, setActiveTasks }) => {
@@ -63,7 +64,7 @@ const Task = ({ task, activeTasks, setActiveTasks }) => {
     return (
         <div className="task-container" style={display ? null : { display: "none" }}>
             <input type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
-            <input className="task-text-box strikethrough" disabled={checked} type="text" value={value} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through", opacity: "0.4" } : null} />
+            <input className="task-text-box strikethrough" disabled={checked} type="text" value={value} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null} />
             <div className="deleteTask">
                 <img className="deleteTask" src={binIcon} alt="delete icon" onClick={handleDeleteTask} />
             </div>
