@@ -5,7 +5,7 @@ const BoardList = ({ boards, setActiveBoard }) => {
   // console.log("rendering: BoardList")
   const boardsRendered = boards.map((b) => {
     return (
-      <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => setActiveBoard(b.Board)}>{b.Board}</Link>
+      <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => setActiveBoard(b)}>{b.Board}</Link>
     )
   });
 

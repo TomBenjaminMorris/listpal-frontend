@@ -5,17 +5,11 @@ import './Card.css'
 
 const fakeApi = (titleEdited) => console.log('Renaming title to: ' + titleEdited)
 
-const Card = ({ title, tasks, setActiveTasks, activeTasks }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) => {
     // console.log("rendering: Card")
     const [titleEdited, setTitleEdited] = useState(title);
     const [timer, setTimer] = useState(null);
     const [, forceUpdate] = useReducer(x => x + 1, 0);
-
-    const tasksRendered = tasks.map((task) => {
-        return (
-            <Task key={task.SK} task={task} activeTasks={activeTasks} setActiveTasks={setActiveTasks}></Task>
-        )
-    });
 
     const handleEditTitle = e => {
         setTitleEdited(e.target.value)
@@ -28,13 +22,16 @@ const Card = ({ title, tasks, setActiveTasks, activeTasks }) => {
     }
 
     const renameCategory = (newTitle) => {
-        const activeTasksTmp = activeTasks.map((t) => {
+        const tmpSortedTasks = sortedTasks
+        const updatedCategoryArray = tmpSortedTasks[title].map((t) => {
             if (t.Category === title) {
                 t.Category = newTitle;
             }
             return t
         });
-        setActiveTasks(activeTasksTmp);
+        tmpSortedTasks[newTitle] = updatedCategoryArray
+        delete tmpSortedTasks[title];
+        setSortedTasks(tmpSortedTasks);
     }
 
     const handleNewTask = async () => {
@@ -51,18 +48,22 @@ const Card = ({ title, tasks, setActiveTasks, activeTasks }) => {
             "Category": title,
             "EntityType": "Task"
         }
-        let tmpActiveTasks = activeTasks;
-        tmpActiveTasks.push(emptyTask);
-        tasks.push(emptyTask);
-        setActiveTasks(tmpActiveTasks);
+        let sortedTasksTmp = sortedTasks;
+        sortedTasksTmp[title].push(emptyTask);
+        setSortedTasks(sortedTasksTmp);
         forceUpdate();
     }
+
+    const tasksRendered = tasks && tasks.map((task) => {
+        return (
+            <Task key={task.SK} title={title} task={task} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} handleDeleteTask={handleDeleteTask}></Task>
+        )
+    });
 
     return (
         <div className="card-container">
             <div className="headingWrapper">
                 <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
-                {/* <h2 onClick={handleEditTitle}>{title}</h2> */}
                 {/* <h3 className="score">{"0"}</h3> */}
             </div>
             <hr />

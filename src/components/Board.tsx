@@ -11,21 +11,21 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
+const Board = ({ sortedTasks, setSortedTasks, activeBoard }) => {
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
-  const [sortedTasks, setSortedTasks] = useState({});
 
   const handleGetActiveTasks = async (boardID) => {
     console.log("TTT triggered: handleGetActiveTasks")
     const data = await getActiveTasks(boardID);
-    setActiveTasks(data);
-    return data;
+    sortTasks(data);
+    setIsLoading(false);
   }
 
   const sortTasks = (data) => {
+    console.log("TTT triggered: sortTasks")
     let sortedData = {}
-    data.forEach((item) => {
+    data && data.forEach((item) => {
       if (!sortedData[item.Category]) {
         sortedData[item.Category] = [item];
       } else {
@@ -36,17 +36,16 @@ const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
   }
 
   useEffect(() => {
-    const url = window.location.href;
-    const boardID = url.split('/').pop();
     if (!isTokenExpired()) {
-      if (activeTasks.length === 0 || activeTasks[0]["GSI1-PK"] !== boardID) {
-        handleGetActiveTasks(boardID).then((data) => {
-          setIsLoading(false);
-          sortTasks(data);
-        });
+      const url = window.location.href;
+      const boardID = url.split('/').pop();
+      var firstKey = Object.keys(sortedTasks)[0];
+      const currentBoardID = sortedTasks[firstKey] && sortedTasks[firstKey][0]['GSI1-PK'];
+      console.log()
+      if (Object.keys(sortedTasks).length === 0 || currentBoardID !== boardID) {
+        handleGetActiveTasks(boardID);
       } else {
         setIsLoading(false);
-        sortTasks(activeTasks);
       }
     } else {
       console.log("TTT Board load: token is exipred...");
@@ -57,7 +56,7 @@ const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
     <div className="wrapper">
       <div className="header">
         <div className="header-left">
-          <Link to="/home" >{activeBoard ? "Home | " + activeBoard : "Home"}</Link>
+          <Link to="/home" >{activeBoard.Board ? "Home | " + activeBoard.Board : "Home"}</Link>
         </div>
       </div>
       <div className="flex-container">
@@ -70,7 +69,7 @@ const Board = ({ activeBoard, activeTasks, setActiveTasks }) => {
             aria-label="Loading Spinner"
             data-testid="loader"
           /> :
-            <CardList activeTasks={activeTasks} sortedTasks={sortedTasks} setActiveTasks={setActiveTasks}></CardList>
+            <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks}></CardList>
         }
       </div>
     </div >

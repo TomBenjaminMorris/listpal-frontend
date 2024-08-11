@@ -12,7 +12,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setActiveBoard, boards, setBoards, setActiveTasks }) => {
+const HomePage = ({ setSortedTasks, setActiveBoard, boards, setBoards }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -26,9 +26,9 @@ const HomePage = ({ setActiveBoard, boards, setBoards, setActiveTasks }) => {
   const handleLogout = () => {
     console.log("TTT triggered: handleLogout")
     setBoards([]);
-    setActiveTasks([]);
+    setSortedTasks([]);
     setActiveBoard("");
-    sessionStorage.clear();
+    sessionStorage.clear(); 
     navigate('/login');
   };
 

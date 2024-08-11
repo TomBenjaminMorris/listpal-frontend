@@ -11,8 +11,8 @@ import './App.css'
 const App = () => {
   // console.log("rendering: App")
   const [boards, setBoards] = useState([]);
-  const [activeTasks, setActiveTasks] = useState([]);
-  const [activeBoard, setActiveBoard] = useState("");
+  const [activeBoard, setActiveBoard] = useState({});
+  const [sortedTasks, setSortedTasks] = useState({});
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -48,8 +48,8 @@ const App = () => {
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
-        <Route path="/home" element={isAuthenticated() ? <HomePage setActiveBoard={setActiveBoard} boards={boards} setBoards={setBoards} setActiveTasks={setActiveTasks} /> : <Navigate replace to="/login" />} />
-        <Route path="/board/*" element={isAuthenticated() ? <Board activeBoard={activeBoard} activeTasks={activeTasks} setActiveTasks={setActiveTasks} /> : <Navigate replace to="/login" />} />
+        <Route path="/home" element={isAuthenticated() ? <HomePage setSortedTasks={setSortedTasks} setActiveBoard={setActiveBoard} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
+        <Route path="/board/*" element={isAuthenticated() ? <Board sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} activeBoard={activeBoard} /> : <Navigate replace to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

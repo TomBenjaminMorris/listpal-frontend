@@ -11,7 +11,7 @@
 }
 
 .flex-container>.boardLink:hover {
-    background-color: var(--red);
+    background-color: var(--red-faded);
     color: white;
 }
 

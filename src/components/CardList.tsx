@@ -4,17 +4,28 @@ import { createRandomString } from '../utils/utils';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ activeTasks, sortedTasks, setActiveTasks }) => {
+const CardList = ({ sortedTasks, setSortedTasks }) => {
     // console.log("rendering: CardList")
-    const [cardList, setCardList] = useState(sortedTasks);
     const [, forceUpdate] = useReducer(x => x + 1, 0);
 
-    var cards = Object.keys(cardList).map(function (key) {
-        return <Card key={key} title={key} tasks={sortedTasks[key]} setActiveTasks={setActiveTasks} activeTasks={activeTasks} />
+    const handleDeleteTask = (taskID, title) => {
+        if (sortedTasks[title] && sortedTasks[title].length === 1) {
+            alert("last task, can't delete");
+            return false
+        } else {
+            const tmpSortedTasks = sortedTasks;
+            tmpSortedTasks[title] = sortedTasks[title].filter(t => t.SK !== taskID);
+            setSortedTasks(tmpSortedTasks);
+            return true
+        }
+    }
+
+    var cards = Object.keys(sortedTasks).map(function (key) {
+        return <Card key={key} title={key} tasks={sortedTasks[key]} setSortedTasks={setSortedTasks} sortedTasks={sortedTasks} handleDeleteTask={handleDeleteTask} />
     });
 
     const handleNewCard = () => {
-        let cardListTmp = cardList;
+        let sortedTasksTmp = sortedTasks;
         const tmpName = createRandomString(9);
         const newCardDefaultTask = {
             "CreatedDate": Date.now(),
@@ -28,11 +39,8 @@ const CardList = ({ activeTasks, sortedTasks, setActiveTasks }) => {
             "Category": tmpName,
             "EntityType": "Task"
         }
-        cardListTmp[tmpName] = [newCardDefaultTask];
-        setCardList(cardListTmp);
-        const activeTasksTmp = activeTasks;
-        activeTasksTmp.push(newCardDefaultTask);
-        setActiveTasks(activeTasksTmp);
+        sortedTasksTmp[tmpName] = [newCardDefaultTask];
+        setSortedTasks(sortedTasksTmp);
         forceUpdate();
     }
 

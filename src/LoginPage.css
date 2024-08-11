@@ -2,6 +2,10 @@
     background-color: var(--red);
 }
 
+.login-buttons:hover {
+    background-color: var(--red-faded);
+}
+
 .login-buttons:focus {
     outline-color: transparent;
     outline-style: solid;

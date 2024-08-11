@@ -4,9 +4,9 @@ import './Task.css'
 
 // const fakeApi = () => console.log('Api is called')
 
-const Task = ({ task, activeTasks, setActiveTasks }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask }) => {
     // console.log("rendering: Task")
-    const [value, setValue] = useState(task.Description);
+    const [description, setDescription] = useState(task.Description);
     const [checked, setChecked] = useState(task.CompletedDate != "nil");
     const [timer, setTimer] = useState(null);
     const [display, setDisplay] = useState(true);
@@ -17,27 +17,29 @@ const Task = ({ task, activeTasks, setActiveTasks }) => {
     }
 
     const handleTextUpdate = e => {
-        setValue(e.target.value)
-        clearTimeout(timer)
+        setDescription(e.target.value);
+        clearTimeout(timer);
         const newTimer = setTimeout(() => {
             // fakeApi()
             updateActiveTaskDescription(e.target.value)
-        }, 1000)
-        setTimer(newTimer)
+        }, 1000);
+        setTimer(newTimer);
     }
 
     const updateActiveTaskDescription = (value) => {
-        const activeTasksTmp = activeTasks.map(t => {
+        let tmpSortedTasks = sortedTasks;
+        tmpSortedTasks[title] = sortedTasks[title].map(t => {
             if (t.SK === task.SK) {
                 t.Description = value;
             }
             return t;
-        })
-        setActiveTasks(activeTasksTmp);
+        });
+        setSortedTasks(tmpSortedTasks);
     }
 
     const updateActiveTaskChecked = (c) => {
-        const activeTasksTmp = activeTasks.map(t => {
+        let tmpSortedTasks = sortedTasks;
+        tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {
             if (t.SK === task.SK) {
                 if (c) {
                     const today = new Date();
@@ -52,21 +54,19 @@ const Task = ({ task, activeTasks, setActiveTasks }) => {
             }
             return t;
         })
-        setActiveTasks(activeTasksTmp);
+        setSortedTasks(tmpSortedTasks);
     }
 
-    const handleDeleteTask = () => {
-        const activeTasksTmp = activeTasks.filter(t => t.SK !== task.SK);
-        setActiveTasks(activeTasksTmp);
-        setDisplay(false);
+    const handleDeleteAndHideTask = (taskID, title) => {
+        handleDeleteTask(taskID, title) ? setDisplay(false) : null;
     }
 
     return (
         <div className="task-container" style={display ? null : { display: "none" }}>
             <input type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
-            <input className="task-text-box strikethrough" disabled={checked} type="text" value={value} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null} />
+            <input className="task-text-box strikethrough" disabled={checked} type="text" value={description} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null} />
             <div className="deleteTask">
-                <img className="deleteTask" src={binIcon} alt="delete icon" onClick={handleDeleteTask} />
+                <img className="deleteTask" src={binIcon} alt="delete icon" onClick={() => handleDeleteAndHideTask(task.SK, title)} />
             </div>
         </div>
     );
