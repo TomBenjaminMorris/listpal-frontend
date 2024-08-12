@@ -28,7 +28,7 @@ const HomePage = ({ setSortedTasks, setActiveBoard, boards, setBoards }) => {
     setBoards([]);
     setSortedTasks([]);
     setActiveBoard("");
-    sessionStorage.clear(); 
+    sessionStorage.clear();
     navigate('/login');
   };
 
