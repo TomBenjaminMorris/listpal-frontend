@@ -6,14 +6,14 @@
 }
 
 .task-text-box {
-    font-size: 15px;
+    font-size: 17px;
     color: black;
     background-color: #f1f1f1;
     border: none;
     width: 350px;
     resize: vertical;
     margin-left: 10px;
-    margin-top: -1px;
+    margin-top: -2px;
     font-family: CircularMedium;
 }
 
@@ -64,8 +64,11 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    /* background-color: black; */
     background-color: var(--red);
+}
+
+input[type="checkbox"]:checked:hover {
+    background-color: var(--white);
 }
 
 input[type="checkbox"]::before {
@@ -91,7 +94,6 @@ input[type="checkbox"]:disabled {
 }
 
 input[type="checkbox"]:hover {
-    /* background-color: black; */
     background-color: var(--red);
 }
 

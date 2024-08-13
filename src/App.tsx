@@ -11,8 +11,9 @@ import './App.css'
 const App = () => {
   // console.log("rendering: App")
   const [boards, setBoards] = useState([]);
-  const [activeBoard, setActiveBoard] = useState({});
+  // const [activeBoard, setActiveBoard] = useState({});
   const [sortedTasks, setSortedTasks] = useState({});
+  // const [token, setToken] = useState('');
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -24,6 +25,7 @@ const App = () => {
     const token = await refreshTokens(sessionStorage.refreshToken)
     if (token) {
       console.log("TTTT tokens refreshed successfully");
+      return token
     } else {
       console.log("TTTT tokens not refreshed");
     }
@@ -33,8 +35,9 @@ const App = () => {
     if (isTokenExpired()) {
       console.log("TTTT token expired, renewing...");
       try {
-        handleRefreshTokens().then(() => {
+        handleRefreshTokens().then((t) => {
           window.location.reload();
+          // setToken(t.AccessToken);
         })
       }
       catch (err) {
@@ -48,8 +51,8 @@ const App = () => {
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
-        <Route path="/home" element={isAuthenticated() ? <HomePage setSortedTasks={setSortedTasks} setActiveBoard={setActiveBoard} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
-        <Route path="/board/*" element={isAuthenticated() ? <Board sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} activeBoard={activeBoard} /> : <Navigate replace to="/login" />} />
+        <Route path="/home" element={isAuthenticated() ? <HomePage setSortedTasks={setSortedTasks} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
+        <Route path="/board/*" element={isAuthenticated() ? <Board sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

@@ -12,7 +12,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setSortedTasks, setActiveBoard, boards, setBoards }) => {
+const HomePage = ({ setSortedTasks, boards, setBoards }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ const HomePage = ({ setSortedTasks, setActiveBoard, boards, setBoards }) => {
     console.log("TTT triggered: handleLogout")
     setBoards([]);
     setSortedTasks([]);
-    setActiveBoard("");
     sessionStorage.clear();
     navigate('/login');
   };
@@ -60,7 +59,7 @@ const HomePage = ({ setSortedTasks, setActiveBoard, boards, setBoards }) => {
               aria-label="Loading Spinner"
               data-testid="loader"
             /> :
-            <BoardList boards={boards} setActiveBoard={setActiveBoard} />
+            <BoardList boards={boards} />
         }
       </div>
     </div>

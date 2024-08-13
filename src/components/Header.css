@@ -9,11 +9,11 @@
 .header a {
     float: left;
     color: white;
-    background-color: var(--red);
+    /* background-color: var(--red); */
     text-align: center;
     padding: 10px;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 20px;
     /* line-height: 25px; */
     border-radius: 5px;
 }
@@ -25,9 +25,16 @@
 }
 
 /* Change the background color on mouse-over */
+.header a:hover .back-button {
+    /* background-color: #ddd; */
+    /* color: black; */
+    opacity: 0.1;
+}
+
 .header a:hover {
-    background-color: #ddd;
-    color: black;
+    /* background-color: #ddd; */
+    color: white;
+    opacity: 0.5;
 }
 
 /* Style the active/current link*/
@@ -52,4 +59,23 @@
     .header-right {
         float: none;
     }
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+}
+
+.back-button>div {
+    /* font-size: 17px; */
+    margin-left: 8px;
+    font-family: CircularBook;
+    padding-right: 3px;
+}
+
+
+.back-icon {
+    width: 25px;
+    margin-left: -3px;
+    margin-top: -1px;
 }

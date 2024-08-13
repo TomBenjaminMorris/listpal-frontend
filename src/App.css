@@ -6,6 +6,7 @@
 :root {
   --red: rgb(230, 70, 70);
   --red-faded: rgb(245, 95, 95);
+  --white: #f1f1f1;
 }
 
 .smallButton {

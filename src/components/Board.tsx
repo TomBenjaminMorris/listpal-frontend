@@ -2,18 +2,20 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
 import { getActiveTasks } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
+import backIcon from '../assets/icons8-back-50-white.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
-import './Board.css'
+import './Board.css';
 
 const override: CSSProperties = {
   paddingTop: "50px",
   opacity: "0.8",
 };
 
-const Board = ({ sortedTasks, setSortedTasks, activeBoard }) => {
+const Board = ({ sortedTasks, setSortedTasks }) => {
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
+  const [currentBoard, setCurrentBoard] = useState('');
 
   const handleGetActiveTasks = async (boardID) => {
     console.log("TTT triggered: handleGetActiveTasks")
@@ -36,6 +38,7 @@ const Board = ({ sortedTasks, setSortedTasks, activeBoard }) => {
   }
 
   useEffect(() => {
+    setCurrentBoard(JSON.parse(localStorage.getItem('activeBoard')));
     if (!isTokenExpired()) {
       const url = window.location.href;
       const boardID = url.split('/').pop();
@@ -56,7 +59,10 @@ const Board = ({ sortedTasks, setSortedTasks, activeBoard }) => {
     <div className="wrapper">
       <div className="header">
         <div className="header-left">
-          <Link to="/home" >{activeBoard.Board ? "Home | " + activeBoard.Board : "Home"}</Link>
+          <Link className="back-button" to="/home" >
+            <img className="back-icon" src={backIcon} alt="back icon" />
+            {currentBoard && <div>{currentBoard.Board}</div>}
+          </Link>
         </div>
       </div>
       <div className="flex-container">

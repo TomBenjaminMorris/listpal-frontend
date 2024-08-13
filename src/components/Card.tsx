@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useReducer, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Task from './Task';
 import './Card.css'
@@ -9,7 +9,21 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) =
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
   const [timer, setTimer] = useState(null);
+  const [orderedTasks, setOrderedTasks] = useState([]);
   const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+  const sortList = (list) => {
+    const doneList = []
+    const notDoneList = []
+    list && list.forEach(element => {
+      element.CompletedDate === "nil" ? notDoneList.push(element) : doneList.push(element);
+    });
+    return [...doneList, ...notDoneList];
+  }
+
+  useEffect(() => {
+    setOrderedTasks(sortList(tasks));
+  }, [tasks])
 
   const handleEditTitle = e => {
     setTitleEdited(e.target.value)
@@ -48,13 +62,18 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) =
       "Category": title,
       "EntityType": "Task"
     }
-    let sortedTasksTmp = { ...sortedTasks };
-    sortedTasksTmp[title].push(emptyTask);
-    setSortedTasks(sortedTasksTmp);
+    let tmpSortedTasks = { ...sortedTasks };
+    tmpSortedTasks[title].push(emptyTask);
+    setSortedTasks(tmpSortedTasks);
+    setOrderedTasks((tasks) => {
+      let tmpTasks = [...tasks];
+      tmpTasks.push(emptyTask)
+      return tmpTasks;
+    });
     forceUpdate();
   }
 
-  const tasksRendered = tasks && tasks.map((task) => {
+  const tasksRendered = orderedTasks && orderedTasks.map((task) => {
     return (
       <Task key={task.SK} title={title} task={task} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} handleDeleteTask={handleDeleteTask}></Task>
     )
