@@ -3,7 +3,7 @@ import binIcon from "../assets/icons8-delete-24.png"
 import './Task.css'
 // const fakeApi = () => console.log('Api is called')
 
-const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask }) => {
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
@@ -60,10 +60,22 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask }) =>
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
   }
 
+  const onKeyDown = (e, taskID, title) => {
+    if (e.keyCode === 8 && e.target.value === "") {
+      console.log('delete');
+      clearTimeout(timer);
+      handleDeleteAndHideTask(taskID, title)
+    } else if (e.keyCode === 13) {
+      console.log('enter');
+      clearTimeout(timer);
+      handleNewTask()
+    }
+  }
+
   return (
     <div className="task-container" style={display ? null : { display: "none" }}>
       <input type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox}/> {/*style={checked ? { opacity: "0.7" } : null} */}
-      <input className="task-text-box strikethrough" disabled={checked} type="text" value={description} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null} />
+      <input onKeyDown={(e) => onKeyDown(e, task.SK, title)} autoFocus className="task-text-box strikethrough" disabled={checked} type="text" value={description} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null} />
       <div className="deleteTask">
         <img className="deleteTask" src={binIcon} alt="delete icon" onClick={() => handleDeleteAndHideTask(task.SK, title)} />
       </div>
