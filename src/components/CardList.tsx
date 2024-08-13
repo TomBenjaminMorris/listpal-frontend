@@ -33,7 +33,7 @@ const CardList = ({ sortedTasks, setSortedTasks }) => {
       "GSI1-SK": "nil",
       "GSI1-PK": "b#12345",
       "ExpiryDate": "nil",
-      "Description": "new task...",
+      "Description": "",
       "CompletedDate": "nil",
       "PK": "u#365202d4-0091-708b-eafe-0027f8ef9007",
       "Category": tmpName,

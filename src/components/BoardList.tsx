@@ -1,12 +1,22 @@
 import { Link } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import './BoardList.css'
 
-const BoardList = ({ boards }) => {
+const BoardList = ({ boards, setBoards }) => {
   // console.log("rendering: BoardList")
 
   const handleBoardSelect = (b) => {
     // setActiveBoard(b)
     localStorage.setItem('activeBoard', JSON.stringify(b));
+  }
+
+  const handleNewBoard = async () => {
+    console.log("TTT triggered: handleNewTask")
+    const newBoard = {"SK":"b#"+uuidv4(),"Board":"New Board"}
+    let tmpBoards = [ ...boards ];
+    tmpBoards.push(newBoard);
+    setBoards(tmpBoards);
+    // forceUpdate();
   }
 
   const boardsRendered = boards.map((b) => {
@@ -16,9 +26,9 @@ const BoardList = ({ boards }) => {
   });
 
   return (
-    <div className="flex-container">
+    <div className="flex-container-board-list">
       {boardsRendered}
-      <div id="addBoardButton">+</div>
+      <div autoFocus id="addBoardButton" onClick={handleNewBoard}>+</div>
     </div>
   );
 };

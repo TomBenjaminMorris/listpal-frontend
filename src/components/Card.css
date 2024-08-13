@@ -10,6 +10,7 @@
     overflow: auto;
     /* resize: both; */
     /* resize: vertical; */
+    resize: horizontal;
 }
 
 #addTask {

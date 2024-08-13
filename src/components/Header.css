@@ -9,7 +9,7 @@
 .header a {
     float: left;
     color: white;
-    /* background-color: var(--red); */
+    background-color: var(--red);
     text-align: center;
     padding: 10px;
     text-decoration: none;
@@ -24,6 +24,10 @@
     font-weight: bold;
 }
 
+.header .back-button {
+    background-color: rgba(255, 255, 255, 0);
+}
+
 /* Change the background color on mouse-over */
 .header a:hover .back-button {
     /* background-color: #ddd; */
@@ -35,6 +39,7 @@
     /* background-color: #ddd; */
     color: white;
     opacity: 0.5;
+    cursor: pointer;
 }
 
 /* Style the active/current link*/

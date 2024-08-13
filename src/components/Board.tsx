@@ -61,7 +61,7 @@ const Board = ({ sortedTasks, setSortedTasks }) => {
         <div className="header-left">
           <Link className="back-button" to="/home" >
             <img className="back-icon" src={backIcon} alt="back icon" />
-            {currentBoard && <div>{currentBoard.Board}</div>}
+            {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div> }
           </Link>
         </div>
       </div>

@@ -10,7 +10,8 @@
     color: black;
     background-color: #f1f1f1;
     border: none;
-    width: 350px;
+    width: 80%;
+    /* width: 350px; */
     resize: vertical;
     margin-left: 10px;
     margin-top: -2px;

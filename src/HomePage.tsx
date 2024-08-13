@@ -5,7 +5,10 @@ import { isTokenExpired } from './utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './components/BoardList';
 import Header from './components/Header';
+import { parseJwt } from './utils/utils';
 import './HomePage.css'
+const emojiList = ["🎉", "💫", "⭐", "✨"];
+const emoji = emojiList[Math.floor(Math.random() * 4)];
 
 const override: CSSProperties = {
   paddingTop: "50px",
@@ -16,6 +19,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  var idToken = parseJwt(sessionStorage.idToken.toString());
 
   const handleGetBoards = async () => {
     console.log("TTT triggered: handleGetBoards")
@@ -48,6 +52,8 @@ const HomePage = ({ setSortedTasks, boards, setBoards }) => {
   return (
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
+      {<h2>{`Hello ${idToken.given_name} 👋`}</h2>}
+      {<h2>{`Your total score across all your boards is... 100 ${emoji}`}</h2>}
       <div className="homePageContent">
         {
           isLoading ?
@@ -59,7 +65,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards }) => {
               aria-label="Loading Spinner"
               data-testid="loader"
             /> :
-            <BoardList boards={boards} />
+            <BoardList boards={boards} setBoards={setBoards} />
         }
       </div>
     </div>
@@ -68,7 +74,6 @@ const HomePage = ({ setSortedTasks, boards, setBoards }) => {
 
 export default HomePage;
 
-{/* <h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2> */ }
 // console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
 // console.log ("Amazon Cognito ID token decoded: ");
 // console.log ( idToken );
@@ -79,3 +84,4 @@ export default HomePage;
 // console.log ( sessionStorage.refreshToken );
 // var idToken = parseJwt(sessionStorage.idToken.toString());
 // var accessToken = parseJwt(sessionStorage.accessToken.toString());
+// {<h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2>}

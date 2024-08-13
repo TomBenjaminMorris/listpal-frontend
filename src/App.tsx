@@ -11,9 +11,7 @@ import './App.css'
 const App = () => {
   // console.log("rendering: App")
   const [boards, setBoards] = useState([]);
-  // const [activeBoard, setActiveBoard] = useState({});
   const [sortedTasks, setSortedTasks] = useState({});
-  // const [token, setToken] = useState('');
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -37,7 +35,6 @@ const App = () => {
       try {
         handleRefreshTokens().then((t) => {
           window.location.reload();
-          // setToken(t.AccessToken);
         })
       }
       catch (err) {

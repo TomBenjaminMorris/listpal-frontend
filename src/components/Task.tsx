@@ -74,10 +74,26 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
 
   return (
     <div className="task-container" style={display ? null : { display: "none" }}>
-      <input type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox}/> {/*style={checked ? { opacity: "0.7" } : null} */}
-      <input onKeyDown={(e) => onKeyDown(e, task.SK, title)} autoFocus className="task-text-box strikethrough" disabled={checked} type="text" value={description} onChange={handleTextUpdate} style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null} />
+      <input type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} /> {/*style={checked ? { opacity: "0.7" } : null} */}
+      <input
+        className="task-text-box strikethrough"
+        type="text"
+        value={description}
+        disabled={checked}
+        autoFocus
+        onKeyDown={(e) => onKeyDown(e, task.SK, title)}
+        onChange={handleTextUpdate}
+        style={checked ? {
+          textDecoration: "line-through var(--red) 2px",
+          opacity: "0.7"
+        } : null}
+      />
       <div className="deleteTask">
-        <img className="deleteTask" src={binIcon} alt="delete icon" onClick={() => handleDeleteAndHideTask(task.SK, title)} />
+        <img
+          className="deleteTask"
+          src={binIcon}
+          alt="delete icon"
+          onClick={() => handleDeleteAndHideTask(task.SK, title)} />
       </div>
     </div>
   );
