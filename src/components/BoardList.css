@@ -1,4 +1,6 @@
 .flex-container-board-list {
+    width: 80%;
+    margin: auto;
     display: flex;
     /* flex-direction: column; */
     flex-wrap: wrap;

@@ -11,6 +11,7 @@
     /* resize: both; */
     /* resize: vertical; */
     resize: horizontal;
+    /* flex-grow: 1; */
 }
 
 #addTask {

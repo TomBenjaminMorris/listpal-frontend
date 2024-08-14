@@ -64,6 +64,17 @@ const Board = ({ sortedTasks, setSortedTasks }) => {
             {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div> }
           </Link>
         </div>
+        <div className="header-right">
+          <Link className="score-button" to="/stats" >
+            <div>1</div>
+          </Link>
+          <Link className="score-button" to="/stats" >
+            <div>21</div>
+          </Link>
+          <Link className="score-button" to="/stats" >
+            <div>98</div>
+          </Link>
+        </div>
       </div>
       <div className="flex-container">
         {

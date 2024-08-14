@@ -83,7 +83,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) =
     <div className="card-container">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
-        {/* <h3 className="score">{"0"}</h3> */}
+        <h3 className="score">{"0"}</h3>
       </div>
       <hr />
       {tasksRendered}

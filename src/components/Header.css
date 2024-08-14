@@ -69,6 +69,7 @@
 .back-button {
     display: flex;
     align-items: center;
+    height: 35px;
 }
 
 .back-button>div {
@@ -78,9 +79,20 @@
     padding-right: 3px;
 }
 
-
 .back-icon {
     width: 25px;
     margin-left: -3px;
     margin-top: -1px;
+}
+
+.score-button {
+    border-radius: 100px !important;
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    margin-left: 10px;
+    background-color: #242424 !important;
+    border: solid;
+    border-color: var(--red-faded) !important;
+    border-width: 3px !important;
 }
