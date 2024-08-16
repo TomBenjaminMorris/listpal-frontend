@@ -6,6 +6,7 @@ import backIcon from '../assets/icons8-back-50-white.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import './Board.css';
+import ScoreBoard from './ScoreBoard';
 
 const override: CSSProperties = {
   paddingTop: "50px",
@@ -55,25 +56,19 @@ const Board = ({ sortedTasks, setSortedTasks }) => {
     }
   }, [])
 
+  const percentage = 81;
+
   return (
     <div className="wrapper">
       <div className="header">
         <div className="header-left">
           <Link className="back-button" to="/home" >
             <img className="back-icon" src={backIcon} alt="back icon" />
-            {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div> }
+            {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div>}
           </Link>
         </div>
         <div className="header-right">
-          <Link className="score-button" to="/stats" >
-            <div>1</div>
-          </Link>
-          <Link className="score-button" to="/stats" >
-            <div>21</div>
-          </Link>
-          <Link className="score-button" to="/stats" >
-            <div>98</div>
-          </Link>
+          <ScoreBoard/>
         </div>
       </div>
       <div className="flex-container">

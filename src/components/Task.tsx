@@ -21,7 +21,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     const newTimer = setTimeout(() => {
       // fakeApi()
       updateActiveTaskDescription(e.target.value)
-    }, 800);
+    }, 100);
     setTimer(newTimer);
   }
 
