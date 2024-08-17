@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Link } from 'react-router-dom';
 import './ScoreCounter.css'
 
-const ScoreCounter = ({ score, percent }) => {
+const ScoreCounter = ({ score, percent, type }) => {
   // console.log("rendering: ScoreCounter")
+  const [showType, setShowType] = useState(false);
 
   return (
     <Link className="score-button" to="/stats" >
-      <div style={{ width: 70, height: 70 }}>
+      <div
+        style={{ width: 70, height: 70 }}
+        onMouseEnter={() => setShowType(true)}
+        onMouseLeave={() => setShowType(false)}
+      >
         <CircularProgressbarWithChildren value={percent} styles={buildStyles({
           trailColor: 'var(--white)',
           textColor: 'var(--white)',
@@ -16,7 +22,7 @@ const ScoreCounter = ({ score, percent }) => {
           pathTransitionDuration: 1,
         })}>
           <div style={{ fontSize: 18, marginTop: -1 }}>
-            <strong>{score}</strong>
+            <strong>{showType ? type : score}</strong>
           </div>
         </CircularProgressbarWithChildren>
       </div>

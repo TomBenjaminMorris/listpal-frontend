@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { isTokenExpired } from './utils/utils';
 import { refreshTokens } from './utils/authService';
+import { getUser } from './utils/apiGatewayClient';
 import LoginPage from './LoginPage';
 import HomePage from './HomePage';
 import ConfirmUserPage from './ConfirmUserPage';
@@ -12,6 +13,7 @@ const App = () => {
   // console.log("rendering: App")
   const [boards, setBoards] = useState([]);
   const [sortedTasks, setSortedTasks] = useState({});
+  const [userDetails, setUserDetails] = useState({});
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -40,6 +42,12 @@ const App = () => {
       catch (err) {
       }
     }
+
+    if (isAuthenticated) {
+      getUser().then((u) => {
+        setUserDetails(u[0]);
+      })
+    }
   }, [])
 
   return (
@@ -48,8 +56,8 @@ const App = () => {
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
-        <Route path="/home" element={isAuthenticated() ? <HomePage setSortedTasks={setSortedTasks} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
-        <Route path="/board/*" element={isAuthenticated() ? <Board sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
+        <Route path="/home" element={isAuthenticated() ? <HomePage userDetails={userDetails} setSortedTasks={setSortedTasks} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
+        <Route path="/board/*" element={isAuthenticated() ? <Board userDetails={userDetails} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

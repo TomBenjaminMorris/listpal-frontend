@@ -41,9 +41,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {
       if (t.SK === task.SK) {
         if (c) {
-          const today = new Date();
           t.CompletedDate = Date.now();
-          t["GSI1-SK"] = today;
+          t["GSI1-SK"] = Date.now();
+          const today = new Date();
           t.ExpiryDate = today.setDate(today.getDate() + 3);
         } else {
           t.CompletedDate = "nil";

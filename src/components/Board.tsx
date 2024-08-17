@@ -13,7 +13,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ sortedTasks, setSortedTasks }) => {
+const Board = ({ sortedTasks, setSortedTasks, userDetails }) => {
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
   const [currentBoard, setCurrentBoard] = useState('');
@@ -68,7 +68,7 @@ const Board = ({ sortedTasks, setSortedTasks }) => {
           </Link>
         </div>
         <div className="header-right">
-          <ScoreBoard/>
+          <ScoreBoard userDetails={userDetails}/>
         </div>
       </div>
       <div className="flex-container">

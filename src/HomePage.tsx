@@ -15,7 +15,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setSortedTasks, boards, setBoards }) => {
+const HomePage = ({ setSortedTasks, boards, setBoards, userDetails }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -46,6 +46,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards }) => {
       }
     } else {
       console.log("TTT HomePage load: token is exipred...");
+      window.location.reload();
     }
   }, [])
 

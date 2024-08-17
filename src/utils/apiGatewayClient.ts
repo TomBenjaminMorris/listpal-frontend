@@ -14,7 +14,7 @@ export const getAllTasks = async () => {
   try {
     const response = await axios.get('/all-tasks', { headers: headers });
     if (response) {
-      return response.data.data;;
+      return response.data.data;
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -49,7 +49,23 @@ export const getBoards = async () => {
   try {
     const response = await axios.get('/boards', { headers: headers });
     if (response) {
-      return response.data.data;;
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
+export const getUser = async () => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken
+  }
+
+  try {
+    const response = await axios.get('/user', { headers: headers });
+    if (response) {
+      return response.data.data;
     }
   } catch (err) {
     console.error("Error getting data: ", err);
