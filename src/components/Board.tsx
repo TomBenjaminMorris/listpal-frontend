@@ -68,7 +68,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails }) => {
           </Link>
         </div>
         <div className="header-right">
-          <ScoreBoard userDetails={userDetails}/>
+          <ScoreBoard userDetails={userDetails} />
         </div>
       </div>
       <div className="flex-container">

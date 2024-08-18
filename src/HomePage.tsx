@@ -7,7 +7,6 @@ import BoardList from './components/BoardList';
 import Header from './components/Header';
 import { parseJwt } from './utils/utils';
 import './HomePage.css'
-import TaskText from './components/TaskText';
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 const emoji = emojiList[Math.floor(Math.random() * 4)];
 

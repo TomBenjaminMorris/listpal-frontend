@@ -12,11 +12,10 @@ const BoardList = ({ boards, setBoards }) => {
 
   const handleNewBoard = async () => {
     console.log("TTT triggered: handleNewTask")
-    const newBoard = {"SK":"b#"+uuidv4(),"Board":"New Board"}
-    let tmpBoards = [ ...boards ];
+    const newBoard = { "SK": "b#" + uuidv4(), "Board": "New Board" }
+    let tmpBoards = [...boards];
     tmpBoards.push(newBoard);
     setBoards(tmpBoards);
-    // forceUpdate();
   }
 
   const boardsRendered = boards.map((b) => {

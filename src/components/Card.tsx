@@ -87,7 +87,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) =
         {/* <h3 className="score">{"0"}</h3> */}
       </div>
       <hr />
-      {tasksRendered}      
+      {tasksRendered}
       <div className="task-container">
         {/* <div onClick={handleNewTask} id="addTask">+</div> */}
         <img

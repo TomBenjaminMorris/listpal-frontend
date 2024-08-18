@@ -4,7 +4,7 @@ import { calcPercents } from '../utils/utils';
 
 const ScoreBoard = ({ userDetails }) => {
   // console.log("rendering: ScoreBoard")
-  const [percentValues, setPercentValues] = useState({W: 0, M: 0, Y: 0});
+  const [percentValues, setPercentValues] = useState({ W: 0, M: 0, Y: 0 });
 
   useEffect(() => {
     if (Object.keys(userDetails).length != 0) {
@@ -17,7 +17,7 @@ const ScoreBoard = ({ userDetails }) => {
     <>
       {/* <ScoreCounter score={userDetails.WScore} percent={percentValues.W} type="W"/>
       <ScoreCounter score={userDetails.MScore} percent={percentValues.M} type="M"/> */}
-      <ScoreCounter score={userDetails.YScore} percent={percentValues.Y} type="Y"/>
+      <ScoreCounter score={userDetails.YScore} percent={percentValues.Y} type="Y" />
     </>
   );
 };

@@ -10,3 +10,4 @@
 
 ### ReactJS
 * https://www.npmjs.com/package/react-circular-progressbar
+* https://www.npmjs.com/package/react-textarea-autosize

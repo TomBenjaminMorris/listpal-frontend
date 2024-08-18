@@ -7,14 +7,6 @@
     margin-top: 50px;
 }
 
-
-
-
-
-
-
-
-
 .grow-wrap {
     /* easy way to plop the elements on top of each other and have them both sized based on the tallest one's height */
     display: grid;
@@ -49,4 +41,3 @@
     /* Place on top of each other */
     grid-area: 1 / 1 / 2 / 2;
 }
-
