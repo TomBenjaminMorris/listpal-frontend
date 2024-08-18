@@ -1,6 +1,5 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { createRandomString } from '../utils/utils';
 import Card from './Card';
 import './CardList.css'
 
@@ -9,15 +8,20 @@ const CardList = ({ sortedTasks, setSortedTasks }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const handleDeleteTask = (taskID, title) => {
+    const tmpSortedTasks = { ...sortedTasks };
     if (sortedTasks[title] && sortedTasks[title].length === 1) {
-      alert("last task, can't delete");
-      return false
+      // alert("last task, can't delete");
+      const ok = confirm("Removing the last task will delete the category. Are you sure?");
+      if (ok) {
+        delete tmpSortedTasks[title];
+      } else {
+        return
+      }
     } else {
-      const tmpSortedTasks = { ...sortedTasks };
       tmpSortedTasks[title] = sortedTasks[title].filter(t => t.SK !== taskID);
-      setSortedTasks(tmpSortedTasks);
-      return true
+      // return true;
     }
+    setSortedTasks(tmpSortedTasks);
   }
 
   var cards = Object.keys(sortedTasks).map(function (key) {
@@ -26,7 +30,11 @@ const CardList = ({ sortedTasks, setSortedTasks }) => {
 
   const handleNewCard = () => {
     let tmpSortedTasks = { ...sortedTasks };
-    const tmpName = createRandomString(9);
+    const name = prompt("Enter new name...");
+    if (Object.keys(tmpSortedTasks).includes(name)) {
+      alert("That category already exists on this board, chose another");
+      return;
+    }
     const newCardDefaultTask = {
       "CreatedDate": Date.now(),
       "SK": "t#" + uuidv4(),
@@ -36,10 +44,10 @@ const CardList = ({ sortedTasks, setSortedTasks }) => {
       "Description": "",
       "CompletedDate": "nil",
       "PK": "u#365202d4-0091-708b-eafe-0027f8ef9007",
-      "Category": tmpName,
+      "Category": name,
       "EntityType": "Task"
     }
-    tmpSortedTasks[tmpName] = [newCardDefaultTask];
+    tmpSortedTasks[name] = [newCardDefaultTask];
     setSortedTasks(tmpSortedTasks);
     forceUpdate();
   }

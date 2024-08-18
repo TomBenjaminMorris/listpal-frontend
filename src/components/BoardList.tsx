@@ -12,7 +12,8 @@ const BoardList = ({ boards, setBoards }) => {
 
   const handleNewBoard = async () => {
     console.log("TTT triggered: handleNewTask")
-    const newBoard = { "SK": "b#" + uuidv4(), "Board": "New Board" }
+    const name = prompt("Enter new name...");
+    const newBoard = { "SK": "b#" + uuidv4(), "Board": name }
     let tmpBoards = [...boards];
     tmpBoards.push(newBoard);
     setBoards(tmpBoards);

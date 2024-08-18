@@ -38,6 +38,11 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) =
 
   const renameCategory = (newTitle) => {
     const tmpSortedTasks = { ...sortedTasks }
+    if (Object.keys(tmpSortedTasks).includes(newTitle)) {
+      alert("That category already exists on this board, chose another");
+      setTitleEdited(title);
+      return;
+    }
     const updatedCategoryArray = sortedTasks[title].map((t) => {
       if (t.Category === title) {
         t.Category = newTitle;
