@@ -6,7 +6,7 @@ import './Card.css'
 
 const fakeApi = (titleEdited) => console.log('Renaming title to: ' + titleEdited)
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setUserDetails }) => {
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
   const [timer, setTimer] = useState(null);
@@ -81,7 +81,16 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask }) =
 
   const tasksRendered = orderedTasks && orderedTasks.map((task) => {
     return (
-      <Task key={task.SK} title={title} task={task} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} handleDeleteTask={handleDeleteTask} handleNewTask={handleNewTask}></Task>
+      <Task
+        key={task.SK}
+        title={title}
+        task={task}
+        sortedTasks={sortedTasks}
+        setSortedTasks={setSortedTasks}
+        handleDeleteTask={handleDeleteTask}
+        handleNewTask={handleNewTask}
+        setUserDetails={setUserDetails}
+      ></Task>
     )
   });
 

@@ -13,7 +13,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ sortedTasks, setSortedTasks, userDetails }) => {
+const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails }) => {
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
   const [currentBoard, setCurrentBoard] = useState('');
@@ -56,8 +56,6 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails }) => {
     }
   }, [])
 
-  const percentage = 81;
-
   return (
     <div className="wrapper">
       <div className="header">
@@ -81,7 +79,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails }) => {
             aria-label="Loading Spinner"
             data-testid="loader"
           /> :
-            <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks}></CardList>
+            <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
         }
       </div>
     </div >

@@ -1,3 +1,28 @@
 .score-button {
     background-color: #242424 !important;
 }
+
+@-webkit-keyframes bulge {
+  0% {
+    transform: scale(1);
+    color: white;
+  }
+  10% {
+    transform: scale(1.2);
+    color: white;
+  }
+  40% {
+    transform: scale(1);
+    color: white;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bulge-now {
+  -webkit-animation-duration: 0.5s;
+  -webkit-animation-name: bulge;
+  -webkit-animation-iteration-count: initial;
+  -webkit-animation-timing-function: ease-in;
+}

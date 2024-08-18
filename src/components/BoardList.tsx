@@ -6,7 +6,6 @@ const BoardList = ({ boards, setBoards }) => {
   // console.log("rendering: BoardList")
 
   const handleBoardSelect = (b) => {
-    // setActiveBoard(b)
     localStorage.setItem('activeBoard', JSON.stringify(b));
   }
 

@@ -4,7 +4,7 @@ import './Task.css'
 import TextareaAutosize from 'react-textarea-autosize';
 // const fakeApi = () => console.log('Api is called')
 
-const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setUserDetails }) => {
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
@@ -46,10 +46,24 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           t["GSI1-SK"] = Date.now();
           const today = new Date();
           t.ExpiryDate = today.setDate(today.getDate() + 3);
+          setUserDetails((details) => {
+            const tmpUserDetails = { ...details };
+            tmpUserDetails.YScore++;
+            tmpUserDetails.MScore++;
+            tmpUserDetails.WScore++;
+            return tmpUserDetails;
+          });
         } else {
           t.CompletedDate = "nil";
           t["GSI1-SK"] = "nil";
           t.ExpiryDate = "nil";
+          setUserDetails((details) => {
+            const tmpUserDetails = { ...details };
+            tmpUserDetails.YScore--;
+            tmpUserDetails.MScore--;
+            tmpUserDetails.WScore--;
+            return tmpUserDetails;
+          });
         }
       }
       return t;
