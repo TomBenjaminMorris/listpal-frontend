@@ -7,6 +7,7 @@ import BoardList from './components/BoardList';
 import Header from './components/Header';
 import { parseJwt } from './utils/utils';
 import './HomePage.css'
+import TaskText from './components/TaskText';
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 const emoji = emojiList[Math.floor(Math.random() * 4)];
 
@@ -15,7 +16,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setSortedTasks, boards, setBoards, userDetails }) => {
+const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetails }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails }) => {
     console.log("TTT triggered: handleLogout")
     setBoards([]);
     setSortedTasks([]);
+    setUserDetails({})
     sessionStorage.clear();
     navigate('/login');
   };

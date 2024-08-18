@@ -6,6 +6,7 @@
     /* min-height: 400px; */
     margin: 20px;
     padding: 5px;
+    padding-bottom: 40px;
     border-radius: 5px;
     overflow: auto;
     /* resize: both; */
@@ -14,16 +15,23 @@
     /* flex-grow: 1; */
 }
 
-#addTask {
-    font-size: 30px;
-    margin-top: -18px;
-    margin-left: 1px;
+/* .task-container img {
+    width: 26px;
+} */
+
+.addTask {
+    /* font-size: 30px; */
+    width: 24px;
+    /* margin-top: -20px; */
+    margin-top: -2px;
+    margin-left: -3px;
+    opacity: 0.4;
 }
 
-#addTask:hover {
+.addTask:hover {
     cursor: pointer;
-    /* opacity: 0.5; */
-    color: var(--red);
+    opacity: 1;
+    /* color: var(--red); */
 }
 
 hr {
@@ -68,6 +76,7 @@ hr {
 
 .headingWrapper .score {
     margin-right: 30px;
+    margin-bottom: 0px;
 }
 
 .edit-title-input {

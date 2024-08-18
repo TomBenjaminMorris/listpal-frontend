@@ -1,0 +1,48 @@
+/* * {
+    box-sizing: border-box;
+    font-family: inherit;
+} */
+
+.TaskText {
+    display: flex;
+    /* font-family: Helvetica, Arial, sans-serif; */
+    /* justify-content: center; */
+    /* flex-direction: column; */
+    /* padding: 30px; */
+    /* max-width: 40ch; */
+    /* width: 85%; */
+    width: -webkit-calc(100% - 50px);
+    width:    -moz-calc(100% - 50px);
+    width:         calc(100% - 50px);
+}
+
+textarea {
+    overflow: hidden;
+    /* background: var(--white); */
+    background: white;
+    /* border-radius: 0; */
+    color: black;
+    border: none;
+    font-family: CircularMedium;
+    font-size: 16px;
+    /* line-height: 1.5; */
+    /* padding: 8px 0; */
+    resize: none;
+    /* transition: border-color 150ms ease; */
+    width: 100%;
+    margin-left: 12px;
+    margin-top: -3px;
+    /* height: 30px; */
+}
+
+textarea:hover {
+    /* border-color: #c6c6c6; */
+}
+
+textarea:focus {
+    outline: none;
+}
+
+textarea::placeholder {
+    /* color: #c6c6c6; */
+}

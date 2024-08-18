@@ -11,7 +11,7 @@ const ScoreCounter = ({ score, percent, type }) => {
   return (
     <Link className="score-button" to="/stats" >
       <div
-        style={{ width: 70, height: 70 }}
+        style={{ width: 60, height: 60 }}
         onMouseEnter={() => setShowType(true)}
         onMouseLeave={() => setShowType(false)}
       >
@@ -21,7 +21,7 @@ const ScoreCounter = ({ score, percent, type }) => {
           pathColor: `var(--red-faded)`,
           pathTransitionDuration: 1,
         })}>
-          <div style={{ fontSize: 18, marginTop: -1 }}>
+          <div style={{ fontSize: 16, marginTop: -1 }}>
             <strong>{showType ? type : score}</strong>
           </div>
         </CircularProgressbarWithChildren>

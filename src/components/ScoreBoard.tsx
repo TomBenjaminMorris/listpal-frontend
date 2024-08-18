@@ -15,8 +15,8 @@ const ScoreBoard = ({ userDetails }) => {
 
   return (
     <>
-      <ScoreCounter score={userDetails.WScore} percent={percentValues.W} type="W"/>
-      <ScoreCounter score={userDetails.MScore} percent={percentValues.M} type="M"/>
+      {/* <ScoreCounter score={userDetails.WScore} percent={percentValues.W} type="W"/>
+      <ScoreCounter score={userDetails.MScore} percent={percentValues.M} type="M"/> */}
       <ScoreCounter score={userDetails.YScore} percent={percentValues.Y} type="Y"/>
     </>
   );

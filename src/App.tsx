@@ -56,7 +56,7 @@ const App = () => {
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
-        <Route path="/home" element={isAuthenticated() ? <HomePage userDetails={userDetails} setSortedTasks={setSortedTasks} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
+        <Route path="/home" element={isAuthenticated() ? <HomePage setUserDetails={setUserDetails} userDetails={userDetails} setSortedTasks={setSortedTasks} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
         <Route path="/board/*" element={isAuthenticated() ? <Board userDetails={userDetails} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

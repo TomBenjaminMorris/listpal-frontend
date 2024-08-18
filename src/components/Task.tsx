@@ -1,6 +1,10 @@
 import { useState } from 'react';
-import binIcon from "../assets/icons8-delete-24.png"
+// import binIcon from "../assets/icons8-delete-24.png"
+import binIcon from "../assets/icons8-close-50.png"
 import './Task.css'
+import TextareaAutosize from 'react-textarea-autosize';
+// import TaskText from './TaskText';
+
 // const fakeApi = () => console.log('Api is called')
 
 const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask }) => {
@@ -57,16 +61,18 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   }
 
   const handleDeleteAndHideTask = (taskID, title) => {
+    console.log("TTT triggered: handleDeleteAndHideTask")
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
   }
 
   const onKeyDown = (e, taskID, title) => {
     if (e.keyCode === 8 && e.target.value === "") {
-      console.log('delete');
+      // console.log('delete');
       clearTimeout(timer);
       handleDeleteAndHideTask(taskID, title)
     } else if (e.keyCode === 13) {
-      console.log('enter');
+      e.preventDefault()
+      // console.log('enter');
       clearTimeout(timer);
       handleNewTask()
     }
@@ -74,8 +80,14 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
 
   return (
     <div className="task-container" style={display ? null : { display: "none" }}>
-      <input type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} /> {/*style={checked ? { opacity: "0.7" } : null} */}
       <input
+        style={checked ? { opacity: "0.7" } : null}
+        type="checkbox"
+        name="checkbox"
+        checked={checked}
+        onChange={handleCheckBox}
+      />
+      {/* <input
         className="task-text-box strikethrough"
         type="text"
         value={description}
@@ -87,6 +99,17 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           textDecoration: "line-through var(--red) 2px",
           opacity: "0.7"
         } : null}
+      /> */}
+      {/* <TaskText initialValue={description} checked={checked}/> */}
+      <TextareaAutosize
+        className="task-textarea-box"
+        value={description}
+        disabled={checked}
+        placeholder='new task...'
+        onChange={handleTextUpdate}
+        autoFocus
+        onKeyDown={(e) => onKeyDown(e, task.SK, title)}
+        style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null}
       />
       <div className="deleteTask">
         <img
