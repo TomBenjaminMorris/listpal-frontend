@@ -84,3 +84,12 @@
     margin-left: -3px;
     margin-top: -1px;
 }
+
+.settings-icon {
+    width: 35px;
+    transition: transform .7s ease-in-out;
+}
+
+.settings-icon:hover {
+    transform: rotate(180deg);
+}

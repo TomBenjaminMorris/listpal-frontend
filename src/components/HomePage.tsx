@@ -1,11 +1,11 @@
 import { useEffect, useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBoards } from './utils/apiGatewayClient';
-import { isTokenExpired } from './utils/utils';
+import { getBoards } from '../utils/apiGatewayClient';
+import { isTokenExpired } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
-import BoardList from './components/BoardList';
-import Header from './components/Header';
-import { parseJwt } from './utils/utils';
+import BoardList from './BoardList';
+import Header from './Header';
+import { parseJwt } from '../utils/utils';
 import './HomePage.css'
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 const emoji = emojiList[Math.floor(Math.random() * 4)];
@@ -49,13 +49,13 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
       console.log("TTT HomePage load: token is exipred...");
       window.location.reload();
     }
-  }, [])
+  }, [setBoards])
 
   return (
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
       {<h2>{`Hello ${idToken.given_name} 👋`}</h2>}
-      {<h2>{`Your total score across all your boards is... 100 ${emoji}`}</h2>}
+      {<h2>{ userDetails.YScore && `Your total score across all your boards is... ${userDetails.YScore} ${emoji}`}</h2>}
       <div className="homePageContent">
         {
           isLoading ?

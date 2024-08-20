@@ -1,0 +1,66 @@
+.set-targets-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 80px;
+}
+
+.settings-headers {
+    font-size: 28px;
+}
+
+.settings-line {
+    border-color: rgba(255, 255, 255, 0.256);
+}
+
+.set-targets-wrapper>form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+}
+
+.set-targets-inputs {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.set-targets-inputs label {
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+    gap: 15px;
+}
+
+.set-targets-input {
+    font-size: 25px;
+    padding: 10px;
+    width: 70px;
+    text-align: center;
+    border-radius: 10px;
+    border: none;
+}
+
+.set-targets-input:focus {
+    outline-color: var(--red-faded);
+}
+
+.set-targets-submit {
+    width: 80px;
+    margin: auto;
+    margin-top: 5px;
+    padding: 8px;
+    border-radius: 30px;
+    border: none;
+    font-size: 14px;
+    font-family: CircularBold;
+}
+
+.set-targets-submit:hover {
+    background-color: var(--red);
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}

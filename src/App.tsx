@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react';
 import { isTokenExpired } from './utils/utils';
 import { refreshTokens } from './utils/authService';
 import { getUser } from './utils/apiGatewayClient';
-import LoginPage from './LoginPage';
-import HomePage from './HomePage';
-import ConfirmUserPage from './ConfirmUserPage';
+import LoginPage from './components/LoginPage';
+import HomePage from './components/HomePage';
+import ConfirmUserPage from './components/ConfirmUserPage';
 import Board from './components/Board';
 import './App.css'
+import Settings from './components/Settings';
 
 const App = () => {
   // console.log("rendering: App")
@@ -56,8 +57,21 @@ const App = () => {
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
-        <Route path="/home" element={isAuthenticated() ? <HomePage setUserDetails={setUserDetails} userDetails={userDetails} setSortedTasks={setSortedTasks} boards={boards} setBoards={setBoards} /> : <Navigate replace to="/login" />} />
-        <Route path="/board/*" element={isAuthenticated() ? <Board setUserDetails={setUserDetails} userDetails={userDetails} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
+
+        <Route path="/home" element={isAuthenticated() ? <HomePage
+          setUserDetails={setUserDetails}
+          userDetails={userDetails}
+          setSortedTasks={setSortedTasks}
+          boards={boards}
+          setBoards={setBoards} /> : <Navigate replace to="/login" />} />
+
+        <Route path="/board/*" element={isAuthenticated() ? <Board
+          setUserDetails={setUserDetails}
+          userDetails={userDetails}
+          sortedTasks={sortedTasks}
+          setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
+
+        <Route path="/settings" element={<Settings userDetails={userDetails} setUserDetails={setUserDetails}/>} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

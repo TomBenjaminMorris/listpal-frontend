@@ -1,14 +1,10 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: Apache-2.0
-
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { confirmSignUp } from './utils/authService';
+import { confirmSignUp } from '../utils/authService';
 
 const ConfirmUserPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  // eslint-disable-next-line
   const [email, setEmail] = useState(location.state?.email || '');
   const [confirmationCode, setConfirmationCode] = useState('');
 

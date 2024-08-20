@@ -23,5 +23,5 @@
 }
 
 .inputText:focus {
-    outline-color: var(--red);
+    outline-color: var(--red-faded);
 }
