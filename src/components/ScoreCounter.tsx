@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { Link } from 'react-router-dom';
 import ConfettiExplosion from 'react-confetti-explosion';
+import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css'
 
@@ -13,11 +14,7 @@ const ScoreCounter = ({ score, percent, type }) => {
   const [isTargetMet, setIsTargetMet] = useState(true);
   const listClassName = `score-button ${animate ? "bulge-now" : ""}`
   const vw = window.innerWidth * 1;
-  const typeToMessageMap = {
-    "W": "weekly",
-    "M": "monthly",
-    "Y": "yearly",
-  }
+  const typeToMessageMap = { "W": "weekly", "M": "monthly", "Y": "yearly" }
 
   const handleConfettiCompleted = () => {
     alert(`You've hit your ${typeToMessageMap[type]} target... keep going!`);
@@ -34,7 +31,17 @@ const ScoreCounter = ({ score, percent, type }) => {
         setIsTargetMet(false);
       }
     }
-  }, [percent])
+  }, [percent, score])
+
+  const starImg = (
+    <img className="star-icon" src={starIcon} alt="star icon" />
+  )
+
+  const scoreRendered = (
+    <strong>
+      {isExploding ? starImg : score}
+    </strong>
+  )
 
   return (
     <Link className={listClassName} onAnimationEnd={() => setAnimate(false)} to="/stats" >
@@ -51,7 +58,7 @@ const ScoreCounter = ({ score, percent, type }) => {
           pathTransitionDuration: 1,
         })}>
           <div style={{ fontSize: 16, marginTop: -1 }}>
-            <strong>{showType ? type : score}</strong>
+            {scoreRendered}
           </div>
         </CircularProgressbarWithChildren>
       </div>

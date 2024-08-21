@@ -8,7 +8,7 @@
     color: white;
   }
   10% {
-    transform: scale(1.2);
+    transform: scale(1.1);
     color: white;
   }
   40% {
@@ -25,4 +25,14 @@
   -webkit-animation-name: bulge;
   -webkit-animation-iteration-count: initial;
   -webkit-animation-timing-function: ease-in;
+}
+
+.star-icon {
+  margin-top: 6px;
+  width: 18px;
+  /* height: 18px; */
+  /* -webkit-animation-duration: 5s;
+  -webkit-animation-name: bulge;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: ease-in; */
 }
