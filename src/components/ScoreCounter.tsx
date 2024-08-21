@@ -44,7 +44,7 @@ const ScoreCounter = ({ score, percent, type }) => {
   )
 
   return (
-    <Link className={listClassName} onAnimationEnd={() => setAnimate(false)} to="/stats" >
+    <Link className={listClassName} onAnimationEnd={() => setAnimate(false)} to="/settings" >
       {isExploding && !isTargetMet && <ConfettiExplosion duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div
         style={{ width: 60, height: 60 }}

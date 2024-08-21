@@ -58,6 +58,10 @@
 
 .set-targets-submit:hover {
     background-color: var(--red);
+    -webkit-animation-duration: 1s;
+    -webkit-animation-name: bulge;
+    -webkit-animation-iteration-count: initial;
+    /* -webkit-animation-timing-function: ease-in; */
 }
 
 input[type=number]::-webkit-inner-spin-button,
