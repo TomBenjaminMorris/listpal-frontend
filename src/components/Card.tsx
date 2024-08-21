@@ -38,6 +38,11 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
 
   const renameCategory = (newTitle) => {
     const tmpSortedTasks = { ...sortedTasks }
+    if (!newTitle || newTitle == "") {
+      alert("Name can't be empty");
+      setTitleEdited(title);
+      return;
+    }
     if (Object.keys(tmpSortedTasks).includes(newTitle)) {
       alert("That category already exists on this board, chose another");
       setTitleEdited(title);

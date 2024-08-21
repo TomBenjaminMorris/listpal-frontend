@@ -13,7 +13,7 @@ const Settings = ({ userDetails, setUserDetails }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prevState) => ({ ...prevState, [name]: parseInt(value) }));
+    setFormData((prevState) => ({ ...prevState, [name]: value && parseInt(value) }));
   };
 
   const handleSubmit = (event) => {
@@ -45,7 +45,7 @@ const Settings = ({ userDetails, setUserDetails }) => {
         </div>
       </div>
       
-      { userDetails.YTarget && <div className="set-targets-wrapper">
+      <div className="set-targets-wrapper">
         <h2 className="settings-headers">Targets</h2>
         <hr className="settings-line" />
         <form onSubmit={handleSubmit}>
@@ -92,7 +92,7 @@ const Settings = ({ userDetails, setUserDetails }) => {
           </div>
           <input className="set-targets-submit" type="submit" value="Save" />
         </form>
-      </div> }
+      </div>
 
       {/* <div className="set-theme-wrapper">
         <h2 className="settings-headers">Themes</h2>

@@ -40,7 +40,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
     if (name === null) {
       return;
     }
-    if (!name) {
+    if (!name || name == "") {
       alert("Name can't be empty");
       return;
     }

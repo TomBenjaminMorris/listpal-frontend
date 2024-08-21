@@ -59,9 +59,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           t.ExpiryDate = "nil";
           setUserDetails((details) => {
             const tmpUserDetails = { ...details };
-            tmpUserDetails.YScore--;
-            tmpUserDetails.MScore--;
-            tmpUserDetails.WScore--;
+            tmpUserDetails.YScore == 0 ? null : tmpUserDetails.YScore--;
+            tmpUserDetails.MScore == 0 ? null : tmpUserDetails.MScore--;
+            tmpUserDetails.WScore == 0 ? null : tmpUserDetails.WScore--;
             return tmpUserDetails;
           });
         }

@@ -28,10 +28,10 @@ export function isTokenExpired() {
 //     return result;
 // }
 
-export function calcPercents({ YTarget, WScore, MScore, YScore }) {
+export function calcPercents({ YTarget, MTarget, WTarget, WScore, MScore, YScore }) {
     // console.log("TTT triggered: calcPercents");
     const YP = (YScore / YTarget) * 100;
-    const MP = (MScore / (YTarget / 12)) * 100;
-    const WP = (WScore / (YTarget / 52)) * 100;
+    const MP = MTarget ? (MScore / MTarget) * 100 : (MScore / (YTarget / 12)) * 100;
+    const WP = WTarget ? (WScore / WTarget) * 100 : (WScore / (YTarget / 52)) * 100;
     return { Y: Math.round(YP), M: Math.round(MP), W: Math.round(WP) }
 }
