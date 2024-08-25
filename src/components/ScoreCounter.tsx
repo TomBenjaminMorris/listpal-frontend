@@ -8,7 +8,7 @@ import './ScoreCounter.css'
 
 const ScoreCounter = ({ score, percent, type }) => {
   // console.log("rendering: ScoreCounter")
-  const [showType, setShowType] = useState(false);
+  const [showScore, setShowScore] = useState(false);
   const [animate, setAnimate] = useState(true);
   const [isExploding, setIsExploding] = useState(false);
   const [isTargetMet, setIsTargetMet] = useState(true);
@@ -48,8 +48,8 @@ const ScoreCounter = ({ score, percent, type }) => {
       {isExploding && !isTargetMet && <ConfettiExplosion duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div
         style={{ width: 60, height: 60 }}
-        onMouseEnter={() => setShowType(true)}
-        onMouseLeave={() => setShowType(false)}
+        onMouseEnter={() => setShowScore(true)}
+        onMouseLeave={() => setShowScore(false)}
       >
         <CircularProgressbarWithChildren value={percent} styles={buildStyles({
           trailColor: 'var(--white)',
@@ -58,7 +58,7 @@ const ScoreCounter = ({ score, percent, type }) => {
           pathTransitionDuration: 1,
         })}>
           <div style={{ fontSize: 16, marginTop: -1 }}>
-            {scoreRendered}
+            {showScore ? score : scoreRendered}
           </div>
         </CircularProgressbarWithChildren>
       </div>

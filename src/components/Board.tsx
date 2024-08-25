@@ -3,6 +3,7 @@ import { useEffect, useState, CSSProperties } from 'react';
 import { getActiveTasks } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
 import backIcon from '../assets/icons8-back-50-white.png';
+import editIcon from '../assets/icons8-edit-64.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
@@ -13,16 +14,52 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails }) => {
+const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards }) => {
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
-  const [currentBoard, setCurrentBoard] = useState('');
+  const [currentBoard, setCurrentBoard] = useState({});
 
   const handleGetActiveTasks = async (boardID) => {
     console.log("TTT triggered: handleGetActiveTasks")
     const data = await getActiveTasks(boardID);
     sortTasks(data);
     setIsLoading(false);
+  }
+
+  const handleEditBoard = async () => {
+    // console.log("TTT triggered: handleEditBoard")
+    const boardName = prompt("Enter new name")
+    if (boardName == "") {
+      alert("Board name can't be empty");
+      return;
+    }
+    if (!boardName) {
+      return;
+    }
+    const url = window.location.href;
+    const boardID = url.split('/').pop();
+    setBoards(current => {
+      let tmpBoards = [...current];
+
+      setCurrentBoard(cb => {
+        let tmpCB = {...cb}
+        tmpCB['Board'] = boardName;
+        localStorage.setItem('activeBoard', JSON.stringify(tmpCB));
+        return tmpCB
+      })
+
+
+      if (tmpBoards.length !=0) {
+        return tmpBoards.map(b => {
+          if (b.SK == boardID) {
+            let tmpB = b
+            tmpB['Board'] = boardName;
+            return tmpB
+          }
+          return b
+        })
+      }
+    })
   }
 
   const sortTasks = (data) => {
@@ -67,6 +104,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails }) => 
         </div>
         <div className="header-right">
           <ScoreBoard userDetails={userDetails} />
+          <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
         </div>
       </div>
       <div className="flex-container">

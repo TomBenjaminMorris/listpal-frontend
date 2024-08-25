@@ -69,6 +69,7 @@ const App = () => {
           setUserDetails={setUserDetails}
           userDetails={userDetails}
           sortedTasks={sortedTasks}
+          setBoards={setBoards}
           setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
 
         <Route path="/settings" element={<Settings userDetails={userDetails} setUserDetails={setUserDetails}/>} />

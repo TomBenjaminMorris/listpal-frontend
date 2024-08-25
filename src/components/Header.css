@@ -51,6 +51,8 @@
 /* Float the link section to the right */
 .header-right {
     float: right;
+    display: flex;
+    align-items: center;
 }
 
 /* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
@@ -85,6 +87,20 @@
     margin-top: -1px;
 }
 
+.edit-icon {
+    width: 35px;
+    height: 35px;
+    padding: 10px;
+}
+
+.edit-icon:hover {
+    opacity: 0.5;
+    -webkit-animation-duration: 0.5s;
+    -webkit-animation-name: bulge;
+    -webkit-animation-iteration-count: initial;
+    -webkit-animation-timing-function: ease-in;
+}
+
 .settings-icon {
     width: 35px;
     transition: transform .7s ease-in-out;
@@ -92,8 +108,4 @@
 
 .settings-icon:hover {
     transform: rotate(180deg);
-    /* -webkit-animation-duration: 0.5s;
-    -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial;
-    -webkit-animation-timing-function: ease-in; */
 }
