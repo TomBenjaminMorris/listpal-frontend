@@ -1,5 +1,6 @@
 import { useReducer, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { newTask } from '../utils/apiGatewayClient';
 import addIcon from "../assets/icons8-add-30.png"
 import Task from './Task';
 import './Card.css'
@@ -62,14 +63,13 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const handleNewTask = async () => {
     console.log("TTT triggered: handleNewTask")
     const emptyTask = {
-      "CreatedDate": Date.now(),
+      "CreatedDate": String(Date.now()),
       "SK": "t#" + uuidv4(),
       "GSI1-SK": "nil",
-      "GSI1-PK": "b#12345",
+      "GSI1-PK": JSON.parse(localStorage.getItem('activeBoard')).SK,
       "ExpiryDate": "nil",
       "Description": "",
       "CompletedDate": "nil",
-      "PK": "u#365202d4-0091-708b-eafe-0027f8ef9007",
       "Category": title,
       "EntityType": "Task"
     }
@@ -81,6 +81,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       tmpTasks.push(emptyTask)
       return tmpTasks;
     });
+    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category);
     forceUpdate();
   }
 

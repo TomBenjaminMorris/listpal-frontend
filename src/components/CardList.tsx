@@ -1,7 +1,9 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { newTask } from '../utils/apiGatewayClient';
 import Card from './Card';
 import './CardList.css'
+import { deleteTask } from '../utils/apiGatewayClient';
 
 const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
   // console.log("rendering: CardList")
@@ -19,6 +21,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
     } else {
       tmpSortedTasks[title] = sortedTasks[title].filter(t => t.SK !== taskID);
     }
+    deleteTask(taskID);
     setSortedTasks(tmpSortedTasks);
   }
 
@@ -49,18 +52,18 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
       return;
     }
     const newCardDefaultTask = {
-      "CreatedDate": Date.now(),
+      "CreatedDate": String(Date.now()),
       "SK": "t#" + uuidv4(),
       "GSI1-SK": "nil",
-      "GSI1-PK": "b#12345",
+      "GSI1-PK": JSON.parse(localStorage.getItem('activeBoard')).SK,
       "ExpiryDate": "nil",
       "Description": "",
       "CompletedDate": "nil",
-      "PK": "u#365202d4-0091-708b-eafe-0027f8ef9007",
       "Category": name,
       "EntityType": "Task"
     }
     tmpSortedTasks[name] = [newCardDefaultTask];
+    newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category);
     setSortedTasks(tmpSortedTasks);
     forceUpdate();
   }

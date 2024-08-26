@@ -2,7 +2,7 @@ import { useState } from 'react';
 import binIcon from "../assets/icons8-close-50.png"
 import './Task.css'
 import TextareaAutosize from 'react-textarea-autosize';
-// const fakeApi = () => console.log('Api is called')
+import { updateTaskDescription, updateTaskDetails } from '../utils/apiGatewayClient';
 
 const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setUserDetails }) => {
   // console.log("rendering: Task")
@@ -20,9 +20,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     setDescription(e.target.value);
     clearTimeout(timer);
     const newTimer = setTimeout(() => {
-      // fakeApi()
+      updateTaskDescription(task.SK, e.target.value)
       updateActiveTaskDescription(e.target.value)
-    }, 100);
+    }, 600);
     setTimer(newTimer);
   }
 
@@ -42,10 +42,10 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {
       if (t.SK === task.SK) {
         if (c) {
-          t.CompletedDate = Date.now();
-          t["GSI1-SK"] = Date.now();
+          t.CompletedDate = String(Date.now());
+          t["GSI1-SK"] = String(Date.now());
           const today = new Date();
-          t.ExpiryDate = today.setDate(today.getDate() + 3);
+          t.ExpiryDate = String(today.setDate(today.getDate() + 3));
           setUserDetails((details) => {
             const tmpUserDetails = { ...details };
             tmpUserDetails.YScore++;
@@ -65,7 +65,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             return tmpUserDetails;
           });
         }
+        updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"]);
       }
+      // call task details api
       return t;
     })
     setSortedTasks(tmpSortedTasks);
