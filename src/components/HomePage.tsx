@@ -55,7 +55,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
       {<h2>{`Hello ${idToken.given_name} 👋`}</h2>}
-      {<h2>{ userDetails.YScore && `Your total score across all your boards is... ${userDetails.YScore} ${emoji}`}</h2>}
+      {<h2>{userDetails.YScore && `Your total score across all your boards is... ${userDetails.YScore} ${emoji}`}</h2>}
       <div className="homePageContent">
         {
           isLoading ?

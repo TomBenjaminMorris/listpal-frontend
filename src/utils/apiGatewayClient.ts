@@ -32,7 +32,6 @@ export const getActiveTasks = async (boardID) => {
   try {
     const response = await axios.get('/active-tasks', { headers: headers, params: params });
     if (response) {
-      // console.log(response);
       return response.data.data;
     }
   } catch (err) {
@@ -132,6 +131,23 @@ export const deleteTask = async (taskID) => {
 
   try {
     const response = await axios.post('/delete-task', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
+export const renameCatagoryAPI = async (taskIDs, category) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { taskIDs, category }
+
+  try {
+    const response = await axios.post('/rename-category', body, { headers: headers });
     if (response) {
       return response.data.data;
     }

@@ -22,7 +22,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     const newTimer = setTimeout(() => {
       updateTaskDescription(task.SK, e.target.value)
       updateActiveTaskDescription(e.target.value)
-    }, 600);
+    }, 400);
     setTimer(newTimer);
   }
 
@@ -67,7 +67,6 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         }
         updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"]);
       }
-      // call task details api
       return t;
     })
     setSortedTasks(tmpSortedTasks);

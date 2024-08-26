@@ -1,6 +1,6 @@
 import { useReducer, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask } from '../utils/apiGatewayClient';
+import { newTask, renameCatagoryAPI } from '../utils/apiGatewayClient';
 import addIcon from "../assets/icons8-add-30.png"
 import Task from './Task';
 import './Card.css'
@@ -33,7 +33,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     const newTimer = setTimeout(() => {
       fakeApi(e.target.value)
       renameCategory(e.target.value)
-    }, 4000)
+    }, 2000)
     setTimer(newTimer);
   }
 
@@ -49,14 +49,17 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       setTitleEdited(title);
       return;
     }
+    let taskIDs = [];
     const updatedCategoryArray = sortedTasks[title].map((t) => {
       if (t.Category === title) {
         t.Category = newTitle;
+        taskIDs.push(t.SK);
       }
       return t
     });
     tmpSortedTasks[newTitle] = updatedCategoryArray
     delete tmpSortedTasks[title];
+    renameCatagoryAPI(taskIDs, newTitle);
     setSortedTasks(tmpSortedTasks);
   }
 
@@ -104,12 +107,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     <div className="card-container">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
-        {/* <h3 className="score">{"0"}</h3> */}
       </div>
       <hr />
       {tasksRendered}
       <div className="task-container">
-        {/* <div onClick={handleNewTask} id="addTask">+</div> */}
         <img
           className="addTask"
           onClick={handleNewTask}

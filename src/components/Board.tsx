@@ -27,7 +27,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
   }
 
   const handleEditBoard = async () => {
-    // console.log("TTT triggered: handleEditBoard")
+    console.log("TTT triggered: handleEditBoard")
     const boardName = prompt("Enter new name")
     if (boardName == "") {
       alert("Board name can't be empty");
@@ -42,14 +42,13 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
       let tmpBoards = [...current];
 
       setCurrentBoard(cb => {
-        let tmpCB = {...cb}
+        let tmpCB = { ...cb }
         tmpCB['Board'] = boardName;
         localStorage.setItem('activeBoard', JSON.stringify(tmpCB));
         return tmpCB
       })
 
-
-      if (tmpBoards.length !=0) {
+      if (tmpBoards.length != 0) {
         return tmpBoards.map(b => {
           if (b.SK == boardID) {
             let tmpB = b
@@ -103,8 +102,8 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
           </Link>
         </div>
         <div className="header-right">
-          <ScoreBoard userDetails={userDetails} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
+          <ScoreBoard userDetails={userDetails} />
         </div>
       </div>
       <div className="flex-container">
