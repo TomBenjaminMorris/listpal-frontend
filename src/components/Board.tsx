@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
-import { getActiveTasks, renameBoardAPI } from '../utils/apiGatewayClient';
+import { deleteBoard, getActiveTasks, renameBoardAPI } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
 import backIcon from '../assets/icons8-back-50-white.png';
+import deleteIcon from '../assets/icons8-delete-48.png';
+import lineIcon from '../assets/icons8-line-50.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
@@ -18,6 +20,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
   const [currentBoard, setCurrentBoard] = useState({});
+  const navigate = useNavigate();
 
   const handleGetActiveTasks = async (boardID) => {
     console.log("TTT triggered: handleGetActiveTasks")
@@ -65,6 +68,20 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     });
   }
 
+  const handleDeleteBoard = async () => {
+    if (!confirm("Delete board?")) {
+      return
+    }
+    const url = window.location.href;
+    const boardID = url.split('/').pop();
+    deleteBoard(boardID).then(() => {
+      setBoards((boards) => {
+        return boards.filter(b => b.SK !== boardID);
+      })
+      navigate('/home');
+    });
+  }
+
   const sortTasks = (data) => {
     console.log("TTT triggered: sortTasks")
     let sortedData = {}
@@ -106,8 +123,11 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
           </Link>
         </div>
         <div className="header-right">
-          <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
+          {/* <img className="line-icon" src={lineIcon} /> */}
           <ScoreBoard userDetails={userDetails} />
+          <img className="line-icon" src={lineIcon} />
+          <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
+          <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
         </div>
       </div>
       <div className="flex-container">

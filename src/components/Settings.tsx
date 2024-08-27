@@ -42,7 +42,6 @@ const Settings = ({ userDetails, setUserDetails }) => {
     updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
       setUserDetails(tmpUserDetails);
       setLoadingTargets(false);
-      // alert("Targets updated");
     })
   };
 

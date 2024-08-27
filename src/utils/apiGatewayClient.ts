@@ -228,3 +228,20 @@ export const renameBoardAPI = async (boardID, name) => {
     throw err;
   }
 };
+
+export const deleteBoard = async (boardID) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { boardID }
+
+  try {
+    const response = await axios.post('/delete-board', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
