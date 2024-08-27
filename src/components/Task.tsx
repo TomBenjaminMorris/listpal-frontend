@@ -2,7 +2,7 @@ import { useState } from 'react';
 import binIcon from "../assets/icons8-close-50.png"
 import './Task.css'
 import TextareaAutosize from 'react-textarea-autosize';
-import { updateTaskDescription, updateTaskDetails } from '../utils/apiGatewayClient';
+import { updateScoresAPI, updateTaskDescription, updateTaskDetails } from '../utils/apiGatewayClient';
 
 const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setUserDetails }) => {
   // console.log("rendering: Task")
@@ -51,6 +51,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             tmpUserDetails.YScore++;
             tmpUserDetails.MScore++;
             tmpUserDetails.WScore++;
+            updateScoresAPI(t.SK, { YScore: tmpUserDetails.YScore, MScore: tmpUserDetails.MScore, WScore: tmpUserDetails.WScore })
             return tmpUserDetails;
           });
         } else {
@@ -62,6 +63,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             tmpUserDetails.YScore == 0 ? null : tmpUserDetails.YScore--;
             tmpUserDetails.MScore == 0 ? null : tmpUserDetails.MScore--;
             tmpUserDetails.WScore == 0 ? null : tmpUserDetails.WScore--;
+            updateScoresAPI(t.SK, { YScore: tmpUserDetails.YScore, MScore: tmpUserDetails.MScore, WScore: tmpUserDetails.WScore })
             return tmpUserDetails;
           });
         }

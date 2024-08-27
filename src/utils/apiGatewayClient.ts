@@ -156,3 +156,20 @@ export const renameCatagoryAPI = async (taskIDs, category) => {
     throw err;
   }
 };
+
+export const updateScoresAPI = async (taskIDs, scores) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { taskIDs, scores }
+
+  try {
+    const response = await axios.post('/user-scores', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
