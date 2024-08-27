@@ -1,9 +1,8 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask } from '../utils/apiGatewayClient';
+import { newTask, deleteTask } from '../utils/apiGatewayClient';
 import Card from './Card';
 import './CardList.css'
-import { deleteTask } from '../utils/apiGatewayClient';
 
 const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
   // console.log("rendering: CardList")

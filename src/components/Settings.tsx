@@ -1,11 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import { updateTargetsAPI } from '../utils/apiGatewayClient';
 import backIcon from '../assets/icons8-back-50-white.png';
+import PulseLoader from "react-spinners/PulseLoader";
 import './Settings.css';
+
+const override: CSSProperties = {
+  margin: "auto",
+  marginTop: "15px",
+};
 
 const Settings = ({ userDetails, setUserDetails }) => {
   // console.log("rendering: Settings")
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
+  const [loadingTargets, setLoadingTargets] = useState(false);
 
   useEffect(() => {
     userDetails.YTarget && setFormData({ weekly: userDetails.WTarget, monthly: userDetails.MTarget, yearly: userDetails.YTarget })
@@ -17,6 +25,7 @@ const Settings = ({ userDetails, setUserDetails }) => {
   };
 
   const handleSubmit = (event) => {
+    setLoadingTargets(true);
     event.preventDefault();
     if (formData.weekly > formData.monthly) {
       alert("Weekly target can't be more than monthly target");
@@ -30,10 +39,12 @@ const Settings = ({ userDetails, setUserDetails }) => {
     tmpUserDetails["YTarget"] = formData.yearly;
     tmpUserDetails["MTarget"] = formData.monthly;
     tmpUserDetails["WTarget"] = formData.weekly;
-    setUserDetails(tmpUserDetails);
-    alert("Targets updated");
+    updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
+      setUserDetails(tmpUserDetails);
+      setLoadingTargets(false);
+      // alert("Targets updated");
+    })
   };
-
 
   return (
     <div className="wrapper">
@@ -44,7 +55,7 @@ const Settings = ({ userDetails, setUserDetails }) => {
           </Link>
         </div>
       </div>
-      
+
       <div className="set-targets-wrapper">
         <h2 className="settings-headers">Targets</h2>
         <hr className="settings-line" />
@@ -90,7 +101,14 @@ const Settings = ({ userDetails, setUserDetails }) => {
               />
             </label>
           </div>
-          <input className="set-targets-submit" type="submit" value="Save" />
+          {loadingTargets ? <PulseLoader
+            cssOverride={override}
+            size={5}
+            color={"white"}
+            speedMultiplier={1}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          /> : <input className="set-targets-submit" type="submit" value="Save" />}
         </form>
       </div>
 

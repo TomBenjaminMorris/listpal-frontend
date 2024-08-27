@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import ScoreCounter from './ScoreCounter';
 import { calcPercents } from '../utils/utils';
+import ScoreCounter from './ScoreCounter';
 
 const ScoreBoard = ({ userDetails }) => {
   // console.log("rendering: ScoreBoard")

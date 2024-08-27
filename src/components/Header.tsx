@@ -8,12 +8,12 @@ const Header = ({ handleLogout }) => {
   return (
     <div className="header">
       <div className="header-left">
+      </div>
+      <div className="header-right">
         <Link className="back-button" to="/settings" >
           <img className="settings-icon" src={settingsIcon} alt="settings icon"/>
         </Link>
-      </div>
-      <div className="header-right">
-        <a onClick={handleLogout}>Logout</a>
+        <a className="logout-button" onClick={handleLogout}>Logout</a>
       </div>
     </div>
   );

@@ -1,17 +1,25 @@
-import { useReducer, useState, useEffect } from 'react';
+import { useReducer, useState, useEffect, CSSProperties } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI } from '../utils/apiGatewayClient';
 import addIcon from "../assets/icons8-add-30.png"
+import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import './Card.css'
 
 const fakeApi = (titleEdited) => console.log('Renaming title to: ' + titleEdited)
+
+const override: CSSProperties = {
+  marginLeft: "30px",
+  marginTop: "8px",
+  opacity: "0.8",
+};
 
 const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setUserDetails }) => {
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
   const [timer, setTimer] = useState(null);
   const [orderedTasks, setOrderedTasks] = useState([]);
+  const [loadingTask, setLoadingTask] = useState(false);
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const sortList = (list) => {
@@ -59,11 +67,13 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     });
     tmpSortedTasks[newTitle] = updatedCategoryArray
     delete tmpSortedTasks[title];
-    renameCatagoryAPI(taskIDs, newTitle);
-    setSortedTasks(tmpSortedTasks);
+    renameCatagoryAPI(taskIDs, newTitle).then(() => {
+      setSortedTasks(tmpSortedTasks);
+    });
   }
 
   const handleNewTask = async () => {
+    setLoadingTask(true)
     console.log("TTT triggered: handleNewTask")
     const emptyTask = {
       "CreatedDate": String(Date.now()),
@@ -76,16 +86,18 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       "Category": title,
       "EntityType": "Task"
     }
-    let tmpSortedTasks = { ...sortedTasks };
-    tmpSortedTasks[title].push(emptyTask);
-    setSortedTasks(tmpSortedTasks);
-    setOrderedTasks((tasks) => {
-      let tmpTasks = [...tasks];
-      tmpTasks.push(emptyTask)
-      return tmpTasks;
+    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category).then(() => {
+      let tmpSortedTasks = { ...sortedTasks };
+      tmpSortedTasks[title].push(emptyTask);
+      setSortedTasks(tmpSortedTasks);
+      setOrderedTasks((tasks) => {
+        let tmpTasks = [...tasks];
+        tmpTasks.push(emptyTask)
+        setLoadingTask(false)
+        return tmpTasks;
+      });
+      forceUpdate();
     });
-    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category);
-    forceUpdate();
   }
 
   const tasksRendered = orderedTasks && orderedTasks.map((task) => {
@@ -111,11 +123,19 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       <hr />
       {tasksRendered}
       <div className="task-container">
+        { loadingTask ? <PulseLoader
+            cssOverride={override}
+            size={5}
+            color={"black"}
+            speedMultiplier={1}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          /> : 
         <img
           className="addTask"
           onClick={handleNewTask}
           src={addIcon}
-          alt="add icon" />
+          alt="add icon" /> }
       </div>
     </div>
   );

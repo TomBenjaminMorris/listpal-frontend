@@ -7,8 +7,8 @@ import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
 import ConfirmUserPage from './components/ConfirmUserPage';
 import Board from './components/Board';
-import './App.css'
 import Settings from './components/Settings';
+import './App.css'
 
 const App = () => {
   // console.log("rendering: App")

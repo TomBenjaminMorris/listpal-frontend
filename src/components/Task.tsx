@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import binIcon from "../assets/icons8-close-50.png"
-import './Task.css'
-import TextareaAutosize from 'react-textarea-autosize';
 import { updateScoresAPI, updateTaskDescription, updateTaskDetails } from '../utils/apiGatewayClient';
+import binIcon from "../assets/icons8-close-50.png"
+import TextareaAutosize from 'react-textarea-autosize';
+import './Task.css'
 
 const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setUserDetails }) => {
   // console.log("rendering: Task")
@@ -20,8 +20,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     setDescription(e.target.value);
     clearTimeout(timer);
     const newTimer = setTimeout(() => {
-      updateTaskDescription(task.SK, e.target.value)
-      updateActiveTaskDescription(e.target.value)
+      updateTaskDescription(task.SK, e.target.value).then(() => {
+        updateActiveTaskDescription(e.target.value)
+      });
     }, 400);
     setTimer(newTimer);
   }
@@ -53,7 +54,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             tmpUserDetails.WScore++;
             updateScoresAPI(t.SK, { YScore: tmpUserDetails.YScore, MScore: tmpUserDetails.MScore, WScore: tmpUserDetails.WScore })
             return tmpUserDetails;
-          });
+          })
         } else {
           t.CompletedDate = "nil";
           t["GSI1-SK"] = "nil";
@@ -67,7 +68,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             return tmpUserDetails;
           });
         }
-        updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"]);
+        updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"])
       }
       return t;
     })

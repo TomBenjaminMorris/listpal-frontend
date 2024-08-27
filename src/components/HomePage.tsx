@@ -2,11 +2,12 @@ import { useEffect, useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBoards } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
+import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
 import Header from './Header';
-import { parseJwt } from '../utils/utils';
 import './HomePage.css'
+
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 const emoji = emojiList[Math.floor(Math.random() * 4)];
 

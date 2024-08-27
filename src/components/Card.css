@@ -83,7 +83,8 @@ hr {
     color: black;
     background-color: #f1f1f1;
     border: none;
-    width: 360px;
+    /* width: 360px; */
+    width: 100%;
     font-family: CircularBold;
     font-size: 25px;
     margin: 0;

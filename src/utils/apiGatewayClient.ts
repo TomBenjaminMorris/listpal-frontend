@@ -5,6 +5,8 @@ const instance = axios.create({
   baseURL: 'https://api.vinsp.in'
 });
 
+/////// GET ///////
+
 export const getAllTasks = async () => {
   const accessToken = sessionStorage.accessToken
   const headers = {
@@ -71,6 +73,8 @@ export const getUser = async () => {
     throw err;
   }
 };
+
+/////// POST ///////
 
 export const updateTaskDescription = async (taskID, description) => {
   const headers = {
@@ -165,6 +169,23 @@ export const updateScoresAPI = async (taskIDs, scores) => {
 
   try {
     const response = await axios.post('/user-scores', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
+export const updateTargetsAPI = async (targets) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { targets }
+
+  try {
+    const response = await axios.post('/user-targets', body, { headers: headers });
     if (response) {
       return response.data.data;
     }
