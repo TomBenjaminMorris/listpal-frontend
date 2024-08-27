@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
-import { getActiveTasks } from '../utils/apiGatewayClient';
+import { getActiveTasks, renameBoardAPI } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
 import backIcon from '../assets/icons8-back-50-white.png';
 import editIcon from '../assets/icons8-edit-64.png';
@@ -38,27 +38,31 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     }
     const url = window.location.href;
     const boardID = url.split('/').pop();
-    setBoards(current => {
-      let tmpBoards = [...current];
+    renameBoardAPI(boardID, boardName).then(() => {
+      setBoards(current => {
+        let tmpBoards = [...current];
 
-      setCurrentBoard(cb => {
-        let tmpCB = { ...cb }
-        tmpCB['Board'] = boardName;
-        localStorage.setItem('activeBoard', JSON.stringify(tmpCB));
-        return tmpCB
-      })
-
-      if (tmpBoards.length != 0) {
-        return tmpBoards.map(b => {
-          if (b.SK == boardID) {
-            let tmpB = b
-            tmpB['Board'] = boardName;
-            return tmpB
-          }
-          return b
+        setCurrentBoard(cb => {
+          let tmpCB = { ...cb }
+          tmpCB['Board'] = boardName;
+          localStorage.setItem('activeBoard', JSON.stringify(tmpCB));
+          return tmpCB
         })
-      }
-    })
+
+        if (tmpBoards.length != 0) {
+          return tmpBoards.map(b => {
+            if (b.SK == boardID) {
+              let tmpB = b
+              tmpB['Board'] = boardName;
+              return tmpB
+            }
+            return b
+          })
+        }
+      })
+    }).catch((e) => {
+      alert(e);
+    });
   }
 
   const sortTasks = (data) => {

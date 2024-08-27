@@ -194,3 +194,37 @@ export const updateTargetsAPI = async (targets) => {
     throw err;
   }
 };
+
+export const newBoardAPI = async (boardID, boardName) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { boardID, boardName }
+
+  try {
+    const response = await axios.post('/new-board', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
+export const renameBoardAPI = async (boardID, name) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { boardID, name }
+
+  try {
+    const response = await axios.post('/rename-board', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
