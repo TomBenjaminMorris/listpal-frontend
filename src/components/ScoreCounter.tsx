@@ -15,6 +15,7 @@ const ScoreCounter = ({ score, percent, type }) => {
   const listClassName = `score-button ${animate ? "bulge-now" : ""}`
   const vw = window.innerWidth * 1;
   const typeToMessageMap = { "W": "weekly", "M": "monthly", "Y": "yearly" }
+  // const typeToEmojiMap = { "W": "⭐", "M": "✨", "Y": "💫" }
 
   const handleConfettiCompleted = () => {
     alert(`You've hit your ${typeToMessageMap[type]} target... keep going!`);
@@ -35,6 +36,7 @@ const ScoreCounter = ({ score, percent, type }) => {
 
   const starImg = (
     <img className="star-icon" src={starIcon} alt="star icon" />
+    // <div style={{fontSize: "20px"}}>{typeToEmojiMap[type]}</div>
   )
 
   const scoreRendered = (

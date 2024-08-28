@@ -11,6 +11,19 @@ import './HomePage.css'
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 const emoji = emojiList[Math.floor(Math.random() * 4)];
 
+const getGreeting = () => {
+  var today = new Date()
+  var curHr = today.getHours()
+
+  if (curHr < 12) {
+    return "Morning"
+  } else if (curHr < 18) {
+    return "Afternoon"
+  } else {
+    return "Evening"
+  }
+}
+
 const override: CSSProperties = {
   paddingTop: "50px",
   opacity: "0.8",
@@ -55,8 +68,10 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
   return (
     <div className="wrapper">
       <Header handleLogout={handleLogout} />
-      {<h2>{`Hello ${idToken.given_name} 👋`}</h2>}
-      {<h2>{userDetails.YScore && `Your total score across all your boards is... ${userDetails.YScore} ${emoji}`}</h2>}
+      {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
+      {<h2>{userDetails.YScore && `Your total score this year, so far is...`}</h2>}
+      {/* {<h1 style={{fontSize: "40px"}}>{userDetails.YScore && `${emoji} ${userDetails.YScore} ${emoji}`}</h1>} */}
+      {<h1 style={{fontSize: "40px"}}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
       <div className="homePageContent">
         {
           isLoading ?
