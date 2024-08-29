@@ -161,11 +161,11 @@ export const renameCatagoryAPI = async (taskIDs, category) => {
   }
 };
 
-export const updateScoresAPI = async (taskIDs, scores) => {
+export const updateScoresAPI = async (scores) => {
   const headers = {
     'Authorization': 'Bearer ' + sessionStorage.accessToken,
   }
-  const body = { taskIDs, scores }
+  const body = { scores }
 
   try {
     const response = await axios.post('/user-scores', body, { headers: headers });

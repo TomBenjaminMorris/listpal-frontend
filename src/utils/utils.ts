@@ -19,19 +19,9 @@ export function isTokenExpired() {
     }
 }
 
-// export function createRandomString(length) {
-//     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-//     let result = "";
-//     for (let i = 0; i < length; i++) {
-//         result += chars.charAt(Math.floor(Math.random() * chars.length));
-//     }
-//     return result;
-// }
-
 export function calcPercents({ YTarget, MTarget, WTarget, WScore, MScore, YScore }) {
-    // console.log("TTT triggered: calcPercents");
     const YP = (YScore / YTarget) * 100;
     const MP = MTarget ? (MScore / MTarget) * 100 : (MScore / (YTarget / 12)) * 100;
     const WP = WTarget ? (WScore / WTarget) * 100 : (WScore / (YTarget / 52)) * 100;
-    return { Y: Math.round(YP), M: Math.round(MP), W: Math.round(WP) }
+    return { Y: YP, M: MP, W: WP }
 }
