@@ -28,7 +28,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     list && list.forEach(element => {
       element.CompletedDate === "nil" ? notDoneList.push(element) : doneList.push(element);
     });
-    return [...doneList, ...notDoneList];
+    return [...notDoneList, ...doneList];
+    // return [...doneList, ...notDoneList];
   }
 
   useEffect(() => {
@@ -75,6 +76,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const handleNewTask = async () => {
     setLoadingTask(true)
     console.log("TTT triggered: handleNewTask")
+
     const emptyTask = {
       "CreatedDate": String(Date.now()),
       "SK": "t#" + uuidv4(),
@@ -86,13 +88,16 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       "Category": title,
       "EntityType": "Task"
     }
+
     newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category).then(() => {
       let tmpSortedTasks = { ...sortedTasks };
-      tmpSortedTasks[title].push(emptyTask);
+      // tmpSortedTasks[title].push(emptyTask);
+      tmpSortedTasks[title].unshift(emptyTask);
       setSortedTasks(tmpSortedTasks);
       setOrderedTasks((tasks) => {
         let tmpTasks = [...tasks];
-        tmpTasks.push(emptyTask)
+        tmpTasks.unshift(emptyTask)
+        // tmpTasks.push(emptyTask)
         setLoadingTask(false)
         return tmpTasks;
       });
@@ -121,21 +126,21 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
       </div>
       <hr />
-      {tasksRendered}
+        {tasksRendered}
       <div className="task-container">
-        { loadingTask ? <PulseLoader
-            cssOverride={override}
-            size={5}
-            color={"black"}
-            speedMultiplier={1}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-          /> : 
-        <img
-          className="addTask"
-          onClick={handleNewTask}
-          src={addIcon}
-          alt="add icon" /> }
+        {loadingTask ? <PulseLoader
+          cssOverride={override}
+          size={5}
+          color={"black"}
+          speedMultiplier={1}
+          aria-label="Loading Spinner"
+          data-testid="loader"
+        /> :
+          <img
+            className="addTask"
+            onClick={handleNewTask}
+            src={addIcon}
+            alt="add icon" />}
       </div>
     </div>
   );
