@@ -43,9 +43,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {
       if (t.SK === task.SK) {
         if (c) {
-          t.CompletedDate = String(Date.now());
-          t["GSI1-SK"] = String(Date.now());
           const today = new Date();
+          t.CompletedDate = String(Date.now());
+          t["GSI1-SK"] = String(today.setDate(today.getDate() + 3));
           t.ExpiryDate = String(today.setDate(today.getDate() + 3));
           setUserDetails((details) => {
             const tmpUserDetails = { ...details };
@@ -91,10 +91,30 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     }
   }
 
+  const taskExpiryOpacity = () => {
+    // const now = new Date
+    // const expiryDate = new Date(parseInt(task.ExpiryDate));
+    // const expiryDate = new Date(unix_timestamp * 1000);
+    const now = Date.now()
+    const expiryDate = parseInt(task.ExpiryDate);
+    const diffTime = Math.abs(expiryDate - now);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays >= 3) {
+      return "0.8"
+    } else if (diffDays >= 2) {
+      return "0.4"
+    } else if (diffDays >= 1) {
+      return "0.2"
+    } else if (diffDays >= 0) {
+      return "0.0"
+    }
+  }
+
   return (
     <div className="task-container" style={display ? null : { display: "none" }}>
       <input
-        style={checked ? { opacity: "0.7" } : null}
+        style={checked ? { opacity: taskExpiryOpacity() } : null}
         type="checkbox"
         name="checkbox"
         checked={checked}
@@ -108,7 +128,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         onChange={handleTextUpdate}
         autoFocus
         onKeyDown={(e) => onKeyDown(e, task.SK, title)}
-        style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: "0.7" } : null}
+        style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: taskExpiryOpacity() } : null}
       />
       <div className="deleteTask">
         <img
