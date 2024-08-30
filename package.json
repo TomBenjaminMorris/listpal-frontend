@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && aws s3 sync dist/ s3://www.listpal.dev.vinsp.in"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.533.0",

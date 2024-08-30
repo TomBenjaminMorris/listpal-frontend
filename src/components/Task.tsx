@@ -44,9 +44,12 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       if (t.SK === task.SK) {
         if (c) {
           const today = new Date();
+          var date = new Date(today.valueOf());
+          const expiryDate = String(date.setDate(date.getDate() + 3));
+
           t.CompletedDate = String(Date.now());
-          t["GSI1-SK"] = String(today.setDate(today.getDate() + 3));
-          t.ExpiryDate = String(today.setDate(today.getDate() + 3));
+          t["GSI1-SK"] = expiryDate;
+          t.ExpiryDate = expiryDate;
           setUserDetails((details) => {
             const tmpUserDetails = { ...details };
             tmpUserDetails.YScore++;
@@ -99,15 +102,14 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     const expiryDate = parseInt(task.ExpiryDate);
     const diffTime = Math.abs(expiryDate - now);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    // console.log(diffDays);
 
-    if (diffDays >= 3) {
+    if (diffDays >= 2) {
       return "0.8"
-    } else if (diffDays >= 2) {
-      return "0.4"
     } else if (diffDays >= 1) {
-      return "0.2"
+      return "0.4"
     } else if (diffDays >= 0) {
-      return "0.0"
+      return "0.2"
     }
   }
 

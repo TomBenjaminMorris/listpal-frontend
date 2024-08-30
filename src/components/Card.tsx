@@ -28,8 +28,14 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     list && list.forEach(element => {
       element.CompletedDate === "nil" ? notDoneList.push(element) : doneList.push(element);
     });
-    return [...notDoneList, ...doneList];
-    // return [...doneList, ...notDoneList];
+    doneList.sort(function(a, b) {
+      return parseInt(a.ExpiryDate) - parseInt(b.ExpiryDate);
+    });
+    notDoneList.sort(function(a, b) {
+      return parseInt(a.CreatedDate) - parseInt(b.CreatedDate);
+    });
+    // return [...notDoneList, ...doneList];
+    return [...doneList, ...notDoneList];
   }
 
   useEffect(() => {
@@ -96,8 +102,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       setSortedTasks(tmpSortedTasks);
       setOrderedTasks((tasks) => {
         let tmpTasks = [...tasks];
-        tmpTasks.unshift(emptyTask)
-        // tmpTasks.push(emptyTask)
+        // tmpTasks.unshift(emptyTask)
+        tmpTasks.push(emptyTask)
         setLoadingTask(false)
         return tmpTasks;
       });
@@ -126,7 +132,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
       </div>
       <hr />
-        {tasksRendered}
+      {tasksRendered}
       <div className="task-container">
         {loadingTask ? <PulseLoader
           cssOverride={override}
