@@ -34,17 +34,19 @@ const App = () => {
 
   useEffect(() => {
     if (isTokenExpired()) {
-      console.log("TTTT token expired, renewing...");
+      console.log("TTTT App load: token expired, renewing...");
       try {
         handleRefreshTokens().then((t) => {
-          window.location.reload();
+          getUser().then((u) => {
+            setUserDetails(u[0]);
+          })
+          // window.location.reload();
         })
       }
       catch (err) {
+        console.error(err);
       }
-    }
-
-    if (isAuthenticated) {
+    } else if (isAuthenticated && Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
       getUser().then((u) => {
         setUserDetails(u[0]);
       })
@@ -63,16 +65,23 @@ const App = () => {
           userDetails={userDetails}
           setSortedTasks={setSortedTasks}
           boards={boards}
-          setBoards={setBoards} /> : <Navigate replace to="/login" />} />
+          setBoards={setBoards}
+          handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
 
         <Route path="/board/*" element={isAuthenticated() ? <Board
           setUserDetails={setUserDetails}
           userDetails={userDetails}
           sortedTasks={sortedTasks}
           setBoards={setBoards}
-          setSortedTasks={setSortedTasks} /> : <Navigate replace to="/login" />} />
+          setSortedTasks={setSortedTasks}
+          handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
 
-        <Route path="/settings" element={<Settings userDetails={userDetails} setUserDetails={setUserDetails} />} />
+        <Route path="/settings"
+          element={<Settings userDetails={userDetails}
+            setUserDetails={setUserDetails}
+            isTokenExpired={isTokenExpired}
+            handleRefreshTokens={handleRefreshTokens}
+            getUser={getUser} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

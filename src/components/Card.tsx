@@ -6,8 +6,6 @@ import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import './Card.css'
 
-const fakeApi = (titleEdited) => console.log('Renaming title to: ' + titleEdited)
-
 const override: CSSProperties = {
   marginLeft: "30px",
   marginTop: "8px",
@@ -28,10 +26,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     list && list.forEach(element => {
       element.CompletedDate === "nil" ? notDoneList.push(element) : doneList.push(element);
     });
-    doneList.sort(function(a, b) {
+    doneList.sort(function (a, b) {
       return parseInt(a.ExpiryDate) - parseInt(b.ExpiryDate);
     });
-    notDoneList.sort(function(a, b) {
+    notDoneList.sort(function (a, b) {
       return parseInt(a.CreatedDate) - parseInt(b.CreatedDate);
     });
     // return [...notDoneList, ...doneList];
@@ -46,7 +44,6 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     setTitleEdited(e.target.value)
     clearTimeout(timer)
     const newTimer = setTimeout(() => {
-      fakeApi(e.target.value)
       renameCategory(e.target.value)
     }, 2000)
     setTimer(newTimer);
@@ -80,9 +77,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   }
 
   const handleNewTask = async () => {
+    // console.log("TTT triggered: handleNewTask")
     setLoadingTask(true)
-    console.log("TTT triggered: handleNewTask")
-
     const emptyTask = {
       "CreatedDate": String(Date.now()),
       "SK": "t#" + uuidv4(),

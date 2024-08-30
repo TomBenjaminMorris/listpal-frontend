@@ -29,14 +29,14 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetails }) => {
+const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetails, handleRefreshTokens }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   var idToken = parseJwt(sessionStorage.idToken.toString());
 
   const handleGetBoards = async () => {
-    console.log("TTT triggered: handleGetBoards")
+    // console.log("TTT triggered: handleGetBoards")
     const data = await getBoards();
     setBoards(data);
   }
@@ -60,8 +60,19 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
         setIsLoading(false);
       }
     } else {
+      setIsLoading(true);
       console.log("TTT HomePage load: token is exipred...");
-      window.location.reload();
+      try {
+        handleRefreshTokens().then((t) => {
+          handleGetBoards().then(() => {
+            setIsLoading(false);
+          });
+          // window.location.reload();
+        })
+      }
+      catch (err) {
+        console.error(err);
+      }
     }
   }, [setBoards])
 
@@ -71,7 +82,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
       {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
       {<h2>{userDetails.YScore && `Your total score this year, so far is...`}</h2>}
       {/* {<h1 style={{fontSize: "40px"}}>{userDetails.YScore && `${emoji} ${userDetails.YScore} ${emoji}`}</h1>} */}
-      {<h1 style={{fontSize: "40px"}}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
+      {<h1 style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
       <div className="homePageContent">
         {
           isLoading ?

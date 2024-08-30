@@ -9,9 +9,9 @@ const BoardList = ({ boards, setBoards }) => {
   const handleBoardSelect = (b) => {
     localStorage.setItem('activeBoard', JSON.stringify(b));
   }
-  
+
   const handleNewBoard = async () => {
-    console.log("TTT triggered: handleNewTask")
+    // console.log("TTT triggered: handleNewTask")
     const name = prompt("Enter new name...");
     if (name == "") {
       alert("Board name can't be empty");

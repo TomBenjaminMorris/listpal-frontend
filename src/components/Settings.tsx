@@ -1,10 +1,27 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import backIcon from '../assets/icons8-back-50-white.png';
 import './Settings.css';
 import TargetSetter from './TargetSetter';
 
-const Settings = ({ userDetails, setUserDetails }) => {
+const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTokens, getUser }) => {
   // console.log("rendering: Settings")
+
+  useEffect(() => {
+    if (isTokenExpired()) {
+      console.log("TTTT App load: token expired, renewing...");
+      try {
+        handleRefreshTokens().then((t) => {
+          getUser().then((u) => {
+            setUserDetails(u[0]);
+          })
+        })
+      }
+      catch (err) {
+        console.error(err);
+      }
+    }
+  }, [])
 
   return (
     <div className="wrapper">
