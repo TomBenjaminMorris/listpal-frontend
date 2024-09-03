@@ -1,15 +1,18 @@
 .login-buttons {
-    background-color: var(--red);
+    background-color: var(--accent);
 }
 
 .login-buttons:hover {
-    background-color: var(--red-faded);
+    background-color: var(--accent);
+    -webkit-animation-duration: 1s;
+    -webkit-animation-name: bulge;
+    -webkit-animation-iteration-count: initial;
 }
 
 .login-buttons:focus {
     outline-color: transparent;
     outline-style: solid;
-    box-shadow: 0 0 0 1px #eaeaea8a;
+    box-shadow: 0 0 0 1px #ffffff8a;
 }
 
 .loginForm {
@@ -19,9 +22,13 @@
 .inputText {
     font-size: 1.3em;
     width: 100%;
-    padding: 5px
+    padding: 8px;
+    background-color: var(--foreground);
+    color: var(--text-colour);
+    border: none;
+    margin-top: 3px;
 }
 
 .inputText:focus {
-    outline-color: var(--red-faded);
+    outline-color: var(--accent);
 }

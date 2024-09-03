@@ -8,6 +8,7 @@ const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTo
   // console.log("rendering: Settings")
 
   useEffect(() => {
+    document.title = "ListPal | Settings";
     if (isTokenExpired()) {
       console.log("TTTT Settings load: token expired, renewing...");
       try {
@@ -20,6 +21,10 @@ const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTo
       catch (err) {
         console.error(err);
       }
+    } else if (Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
+      getUser().then((u) => {
+        setUserDetails(u[0]);
+      })
     }
   }, [])
 

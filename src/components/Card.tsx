@@ -1,7 +1,8 @@
 import { useReducer, useState, useEffect, CSSProperties, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI } from '../utils/apiGatewayClient';
-import addIcon from "../assets/icons8-add-30.png"
+// import addIcon from "../assets/icons8-add-30.png"
+import addIcon from "../assets/icons8-add-24-white.png"
 import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import './Card.css'
@@ -141,7 +142,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         {loadingTask ? <PulseLoader
           cssOverride={override}
           size={5}
-          color={"black"}
+          color={"var(--text-colour)"}
           speedMultiplier={1}
           aria-label="Loading Spinner"
           data-testid="loader"

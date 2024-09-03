@@ -8,8 +8,8 @@
 /* Style the header links */
 .header a {
     float: left;
-    color: white;
-    background-color: var(--red);
+    color: var(--text-colour);
+    background-color: var(--accent);
     text-align: center;
     padding: 10px;
     text-decoration: none;
@@ -40,7 +40,7 @@
 
 .header a:hover {
     /* background-color: #ddd; */
-    color: white;
+    color: var(--text-colour);
     /* opacity: 0.5; */
     cursor: pointer;
 }
@@ -48,7 +48,7 @@
 /* Style the active/current link*/
 .header a.active {
     background-color: dodgerblue;
-    color: white;
+    color: var(--text-colour);
 }
 
 /* Float the link section to the right */

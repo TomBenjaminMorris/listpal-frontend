@@ -1,11 +1,12 @@
 .card-container {
-    background-color: #f1f1f1;
+    /* background-color: #f1f1f1; */
+    background-color: var(--foreground);
     color: black;
-    width: 550px;
+    /* width: 550px; */
     min-width: 450px;
     min-height: 300px;
     /* min-height: 400px; */
-    margin: 20px;
+    /* margin: 20px; */
     padding: 5px;
     padding-bottom: 40px;
     border-radius: 5px;
@@ -22,11 +23,13 @@
 
 .addTask {
     /* font-size: 30px; */
-    width: 24px;
+    /* width: 24px; */
+    width: 21px;
     /* margin-top: -20px; */
-    margin-top: -2px;
-    margin-left: -3px;
-    opacity: 0.5;
+    margin-top: -3px;
+    margin-left: -1px;
+    /* opacity: 0.5; */
+    opacity: 0.8;
 }
 
 .addTask:hover {
@@ -35,14 +38,15 @@
     -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
     -webkit-animation-iteration-count: infinite;
-    /* color: var(--red); */
+    /* color: var(--accent); */
 }
 
 hr {
     display: block;
     height: 1px;
     border: 0;
-    border-top: 1px solid #00000034;
+    /* border-top: 1px solid #00000034; */
+    border-top: 1px solid #ffffff82;
     margin-bottom: 30px;
     padding: 0;
     width: 90%;
@@ -84,8 +88,10 @@ hr {
 }
 
 .edit-title-input {
-    color: black;
-    background-color: #f1f1f1;
+    /* color: black; */
+    color: var(--text-colour);
+    /* background-color: #f1f1f1; */
+    background-color: var(--foreground);
     border: none;
     /* width: 360px; */
     width: 100%;

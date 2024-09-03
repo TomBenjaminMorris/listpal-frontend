@@ -7,8 +7,11 @@
 
 .task-textarea-box {
     font-size: 16px;
-    color: black;
-    background-color: #f1f1f1;
+    letter-spacing: 0.1px;
+    /* color: black; */
+    color: var(--text-colour);
+    /* background-color: #f1f1f1; */
+    background-color: var(--foreground);
     border: none;
     width: -webkit-calc(100% - 60px);
     width: -moz-calc(100% - 60px);
@@ -58,7 +61,7 @@ input[type="checkbox"] {
     width: 1.2em;
     height: 1.2em;
     border: 0.15em solid currentColor;
-    border-color: var(--red);
+    border-color: var(--accent);
     border-radius: 0.3em;
     transform: translateY(-0.075em);
     display: grid;
@@ -67,12 +70,12 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    background-color: var(--red);
+    background-color: var(--accent);
 }
 
 input[type="checkbox"]:checked:hover {
-    background-color: rgb(255, 157, 157);
-    border-color: rgb(255, 157, 157);
+    background-color: var(--accent);
+    border-color: var(--accent);
 }
 
 input[type="checkbox"]::before {
@@ -98,7 +101,7 @@ input[type="checkbox"]:disabled {
 }
 
 input[type="checkbox"]:hover {
-    background-color: var(--red);
+    background-color: var(--accent);
 }
 
 

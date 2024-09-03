@@ -39,10 +39,11 @@
     text-align: center;
     border-radius: 10px;
     border: none;
+    background-color: var(--foreground);
 }
 
 .set-targets-input:focus {
-    outline-color: var(--red-faded);
+    outline-color: var(--accent);
 }
 
 .set-targets-submit {
@@ -54,13 +55,15 @@
     border: none;
     font-size: 14px;
     font-family: CircularBold;
+    background-color: var(--accent);
 }
 
 .set-targets-submit:hover {
-    background-color: var(--red);
+    background-color: var(--accent);
     -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
     -webkit-animation-iteration-count: initial;
+    opacity: 0.6;
     /* -webkit-animation-timing-function: ease-in; */
 }
 

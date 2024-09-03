@@ -41,3 +41,9 @@
     /* Place on top of each other */
     grid-area: 1 / 1 / 2 / 2;
 }
+
+.totalScore {
+    -webkit-animation-duration: 6s;
+    -webkit-animation-name: bulge;
+    -webkit-animation-iteration-count: infinite;
+}

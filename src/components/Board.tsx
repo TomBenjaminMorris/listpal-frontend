@@ -108,7 +108,9 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
   }
 
   useEffect(() => {
-    setCurrentBoard(JSON.parse(localStorage.getItem('activeBoard')));
+    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+    document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board);
+    setCurrentBoard(ls_currentBoard);
     if (!isTokenExpired()) {
       getTasks();
       if (Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
@@ -156,7 +158,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
           isLoading ? <PulseLoader
             cssOverride={override}
             size={10}
-            color={"#fff"}
+            color={"var(--text-colour)"}
             speedMultiplier={1}
             aria-label="Loading Spinner"
             data-testid="loader"

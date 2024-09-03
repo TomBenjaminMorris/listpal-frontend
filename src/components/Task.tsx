@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { updateScoresAPI, updateTaskDescription, updateTaskDetails } from '../utils/apiGatewayClient';
-import binIcon from "../assets/icons8-close-50.png"
+import binIcon from "../assets/icons8-close-50-white.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import './Task.css'
 
@@ -130,7 +130,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         onChange={handleTextUpdate}
         autoFocus
         onKeyDown={(e) => onKeyDown(e, task.SK, title)}
-        style={checked ? { textDecoration: "line-through var(--red) 2px", opacity: taskExpiryOpacity() } : null}
+        style={checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null}
       />
       <div className="deleteTask">
         <img

@@ -4,7 +4,7 @@
     align-items: center;
 }
 
-.flex-container>.task {
+/* .flex-container>.task {
     background-color: #f1f1f1;
     color: black;
     width: 50%;
@@ -12,8 +12,8 @@
     font-size: 18px;
     padding: 5px;
     border-radius: 5px;
-}
+} */
 
-.flex-container>.task:hover {
+/* .flex-container>.task:hover {
     background-color: #a39999;
-}
+} */

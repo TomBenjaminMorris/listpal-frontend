@@ -18,8 +18,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
         return
       }
     } else {
-      tmpSortedTasks[title] = sortedTasks[title].fi
-      lter(t => t.SK !== taskID);
+      tmpSortedTasks[title] = sortedTasks[title].filter(t => t.SK !== taskID);
     }
     deleteTask(taskID);
     setSortedTasks(tmpSortedTasks);

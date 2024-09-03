@@ -1,5 +1,5 @@
 import './Header.css'
-import settingsIcon from '../assets/icons8-settings-white-50.png';
+import settingsIcon from '../assets/icons8-settings-50-white.png';
 import { Link } from 'react-router-dom';
 
 const Header = ({ handleLogout }) => {

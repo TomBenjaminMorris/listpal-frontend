@@ -56,11 +56,12 @@ const App = () => {
           handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
 
         <Route path="/settings"
-          element={<Settings userDetails={userDetails}
+          element={ isAuthenticated() ? <Settings userDetails={userDetails}
             setUserDetails={setUserDetails}
             isTokenExpired={isTokenExpired}
             handleRefreshTokens={handleRefreshTokens}
-            getUser={getUser} />} />
+            getUser={getUser} /> : <Navigate replace to="/login"/> } />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

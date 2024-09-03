@@ -6,7 +6,19 @@
 :root {
   --red: rgb(230, 70, 70);
   --red-faded: rgb(245, 95, 95);
-  --white: #f1f1f1;
+  /* --white: #f1f1f1; */
+  --white: #e6e6e6;
+  --black: #141414;
+  --black-faded: #242424;
+  --sl-purple: rgb(35,34,50); /* sl-purple */
+  --sl-dark-purple: rgb(24,24,35); /* sl-dark-purple */
+  --sl-white: rgb(247,247,254); /* sl-white */
+  --sl-red: rgb(230,91,64); /* sl-red */
+
+  --background: var(--sl-dark-purple);
+  --foreground: var(--sl-purple);
+  --text-colour: var(--sl-white);
+  --accent: var(--sl-red);
 }
 
 .smallButton {

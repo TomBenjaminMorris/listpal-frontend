@@ -106,7 +106,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
         {loadingTargets ? <PulseLoader
           cssOverride={override}
           size={5}
-          color={"white"}
+          color={"var(--text-colour)"}
           speedMultiplier={1}
           aria-label="Loading Spinner"
           data-testid="loader"

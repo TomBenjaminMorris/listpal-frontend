@@ -51,6 +51,7 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
   };
 
   useEffect(() => {
+    document.title = "ListPal | Home";
     if (!isTokenExpired()) {
       if (boards.length === 0) {
         handleGetBoards().then(() => {
@@ -89,14 +90,14 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
       <Header handleLogout={handleLogout} />
       {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
       {<h2>{userDetails.YScore && `Your total score this year, so far is...`}</h2>}
-      {<h1 style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
+      {<h1 className="totalScore" style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
       <div className="homePageContent">
         {
           isLoading ?
             <PulseLoader
               cssOverride={override}
               size={10}
-              color={"#fff"}
+              color={"var(--text-colour)"}
               speedMultiplier={1}
               aria-label="Loading Spinner"
               data-testid="loader"

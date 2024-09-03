@@ -54,9 +54,9 @@ const ScoreCounter = ({ score, percent, type }) => {
         onMouseLeave={() => setShowScore(false)}
       >
         <CircularProgressbarWithChildren value={percent} styles={buildStyles({
-          trailColor: 'var(--white)',
-          textColor: 'var(--white)',
-          pathColor: `var(--red-faded)`,
+          trailColor: 'var(--text-colour)',
+          textColor: 'var(--text-colour)',
+          pathColor: `var(--accent)`,
           pathTransitionDuration: 1,
         })}>
           <div style={{ fontSize: 16, marginTop: -1 }}>
