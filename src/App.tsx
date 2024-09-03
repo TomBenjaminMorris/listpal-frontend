@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { isTokenExpired } from './utils/utils';
 import { refreshTokens } from './utils/authService';
 import { getUser } from './utils/apiGatewayClient';
@@ -25,33 +25,12 @@ const App = () => {
     console.log("TTTT triggered: handleRefreshTokens")
     const token = await refreshTokens(sessionStorage.refreshToken)
     if (token) {
-      console.log("TTTT tokens refreshed successfully");
+      // console.log("TTTT tokens refreshed successfully");
       return token
     } else {
-      console.log("TTTT tokens not refreshed");
+      // console.log("TTTT tokens not refreshed");
     }
   };
-
-  useEffect(() => {
-    if (isTokenExpired()) {
-      console.log("TTTT App load: token expired, renewing...");
-      try {
-        handleRefreshTokens().then((t) => {
-          getUser().then((u) => {
-            setUserDetails(u[0]);
-          })
-          // window.location.reload();
-        })
-      }
-      catch (err) {
-        console.error(err);
-      }
-    } else if (isAuthenticated && Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
-      getUser().then((u) => {
-        setUserDetails(u[0]);
-      })
-    }
-  }, [])
 
   return (
     <BrowserRouter>

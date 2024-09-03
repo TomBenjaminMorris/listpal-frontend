@@ -79,7 +79,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   }
 
   const handleDeleteAndHideTask = (taskID, title) => {
-    console.log("TTT triggered: handleDeleteAndHideTask")
+    // console.log("TTT triggered: handleDeleteAndHideTask")
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
   }
 

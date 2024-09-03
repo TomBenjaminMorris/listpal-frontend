@@ -9,7 +9,7 @@ const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTo
 
   useEffect(() => {
     if (isTokenExpired()) {
-      console.log("TTTT App load: token expired, renewing...");
+      console.log("TTTT Settings load: token expired, renewing...");
       try {
         handleRefreshTokens().then((t) => {
           getUser().then((u) => {

@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, CSSProperties } from 'react';
+import { useReducer, useState, useEffect, CSSProperties, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI } from '../utils/apiGatewayClient';
 import addIcon from "../assets/icons8-add-30.png"
@@ -122,8 +122,16 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     )
   });
 
+  const measuredRef = useCallback(node => {
+    if (!node) return;
+    const resizeObserver = new ResizeObserver(() => {
+      forceUpdate()
+    });
+    resizeObserver.observe(node);
+  }, []);
+
   return (
-    <div className="card-container">
+    <div ref={measuredRef} className="card-container">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
       </div>

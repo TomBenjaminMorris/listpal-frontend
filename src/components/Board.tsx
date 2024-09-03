@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI } from '../utils/apiGatewayClient';
+import { deleteBoard, getActiveTasks, renameBoardAPI, getUser } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
 import backIcon from '../assets/icons8-back-50-white.png';
 import deleteIcon from '../assets/icons8-delete-48.png';
@@ -111,6 +111,11 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     setCurrentBoard(JSON.parse(localStorage.getItem('activeBoard')));
     if (!isTokenExpired()) {
       getTasks();
+      if (Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
+        getUser().then((u) => {
+          setUserDetails(u[0]);
+        })
+      }
 
     } else {
       setIsLoading(true);
@@ -118,7 +123,9 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
       try {
         handleRefreshTokens().then((t) => {
           getTasks();
-          // window.location.reload();
+          getUser().then((u) => {
+            setUserDetails(u[0]);
+          })
         })
       }
       catch (err) {

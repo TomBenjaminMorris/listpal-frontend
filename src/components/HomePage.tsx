@@ -1,6 +1,6 @@
 import { useEffect, useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBoards } from '../utils/apiGatewayClient';
+import { getBoards, getUser } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
 import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
@@ -59,6 +59,12 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
       } else {
         setIsLoading(false);
       }
+
+      if (Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
+        getUser().then((u) => {
+          setUserDetails(u[0]);
+        })
+      }
     } else {
       setIsLoading(true);
       console.log("TTT HomePage load: token is exipred...");
@@ -67,7 +73,9 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
           handleGetBoards().then(() => {
             setIsLoading(false);
           });
-          // window.location.reload();
+          getUser().then((u) => {
+            setUserDetails(u[0]);
+          })
         })
       }
       catch (err) {
@@ -81,7 +89,6 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
       <Header handleLogout={handleLogout} />
       {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
       {<h2>{userDetails.YScore && `Your total score this year, so far is...`}</h2>}
-      {/* {<h1 style={{fontSize: "40px"}}>{userDetails.YScore && `${emoji} ${userDetails.YScore} ${emoji}`}</h1>} */}
       {<h1 style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
       <div className="homePageContent">
         {

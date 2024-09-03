@@ -11,6 +11,7 @@
 * https://www.npmjs.com/package/react-circular-progressbar
 * https://www.npmjs.com/package/react-textarea-autosize
 * https://www.npmjs.com/package/react-confetti-explosion
+* https://stackoverflow.com/questions/68175873/detect-element-reference-height-change
 
 ### Git
 * https://stackoverflow.com/questions/23546865/how-to-configure-command-line-git-to-use-ssh-key

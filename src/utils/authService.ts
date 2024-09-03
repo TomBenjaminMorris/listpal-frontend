@@ -90,7 +90,7 @@ export const refreshTokens = async (refreshToken: string) => {
     const command = new InitiateAuthCommand(params);
     const { AuthenticationResult } = await cognitoClient.send(command);
     if (AuthenticationResult) {
-      console.log("TTTT refreshing tokens")
+      // console.log("TTTT refreshing tokens")
       sessionStorage.setItem("idToken", AuthenticationResult.IdToken || '');
       sessionStorage.setItem("accessToken", AuthenticationResult.AccessToken || '');
       if (AuthenticationResult.RefreshToken) {

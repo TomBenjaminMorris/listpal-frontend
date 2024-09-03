@@ -1,6 +1,7 @@
 .card-container {
     background-color: #f1f1f1;
     color: black;
+    width: 550px;
     min-width: 450px;
     min-height: 300px;
     /* min-height: 400px; */
