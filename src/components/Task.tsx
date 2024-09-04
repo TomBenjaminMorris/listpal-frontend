@@ -16,6 +16,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     updateActiveTaskChecked(!checked);
   }
 
+  // need to fix this to stop it cancelling after creating a new task
   const handleTextUpdate = e => {
     setDescription(e.target.value);
     clearTimeout(timer);
@@ -23,7 +24,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       updateTaskDescription(task.SK, e.target.value).then(() => {
         updateActiveTaskDescription(e.target.value)
       });
-    }, 400);
+    }, 1000);
     setTimer(newTimer);
   }
 
@@ -89,20 +90,16 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       handleDeleteAndHideTask(taskID, title)
     } else if (e.keyCode === 13) {
       e.preventDefault()
-      clearTimeout(timer);
+      // clearTimeout(timer);
       handleNewTask()
     }
   }
 
   const taskExpiryOpacity = () => {
-    // const now = new Date
-    // const expiryDate = new Date(parseInt(task.ExpiryDate));
-    // const expiryDate = new Date(unix_timestamp * 1000);
     const now = Date.now()
     const expiryDate = parseInt(task.ExpiryDate);
     const diffTime = Math.abs(expiryDate - now);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    // console.log(diffDays);
 
     if (diffDays >= 2) {
       return "0.8"
@@ -128,7 +125,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         disabled={checked}
         placeholder='new task...'
         onChange={handleTextUpdate}
-        autoFocus
+        autoFocus={description === "" ? true : false}
         onKeyDown={(e) => onKeyDown(e, task.SK, title)}
         style={checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null}
       />
