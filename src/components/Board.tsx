@@ -147,7 +147,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
         </div>
         <div className="header-right">
           {/* <img className="line-icon" src={lineIcon} /> */}
-          <ScoreBoard userDetails={userDetails} />
+          {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} />}
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
