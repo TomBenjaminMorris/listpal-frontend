@@ -1,13 +1,14 @@
 .card-container {
     background-color: var(--foreground);
     color: black;
-    min-width: 450px;
     /* min-height: 200px; */
-    padding: 2px;
+    padding: 3px;
     padding-bottom: 40px;
     border-radius: 15px;
     overflow: auto;
+    min-width: 600px;
     flex-grow: 1;
+    flex-basis: 48%;
     /* width: 550px; */
     /* max-width: 750px; */
     /* min-height: 400px; */

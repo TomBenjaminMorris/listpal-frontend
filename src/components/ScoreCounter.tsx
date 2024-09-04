@@ -18,7 +18,7 @@ const ScoreCounter = ({ score, percent, type }) => {
   // const typeToEmojiMap = { "W": "⭐", "M": "✨", "Y": "💫" }
 
   const handleConfettiCompleted = () => {
-    alert(`You've hit your ${typeToMessageMap[type]} target... keep going!`);
+    // alert(`You've hit your ${typeToMessageMap[type]} target... keep going!`);
     setIsTargetMet(true);
   }
 

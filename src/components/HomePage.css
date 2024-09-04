@@ -1,5 +1,5 @@
 .wrapper {
-    width: 100vw;
+    width: 98vw;
     height: 100vh;
 }
 
@@ -42,8 +42,8 @@
     grid-area: 1 / 1 / 2 / 2;
 }
 
-.totalScore {
+/* .totalScore {
     -webkit-animation-duration: 6s;
     -webkit-animation-name: bulge;
     -webkit-animation-iteration-count: infinite;
-}
+} */

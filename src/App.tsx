@@ -32,6 +32,17 @@ const App = () => {
     }
   };
 
+  const setOrderedSortedTasks = (tasks) => {
+    const tmpOrderedSortedTasks = Object.keys(tasks).sort().reduce(
+      (obj, key) => { 
+        obj[key] = tasks[key]; 
+        return obj;
+      }, 
+      {}
+    );
+    setSortedTasks(tmpOrderedSortedTasks)
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -42,7 +53,7 @@ const App = () => {
         <Route path="/home" element={isAuthenticated() ? <HomePage
           setUserDetails={setUserDetails}
           userDetails={userDetails}
-          setSortedTasks={setSortedTasks}
+          setSortedTasks={setOrderedSortedTasks}
           boards={boards}
           setBoards={setBoards}
           handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
@@ -52,7 +63,7 @@ const App = () => {
           userDetails={userDetails}
           sortedTasks={sortedTasks}
           setBoards={setBoards}
-          setSortedTasks={setSortedTasks}
+          setSortedTasks={setOrderedSortedTasks}
           handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
 
         <Route path="/settings"

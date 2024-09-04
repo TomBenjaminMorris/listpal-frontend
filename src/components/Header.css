@@ -1,8 +1,18 @@
 /* Style the header with a grey background and some padding */
 .header {
     overflow: hidden;
-    /* background-color: #f1f1f1; */
+    background-color: var(--background);
     padding: 20px;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 97vw;
+    margin-left: -7px;
+    z-index: 100;
+    box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -15px;
+
 }
 
 /* Style the header links */

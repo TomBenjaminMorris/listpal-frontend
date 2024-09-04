@@ -15,3 +15,6 @@
 
 ### Git
 * https://stackoverflow.com/questions/23546865/how-to-configure-command-line-git-to-use-ssh-key
+
+### CSS
+* https://getcssscan.com/css-box-shadow-examples

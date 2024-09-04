@@ -138,7 +138,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
 
   return (
     <div className="wrapper">
-      <div className="header">
+      <div className="header sticky">
         <div className="header-left">
           <Link className="back-button" to="/home" >
             <img className="back-icon" src={backIcon} alt="back icon" />
