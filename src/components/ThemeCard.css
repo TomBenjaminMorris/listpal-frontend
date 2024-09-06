@@ -1,0 +1,37 @@
+.theme-card-wrapper {
+    background-color: var(--background);
+    border-radius: 15px;
+    border-style: solid;
+    border-width: 2px;
+    min-width: 300px;
+    max-width: 300px;
+    align-items: center;
+    flex-basis: 30%;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.theme-card-wrapper:hover {
+    -webkit-animation-duration: 1s;
+    -webkit-animation-name: bulge;
+    -webkit-animation-iteration-count: initial;
+}
+
+.theme-card-wrapper h2 {
+    font-size: 20px;
+    text-align: left;
+    padding: 20px;
+    padding-bottom: 0px;
+    margin: 0;
+    font-family: CircularBlack;
+}
+
+.theme-card-wrapper p{
+    text-align: left;
+    margin: 0;
+}
+
+.theme-card-inner-wrapper {
+    border-radius: 15px;
+    margin: 15px;
+    padding: 15px;
+}

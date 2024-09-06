@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isTokenExpired } from './utils/utils';
 import { refreshTokens } from './utils/authService';
 import { getUser } from './utils/apiGatewayClient';
@@ -15,6 +15,16 @@ const App = () => {
   const [boards, setBoards] = useState([]);
   const [sortedTasks, setSortedTasks] = useState({});
   const [userDetails, setUserDetails] = useState({});
+  // const [theme, setTheme] = useState('purple-haze');
+  
+  useEffect(() => {
+    const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
+    document.documentElement.style.setProperty("--background", `var(--${theme}-bg)`);
+    document.documentElement.style.setProperty("--foreground", `var(--${theme}-fg)`);
+    document.documentElement.style.setProperty("--text-colour", `var(--${theme}-text-colour)`);
+    document.documentElement.style.setProperty("--accent", `var(--${theme}-accent)`);
+    document.documentElement.style.setProperty("--accent-2", `var(--${theme}-accent-2)`);
+  }, [userDetails])
 
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
@@ -34,10 +44,10 @@ const App = () => {
 
   const setOrderedSortedTasks = (tasks) => {
     const tmpOrderedSortedTasks = Object.keys(tasks).sort().reduce(
-      (obj, key) => { 
-        obj[key] = tasks[key]; 
+      (obj, key) => {
+        obj[key] = tasks[key];
         return obj;
-      }, 
+      },
       {}
     );
     setSortedTasks(tmpOrderedSortedTasks)
@@ -67,11 +77,11 @@ const App = () => {
           handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
 
         <Route path="/settings"
-          element={ isAuthenticated() ? <Settings userDetails={userDetails}
+          element={isAuthenticated() ? <Settings userDetails={userDetails}
             setUserDetails={setUserDetails}
             isTokenExpired={isTokenExpired}
             handleRefreshTokens={handleRefreshTokens}
-            getUser={getUser} /> : <Navigate replace to="/login"/> } />
+            getUser={getUser} /> : <Navigate replace to="/login" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -1,7 +1,7 @@
 .set-targets-wrapper {
     display: flex;
     flex-direction: column;
-    margin-bottom: 80px;
+    margin-bottom: 50px;
 }
 
 .settings-headers {
@@ -40,6 +40,7 @@
     border-radius: 10px;
     border: none;
     background-color: var(--foreground);
+    color: var(--text-colour);
 }
 
 .set-targets-input:focus {
@@ -56,6 +57,7 @@
     font-size: 14px;
     font-family: CircularBold;
     background-color: var(--accent);
+    color: var(--text-colour);
 }
 
 .set-targets-submit:hover {

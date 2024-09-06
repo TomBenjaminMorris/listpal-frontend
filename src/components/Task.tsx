@@ -121,11 +121,11 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays >= 2) {
-      return "0.3"
+      return "0.4"
     } else if (diffDays == 1) {
-      return "0.2"
+      return "0.3"
     } else if (diffDays == 0) {
-      return "0.01"
+      return "0.2"
     }
   }
 

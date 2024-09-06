@@ -7,8 +7,8 @@ const Header = ({ handleLogout }) => {
 
   return (
     <div className="header">
-      <div className="header-left">
-      </div>
+      {/* <div className="header-left">
+      </div> */}
       <div className="header-right">
         <Link className="back-button" to="/settings" >
           <img className="settings-icon" src={settingsIcon} alt="settings icon"/>

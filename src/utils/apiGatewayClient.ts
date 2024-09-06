@@ -195,6 +195,23 @@ export const updateTargetsAPI = async (targets) => {
   }
 };
 
+export const updateThemeAPI = async (theme) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { theme }
+
+  try {
+    const response = await axios.post('/user-theme', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
 export const newBoardAPI = async (boardID, boardName) => {
   const headers = {
     'Authorization': 'Bearer ' + sessionStorage.accessToken,
