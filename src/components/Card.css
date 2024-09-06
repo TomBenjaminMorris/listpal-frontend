@@ -1,7 +1,5 @@
 .card-container {
     background-color: var(--foreground);
-    color: black;
-    /* min-height: 200px; */
     padding: 3px;
     padding-bottom: 40px;
     border-radius: 15px;
@@ -12,24 +10,15 @@
     /* width: 550px; */
     /* max-width: 750px; */
     /* min-height: 400px; */
-    /* margin: 20px; */
     /* resize: both; */
     /* resize: vertical; */
     /* resize: horizontal; */
 }
 
-/* .task-container img {
-    width: 26px;
-} */
-
 .addTask {
-    /* font-size: 30px; */
-    /* width: 24px; */
     width: 21px;
-    /* margin-top: -20px; */
     margin-top: -3px;
     margin-left: -1px;
-    /* opacity: 0.5; */
     opacity: 0.8;
 }
 
@@ -42,7 +31,6 @@
 }
 
 hr {
-    /* display: block; */
     border: 0;
     border-top: 1px solid var(--text-colour);
     opacity: 0.5;
@@ -86,12 +74,9 @@ hr {
 }
 
 .edit-title-input {
-    /* color: black; */
     color: var(--text-colour);
-    /* background-color: #f1f1f1; */
     background-color: var(--foreground);
     border: none;
-    /* width: 360px; */
     width: 100%;
     font-family: CircularBold;
     font-size: 25px;

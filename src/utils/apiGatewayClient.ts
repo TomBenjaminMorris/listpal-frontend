@@ -245,3 +245,20 @@ export const deleteBoard = async (boardID) => {
     throw err;
   }
 };
+
+export const updateTaskImportance = async (taskID, isImportant) => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken,
+  }
+  const body = { taskID, isImportant }
+
+  try {
+    const response = await axios.post('/task-important', body, { headers: headers });
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};

@@ -67,7 +67,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             Weekly
             <input
               className="set-targets-input"
-              min={1}
+              // min={1}
               max={1000}
               type="number"
               name="weekly"
@@ -80,7 +80,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             Monthly
             <input
               className="set-targets-input"
-              min={1}
+              // min={1}
               max={1000}
               type="number"
               name="monthly"
@@ -93,7 +93,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             Yearly
             <input
               className="set-targets-input"
-              min={1}
+              // min={1}
               max={1000}
               type="number"
               name="yearly"

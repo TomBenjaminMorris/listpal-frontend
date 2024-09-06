@@ -3,7 +3,6 @@
     max-width: 2000px;
     margin: auto;
     display: flex;
-    /* flex-direction: column; */
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
@@ -11,28 +10,21 @@
 }
 
 .flex-container-board-list>.boardLink {
-    /* background-color: #f1f1f1; */
     background-color: var(--foreground);
-    /* color: black; */
     color: var(--text-colour);
     width: 300px;
     height: 100px;
-    /* padding: 40px; */
-    /* margin: 15px; */
     text-align: center;
     line-height: 100px;
     font-size: 25px;
     border-radius: 10px;
-    /* border: solid rgb(55, 54, 54); */
 }
 
 .flex-container-board-list>.boardLink:hover {
     background-color: var(--accent);
-    /* color: white; */
     -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
     -webkit-animation-iteration-count: initial;
-    /* -webkit-animation-timing-function: ease-in; */
 }
 
 #addBoardButton {
@@ -40,16 +32,12 @@
     height: 92px;
     line-height: 92px;
     width: 300px;
-    /* padding: 37px; */
-    /* margin: 15px; */
     text-align: center;
     border-radius: 10px;
     border: rgb(158, 158, 158);
     border-style: dashed;
     border-width: 4px;
     font-size: 50px;
-    /* font-family: none; */
-    /* opacity: 0.7; */
 }
 
 #addBoardButton:hover {

@@ -1,28 +1,18 @@
 .card-list-container {
     display: flex;
     flex-wrap: wrap;
-    /* flex-direction: column; */
     justify-content: flex-start;
     width: 92%;
     max-width: 1500px;
-    /* align-items: flex-start; */
     align-items: stretch;
     gap: 25px;
-    /* margin-top: 15px; */
     margin-top: 150px;
     margin-bottom: 50px;
 }
 
 #addCardButton {
     background-color: var(--foreground);
-    /* min-width: 450px; */
-    /* max-width: 450px; */
-    /* height: 160px; */
-    /* margin-bottom: 30px; */
     border-radius: 15px;
-    /* background-color: rgb(27, 27, 27); */
-    /* color: white;
-    border: white; */
     border-style: dashed;
     border-color: var(--text-colour);
     border-width: 4px;

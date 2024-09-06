@@ -14,6 +14,7 @@ import './Board.css';
 const override: CSSProperties = {
   paddingTop: "50px",
   opacity: "0.8",
+  marginTop: "200px",
 };
 
 const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleRefreshTokens }) => {

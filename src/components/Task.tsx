@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { updateScoresAPI, updateTaskDescription, updateTaskDetails } from '../utils/apiGatewayClient';
+import { updateScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance } from '../utils/apiGatewayClient';
 import binIcon from "../assets/icons8-close-50-white.png"
+import importantIcon from "../assets/icons8-important-30-white.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import './Task.css'
 
@@ -16,7 +17,6 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     updateActiveTaskChecked(!checked);
   }
 
-  // need to fix this to stop it cancelling after creating a new task
   const handleTextUpdate = e => {
     setDescription(e.target.value);
     clearTimeout(timer);
@@ -81,7 +81,26 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
 
   const handleDeleteAndHideTask = (taskID, title) => {
     // console.log("TTT triggered: handleDeleteAndHideTask")
+    if (!confirm("Delete task?")) {
+      return
+    }
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
+  }
+
+  const handleMarkAsImportant = (taskID) => {
+    // console.log("TTT triggered: handleMarkAsImportant")
+    let tmpSortedTasks = { ...sortedTasks };
+    let isImportant = "false";
+    tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {
+      if (t.SK === taskID) {
+        t.Important == "true" ? isImportant = "false" : isImportant = "true";
+        t.Important = isImportant
+      }
+      return t;
+    })
+    updateTaskImportance(taskID, isImportant).then(() => {
+      setSortedTasks(tmpSortedTasks);
+    })
   }
 
   const onKeyDown = (e, taskID, title) => {
@@ -102,11 +121,11 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays >= 2) {
-      return "0.8"
-    } else if (diffDays >= 1) {
-      return "0.4"
-    } else if (diffDays >= 0) {
+      return "0.3"
+    } else if (diffDays == 1) {
       return "0.2"
+    } else if (diffDays == 0) {
+      return "0.01"
     }
   }
 
@@ -120,7 +139,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         onChange={handleCheckBox}
       />
       <TextareaAutosize
-        className="task-textarea-box"
+        className={`task-textarea-box ${task.Important == "true" ? "highlight" : null}`}
         value={description}
         disabled={checked}
         placeholder='new task...'
@@ -131,7 +150,12 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       />
       <div className="deleteTask">
         <img
-          className="deleteTask"
+          src={importantIcon}
+          alt="important icon" 
+          onClick={() => handleMarkAsImportant(task.SK)} />
+      </div>
+      <div className="deleteTask" >
+        <img
           src={binIcon}
           alt="delete icon"
           onClick={() => handleDeleteAndHideTask(task.SK, title)} />

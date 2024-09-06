@@ -64,7 +64,6 @@
     -webkit-animation-name: bulge;
     -webkit-animation-iteration-count: initial;
     opacity: 0.6;
-    /* -webkit-animation-timing-function: ease-in; */
 }
 
 input[type=number]::-webkit-inner-spin-button,
