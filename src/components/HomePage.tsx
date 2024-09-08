@@ -53,30 +53,29 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
   useEffect(() => {
     document.title = "ListPal | Home";
     if (!isTokenExpired()) {
-      if (boards.length === 0) {
+      if (boards.length === 0 || Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
         handleGetBoards().then(() => {
-          setIsLoading(false);
+          // setIsLoading(false);
+          getUser().then((u) => {
+            setUserDetails(u[0]);
+            setIsLoading(false);
+          })
         });
       } else {
         setIsLoading(false);
       }
 
-      if (Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
-        getUser().then((u) => {
-          setUserDetails(u[0]);
-        })
-      }
     } else {
       setIsLoading(true);
       console.log("TTT HomePage load: token is exipred...");
       try {
         handleRefreshTokens().then((t) => {
           handleGetBoards().then(() => {
-            setIsLoading(false);
+            getUser().then((u) => {
+              setUserDetails(u[0]);
+              setIsLoading(false);
+            })
           });
-          getUser().then((u) => {
-            setUserDetails(u[0]);
-          })
         })
       }
       catch (err) {
@@ -85,29 +84,34 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
     }
   }, [setBoards])
 
+  const content = (
+    <>
+      <Header handleLogout={handleLogout} />
+      <div className="home-page-content-wrapper">
+        {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
+        {<h2>{`Your total score this year, so far is...`}</h2>}
+        {<h1 className="totalScore" style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
+        <div className="homePageContent">
+          <BoardList boards={boards} setBoards={setBoards} />
+        </div>
+      </div>
+    </>
+  )
+
   return (
     <div className="wrapper">
-      <Header handleLogout={handleLogout} />
-      {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
-      {<h2>{userDetails.YScore && `Your total score this year, so far is...`}</h2>}
-      {<h1 className="totalScore" style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
-      <div className="homePageContent">
-        {
-          isLoading ?
-            <PulseLoader
-              cssOverride={override}
-              size={10}
-              color={"var(--text-colour)"}
-              speedMultiplier={1}
-              aria-label="Loading Spinner"
-              data-testid="loader"
-            /> :
-            <BoardList boards={boards} setBoards={setBoards} />
-        }
-      </div>
+      {isLoading ? <div className="loadingWrapper"><PulseLoader
+        cssOverride={override}
+        size={12}
+        color={"var(--text-colour)"}
+        speedMultiplier={1}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      /></div> : content}
     </div>
   );
 };
+
 
 export default HomePage;
 

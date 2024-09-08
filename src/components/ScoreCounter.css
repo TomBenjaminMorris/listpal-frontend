@@ -1,5 +1,4 @@
 .score-button {
-    background-color: var(--background) !important;
 }
 
 @-webkit-keyframes bulge {
@@ -28,6 +27,6 @@
 }
 
 .star-icon {
-  margin-top: 6px;
-  width: 18px;
+  margin-top: 5px;
+  width: 16px;
 }

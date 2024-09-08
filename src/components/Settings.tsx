@@ -31,16 +31,18 @@ const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTo
 
   return (
     <div className="wrapper">
-      <div className="header">
+      <div className="header sticky">
         <div className="header-left">
           <Link className="back-button" to="/home" >
-            <img className="back-icon" src={backIcon} alt="back icon" /><div>Back</div>
+            <img className="back-icon" src={backIcon} alt="back icon" /><div>Home</div>
           </Link>
         </div>
       </div>
-      <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" />
-      <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Edit Current Scores" />
-      <ThemeSetter setUserDetails={setUserDetails}></ThemeSetter>
+      <div className="settings-content-wrapper">
+        <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" />
+        <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Edit Current Scores" />
+        <ThemeSetter setUserDetails={setUserDetails} />
+      </div>
     </div >
   );
 };

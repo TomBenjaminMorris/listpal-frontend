@@ -3,6 +3,17 @@
     /* height: 100vh; */
 }
 
+.home-page-content-wrapper {
+    margin-top: 200px;
+}
+
+.loadingWrapper {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content:center
+}
+
 .homePageContent {
     margin-top: 50px;
 }

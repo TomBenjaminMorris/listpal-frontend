@@ -6,7 +6,7 @@ const Header = ({ handleLogout }) => {
   // console.log("rendering: Header")
 
   return (
-    <div className="header">
+    <div className="header sticky">
       {/* <div className="header-left">
       </div> */}
       <div className="header-right">

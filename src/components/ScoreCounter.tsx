@@ -49,7 +49,7 @@ const ScoreCounter = ({ score, percent, type }) => {
     <Link className={listClassName} onAnimationEnd={() => setAnimate(false)} to="/settings" >
       {isExploding && !isTargetMet && <ConfettiExplosion duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div
-        style={{ width: 55, height: 55 }}
+        style={{ width: 50, height: 50 }}
         onMouseEnter={() => setShowScore(true)}
         onMouseLeave={() => setShowScore(false)}
       >
@@ -59,7 +59,7 @@ const ScoreCounter = ({ score, percent, type }) => {
           pathColor: `var(--accent)`,
           pathTransitionDuration: 1,
         })}>
-          <div style={{ fontSize: 16, marginTop: -1 }}>
+          <div style={{ fontSize: 15, marginTop: 0 }}>
             {showScore ? score : scoreRendered}
           </div>
         </CircularProgressbarWithChildren>

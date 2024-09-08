@@ -4,7 +4,7 @@
     padding-bottom: 40px;
     border-radius: 15px;
     overflow: auto;
-    min-width: 600px;
+    min-width: 550px;
     flex-grow: 1;
     flex-basis: 48%;
     /* width: 550px; */

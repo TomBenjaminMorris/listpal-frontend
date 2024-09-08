@@ -24,7 +24,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       updateTaskDescription(task.SK, e.target.value).then(() => {
         updateActiveTaskDescription(e.target.value)
       });
-    }, 1000);
+    }, 2000);
     setTimer(newTimer);
   }
 
@@ -46,7 +46,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         if (c) {
           const today = new Date();
           var date = new Date(today.valueOf());
-          const expiryDate = String(date.setDate(date.getDate() + 3));
+          const expiryDate = String(date.setDate(date.getDate() + 2));
 
           t.CompletedDate = String(Date.now());
           t["GSI1-SK"] = expiryDate;
@@ -79,9 +79,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     setSortedTasks(tmpSortedTasks);
   }
 
-  const handleDeleteAndHideTask = (taskID, title) => {
+  const handleDeleteAndHideTask = (taskID, title, fromKeybord) => {
     // console.log("TTT triggered: handleDeleteAndHideTask")
-    if (!confirm("Delete task?")) {
+    if (!fromKeybord && !confirm("Delete task?")) {
       return
     }
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
@@ -106,7 +106,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   const onKeyDown = (e, taskID, title) => {
     if (e.keyCode === 8 && e.target.value === "") {
       clearTimeout(timer);
-      handleDeleteAndHideTask(taskID, title)
+      handleDeleteAndHideTask(taskID, title, true)
     } else if (e.keyCode === 13) {
       e.preventDefault()
       // clearTimeout(timer);
@@ -158,7 +158,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         <img
           src={binIcon}
           alt="delete icon"
-          onClick={() => handleDeleteAndHideTask(task.SK, title)} />
+          onClick={() => handleDeleteAndHideTask(task.SK, title, false)} />
       </div>
     </div>
   );

@@ -12,9 +12,7 @@ import ScoreBoard from './ScoreBoard';
 import './Board.css';
 
 const override: CSSProperties = {
-  paddingTop: "50px",
   opacity: "0.8",
-  marginTop: "200px",
 };
 
 const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleRefreshTokens }) => {
@@ -137,11 +135,11 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     }
   }, [])
 
-  return (
-    <div className="wrapper">
+  const content = (
+    <>
       <div className="header sticky">
         <div className="header-left">
-          <Link className="back-button" to="/home" >
+          <Link className="back-button board-back-button " to="/home" >
             <img className="back-icon" src={backIcon} alt="back icon" />
             {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div>}
           </Link>
@@ -155,18 +153,21 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
         </div>
       </div>
       <div className="flex-container">
-        {
-          isLoading ? <PulseLoader
-            cssOverride={override}
-            size={10}
-            color={"var(--text-colour)"}
-            speedMultiplier={1}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-          /> :
-            <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
-        }
+        <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
       </div>
+    </>
+  )
+
+  return (
+    <div className="wrapper">
+      {isLoading ? <div className="loadingWrapper"><PulseLoader
+        cssOverride={override}
+        size={12}
+        color={"var(--text-colour)"}
+        speedMultiplier={1}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      /></div> : content}
     </div >
   );
 };
