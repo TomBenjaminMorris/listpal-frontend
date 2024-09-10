@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI, getUser } from '../utils/apiGatewayClient';
+import { getBoards, deleteBoard, getActiveTasks, renameBoardAPI, getUser } from '../utils/apiGatewayClient';
 import { isTokenExpired } from '../utils/utils';
-import backIcon from '../assets/icons8-back-50-white.png';
+// import backIcon from '../assets/icons8-back-50-white.png';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import lineIcon from '../assets/icons8-line-50.png';
 import editIcon from '../assets/icons8-edit-64.png';
@@ -10,12 +10,13 @@ import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import './Board.css';
+import SideNavBar from './SideNavBar';
 
 const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleRefreshTokens }) => {
+const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleRefreshTokens, handleSidebarCollapse, sidebarIsOpen, boards }) => {
   // console.log("rendering: Board")
   const [isLoading, setIsLoading] = useState(true);
   const [currentBoard, setCurrentBoard] = useState({});
@@ -106,6 +107,9 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     }
   }
 
+  const url = window.location.href;
+  const boardID = url.split('/').pop();
+
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
     document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board);
@@ -116,6 +120,10 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
         getUser().then((u) => {
           setUserDetails(u[0]);
         })
+      }
+
+      if (boards.length === 0) {
+        getBoards().then((data) => setBoards(data));
       }
 
     } else {
@@ -133,27 +141,37 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
         console.error(err);
       }
     }
-  }, [])
+  }, [boardID])
+
+
 
   const content = (
     <>
       <div className="header sticky">
         <div className="header-left">
           <Link className="back-button board-back-button " to="/home" >
-            <img className="back-icon" src={backIcon} alt="back icon" />
-            {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div>}
+            {/* <img className="back-icon" src={backIcon} alt="back icon" />
+            {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div>} */}
+            <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
+              <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
+            </div>
           </Link>
         </div>
         <div className="header-right">
-          {/* <img className="line-icon" src={lineIcon} /> */}
           {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} />}
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
         </div>
       </div>
-      <div className="flex-container">
-        <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
+
+      <div className="board-content-wrapper">
+        <SideNavBar sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse}
+          boards={boards} />
+        <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+          {/* <div className="board-filter-wrapper">All</div> */}
+          <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
+        </div>
       </div>
     </>
   )

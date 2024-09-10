@@ -4,7 +4,14 @@
 }
 
 .home-page-content-wrapper {
-    margin-top: 200px;
+    /* margin-top: 200px; */
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.home-page-content-sub-wrapper {
+    margin-top: 150px;
+    flex-grow: 1;
 }
 
 .loadingWrapper {

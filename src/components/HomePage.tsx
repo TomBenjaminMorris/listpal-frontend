@@ -7,6 +7,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
 import Header from './Header';
 import './HomePage.css'
+import SideNavBar from './SideNavBar';
 
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 const emoji = emojiList[Math.floor(Math.random() * 4)];
@@ -29,7 +30,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetails, handleRefreshTokens }) => {
+const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetails, handleRefreshTokens, handleSidebarCollapse, sidebarIsOpen }) => {
   // console.log("rendering: HomePage")
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -86,13 +87,16 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
 
   const content = (
     <>
-      <Header handleLogout={handleLogout} />
-      <div className="home-page-content-wrapper">
-        {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
-        {<h2>{`Your total score this year, so far is...`}</h2>}
-        {<h1 className="totalScore" style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
-        <div className="homePageContent">
-          <BoardList boards={boards} setBoards={setBoards} />
+      <Header handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} />
+      <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+        <SideNavBar sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} />
+        <div className="home-page-content-sub-wrapper">
+          {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
+          {<h2>{`Your total score this year, so far is...`}</h2>}
+          {<h1 className="totalScore" style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
+          <div className="homePageContent">
+            <BoardList boards={boards} setBoards={setBoards} />
+          </div>
         </div>
       </div>
     </>
@@ -112,17 +116,4 @@ const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetai
   );
 };
 
-
 export default HomePage;
-
-// console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
-// console.log ("Amazon Cognito ID token decoded: ");
-// console.log ( idToken );
-// console.log ("Amazon Cognito access token encoded: " + sessionStorage.accessToken.toString());
-// console.log ("Amazon Cognito access token decoded: ");
-// console.log ( accessToken );
-// console.log ("Amazon Cognito refresh token: ");
-// console.log ( sessionStorage.refreshToken );
-// var idToken = parseJwt(sessionStorage.idToken.toString());
-// var accessToken = parseJwt(sessionStorage.accessToken.toString());
-// {<h2>Hello {`${idToken.given_name} ${idToken.family_name}`}</h2>}

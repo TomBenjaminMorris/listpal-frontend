@@ -1,5 +1,23 @@
+.board-content-wrapper{
+    display: flex;
+    justify-content: space-evenly;
+}
+
 .flex-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* padding-left: 250px; */
+    flex-grow: 1;
+    margin-top: 95px;
+}
+
+.board-filter-wrapper{
+    margin-top: 110px;
+    width: 120px;
+    background-color: var(--accent);
+    padding: 5px;
+    border-radius: 35px;
+    margin-left: 35px;
+    margin-right: auto;
 }

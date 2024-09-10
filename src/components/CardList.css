@@ -2,11 +2,12 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
-    width: 92%;
-    max-width: 1500px;
+    width: 95%;
+    max-width: 1600px;
     align-items: stretch;
     gap: 25px;
-    margin-top: 120px;
+    /* margin-top: 120px; */
+    margin-top: 20px;
     margin-bottom: 50px;
 }
 

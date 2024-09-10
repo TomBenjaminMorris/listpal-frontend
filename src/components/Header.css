@@ -2,9 +2,11 @@
     overflow: hidden;
     background-color: white;
     background-color: var(--background);
+
     width: 100vw;
     padding-top: 10px;
     padding-bottom: 10px;
+    height: 65px;
 }
 
 .sticky {
@@ -12,7 +14,7 @@
     top: 0;
     left: 0;
     z-index: 100;
-    box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -15px;
+    box-shadow: rgba(0, 0, 0, 0.45) 0px 20px 20px -15px;
 }
 
 .header a {
@@ -26,7 +28,7 @@
 }
 
 .header .back-button {
-    margin-left: 20px;
+    margin-left: 15px;
     font-size: 20px;
     display: flex;
     align-items: center;
@@ -34,10 +36,10 @@
 }
 
 .board-back-button {
-    margin-top: 9px;
+    margin-top: 8px;
 }
 
-.back-button > div {
+.back-button>div {
     margin-top: -1px;
 }
 
@@ -59,7 +61,10 @@
 
 .logout-button {
     margin-right: 30px;
+    margin-top: 15px;
     background-color: var(--accent);
+    padding: 8px !important;
+    font-size: 15px !important;
 }
 
 .logout-button:hover {
@@ -127,6 +132,7 @@
     width: 30px;
     transition: transform .7s ease-in-out;
     margin-right: 20px;
+    margin-top: 10px;
 }
 
 .settings-icon:hover {
@@ -136,4 +142,21 @@
 .line-icon {
     height: 40px;
     opacity: 0.5;
+}
+
+.logo-text-wrapper {
+    display: flex;
+    /* margin-left: 180px !important; */
+    /* margin-left: 100px; */
+    font-size: 25px;
+    /* background-color: var(--foreground);
+    padding: 5px;
+    border-radius: 5px;
+    padding-left: 20px;
+    padding-right: 20px !important; */
+
+}
+
+.logo-text-2 {
+    font-family: CircularBlack;
 }

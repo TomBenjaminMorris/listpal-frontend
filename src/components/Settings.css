@@ -1,3 +1,9 @@
 .settings-content-wrapper {
-  margin-top: 100px;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.settings-content-sub-wrapper {
+  margin-top: 120px;
+  flex-grow: 1;
 }

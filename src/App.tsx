@@ -15,8 +15,9 @@ const App = () => {
   const [boards, setBoards] = useState([]);
   const [sortedTasks, setSortedTasks] = useState({});
   const [userDetails, setUserDetails] = useState({});
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   // const [theme, setTheme] = useState('purple-haze');
-  
+
   useEffect(() => {
     const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
     document.documentElement.style.setProperty("--background", `var(--${theme}-bg)`);
@@ -53,6 +54,10 @@ const App = () => {
     setSortedTasks(tmpOrderedSortedTasks)
   };
 
+  const handleSidebarCollapse = async () => {
+    setSidebarIsOpen(current => !current);
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -66,7 +71,9 @@ const App = () => {
           setSortedTasks={setOrderedSortedTasks}
           boards={boards}
           setBoards={setBoards}
-          handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
+          handleRefreshTokens={handleRefreshTokens}
+          handleSidebarCollapse={handleSidebarCollapse}
+          sidebarIsOpen={sidebarIsOpen} /> : <Navigate replace to="/login" />} />
 
         <Route path="/board/*" element={isAuthenticated() ? <Board
           setUserDetails={setUserDetails}
@@ -74,14 +81,22 @@ const App = () => {
           sortedTasks={sortedTasks}
           setBoards={setBoards}
           setSortedTasks={setOrderedSortedTasks}
-          handleRefreshTokens={handleRefreshTokens} /> : <Navigate replace to="/login" />} />
+          handleRefreshTokens={handleRefreshTokens}
+          handleSidebarCollapse={handleSidebarCollapse}
+          sidebarIsOpen={sidebarIsOpen}
+          boards={boards} /> : <Navigate replace to="/login" />} />
 
         <Route path="/settings"
           element={isAuthenticated() ? <Settings userDetails={userDetails}
             setUserDetails={setUserDetails}
             isTokenExpired={isTokenExpired}
             handleRefreshTokens={handleRefreshTokens}
-            getUser={getUser} /> : <Navigate replace to="/login" />} />
+            getUser={getUser}
+            handleSidebarCollapse={handleSidebarCollapse}
+            sidebarIsOpen={sidebarIsOpen}
+            setSortedTasks={setSortedTasks}
+            setBoards={setBoards}
+            boards={boards} /> : <Navigate replace to="/login" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

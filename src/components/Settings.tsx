@@ -1,12 +1,25 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import backIcon from '../assets/icons8-back-50-white.png';
 import './Settings.css';
 import TargetSetter from './TargetSetter';
 import ThemeSetter from './ThemeSetter';
+import SideNavBar from './SideNavBar';
+import Header from './Header';
 
-const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTokens, getUser }) => {
+const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTokens, getUser, sidebarIsOpen, handleSidebarCollapse, setBoards, setSortedTasks, boards }) => {
   // console.log("rendering: Settings")
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    console.log("TTT triggered: handleLogout")
+    setBoards([]);
+    setSortedTasks([]);
+    setUserDetails({})
+    sessionStorage.clear();
+    navigate('/login');
+  };
 
   useEffect(() => {
     document.title = "ListPal | Settings";
@@ -31,20 +44,18 @@ const Settings = ({ userDetails, setUserDetails, isTokenExpired, handleRefreshTo
 
   return (
     <div className="wrapper">
-      <div className="header sticky">
-        <div className="header-left">
-          <Link className="back-button" to="/home" >
-            <img className="back-icon" src={backIcon} alt="back icon" /><div>Home</div>
-          </Link>
+      <Header handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} />
+      <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+        <SideNavBar sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse}
+        boards={boards} />
+        <div className="settings-content-sub-wrapper">
+          <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
+          <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" />
+          <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Edit Current Scores" />
         </div>
-      </div>
-      <div className="settings-content-wrapper">
-        <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" />
-        <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Edit Current Scores" />
-        <ThemeSetter setUserDetails={setUserDetails} />
       </div>
     </div >
   );
 };
 
-export default Settings;
+export default Settings

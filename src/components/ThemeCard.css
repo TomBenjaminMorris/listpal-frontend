@@ -10,10 +10,11 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-.theme-card-wrapper:hover {
+.theme-card-wrapper:hover, .selected-wrapper:hover {
     -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
     -webkit-animation-iteration-count: initial;
+    cursor: pointer;
 }
 
 .theme-card-wrapper h2 {
@@ -34,4 +35,14 @@
     border-radius: 15px;
     margin: 15px;
     padding: 15px;
+}
+
+.selected-wrapper {
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.outline {
+    border: solid 3px;
+    border-color: var(--accent) !important;
 }
