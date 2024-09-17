@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { isTokenExpired } from './utils/utils';
-import { refreshTokens } from './utils/authService';
-import { getUser } from './utils/apiGatewayClient';
+import { getBoards, getUser } from './utils/apiGatewayClient';
 import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
 import ConfirmUserPage from './components/ConfirmUserPage';
@@ -16,7 +14,8 @@ const App = () => {
   const [sortedTasks, setSortedTasks] = useState({});
   const [userDetails, setUserDetails] = useState({});
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
-  // const [theme, setTheme] = useState('purple-haze');
+  const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
@@ -27,20 +26,20 @@ const App = () => {
     document.documentElement.style.setProperty("--accent-2", `var(--${theme}-accent-2)`);
   }, [userDetails])
 
+  useEffect(() => {
+    setIsLoading(true);
+    getUser().then((u) => {
+      getBoards().then((b) => {
+        setUserDetails(u[0]);
+        setBoards(b);
+        setIsLoading(false);
+      });
+    })
+  }, [])
+
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
     return !!accessToken;
-  };
-
-  const handleRefreshTokens = async () => {
-    console.log("TTTT triggered: handleRefreshTokens")
-    const token = await refreshTokens(sessionStorage.refreshToken)
-    if (token) {
-      // console.log("TTTT tokens refreshed successfully");
-      return token
-    } else {
-      // console.log("TTTT tokens not refreshed");
-    }
   };
 
   const setOrderedSortedTasks = (tasks) => {
@@ -58,6 +57,15 @@ const App = () => {
     setSidebarIsOpen(current => !current);
   }
 
+  const handleLogout = () => {
+    console.log("TTT triggered: handleLogout")
+    setBoards([]);
+    setSortedTasks([]);
+    setUserDetails({})
+    localStorage.clear();
+    sessionStorage.clear();
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -66,14 +74,15 @@ const App = () => {
         <Route path="/confirm" element={<ConfirmUserPage />} />
 
         <Route path="/home" element={isAuthenticated() ? <HomePage
-          setUserDetails={setUserDetails}
           userDetails={userDetails}
-          setSortedTasks={setOrderedSortedTasks}
           boards={boards}
           setBoards={setBoards}
-          handleRefreshTokens={handleRefreshTokens}
           handleSidebarCollapse={handleSidebarCollapse}
-          sidebarIsOpen={sidebarIsOpen} /> : <Navigate replace to="/login" />} />
+          handleLogout={handleLogout}
+          sidebarIsOpen={sidebarIsOpen}
+          isLoading={isLoading}
+          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} /> : <Navigate replace to="/login" />} />
 
         <Route path="/board/*" element={isAuthenticated() ? <Board
           setUserDetails={setUserDetails}
@@ -81,22 +90,24 @@ const App = () => {
           sortedTasks={sortedTasks}
           setBoards={setBoards}
           setSortedTasks={setOrderedSortedTasks}
-          handleRefreshTokens={handleRefreshTokens}
           handleSidebarCollapse={handleSidebarCollapse}
+          handleLogout={handleLogout}
           sidebarIsOpen={sidebarIsOpen}
-          boards={boards} /> : <Navigate replace to="/login" />} />
+          boards={boards}
+          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+          isLoading={isLoading} /> : <Navigate replace to="/login" />} />
 
-        <Route path="/settings"
-          element={isAuthenticated() ? <Settings userDetails={userDetails}
-            setUserDetails={setUserDetails}
-            isTokenExpired={isTokenExpired}
-            handleRefreshTokens={handleRefreshTokens}
-            getUser={getUser}
-            handleSidebarCollapse={handleSidebarCollapse}
-            sidebarIsOpen={sidebarIsOpen}
-            setSortedTasks={setSortedTasks}
-            setBoards={setBoards}
-            boards={boards} /> : <Navigate replace to="/login" />} />
+        <Route path="/settings" element={isAuthenticated() ? <Settings
+          userDetails={userDetails}
+          setUserDetails={setUserDetails}
+          handleSidebarCollapse={handleSidebarCollapse}
+          handleLogout={handleLogout}
+          sidebarIsOpen={sidebarIsOpen}
+          boards={boards}
+          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+          isLoading={isLoading} /> : <Navigate replace to="/login" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -1,7 +1,5 @@
-import { useEffect, useState, CSSProperties } from 'react';
+import { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBoards, getUser } from '../utils/apiGatewayClient';
-import { isTokenExpired } from '../utils/utils';
 import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
@@ -30,66 +28,16 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ setSortedTasks, boards, setBoards, userDetails, setUserDetails, handleRefreshTokens, handleSidebarCollapse, sidebarIsOpen }) => {
+const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen }) => {
   // console.log("rendering: HomePage")
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
   var idToken = parseJwt(sessionStorage.idToken.toString());
-
-  const handleGetBoards = async () => {
-    // console.log("TTT triggered: handleGetBoards")
-    const data = await getBoards();
-    setBoards(data);
-  }
-
-  const handleLogout = () => {
-    console.log("TTT triggered: handleLogout")
-    setBoards([]);
-    setSortedTasks([]);
-    setUserDetails({})
-    sessionStorage.clear();
-    navigate('/login');
-  };
-
-  useEffect(() => {
-    document.title = "ListPal | Home";
-    if (!isTokenExpired()) {
-      if (boards.length === 0 || Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
-        handleGetBoards().then(() => {
-          // setIsLoading(false);
-          getUser().then((u) => {
-            setUserDetails(u[0]);
-            setIsLoading(false);
-          })
-        });
-      } else {
-        setIsLoading(false);
-      }
-
-    } else {
-      setIsLoading(true);
-      console.log("TTT HomePage load: token is exipred...");
-      try {
-        handleRefreshTokens().then((t) => {
-          handleGetBoards().then(() => {
-            getUser().then((u) => {
-              setUserDetails(u[0]);
-              setIsLoading(false);
-            })
-          });
-        })
-      }
-      catch (err) {
-        console.error(err);
-      }
-    }
-  }, [setBoards])
 
   const content = (
     <>
-      <Header handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} />
+      <Header sidebarIsOpen={sidebarIsOpen} />
       <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-        <SideNavBar sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} />
+        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} />
+
         <div className="home-page-content-sub-wrapper">
           {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
           {<h2>{`Your total score this year, so far is...`}</h2>}

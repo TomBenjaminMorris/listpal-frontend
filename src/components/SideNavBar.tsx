@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { parseJwt } from '../utils/utils';
 import menuIcon from '../assets/icons8-menu-50.png';
@@ -9,17 +8,19 @@ import statsIcon from '../assets/icons8-graph-48.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
 import userIcon from '../assets/icons8-user-48.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
+import logoutIcon from '../assets/icons8-logout-48.png';
 import './SideNavBar.css'
 
-const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards }) => {
+const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen }) => {
   // console.log("rendering: SideNavBar")
-  const [isSelected, setIsSelected] = useState(false);
   var idToken = parseJwt(sessionStorage.idToken.toString());
   const navigate = useNavigate();
+  const activeBoard = JSON.parse(localStorage.getItem('activeBoard'))
 
   const boardsRendered = boards.map((b) => {
     return (
-      <div className={`${JSON.parse(localStorage.getItem('activeBoard')).SK === b.SK ? "highlight-board-link" : null}`}>
+      // <div key={b.SK} className={`${ activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
+      <div key={b.SK} >
         <Link key={b.SK} to={"/board/" + b.SK} onClick={() => localStorage.setItem('activeBoard', JSON.stringify(b))}>{b.Board}</Link>
       </div>
     )
@@ -27,37 +28,50 @@ const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards }) => {
 
   return (
     <div className="sidebar-wrapper" style={{ width: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+
+      {/* MENU HAMBURGER */}
       <div className="toggle-wrapper">
         <img className={`${sidebarIsOpen ? "sidebar-icon" : "menu-icon"}`} src={sidebarIsOpen ? sidebarIcon : menuIcon} alt="menu icon" onClick={handleSidebarCollapse} />
       </div>
-      <div className="sidenav-links-wrapper">
 
+      <div className="sidenav-links-wrapper">
+        {/* HOME */}
         <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/home" >
           <img src={homeIcon} />
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Home</div>
         </Link>
 
-        <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={() => !sidebarIsOpen ? navigate("/board/" + JSON.parse(localStorage.getItem('activeBoard')).SK) : setIsSelected(current => !current)}>
+        {/* BOARD LINKS */}
+        <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={() => !sidebarIsOpen ? navigate("/board/" + JSON.parse(localStorage.getItem('activeBoard')).SK) : setSidebarBoardsMenuIsOpen(current => !current)}>
           <img src={listsIcon} />
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Boards</div>
-          <img className={`sidenav-board-link-arrow ${isSelected ? "rotate" : null} ${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`} src={rightIcon}/>
+          <img className={`sidenav-board-link-arrow ${sidebarBoardsMenuIsOpen ? "rotate" : null} ${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`} src={rightIcon} />
         </div>
-        <div className={`sidenav-link-boards-sub ${sidebarIsOpen ? "sidenav-link-text" : "hidden"} ${isSelected ? "sidenav-link-text" : "hidden"}`}>
+        <div className={`sidenav-link-boards-sub ${sidebarIsOpen ? "sidenav-link-text" : "hidden"} ${sidebarBoardsMenuIsOpen ? "sidenav-link-text" : "hidden"}`}>
           {boardsRendered}
         </div>
 
+        {/* SETTINGS */}
         <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/settings" >
           <img src={settingsIcon} />
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Settings</div>
         </Link>
 
-        <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/stats" >
+        {/* STATS */}
+        {/* <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/stats" >
           <img src={statsIcon} />
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Stats</div>
-        </Link>
+        </Link> */}
       </div>
 
-      <Link className={`sidenav-user sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/stats" >
+      {/* LOGOUT */}
+      <Link onClick={() => handleLogout()} className={`sidenav-user sidenav-link sidenav-logout ${sidebarIsOpen ? "open" : "collapsed"}`} to="/login" >
+        <img src={logoutIcon} />
+        <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>{"Log Out"}</div>
+      </Link>
+
+      {/* USER */}
+      <Link className={`sidenav-user sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/home" >
         <img src={userIcon} />
         <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>{`${idToken.given_name} ${idToken.family_name}`}</div>
       </Link>

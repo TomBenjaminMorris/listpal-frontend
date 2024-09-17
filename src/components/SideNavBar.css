@@ -149,6 +149,11 @@
 }
 
 .sidenav-user { 
-  margin-bottom: 15px;
+  /* margin-bottom: 15px; */
+  /* margin-top: auto; */
+}
+
+.sidenav-logout { 
   margin-top: auto;
+  /* margin-bottom: 15px; */
 }

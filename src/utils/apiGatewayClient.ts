@@ -1,22 +1,50 @@
 import axios from 'axios';
+import { isTokenExpired } from './utils';
+import { refreshTokens } from './authService';
 axios.defaults.baseURL = 'https://api.vinsp.in';
 
-const instance = axios.create({
-  baseURL: 'https://api.vinsp.in'
-});
+const tokenCheck = async () => {
+  try {
+    if (isTokenExpired()) {
+      // console.log("TTTT attempting tokens refresh");
+      const token = await refreshTokens(sessionStorage.refreshToken)
+      if (token) {
+        // console.log("TTTT tokens refreshed successfully");
+        return true;
+      } else {
+        console.log("TTTT tokens not refreshed");
+        return false;
+      }
+    } else {
+      // console.log("TTTT token not expired");
+      return true;
+    }
+  } catch (e) {
+    console.error(e)
+    return false;
+  }
+};
+
+const getHeaders = () => {
+  const headers = {
+    'Authorization': 'Bearer ' + sessionStorage.accessToken
+  }
+  return headers;
+}
 
 /////// GET ///////
 
 export const getAllTasks = async () => {
-  const accessToken = sessionStorage.accessToken
-  const headers = {
-    'Authorization': 'Bearer ' + accessToken
-  }
-
   try {
-    const response = await axios.get('/all-tasks', { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.get('/all-tasks', { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -25,16 +53,17 @@ export const getAllTasks = async () => {
 };
 
 export const getActiveTasks = async (boardID) => {
-  const accessToken = sessionStorage.accessToken
   const params = { boardID }
-  const headers = {
-    'Authorization': 'Bearer ' + accessToken
-  }
-
   try {
-    const response = await axios.get('/active-tasks', { headers: headers, params: params });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.get('/active-tasks', { headers: getHeaders(), params: params });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -43,14 +72,16 @@ export const getActiveTasks = async (boardID) => {
 };
 
 export const getBoards = async () => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken
-  }
-
   try {
-    const response = await axios.get('/boards', { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.get('/boards', { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -59,14 +90,16 @@ export const getBoards = async () => {
 };
 
 export const getUser = async () => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken
-  }
-
   try {
-    const response = await axios.get('/user', { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.get('/user', { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -77,15 +110,17 @@ export const getUser = async () => {
 /////// POST ///////
 
 export const updateTaskDescription = async (taskID, description) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { taskID, description }
-
   try {
-    const response = await axios.post('/task-description', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/task-description', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -94,15 +129,17 @@ export const updateTaskDescription = async (taskID, description) => {
 };
 
 export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1SK) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { taskID, completedDate, expiryDate, GSI1SK }
-
   try {
-    const response = await axios.post('/task-details', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/task-details', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -111,15 +148,17 @@ export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1S
 };
 
 export const newTask = async (taskID, createdDate, completedDate, expiryDate, boardID, description, category) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { taskID, createdDate, completedDate, expiryDate, boardID, description, category }
-
   try {
-    const response = await axios.post('/new-task', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/new-task', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -128,15 +167,17 @@ export const newTask = async (taskID, createdDate, completedDate, expiryDate, bo
 };
 
 export const deleteTask = async (taskID) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { taskID }
-
   try {
-    const response = await axios.post('/delete-task', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/delete-task', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -145,15 +186,17 @@ export const deleteTask = async (taskID) => {
 };
 
 export const renameCatagoryAPI = async (taskIDs, category) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { taskIDs, category }
-
   try {
-    const response = await axios.post('/rename-category', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/rename-category', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -162,15 +205,17 @@ export const renameCatagoryAPI = async (taskIDs, category) => {
 };
 
 export const updateScoresAPI = async (scores) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { scores }
-
   try {
-    const response = await axios.post('/user-scores', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/user-scores', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -179,15 +224,17 @@ export const updateScoresAPI = async (scores) => {
 };
 
 export const updateTargetsAPI = async (targets) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { targets }
-
   try {
-    const response = await axios.post('/user-targets', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/user-targets', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -196,15 +243,17 @@ export const updateTargetsAPI = async (targets) => {
 };
 
 export const updateThemeAPI = async (theme) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { theme }
-
   try {
-    const response = await axios.post('/user-theme', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/user-theme', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -213,15 +262,17 @@ export const updateThemeAPI = async (theme) => {
 };
 
 export const newBoardAPI = async (boardID, boardName) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { boardID, boardName }
-
   try {
-    const response = await axios.post('/new-board', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/new-board', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -230,15 +281,17 @@ export const newBoardAPI = async (boardID, boardName) => {
 };
 
 export const renameBoardAPI = async (boardID, name) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { boardID, name }
-
   try {
-    const response = await axios.post('/rename-board', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/rename-board', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -247,15 +300,17 @@ export const renameBoardAPI = async (boardID, name) => {
 };
 
 export const deleteBoard = async (boardID) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { boardID }
-
   try {
-    const response = await axios.post('/delete-board', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/delete-board', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);
@@ -264,15 +319,17 @@ export const deleteBoard = async (boardID) => {
 };
 
 export const updateTaskImportance = async (taskID, isImportant) => {
-  const headers = {
-    'Authorization': 'Bearer ' + sessionStorage.accessToken,
-  }
   const body = { taskID, isImportant }
-
   try {
-    const response = await axios.post('/task-important', body, { headers: headers });
-    if (response) {
-      return response.data.data;
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/task-important', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
     console.error("Error getting data: ", err);

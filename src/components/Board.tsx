@@ -1,8 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
-import { getBoards, deleteBoard, getActiveTasks, renameBoardAPI, getUser } from '../utils/apiGatewayClient';
-import { isTokenExpired } from '../utils/utils';
-// import backIcon from '../assets/icons8-back-50-white.png';
+import { deleteBoard, getActiveTasks, renameBoardAPI } from '../utils/apiGatewayClient';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import lineIcon from '../assets/icons8-line-50.png';
 import editIcon from '../assets/icons8-edit-64.png';
@@ -16,18 +14,12 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleRefreshTokens, handleSidebarCollapse, sidebarIsOpen, boards }) => {
+const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading }) => {
   // console.log("rendering: Board")
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentBoard, setCurrentBoard] = useState({});
+  const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const navigate = useNavigate();
-
-  const handleGetActiveTasks = async (boardID) => {
-    // console.log("TTT triggered: handleGetActiveTasks")
-    const data = await getActiveTasks(boardID);
-    sortTasks(data);
-    setIsLoading(false);
-  }
+  const url = window.location.href;
+  const boardID = url.split('/').pop();
 
   const handleEditBoard = async () => {
     // console.log("TTT triggered: handleEditBoard")
@@ -39,32 +31,32 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     if (!boardName) {
       return;
     }
-    const url = window.location.href;
-    const boardID = url.split('/').pop();
+    setIsLoadingLocal(true);
+
     renameBoardAPI(boardID, boardName).then(() => {
       setBoards(current => {
+        let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+        ls_currentBoard['Board'] = boardName;
+        localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
+        document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board);
+
         let tmpBoards = [...current];
-
-        setCurrentBoard(cb => {
-          let tmpCB = { ...cb }
-          tmpCB['Board'] = boardName;
-          localStorage.setItem('activeBoard', JSON.stringify(tmpCB));
-          return tmpCB
-        })
-
         if (tmpBoards.length != 0) {
           return tmpBoards.map(b => {
             if (b.SK == boardID) {
               let tmpB = b
               tmpB['Board'] = boardName;
+              setIsLoadingLocal(false);
               return tmpB
             }
+            setIsLoadingLocal(false);
             return b
           })
         }
       })
     }).catch((e) => {
       alert(e);
+      setIsLoadingLocal(false);
     });
   }
 
@@ -72,8 +64,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
     if (!confirm("Delete board?")) {
       return
     }
-    const url = window.location.href;
-    const boardID = url.split('/').pop();
+    setIsLoadingLocal(true);
     deleteBoard(boardID).then(() => {
       setBoards((boards) => {
         return boards.filter(b => b.SK !== boardID);
@@ -83,7 +74,6 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
   }
 
   const sortTasks = (data) => {
-    // console.log("TTT triggered: sortTasks")
     let sortedData = {}
     data && data.forEach((item) => {
       if (!sortedData[item.Category]) {
@@ -93,65 +83,33 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
       }
     })
     setSortedTasks(sortedData);
+    setIsLoadingLocal(false);
   }
 
-  const getTasks = () => {
-    const url = window.location.href;
-    const boardID = url.split('/').pop();
+  const getTasks = async () => {
     var firstKey = Object.keys(sortedTasks)[0];
     const currentBoardID = sortedTasks[firstKey] && sortedTasks[firstKey][0]['GSI1-PK'];
     if (Object.keys(sortedTasks).length === 0 || currentBoardID !== boardID) {
-      handleGetActiveTasks(boardID);
-    } else {
-      setIsLoading(false);
+      getActiveTasks(boardID).then((data) => {
+        sortTasks(data);
+      });
+    }
+    else {
+      setIsLoadingLocal(false);
     }
   }
 
-  const url = window.location.href;
-  const boardID = url.split('/').pop();
-
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-    document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board);
-    setCurrentBoard(ls_currentBoard);
-    if (!isTokenExpired()) {
-      getTasks();
-      if (Object.keys(userDetails).length === 0 && userDetails.constructor === Object) {
-        getUser().then((u) => {
-          setUserDetails(u[0]);
-        })
-      }
-
-      if (boards.length === 0) {
-        getBoards().then((data) => setBoards(data));
-      }
-
-    } else {
-      setIsLoading(true);
-      console.log("TTT Board load: token is exipred...");
-      try {
-        handleRefreshTokens().then((t) => {
-          getTasks();
-          getUser().then((u) => {
-            setUserDetails(u[0]);
-          })
-        })
-      }
-      catch (err) {
-        console.error(err);
-      }
-    }
+    ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board) : null;
+    getTasks();
   }, [boardID])
-
-
 
   const content = (
     <>
       <div className="header sticky">
         <div className="header-left">
           <Link className="back-button board-back-button " to="/home" >
-            {/* <img className="back-icon" src={backIcon} alt="back icon" />
-            {currentBoard ? <div>{currentBoard.Board}</div> : <div>Back</div>} */}
             <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
               <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
             </div>
@@ -166,8 +124,8 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
       </div>
 
       <div className="board-content-wrapper">
-        <SideNavBar sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse}
-          boards={boards} />
+        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} />
+
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           {/* <div className="board-filter-wrapper">All</div> */}
           <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
@@ -178,7 +136,7 @@ const Board = ({ sortedTasks, setSortedTasks, userDetails, setUserDetails, setBo
 
   return (
     <div className="wrapper">
-      {isLoading ? <div className="loadingWrapper"><PulseLoader
+      {isLoadingLocal || isLoading ? <div className="loadingWrapper"><PulseLoader
         cssOverride={override}
         size={12}
         color={"var(--text-colour)"}
