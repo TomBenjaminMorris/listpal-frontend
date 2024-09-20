@@ -1,4 +1,23 @@
-.score-button {padding-left: 4px !important;}
+.score-button {
+  padding-left: 12px;
+  /* padding-top: 10px; */
+}
+
+.score-input {
+  background-color: var(--background);
+  color: var(--text-colour);
+  border: none;
+  text-align: center;
+  width: 30px;
+  border-radius: 15px;
+  font-size: 15px;
+  font-weight: bold;
+  font-family: CircularMedium;
+}
+
+.score-input:focus{
+  outline: none;
+}
 
 @-webkit-keyframes bulge {
   0% {

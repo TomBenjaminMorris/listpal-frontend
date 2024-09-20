@@ -110,13 +110,13 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
       <div className="header sticky">
         <div className="header-left">
           <Link className="back-button board-back-button " to="/home" >
-            <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
+            <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}`, marginTop: "15px" }}>
               <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
             </div>
           </Link>
         </div>
         <div className="header-right">
-          {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} />}
+          {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} setUserDetails={setUserDetails} />}
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
