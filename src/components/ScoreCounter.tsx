@@ -47,7 +47,7 @@ const ScoreCounter = ({ score, percent, type }) => {
 
   return (
     <Link className={listClassName} onAnimationEnd={() => setAnimate(false)} to="/settings" >
-      {isExploding && !isTargetMet && <ConfettiExplosion duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
+      {isExploding && !isTargetMet && <ConfettiExplosion zIndex={1000} duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div
         style={{ width: 50, height: 50 }}
         onMouseEnter={() => setShowScore(true)}
