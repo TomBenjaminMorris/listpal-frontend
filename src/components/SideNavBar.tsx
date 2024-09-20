@@ -4,7 +4,7 @@ import menuIcon from '../assets/icons8-menu-50.png';
 import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
-import statsIcon from '../assets/icons8-graph-48.png';
+// import statsIcon from '../assets/icons8-graph-48.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
 import userIcon from '../assets/icons8-user-48.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
@@ -19,8 +19,8 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
 
   const boardsRendered = boards.map((b) => {
     return (
-      // <div key={b.SK} className={`${ activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
-      <div key={b.SK} >
+      <div key={b.SK} className={`${ activeBoard && activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
+      {/* <div key={b.SK} > */}
         <Link key={b.SK} to={"/board/" + b.SK} onClick={() => localStorage.setItem('activeBoard', JSON.stringify(b))}>{b.Board}</Link>
       </div>
     )
@@ -42,7 +42,7 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
         </Link>
 
         {/* BOARD LINKS */}
-        <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={() => !sidebarIsOpen ? navigate("/board/" + JSON.parse(localStorage.getItem('activeBoard')).SK) : setSidebarBoardsMenuIsOpen(current => !current)}>
+        <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={() => !sidebarIsOpen ? activeBoard && navigate("/board/" + (activeBoard.SK)) : setSidebarBoardsMenuIsOpen(current => !current)}>
           <img src={listsIcon} />
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Boards</div>
           <img className={`sidenav-board-link-arrow ${sidebarBoardsMenuIsOpen ? "rotate" : null} ${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`} src={rightIcon} />

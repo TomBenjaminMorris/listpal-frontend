@@ -38,7 +38,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
         let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
         ls_currentBoard['Board'] = boardName;
         localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
-        document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board);
+        document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board);
 
         let tmpBoards = [...current];
         if (tmpBoards.length != 0) {
@@ -101,7 +101,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
 
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-    ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard.Board && " | " + ls_currentBoard.Board) : null;
+    ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board) : null;
     getTasks();
   }, [boardID])
 

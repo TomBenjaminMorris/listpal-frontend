@@ -1,5 +1,5 @@
-import { CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { CSSProperties, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
 import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
@@ -8,7 +8,7 @@ import './HomePage.css'
 import SideNavBar from './SideNavBar';
 
 const emojiList = ["🎉", "💫", "⭐", "✨"];
-const emoji = emojiList[Math.floor(Math.random() * 4)];
+// const emoji = emojiList[Math.floor(Math.random() * 4)];
 
 const getGreeting = () => {
   var today = new Date()
@@ -31,6 +31,10 @@ const override: CSSProperties = {
 const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen }) => {
   // console.log("rendering: HomePage")
   var idToken = parseJwt(sessionStorage.idToken.toString());
+
+  useEffect(() => {
+    document.title = "ListPal | Home";
+  }, [])
 
   const content = (
     <>

@@ -79,12 +79,15 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
 
   const handleNewTask = async () => {
     // console.log("TTT triggered: handleNewTask")
+    const url = window.location.href;
+    const boardID = url.split('/').pop();
+    
     setLoadingTask(true)
     const emptyTask = {
       "CreatedDate": String(Date.now()),
       "SK": "t#" + uuidv4(),
       "GSI1-SK": "nil",
-      "GSI1-PK": JSON.parse(localStorage.getItem('activeBoard')).SK,
+      "GSI1-PK": boardID,
       "ExpiryDate": "nil",
       "Description": "",
       "CompletedDate": "nil",
