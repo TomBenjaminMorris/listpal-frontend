@@ -4,11 +4,12 @@
 }
 
 .score-input {
-  background-color: var(--background);
+  /* background-color: var(--background); */
+  background: none;
   color: var(--text-colour);
   border: none;
   text-align: center;
-  width: 30px;
+  width: 40px;
   border-radius: 15px;
   font-size: 15px;
   font-weight: bold;

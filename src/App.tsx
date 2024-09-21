@@ -7,6 +7,7 @@ import ConfirmUserPage from './components/ConfirmUserPage';
 import Board from './components/Board';
 import Settings from './components/Settings';
 import './App.css'
+import _debounce from 'lodash.debounce';
 
 const App = () => {
   // console.log("rendering: App")
@@ -16,6 +17,16 @@ const App = () => {
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 650);
+  const [hideMobileSidebar, setHideMobileSidebar] = useState(true);
+
+  useEffect(() => {
+    const handleResize = _debounce(() => setIsMobile(window.innerWidth < 650), 10)
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, [])
 
   useEffect(() => {
     const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
@@ -55,6 +66,7 @@ const App = () => {
 
   const handleSidebarCollapse = async () => {
     setSidebarIsOpen(current => !current);
+    setHideMobileSidebar(current => !current);
   }
 
   const handleLogout = () => {
@@ -82,7 +94,11 @@ const App = () => {
           sidebarIsOpen={sidebarIsOpen}
           isLoading={isLoading}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} /> : <Navigate replace to="/login" />} />
+          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+          isMobile={isMobile}
+          hideMobileSidebar={hideMobileSidebar}
+          setHideMobileSidebar={setHideMobileSidebar}
+          setSidebarIsOpen={setSidebarIsOpen} /> : <Navigate replace to="/login" />} />
 
         <Route path="/board/*" element={isAuthenticated() ? <Board
           setUserDetails={setUserDetails}
@@ -96,7 +112,11 @@ const App = () => {
           boards={boards}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          isLoading={isLoading} /> : <Navigate replace to="/login" />} />
+          isLoading={isLoading}
+          setHideMobileSidebar={setHideMobileSidebar}
+          setSidebarIsOpen={setSidebarIsOpen}
+          isMobile={isMobile}
+          hideMobileSidebar={hideMobileSidebar} /> : <Navigate replace to="/login" />} />
 
         <Route path="/settings" element={isAuthenticated() ? <Settings
           userDetails={userDetails}
@@ -107,7 +127,11 @@ const App = () => {
           boards={boards}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          isLoading={isLoading} /> : <Navigate replace to="/login" />} />
+          isLoading={isLoading}
+          setHideMobileSidebar={setHideMobileSidebar}
+          setSidebarIsOpen={setSidebarIsOpen}
+          isMobile={isMobile}
+          hideMobileSidebar={hideMobileSidebar} /> : <Navigate replace to="/login" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

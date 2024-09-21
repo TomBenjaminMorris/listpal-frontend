@@ -16,6 +16,7 @@
     color: var(--text-colour);
     background-color: var(--foreground);
     border: none;
+    border-radius: 5px;
     width: -webkit-calc(100% - 85px);
     width: -moz-calc(100% - 85px);
     width: calc(100% - 85px);
@@ -27,6 +28,7 @@
 
 .highlight {
     background-color: var(--accent-2);
+    /* color: var(--accent-2); */
 }
 
 .task-textarea-box:focus {

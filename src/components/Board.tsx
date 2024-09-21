@@ -4,6 +4,7 @@ import { deleteBoard, getActiveTasks, renameBoardAPI } from '../utils/apiGateway
 import deleteIcon from '../assets/icons8-delete-48.png';
 import lineIcon from '../assets/icons8-line-50.png';
 import editIcon from '../assets/icons8-edit-64.png';
+import menuIcon from '../assets/icons8-menu-50.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
@@ -14,7 +15,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading }) => {
+const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
   // console.log("rendering: Board")
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const navigate = useNavigate();
@@ -86,6 +87,11 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
     setIsLoadingLocal(false);
   }
 
+  const handleMenuClick = async () => {
+    setHideMobileSidebar(current => !current);
+    setSidebarIsOpen(current => !current);
+  }
+
   const getTasks = async () => {
     var firstKey = Object.keys(sortedTasks)[0];
     const currentBoardID = sortedTasks[firstKey] && sortedTasks[firstKey][0]['GSI1-PK'];
@@ -114,6 +120,9 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
               <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
             </div>
           </Link>
+          {isMobile && <div className="toggle-wrapper">
+            <img className="menu-icon-mobile" src={menuIcon} alt="menu icon" onClick={handleMenuClick} />
+          </div>}
         </div>
         <div className="header-right">
           {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} setUserDetails={setUserDetails} />}
@@ -124,7 +133,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
       </div>
 
       <div className="board-content-wrapper">
-        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} />
+        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
 
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           {/* <div className="board-filter-wrapper">All</div> */}

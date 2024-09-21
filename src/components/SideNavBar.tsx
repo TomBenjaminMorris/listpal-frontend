@@ -11,7 +11,7 @@ import rightIcon from '../assets/icons8-right-arrow-64.png';
 import logoutIcon from '../assets/icons8-logout-48.png';
 import './SideNavBar.css'
 
-const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen }) => {
+const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar }) => {
   // console.log("rendering: SideNavBar")
   var idToken = parseJwt(sessionStorage.idToken.toString());
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
   });
 
   return (
-    <div className="sidebar-wrapper" style={{ width: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+    <div className="sidebar-wrapper" style={{ width: `${sidebarIsOpen ? "250px" : "80px"}`, display: isMobile && hideMobileSidebar ? "none" : "flex" }}>
 
       {/* MENU HAMBURGER */}
       <div className="toggle-wrapper">

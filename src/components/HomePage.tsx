@@ -28,7 +28,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen }) => {
+const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen }) => {
   // console.log("rendering: HomePage")
   var idToken = parseJwt(sessionStorage.idToken.toString());
 
@@ -38,9 +38,9 @@ const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarC
 
   const content = (
     <>
-      <Header sidebarIsOpen={sidebarIsOpen} />
+      <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} />
+        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
 
         <div className="home-page-content-sub-wrapper">
           {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}

@@ -2,15 +2,19 @@ import './Header.css'
 import menuIcon from '../assets/icons8-menu-50.png';
 import { Link } from 'react-router-dom';
 
-const Header = ({ sidebarIsOpen, handleSidebarCollapse }) => {
+const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobile }) => {
   // console.log("rendering: Header")
+  const handleMenuClick = async () => {
+    setHideMobileSidebar(current => !current);
+    setSidebarIsOpen(current => !current);
+  }
 
   return (
     <div className="header sticky">
       <div className="header-left">
-        <div className="toggle-wrapper">
-          <img className="menu-icon" src={menuIcon} alt="menu icon" />
-        </div>
+        {isMobile && <div className="toggle-wrapper">
+          <img className="menu-icon-mobile" src={menuIcon} alt="menu icon" onClick={handleMenuClick} />
+        </div>}
       </div>
       {/* <div className="header-left">
       </div> */}
