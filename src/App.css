@@ -61,3 +61,101 @@
 button {
   margin: 0.5em;
 }
+
+
+@media screen and (max-width: 650px) {
+
+  /* MISC STYLES */
+  .sidebar-wrapper {
+    display: none;
+  }
+
+  .header {
+    height: 50px;
+  }
+
+  .logo-text-wrapper {
+    margin-right: 0px;
+  }
+
+  .score-input {
+    width: 20px;
+    margin-top: 3px;
+  }
+
+  .menu-icon{
+    margin: auto;
+    margin-left: 15px;
+    margin-top: 5px;
+    opacity: 1;
+  }
+
+  /* HOMEPAGE STYLES */
+  .home-page-content-wrapper {
+    padding-left: 0px !important;
+  }
+
+  .home-page-content-sub-wrapper {
+    margin-top: 90px;
+  }
+
+  .home-page-content-sub-wrapper>h2 {
+    width: 90%;
+    margin: auto;
+    margin-top: 20px;
+  }
+  
+  /* SETTINGS STYLES */
+  .settings-content-wrapper {
+    /* width: 80%; */
+    padding-left: 0px !important;
+    margin: auto;
+  }
+
+  .settings-content-sub-wrapper {
+    margin-top: 90px;
+  }
+
+  /* BOARD STYLES */
+  .flex-container-board-list {
+    margin-bottom: 30px;
+  }
+
+  .flex-container {
+    margin-top: 70px;
+    padding-left: 0px !important;
+  }
+
+  .card-list-container {
+    /* width: 80%; */
+    /* margin: auto; */
+  }
+
+  .card-container {
+    min-width: 0px;
+  }
+
+  .deleteTask {
+    display: block;
+  }
+
+  .task-textarea-box {
+    font-size: 17px;
+  }
+
+  .edit-title-input {
+    /* font-size: 25px; */
+  }
+
+  .delete-icon, .edit-icon, .line-icon, .listpal-board-logo {
+    display: none !important;
+  }
+
+  .task-textarea-box {
+    margin-left: 5px !important;
+  }
+
+  .task-container:hover textarea {
+    opacity: 1;
+  }
+}

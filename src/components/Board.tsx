@@ -109,7 +109,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
     <>
       <div className="header sticky">
         <div className="header-left">
-          <Link className="back-button board-back-button " to="/home" >
+          <Link className="back-button board-back-button listpal-board-logo " to="/home" >
             <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}`, marginTop: "15px" }}>
               <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
             </div>
