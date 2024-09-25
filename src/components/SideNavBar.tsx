@@ -19,9 +19,11 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
 
   const boardsRendered = boards.map((b) => {
     return (
-      <div key={b.SK} className={`${ activeBoard && activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
-      {/* <div key={b.SK} > */}
-        <Link key={b.SK} to={"/board/" + b.SK} onClick={() => localStorage.setItem('activeBoard', JSON.stringify(b))}>{b.Board}</Link>
+      <div key={b.SK} className={`${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
+        {/* <div key={b.SK} > */}
+        <Link key={b.SK} to={"/board/" + b.SK} onClick={() => {
+          localStorage.setItem('activeBoard', JSON.stringify(b))
+        }}>{b.Board}</Link>
       </div>
     )
   });

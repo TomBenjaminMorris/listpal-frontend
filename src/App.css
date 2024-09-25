@@ -163,4 +163,10 @@ button {
   .task-container:hover textarea {
     opacity: 1;
   }
+
+  .basic-multi-select {
+    margin-top: 20px;
+    width: 80%;
+
+  }
 }

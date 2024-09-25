@@ -1,4 +1,4 @@
-.board-content-wrapper{
+.board-content-wrapper {
     display: flex;
     justify-content: space-evenly;
 }
@@ -12,7 +12,7 @@
     margin-top: 95px;
 }
 
-.board-filter-wrapper{
+.board-filter-wrapper {
     margin-top: 110px;
     width: 120px;
     background-color: var(--accent);
@@ -20,4 +20,12 @@
     border-radius: 35px;
     margin-left: 35px;
     margin-right: auto;
+}
+
+.basic-multi-select {
+    width: 70%;
+    /* width: 95%; */
+    margin-top: 10px;
+    text-align: left;
+    max-width: 1400px;
 }

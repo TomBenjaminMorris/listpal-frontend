@@ -3,7 +3,6 @@
     background-color: white;
     background-color: var(--background);
     display: flex;
-
     width: 100vw;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -36,10 +35,6 @@
     height: 35px;
 }
 
-.board-back-button {
-    /* margin-top: 8px; */
-}
-
 .back-button>div {
     margin-top: -1px;
 }
@@ -55,13 +50,11 @@
 }
 
 .header-right {
-    /* float: right; */
     display: flex;
     align-items: center;
     margin-left: auto;
     margin-right: 15px;
     margin-top: 5px;
-    /* align-self: center; */
 }
 
 .logout-button {
@@ -75,19 +68,6 @@
 .logout-button:hover {
     opacity: 0.7;
 }
-
-/* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
-/* @media screen and (max-width: 500px) {
-    .header a {
-        float: none;
-        display: block;
-        text-align: left;
-    }
-
-    .header-right {
-        float: none;
-    }
-} */
 
 .back-button:hover {
     opacity: 0.6;
@@ -151,14 +131,7 @@
 
 .logo-text-wrapper {
     display: flex;
-    /* margin-left: 180px !important; */
-    /* margin-left: 100px; */
-    font-size: 25px;
-    /* background-color: var(--foreground);
-    padding: 5px;
-    border-radius: 5px;
-    padding-left: 20px;
-    padding-right: 20px !important; */
+    font-size: 22px;
     margin-right: 20px;
 }
 

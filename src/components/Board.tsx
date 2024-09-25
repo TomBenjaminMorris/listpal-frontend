@@ -8,16 +8,30 @@ import menuIcon from '../assets/icons8-menu-50.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
-import './Board.css';
 import SideNavBar from './SideNavBar';
+import Select, { MultiValue } from "react-select";
+import './Board.css';
+import { BarLoader } from 'react-spinners';
 
 const override: CSSProperties = {
   opacity: "0.8",
 };
 
+const options = [
+  { value: 'chocolate', label: 'Chocolate' },
+  { value: 'strawberry', label: 'Strawberry' },
+  { value: 'vanilla', label: 'Vanilla' }
+]
+
 const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
   // console.log("rendering: Board")
+  const [localSortedTasks, setLocalSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
+  const [categories, setCategories] = useState([{ label: null, value: null }]);
+  const [selectedCategories, setSelectedCategories] = useState<MultiValue<{
+    value: string;
+    label: string;
+  }> | null>(null);
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
@@ -93,9 +107,9 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
   }
 
   const getTasks = async () => {
-    var firstKey = Object.keys(sortedTasks)[0];
-    const currentBoardID = sortedTasks[firstKey] && sortedTasks[firstKey][0]['GSI1-PK'];
-    if (Object.keys(sortedTasks).length === 0 || currentBoardID !== boardID) {
+    var firstKey = Object.keys(localSortedTasks)[0];
+    const currentBoardID = localSortedTasks[firstKey] && localSortedTasks[firstKey][0]['GSI1-PK'];
+    if (Object.keys(localSortedTasks).length === 0 || currentBoardID !== boardID) {
       getActiveTasks(boardID).then((data) => {
         sortTasks(data);
       });
@@ -108,8 +122,123 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
     ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board) : null;
-    getTasks();
+    getTasks()
   }, [boardID])
+
+  useEffect(() => {
+    if ((selectedCategories && selectedCategories.length == 0) || selectedCategories == null) {
+      setLocalSortedTasks(sortedTasks)
+    } else {
+      const tmpCat = selectedCategories && selectedCategories.map((c) => {
+        return c.label
+      })
+      const tmp = {}
+      Object.keys(sortedTasks).forEach((t) => {
+        tmpCat && tmpCat.includes(t) ? tmp[t] = sortedTasks[t] : null
+      })
+      setLocalSortedTasks(tmp)
+    }
+  }, [selectedCategories, sortedTasks])
+
+  useEffect(() => {
+    const tmpCategories = Object.keys(sortedTasks).map((t) => {
+      return { label: t, value: t.toLowerCase() }
+    });
+    setCategories(tmpCategories)
+  }, [sortedTasks])
+
+  const customStyles = {
+    option: (defaultStyles, state) => ({
+      color: "var(--text-colour)",
+      padding: "10px",
+      borderRadius: "10px",
+      ':hover': {
+        backgroundColor: "var(--accent)"
+      },
+    }),
+    multiValue: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+      backgroundColor: "var(--accent)",
+      borderRadius: "10px",
+      marginTop: "5px",
+      marginBottom: "5px",
+      padding: "5px",
+      marginRight: "10px",
+    }),
+    multiValueLabel: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+    }),
+    placeholder: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+      fontFamily: "CircularBook",
+      fontSize: "20px",
+      marginLeft: "5px",
+      opacity: "0.6",
+    }),
+    multiValueRemove: (defaultStyles, state) => ({
+      ...defaultStyles,
+    }),
+    clearIndicator: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+      padding: "5px",
+      marginRight: "10px",
+      borderRadius: "10px",
+      backgroundColor: "var(--background)",
+    }),
+    dropdownIndicator: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+      padding: "5px",
+      borderRadius: "10px",
+      display: "none",
+      backgroundColor: "var(--background)",
+    }),
+    container: (defaultStyles, state) => ({
+      ...defaultStyles,
+      border: "none",
+    }),
+    input: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+    }),
+    indicatorSeparator: (defaultStyles, state) => ({
+      display: "none",
+    }),
+    menu: (defaultStyles, state) => ({
+      ...defaultStyles,
+      backgroundColor: "var(--background)",
+      fontSize: "20px",
+      padding: "20px",
+      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"
+    }),
+    menuList: (defaultStyles, state) => ({
+      ...defaultStyles,
+      backgroundColor: "var(--background)",
+    }),
+    control: (defaultStyles, state) => ({
+      backgroundColor: "var(--foreground)",
+      padding: "10px",
+      borderRadius: "10px",
+      fontFamily: "CircularBold",
+      fontSize: "20px",
+      label: "control",
+      display: "flex",
+      transition: "all 100ms",
+      border: "none",
+      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"
+    }),
+    noOptionsMessage: (defaultStyles, state) => ({
+      ...defaultStyles,
+      color: "var(--text-colour)",
+      borderRadius: "10px",
+      fontFamily: "CircularBold",
+      fontSize: "20px",
+    }),
+  };
 
   const content = (
     <>
@@ -137,7 +266,24 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
 
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           {/* <div className="board-filter-wrapper">All</div> */}
-          <CardList sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
+
+
+          <Select
+            isMulti
+            name="categories"
+            options={categories}
+            className="basic-multi-select"
+            noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`}
+            styles={customStyles}
+            onChange={setSelectedCategories}
+            placeholder="Filter Options..."
+          />
+
+
+
+
+
+          <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
         </div>
       </div>
     </>
