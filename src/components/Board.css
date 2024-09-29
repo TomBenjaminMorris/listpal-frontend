@@ -23,9 +23,9 @@
 }
 
 .basic-multi-select {
-    width: 70%;
     /* width: 95%; */
+    width: 60%;
     margin-top: 10px;
     text-align: left;
-    max-width: 1400px;
+    max-width: 600px;
 }

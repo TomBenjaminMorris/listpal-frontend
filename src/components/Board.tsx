@@ -221,7 +221,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
     }),
     control: (defaultStyles, state) => ({
       backgroundColor: "var(--foreground)",
-      padding: "10px",
+      padding: "3px",
       borderRadius: "10px",
       fontFamily: "CircularBold",
       fontSize: "20px",
@@ -265,9 +265,6 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
 
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-          {/* <div className="board-filter-wrapper">All</div> */}
-
-
           <Select
             isMulti
             name="categories"
@@ -276,13 +273,8 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
             noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`}
             styles={customStyles}
             onChange={setSelectedCategories}
-            placeholder="Filter Options..."
+            placeholder="Filter Categories..."
           />
-
-
-
-
-
           <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
         </div>
       </div>

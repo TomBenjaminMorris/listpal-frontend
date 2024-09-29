@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI } from '../utils/apiGatewayClient';
 // import addIcon from "../assets/icons8-add-30.png"
 import addIcon from "../assets/icons8-add-24-white.png"
+import closeIcon from "../assets/icons8-close-50-white.png"
 import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import './Card.css'
@@ -39,7 +40,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
 
   useEffect(() => {
     setOrderedTasks(sortList(tasks));
-  }, [tasks])
+  }, [sortedTasks])
 
   const handleEditTitle = e => {
     setTitleEdited(e.target.value)
@@ -81,7 +82,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     // console.log("TTT triggered: handleNewTask")
     const url = window.location.href;
     const boardID = url.split('/').pop();
-    
+
     setLoadingTask(true)
     const emptyTask = {
       "CreatedDate": String(Date.now()),
@@ -138,6 +139,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     <div ref={measuredRef} className="card-container">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
+        {/* <img className="deleteCategory" onClick={() => alert("will delete category")} src={closeIcon} alt="delete icon" /> */}
       </div>
       <hr />
       {tasksRendered}

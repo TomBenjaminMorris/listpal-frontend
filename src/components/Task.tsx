@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { updateScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance } from '../utils/apiGatewayClient';
 import binIcon from "../assets/icons8-close-50-white.png"
 import importantIcon from "../assets/icons8-important-30-white.png"
@@ -11,6 +11,10 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [timer, setTimer] = useState(null);
   const [display, setDisplay] = useState(true);
+
+  useEffect(() => {
+    setDescription(task.Description);
+  }, [task.Description])
 
   const handleCheckBox = () => {
     setChecked((checked) => !checked);
@@ -80,7 +84,6 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   }
 
   const handleDeleteAndHideTask = (taskID, title, fromKeybord) => {
-    // console.log("TTT triggered: handleDeleteAndHideTask")
     if (!fromKeybord && !confirm("Delete task?")) {
       return
     }
@@ -88,7 +91,6 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   }
 
   const handleMarkAsImportant = (taskID) => {
-    // console.log("TTT triggered: handleMarkAsImportant")
     let tmpSortedTasks = { ...sortedTasks };
     let isImportant = "false";
     tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {

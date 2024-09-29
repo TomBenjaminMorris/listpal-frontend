@@ -105,6 +105,9 @@ export const refreshTokens = async (refreshToken: string) => {
     }
   } catch (error) {
     console.error("Error refreshing token: ", error);
+    sessionStorage.clear();
+    const navigate = useNavigate();
+    navigate('/login');
     throw error;
   }
 };

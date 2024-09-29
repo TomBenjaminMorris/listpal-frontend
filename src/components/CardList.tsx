@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask, deleteTask } from '../utils/apiGatewayClient';
+import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayClient';
 import Card from './Card';
 import './CardList.css'
 
@@ -10,18 +10,33 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
 
   const handleDeleteTask = (taskID, title) => {
     const tmpSortedTasks = { ...sortedTasks };
-    if (sortedTasks[title] && sortedTasks[title].length === 1) {
-      const ok = confirm("Removing the last task will delete the category. Are you sure?");
-      if (ok) {
-        delete tmpSortedTasks[title];
-      } else {
-        return
-      }
+    const tmp = tmpSortedTasks[title].filter((t) => t.CompletedDate == "nil");
+    console.log(tmp)
+    const isLastUncheckedTask = tmp.length == 1 && tmp[0].SK == taskID;
+    console.log(isLastUncheckedTask)
+    if (tmpSortedTasks[title] && isLastUncheckedTask) {
+      // const ok = confirm("Removing the last task will delete the category. Are you sure?");
+      // if (ok) {
+      //   delete tmpSortedTasks[title];
+      // } else {
+      //   return
+      // }
+      tmpSortedTasks[title] = tmpSortedTasks[title].map(t => {
+        if (t.SK === taskID) {
+          if (t.Description != "") {
+            t.Description = "";
+            updateTaskDescription(taskID, "");
+          }
+        }
+        return t;
+      });
+      setSortedTasks(tmpSortedTasks)
+      alert("Last unchecked task cannot be removed");
     } else {
       tmpSortedTasks[title] = sortedTasks[title].filter(t => t.SK !== taskID);
+      deleteTask(taskID);
+      setSortedTasks(tmpSortedTasks);
     }
-    deleteTask(taskID);
-    setSortedTasks(tmpSortedTasks);
   }
 
   var cards = Object.keys(sortedTasks).map(function (key) {
