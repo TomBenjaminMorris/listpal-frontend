@@ -11,12 +11,12 @@ const ThemeCard = ({ name, setUserDetails, highlight }) => {
   }
 
   const handleChoice = () => {
+    setUserDetails(current => {
+      let tmpUserDetails = { ...current };
+      tmpUserDetails.Theme = name;
+      return tmpUserDetails
+    });
     updateThemeAPI(name).then(() => {
-      setUserDetails(current => {
-        let tmpUserDetails = { ...current };
-        tmpUserDetails.Theme = name;
-        return tmpUserDetails
-      });
     })
   };
 

@@ -14,11 +14,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
   const [loadingTargets, setLoadingTargets] = useState(false);
 
   useEffect(() => {
-    if (title === "Set Targets") {
-      userDetails.YTarget && setFormData({ weekly: userDetails.WTarget, monthly: userDetails.MTarget, yearly: userDetails.YTarget })
-    } else if (title === "Edit Current Scores") {
-      userDetails.YTarget && setFormData({ weekly: userDetails.WScore, monthly: userDetails.MScore, yearly: userDetails.YScore })
-    }
+    userDetails.YTarget && setFormData({ weekly: userDetails.WTarget, monthly: userDetails.MTarget, yearly: userDetails.YTarget })
   }, [userDetails])
 
   const handleChange = (event) => {
@@ -38,23 +34,13 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
       return;
     }
     const tmpUserDetails = { ...userDetails };
-    if (title === "Set Targets") {
-      tmpUserDetails["YTarget"] = formData.yearly;
-      tmpUserDetails["MTarget"] = formData.monthly;
-      tmpUserDetails["WTarget"] = formData.weekly;
-      updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
-        setUserDetails(tmpUserDetails);
-        setLoadingTargets(false);
-      })
-    } else if (title === "Edit Current Scores") {
-      tmpUserDetails["YScore"] = formData.yearly;
-      tmpUserDetails["MScore"] = formData.monthly;
-      tmpUserDetails["WScore"] = formData.weekly;
-      updateScoresAPI({ YScore: formData.yearly, MScore: formData.monthly, WScore: formData.weekly }).then(() => {
-        setUserDetails(tmpUserDetails);
-        setLoadingTargets(false);
-      })
-    }
+    tmpUserDetails["YTarget"] = formData.yearly;
+    tmpUserDetails["MTarget"] = formData.monthly;
+    tmpUserDetails["WTarget"] = formData.weekly;
+    updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
+      setUserDetails(tmpUserDetails);
+      setLoadingTargets(false);
+    })
   };
 
   return (

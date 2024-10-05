@@ -193,8 +193,9 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
       ...defaultStyles,
       color: "var(--text-colour)",
       padding: "5px",
+      marginRight: "10px",
       borderRadius: "10px",
-      display: "none",
+      // display: "none",
       backgroundColor: "var(--background)",
     }),
     container: (defaultStyles, state) => ({
@@ -211,6 +212,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
     menu: (defaultStyles, state) => ({
       ...defaultStyles,
       backgroundColor: "var(--background)",
+      borderRadius: "10px",
       fontSize: "20px",
       padding: "20px",
       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"

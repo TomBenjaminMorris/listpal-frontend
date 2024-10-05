@@ -11,9 +11,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
   const handleDeleteTask = (taskID, title) => {
     const tmpSortedTasks = { ...sortedTasks };
     const tmp = tmpSortedTasks[title].filter((t) => t.CompletedDate == "nil");
-    console.log(tmp)
     const isLastUncheckedTask = tmp.length == 1 && tmp[0].SK == taskID;
-    console.log(isLastUncheckedTask)
     if (tmpSortedTasks[title] && isLastUncheckedTask) {
       // const ok = confirm("Removing the last task will delete the category. Are you sure?");
       // if (ok) {
@@ -26,12 +24,13 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
           if (t.Description != "") {
             t.Description = "";
             updateTaskDescription(taskID, "");
+          } else {
+            alert("Last task cannot be removed");
           }
         }
         return t;
       });
       setSortedTasks(tmpSortedTasks)
-      alert("Last unchecked task cannot be removed");
     } else {
       tmpSortedTasks[title] = sortedTasks[title].filter(t => t.SK !== taskID);
       deleteTask(taskID);

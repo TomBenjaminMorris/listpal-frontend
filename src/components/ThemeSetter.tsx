@@ -6,7 +6,7 @@ const ThemeSetter = ({ userDetails, setUserDetails }) => {
   const themeOptions = ['purple-haze', 'granite', 'aqua-mentos', 'cherry-violet'];
 
   var themeCards = themeOptions.map(function (themeOption) {
-    
+
     return <ThemeCard
       key={themeOption}
       name={themeOption}

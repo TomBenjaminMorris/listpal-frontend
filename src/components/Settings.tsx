@@ -26,7 +26,6 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
         <div className="settings-content-sub-wrapper">
           <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" />
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
-          {/* <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Edit Current Scores" /> */}
         </div>
       </div>
     </>

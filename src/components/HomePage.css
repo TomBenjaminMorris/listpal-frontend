@@ -4,7 +4,6 @@
 }
 
 .home-page-content-wrapper {
-    /* margin-top: 200px; */
     display: flex;
     justify-content: space-evenly;
 }
@@ -14,13 +13,17 @@
     flex-grow: 1;
 }
 
-.loadingWrapper {
+.loadingWrapper {   
     height: 100vh;
     display: flex;
     align-items: center;
-    justify-content:center
+    justify-content: center
 }
 
 .homePageContent {
     margin-top: 50px;
+}
+
+.totalScore:hover {
+    cursor: default;
 }

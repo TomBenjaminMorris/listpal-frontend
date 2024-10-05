@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { updateScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance } from '../utils/apiGatewayClient';
+import { updateScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask } from '../utils/apiGatewayClient';
+import { v4 as uuidv4 } from 'uuid';
 import binIcon from "../assets/icons8-close-50-white.png"
 import importantIcon from "../assets/icons8-important-30-white.png"
 import TextareaAutosize from 'react-textarea-autosize';
@@ -45,9 +46,13 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
 
   const updateActiveTaskChecked = (c) => {
     let tmpSortedTasks = { ...sortedTasks };
+    let isLastUncheckedTask = false;
     tmpSortedTasks[title] = sortedTasks[title] && sortedTasks[title].map(t => {
       if (t.SK === task.SK) {
         if (c) {
+          const tmp = tmpSortedTasks[title].filter((t) => t.CompletedDate == "nil");
+          isLastUncheckedTask = tmp.length == 1 && tmp[0].SK == task.SK;
+
           const today = new Date();
           var date = new Date(today.valueOf());
           const expiryDate = String(date.setDate(date.getDate() + 2));
@@ -80,6 +85,22 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       }
       return t;
     })
+    const activeBoard = JSON.parse(localStorage.getItem('activeBoard'))
+    const newCardDefaultTask = {
+      "CreatedDate": String(Date.now()),
+      "SK": "t#" + uuidv4(),
+      "GSI1-SK": "nil",
+      "GSI1-PK": activeBoard.SK,
+      "ExpiryDate": "nil",
+      "Description": "",
+      "CompletedDate": "nil",
+      "Category": title,
+      "EntityType": "Task"
+    }
+    if (isLastUncheckedTask) {
+      tmpSortedTasks[title].push(newCardDefaultTask);
+      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category);
+    }
     setSortedTasks(tmpSortedTasks);
   }
 
@@ -153,7 +174,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       <div className="deleteTask">
         <img
           src={importantIcon}
-          alt="important icon" 
+          alt="important icon"
           onClick={() => handleMarkAsImportant(task.SK)} />
       </div>
       <div className="deleteTask" >

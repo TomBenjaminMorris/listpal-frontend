@@ -22,9 +22,9 @@
 
 .flex-container-board-list>.boardLink:hover {
     background-color: var(--accent);
-    -webkit-animation-duration: 1s;
+    /* -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial;
+    -webkit-animation-iteration-count: initial; */
 }
 
 #addBoardButton {
@@ -43,7 +43,7 @@
 #addBoardButton:hover {
     background-color: rgb(86, 86, 86);
     opacity: 1;
-    -webkit-animation-duration: 1s;
+    /* -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial;
+    -webkit-animation-iteration-count: initial; */
 }
