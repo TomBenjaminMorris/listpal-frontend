@@ -185,6 +185,12 @@ export const deleteTask = async (taskID) => {
   }
 };
 
+export const deleteTasks = async (tasks) => {
+  tasks && tasks.forEach(t => {
+    deleteTask(t.SK);
+  });
+};
+
 export const renameCatagoryAPI = async (taskIDs, category) => {
   const body = { taskIDs, category }
   try {

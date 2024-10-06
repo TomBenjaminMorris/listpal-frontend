@@ -1,6 +1,6 @@
 import { useReducer, useState, useEffect, CSSProperties, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask, renameCatagoryAPI } from '../utils/apiGatewayClient';
+import { newTask, renameCatagoryAPI, deleteTasks } from '../utils/apiGatewayClient';
 // import addIcon from "../assets/icons8-add-30.png"
 import addIcon from "../assets/icons8-add-24-white.png"
 import closeIcon from "../assets/icons8-close-50-white.png"
@@ -22,6 +22,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const [loadingTask, setLoadingTask] = useState(false);
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
+  useEffect(() => {
+    setOrderedTasks(sortList(tasks));
+  }, [sortedTasks])
+
   const sortList = (list) => {
     const doneList = []
     const notDoneList = []
@@ -37,10 +41,6 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     // return [...notDoneList, ...doneList];
     return [...doneList, ...notDoneList];
   }
-
-  useEffect(() => {
-    setOrderedTasks(sortList(tasks));
-  }, [sortedTasks])
 
   const handleEditTitle = e => {
     setTitleEdited(e.target.value)
@@ -112,6 +112,26 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     });
   }
 
+  const handleDeleteCategory = () => {
+    const ok = confirm(`Delete catagory - ${title}?`);
+    if (ok) {
+      const tmpSortedTasks = { ...sortedTasks };
+      deleteTasks(tmpSortedTasks[title])
+      delete tmpSortedTasks[title];
+      setSortedTasks(tmpSortedTasks);
+    } else {
+      return
+    }
+  }
+
+  const measuredRef = useCallback(node => {
+    if (!node) return;
+    const resizeObserver = new ResizeObserver(() => {
+      forceUpdate()
+    });
+    resizeObserver.observe(node);
+  }, []);
+
   const tasksRendered = orderedTasks && orderedTasks.map((task) => {
     return (
       <Task
@@ -127,19 +147,11 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     )
   });
 
-  const measuredRef = useCallback(node => {
-    if (!node) return;
-    const resizeObserver = new ResizeObserver(() => {
-      forceUpdate()
-    });
-    resizeObserver.observe(node);
-  }, []);
-
   return (
     <div ref={measuredRef} className="card-container">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
-        {/* <img className="deleteCategory" onClick={() => alert("will delete category")} src={closeIcon} alt="delete icon" /> */}
+        <img className="deleteCategory" onClick={handleDeleteCategory} src={closeIcon} alt="delete icon" />
       </div>
       <hr />
       {tasksRendered}
