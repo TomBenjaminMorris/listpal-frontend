@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { updateScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask } from '../utils/apiGatewayClient';
+import { updateBoardScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask } from '../utils/apiGatewayClient';
 import { v4 as uuidv4 } from 'uuid';
 import binIcon from "../assets/icons8-close-50-white.png"
 import importantIcon from "../assets/icons8-important-30-white.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import './Task.css'
 
-const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setUserDetails }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards }) => {
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
@@ -60,31 +60,40 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           t.CompletedDate = String(Date.now());
           t["GSI1-SK"] = expiryDate;
           t.ExpiryDate = expiryDate;
-          setUserDetails((details) => {
-            const tmpUserDetails = { ...details };
-            tmpUserDetails.YScore++;
-            tmpUserDetails.MScore++;
-            tmpUserDetails.WScore++;
-            updateScoresAPI({ YScore: tmpUserDetails.YScore, MScore: tmpUserDetails.MScore, WScore: tmpUserDetails.WScore })
-            return tmpUserDetails;
+          setBoards(current => {
+            const tmpBoards = current.map(b => {
+              if (b.SK == JSON.parse(localStorage.getItem('activeBoard')).SK) {
+                b.YScore++;
+                b.MScore++;
+                b.WScore++;
+                updateBoardScoresAPI(b.SK, { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore })
+              }
+              return b
+            });
+            return tmpBoards;
           })
         } else {
           t.CompletedDate = "nil";
           t["GSI1-SK"] = "nil";
           t.ExpiryDate = "nil";
-          setUserDetails((details) => {
-            const tmpUserDetails = { ...details };
-            tmpUserDetails.YScore == 0 ? null : tmpUserDetails.YScore--;
-            tmpUserDetails.MScore == 0 ? null : tmpUserDetails.MScore--;
-            tmpUserDetails.WScore == 0 ? null : tmpUserDetails.WScore--;
-            updateScoresAPI({ YScore: tmpUserDetails.YScore, MScore: tmpUserDetails.MScore, WScore: tmpUserDetails.WScore })
-            return tmpUserDetails;
-          });
+          setBoards(current => {
+            const tmpBoards = current.map(b => {
+              if (b.SK == JSON.parse(localStorage.getItem('activeBoard')).SK) {
+                b.YScore == 0 ? null : b.YScore--;
+                b.MScore == 0 ? null : b.MScore--;
+                b.WScore == 0 ? null : b.WScore--;
+                updateBoardScoresAPI(b.SK, { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore })
+              }
+              return b
+            });
+            return tmpBoards;
+          })
         }
         updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"])
       }
       return t;
     })
+
     const activeBoard = JSON.parse(localStorage.getItem('activeBoard'))
     const newCardDefaultTask = {
       "CreatedDate": String(Date.now()),

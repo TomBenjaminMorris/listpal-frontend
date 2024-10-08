@@ -14,7 +14,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setUserDetails }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards }) => {
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
   const [timer, setTimer] = useState(null);
@@ -142,7 +142,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         setSortedTasks={setSortedTasks}
         handleDeleteTask={handleDeleteTask}
         handleNewTask={handleNewTask}
-        setUserDetails={setUserDetails}
+        setBoards={setBoards}
       ></Task>
     )
   });

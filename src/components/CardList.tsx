@@ -4,7 +4,7 @@ import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayC
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards }) => {
   // console.log("rendering: CardList")
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
@@ -46,7 +46,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
       setSortedTasks={setSortedTasks}
       sortedTasks={sortedTasks}
       handleDeleteTask={handleDeleteTask}
-      setUserDetails={setUserDetails}
+      setBoards={setBoards}
     />
   });
 

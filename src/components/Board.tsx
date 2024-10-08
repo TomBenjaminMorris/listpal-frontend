@@ -23,7 +23,7 @@ const options = [
   { value: 'vanilla', label: 'Vanilla' }
 ]
 
-const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
+const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
   // console.log("rendering: Board")
   const [localSortedTasks, setLocalSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
@@ -256,7 +256,8 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
           </div>}
         </div>
         <div className="header-right">
-          {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} setUserDetails={setUserDetails} />}
+          {/* {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard boards={boards} setBoards={setBoards} />} */}
+          <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID}/>
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
@@ -277,7 +278,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
             onChange={setSelectedCategories}
             placeholder="Filter Categories..."
           />
-          <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
+          <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>
     </>

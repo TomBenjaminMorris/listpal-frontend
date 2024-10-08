@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
-import { updateScoresAPI } from '../utils/apiGatewayClient';
+import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import ConfettiExplosion from 'react-confetti-explosion';
 import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css'
 
-const ScoreCounter = ({ score, percent, type, userDetails, setUserDetails }) => {
+const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   // console.log("rendering: ScoreCounter")
   const [scoreValue, setScoreValue] = useState(score);
   const [showScore, setShowScore] = useState(false);
@@ -27,10 +27,18 @@ const ScoreCounter = ({ score, percent, type, userDetails, setUserDetails }) => 
     setScoreValue(e.target.value);
     clearTimeout(timer);
     const newTimer = setTimeout(() => {
-      const tmpUserDetails = { ...userDetails };
-      tmpUserDetails[typeToUserDetailMap[type]] = e.target.value;
-      updateScoresAPI({ YScore: tmpUserDetails["YScore"], MScore: tmpUserDetails["MScore"], WScore: tmpUserDetails["WScore"] }).then(() => {
-        setUserDetails(tmpUserDetails);
+      const tmpBoardDetails = { ...currentBoard };
+      tmpBoardDetails[typeToUserDetailMap[type]] = e.target.value;
+      updateBoardScoresAPI(currentBoard.SK, { YScore: tmpBoardDetails["YScore"], MScore: tmpBoardDetails["MScore"], WScore: tmpBoardDetails["WScore"] }).then(() => {
+        setBoards(current => {
+          return current.map((c) => {
+            if (c.SK === currentBoard.SK) {
+              return tmpBoardDetails
+            } else {
+              return c
+            }
+          });
+        });
       })
     }, 500);
     setTimer(newTimer);
