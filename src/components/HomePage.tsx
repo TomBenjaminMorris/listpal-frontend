@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
@@ -28,13 +28,22 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen }) => {
+const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen }) => {
   // console.log("rendering: HomePage")
+  const [totalScore, setTotalScore] = useState(0);
   var idToken = parseJwt(sessionStorage.idToken.toString());
 
   useEffect(() => {
     document.title = "ListPal | Home";
   }, [])
+
+  useEffect(() => {
+    let score = 0
+    boards && boards.forEach(element => {
+      score += Number(element.YScore)
+    });
+    setTotalScore(score)
+  }, [boards])
 
   const content = (
     <>
@@ -44,8 +53,8 @@ const HomePage = ({ handleLogout, boards, setBoards, userDetails, handleSidebarC
 
         <div className="home-page-content-sub-wrapper">
           {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
-          {<h2>{`Your total score this year, so far is...`}</h2>}
-          {<h1 className="totalScore" style={{ fontSize: "40px" }}>{userDetails.YScore && `${emojiList[3]} ${userDetails.YScore} ${emojiList[3]}`}</h1>}
+          {<h2>{`The total score across your boards this year is...`}</h2>}
+          {<h1 className="totalScore" style={{ fontSize: "40px" }}>{totalScore && `${emojiList[3]} ${totalScore} ${emojiList[3]}`}</h1>}
           <div className="homePageContent">
             <BoardList boards={boards} setBoards={setBoards} />
           </div>

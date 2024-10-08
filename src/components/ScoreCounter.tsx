@@ -80,7 +80,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
           pathTransitionDuration: 1,
         })}>
           <div style={{ fontSize: 15, marginTop: 0 }}>
-            <input className="score-input" type="number" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
+            <input className="score-input" type="text" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
           </div>
         </CircularProgressbarWithChildren>
       </div>

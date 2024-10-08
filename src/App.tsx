@@ -86,7 +86,6 @@ const App = () => {
         <Route path="/confirm" element={<ConfirmUserPage />} />
 
         <Route path="/home" element={isAuthenticated() ? <HomePage
-          userDetails={userDetails}
           boards={boards}
           setBoards={setBoards}
           handleSidebarCollapse={handleSidebarCollapse}
@@ -101,8 +100,6 @@ const App = () => {
           setSidebarIsOpen={setSidebarIsOpen} /> : <Navigate replace to="/login" />} />
 
         <Route path="/board/*" element={isAuthenticated() ? <Board
-          setUserDetails={setUserDetails}
-          userDetails={userDetails}
           sortedTasks={sortedTasks}
           setBoards={setBoards}
           setSortedTasks={setOrderedSortedTasks}

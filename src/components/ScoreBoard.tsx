@@ -15,7 +15,7 @@ const ScoreBoard = ({ boards, setBoards, boardID }) => {
   }, [currentBoard])
 
   useEffect(() => {
-    setCurrentBoard( boards.filter((b) => b.SK == boardID)[0] )
+    setCurrentBoard(boards.filter((b) => b.SK == boardID)[0])
   }, [boards, boardID])
 
   return (

@@ -1,5 +1,4 @@
 import { useEffect, CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Settings.css';
 import TargetSetter from './TargetSetter';
 import ThemeSetter from './ThemeSetter';
@@ -24,7 +23,7 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
         <div className="settings-content-sub-wrapper">
-          <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" />
+          {/* <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" /> */}
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>
       </div>
