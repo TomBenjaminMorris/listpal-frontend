@@ -16,15 +16,12 @@ const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobil
           <img className="menu-icon-mobile" src={menuIcon} alt="menu icon" onClick={handleMenuClick} />
         </div>}
       </div>
-      {/* <div className="header-left">
-      </div> */}
       <div className="header-right">
         <Link className="back-button board-back-button " to="/home" >
           <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
             <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
           </div>
         </Link>
-        {/* <a className="logout-button" onClick={handleLogout}>Logout</a> */}
       </div>
     </div>
   );

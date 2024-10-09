@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
+import { isAuthenticated } from './utils/utils';
 import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
 import ConfirmUserPage from './components/ConfirmUserPage';
@@ -16,9 +17,9 @@ const App = () => {
   const [userDetails, setUserDetails] = useState({});
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 650);
   const [hideMobileSidebar, setHideMobileSidebar] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 650);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const handleResize = _debounce(() => setIsMobile(window.innerWidth < 650), 10)
@@ -47,11 +48,6 @@ const App = () => {
       });
     })
   }, [])
-
-  const isAuthenticated = () => {
-    const accessToken = sessionStorage.getItem('accessToken');
-    return !!accessToken;
-  };
 
   const setOrderedSortedTasks = (tasks) => {
     const tmpOrderedSortedTasks = Object.keys(tasks).sort().reduce(
@@ -85,8 +81,8 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
 
+        {/* HOME PAGE */}
         <Route path="/home" element={isAuthenticated() ? <HomePage
-          userDetails={userDetails}
           boards={boards}
           setBoards={setBoards}
           handleSidebarCollapse={handleSidebarCollapse}
@@ -100,9 +96,8 @@ const App = () => {
           setHideMobileSidebar={setHideMobileSidebar}
           setSidebarIsOpen={setSidebarIsOpen} /> : <Navigate replace to="/login" />} />
 
+        {/* BOARD */}
         <Route path="/board/*" element={isAuthenticated() ? <Board
-          setUserDetails={setUserDetails}
-          userDetails={userDetails}
           sortedTasks={sortedTasks}
           setBoards={setBoards}
           setSortedTasks={setOrderedSortedTasks}
@@ -118,6 +113,7 @@ const App = () => {
           isMobile={isMobile}
           hideMobileSidebar={hideMobileSidebar} /> : <Navigate replace to="/login" />} />
 
+        {/* SETTINGS */}
         <Route path="/settings" element={isAuthenticated() ? <Settings
           userDetails={userDetails}
           setUserDetails={setUserDetails}

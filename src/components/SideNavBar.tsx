@@ -4,11 +4,11 @@ import menuIcon from '../assets/icons8-menu-50.png';
 import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
-// import statsIcon from '../assets/icons8-graph-48.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
 import userIcon from '../assets/icons8-user-48.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
 import logoutIcon from '../assets/icons8-logout-48.png';
+// import statsIcon from '../assets/icons8-graph-48.png';
 import './SideNavBar.css'
 
 const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar }) => {

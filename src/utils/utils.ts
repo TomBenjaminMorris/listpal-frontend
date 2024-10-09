@@ -25,3 +25,8 @@ export function calcPercents({ YTarget, MTarget, WTarget, WScore, MScore, YScore
     const WP = WTarget ? (WScore / WTarget) * 100 : (WScore / (YTarget / 52)) * 100;
     return { Y: YP, M: MP, W: WP }
 }
+
+export function isAuthenticated() {
+    const accessToken = sessionStorage.getItem('accessToken');
+    return !!accessToken;
+};

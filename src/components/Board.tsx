@@ -11,27 +11,18 @@ import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
 import Select, { MultiValue } from "react-select";
 import './Board.css';
-import { BarLoader } from 'react-spinners';
 
 const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const options = [
-  { value: 'chocolate', label: 'Chocolate' },
-  { value: 'strawberry', label: 'Strawberry' },
-  { value: 'vanilla', label: 'Vanilla' }
-]
-
-const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUserDetails, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
+const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
   // console.log("rendering: Board")
   const [localSortedTasks, setLocalSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [categories, setCategories] = useState([{ label: null, value: null }]);
-  const [selectedCategories, setSelectedCategories] = useState<MultiValue<{
-    value: string;
-    label: string;
-  }> | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
+
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
@@ -256,7 +247,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
           </div>}
         </div>
         <div className="header-right">
-          {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard userDetails={userDetails} setUserDetails={setUserDetails} />}
+          <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
@@ -265,34 +256,31 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, userDetails, setUser
 
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
-
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-          <Select
-            isMulti
-            name="categories"
-            options={categories}
-            className="basic-multi-select"
-            noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`}
-            styles={customStyles}
-            onChange={setSelectedCategories}
-            placeholder="Filter Categories..."
-          />
-          <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setUserDetails={setUserDetails}></CardList>
+          <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories}
+            placeholder="Filter Categories..." />
+          <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>
     </>
   )
 
-  return (
-    <div className="wrapper">
-      {isLoadingLocal || isLoading ? <div className="loadingWrapper"><PulseLoader
+  const loader = (
+    <div className="loadingWrapper">
+      <PulseLoader
         cssOverride={override}
         size={12}
         color={"var(--text-colour)"}
         speedMultiplier={1}
         aria-label="Loading Spinner"
         data-testid="loader"
-      /></div> : content}
+      />
+    </div>
+  )
+
+  return (
+    <div className="wrapper">
+      {isLoadingLocal || isLoading ? loader : content}
     </div >
   );
 };

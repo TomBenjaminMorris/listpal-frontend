@@ -20,7 +20,16 @@ const BoardList = ({ boards, setBoards }) => {
     if (!name) {
       return;
     }
-    const newBoard = { "SK": "b#" + uuidv4(), "Board": name }
+    const newBoard = {
+      "SK": "b#" + uuidv4(),
+      "Board": name,
+      "WTarget": 7,
+      "YTarget": 365,
+      "MTarget": 31,
+      "WScore": 0,
+      "MScore": 0,
+      "YScore": 0
+    }
     let tmpBoards = [...boards];
     tmpBoards.push(newBoard);
     newBoardAPI(newBoard.SK, newBoard.Board);
@@ -29,14 +38,14 @@ const BoardList = ({ boards, setBoards }) => {
 
   const boardsRendered = boards.map((b) => {
     return (
-      <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>{b.Board}</Link>
+      <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>{`${b.Board} (${b.YScore})`}</Link>
     )
   });
 
   return (
     <div className="flex-container-board-list">
       {boardsRendered}
-      <div autoFocus id="addBoardButton" onClick={handleNewBoard}>+</div>
+      <div id="addBoardButton" onClick={handleNewBoard}>+</div>
     </div>
   );
 };

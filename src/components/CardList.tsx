@@ -4,10 +4,10 @@ import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayC
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards }) => {
   // console.log("rendering: CardList")
   const [, forceUpdate] = useReducer(x => x + 1, 0);
-
+  
   const handleDeleteTask = (taskID, title) => {
     const tmpSortedTasks = { ...sortedTasks };
     const tmp = tmpSortedTasks[title].filter((t) => t.CompletedDate == "nil");
@@ -37,18 +37,6 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
       setSortedTasks(tmpSortedTasks);
     }
   }
-
-  var cards = Object.keys(sortedTasks).map(function (key) {
-    return <Card
-      key={key}
-      title={key}
-      tasks={sortedTasks[key]}
-      setSortedTasks={setSortedTasks}
-      sortedTasks={sortedTasks}
-      handleDeleteTask={handleDeleteTask}
-      setUserDetails={setUserDetails}
-    />
-  });
 
   const handleNewCard = () => {
     let tmpSortedTasks = { ...sortedTasks };
@@ -83,6 +71,18 @@ const CardList = ({ sortedTasks, setSortedTasks, setUserDetails }) => {
     setSortedTasks(tmpSortedTasks);
     forceUpdate();
   }
+
+  const cards = Object.keys(sortedTasks).map(function (key) {
+    return <Card
+      key={key}
+      title={key}
+      tasks={sortedTasks[key]}
+      setSortedTasks={setSortedTasks}
+      sortedTasks={sortedTasks}
+      handleDeleteTask={handleDeleteTask}
+      setBoards={setBoards}
+    />
+  });
 
   return (
     <div className="card-list-container">
