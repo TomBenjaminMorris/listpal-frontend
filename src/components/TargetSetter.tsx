@@ -1,5 +1,5 @@
 import { useState, useEffect, CSSProperties } from 'react';
-import { updateTargetsAPI, updateScoresAPI } from '../utils/apiGatewayClient';
+// import { updateTargetsAPI } from '../utils/apiGatewayClient';
 import PulseLoader from "react-spinners/PulseLoader";
 import './TargetSetter.css'
 
@@ -37,10 +37,10 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
     tmpUserDetails["YTarget"] = formData.yearly;
     tmpUserDetails["MTarget"] = formData.monthly;
     tmpUserDetails["WTarget"] = formData.weekly;
-    updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
-      setUserDetails(tmpUserDetails);
-      setLoadingTargets(false);
-    })
+    // updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
+    //   setUserDetails(tmpUserDetails);
+    //   setLoadingTargets(false);
+    // })
   };
 
   return (
@@ -53,7 +53,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             Weekly
             <input
               className="set-targets-input"
-              // min={1}
+              min={0}
               max={1000}
               type="number"
               name="weekly"
@@ -66,7 +66,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             Monthly
             <input
               className="set-targets-input"
-              // min={1}
+              min={0}
               max={1000}
               type="number"
               name="monthly"
@@ -79,7 +79,7 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             Yearly
             <input
               className="set-targets-input"
-              // min={1}
+              min={0}
               max={1000}
               type="number"
               name="yearly"

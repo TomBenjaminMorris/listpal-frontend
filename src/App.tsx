@@ -7,8 +7,8 @@ import HomePage from './components/HomePage';
 import ConfirmUserPage from './components/ConfirmUserPage';
 import Board from './components/Board';
 import Settings from './components/Settings';
-import './App.css'
 import _debounce from 'lodash.debounce';
+import './App.css'
 
 const App = () => {
   // console.log("rendering: App")

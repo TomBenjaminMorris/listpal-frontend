@@ -12,7 +12,7 @@ const ScoreBoard = ({ boards, setBoards, boardID }) => {
       const percents = calcPercents(currentBoard);
       setPercentValues(percents);
     }
-  }, [currentBoard])
+  }, [currentBoard, boards])
 
   useEffect(() => {
     setCurrentBoard(boards.filter((b) => b.SK == boardID)[0])

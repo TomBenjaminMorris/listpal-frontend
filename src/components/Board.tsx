@@ -206,7 +206,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
       borderRadius: "10px",
       fontSize: "20px",
       padding: "20px",
-      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"
+      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;",
     }),
     menuList: (defaultStyles, state) => ({
       ...defaultStyles,
@@ -257,8 +257,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-          <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories}
-            placeholder="Filter Categories..." />
+          <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
           <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>
