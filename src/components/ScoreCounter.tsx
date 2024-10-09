@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import ConfettiExplosion from 'react-confetti-explosion';
-import starIcon from '../assets/icons8-star-50.png';
+// import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css'
 
@@ -14,6 +14,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   const [isExploding, setIsExploding] = useState(false);
   const [isTargetMet, setIsTargetMet] = useState(true);
   const [timer, setTimer] = useState(null);
+
   const listClassName = `score-button ${animate ? "bulge-now" : ""}`
   const vw = window.innerWidth * 1;
   const typeToUserDetailMap = { "W": "WScore", "M": "MScore", "Y": "YScore" }
@@ -57,21 +58,20 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
     }
   }, [percent, score])
 
-  const starImg = (
-    <img className="star-icon" src={starIcon} alt="star icon" />
-  )
+  // const starImg = (
+  //   <img className="star-icon" src={starIcon} alt="star icon" />
+  // )
 
-  const scoreRendered = (
-    isExploding ? starImg : <input className="score-input" type="number" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
-  )
+  // const scoreRendered = (
+  //   isExploding ? starImg : <input className="score-input" type="number" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
+  // )
 
   return (
     <div className={listClassName} onAnimationEnd={() => setAnimate(false)}>
       {isExploding && !isTargetMet && <ConfettiExplosion zIndex={1000} duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
-      <div
-        style={{ width: 50, height: 50 }}
-        onMouseEnter={isExploding ? () => setShowScore(true) : null}
-        onMouseLeave={isExploding ? () => setShowScore(false) : null}
+      <div style={{ width: 50, height: 50 }}
+      // onMouseEnter={isExploding ? () => setShowScore(true) : null}
+      // onMouseLeave={isExploding ? () => setShowScore(false) : null}
       >
         <CircularProgressbarWithChildren value={percent} styles={buildStyles({
           trailColor: 'var(--text-colour)',

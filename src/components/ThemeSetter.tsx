@@ -5,8 +5,7 @@ const ThemeSetter = ({ userDetails, setUserDetails }) => {
   // console.log("rendering: ThemeSetter")
   const themeOptions = ['purple-haze', 'granite', 'aqua-mentos', 'cherry-violet'];
 
-  var themeCards = themeOptions.map(function (themeOption) {
-
+  const themeCards = themeOptions.map(function (themeOption) {
     return <ThemeCard
       key={themeOption}
       name={themeOption}

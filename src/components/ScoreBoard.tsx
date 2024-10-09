@@ -5,7 +5,7 @@ import ScoreCounter from './ScoreCounter';
 const ScoreBoard = ({ boards, setBoards, boardID }) => {
   // console.log("rendering: ScoreBoard")
   const [percentValues, setPercentValues] = useState({ W: 0, M: 0, Y: 0 });
-  const [currentBoard, setCurrentBoard] = useState({ WScore: 0, MScore: 0, YScore: 0 });
+  const [currentBoard, setCurrentBoard] = useState({ WScore: 0, MScore: 0, YScore: 0, WTarget: 0, MTarget: 0, YTarget: 0 });
 
   useEffect(() => {
     if (Object.keys(currentBoard).length != 0) {

@@ -1,7 +1,6 @@
 import { useReducer, useState, useEffect, CSSProperties, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks } from '../utils/apiGatewayClient';
-// import addIcon from "../assets/icons8-add-30.png"
 import addIcon from "../assets/icons8-add-24-white.png"
 import closeIcon from "../assets/icons8-close-50-white.png"
 import PulseLoader from "react-spinners/PulseLoader";

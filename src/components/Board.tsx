@@ -11,17 +11,10 @@ import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
 import Select, { MultiValue } from "react-select";
 import './Board.css';
-import { BarLoader } from 'react-spinners';
 
 const override: CSSProperties = {
   opacity: "0.8",
 };
-
-const options = [
-  { value: 'chocolate', label: 'Chocolate' },
-  { value: 'strawberry', label: 'Strawberry' },
-  { value: 'vanilla', label: 'Vanilla' }
-]
 
 const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
   // console.log("rendering: Board")
