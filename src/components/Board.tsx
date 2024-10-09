@@ -28,10 +28,8 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const [localSortedTasks, setLocalSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [categories, setCategories] = useState([{ label: null, value: null }]);
-  const [selectedCategories, setSelectedCategories] = useState<MultiValue<{
-    value: string;
-    label: string;
-  }> | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
+
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
@@ -256,8 +254,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
           </div>}
         </div>
         <div className="header-right">
-          {/* {(Object.keys(userDetails).length !== 0 && userDetails.constructor === Object) && <ScoreBoard boards={boards} setBoards={setBoards} />} */}
-          <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID}/>
+          <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
@@ -266,34 +263,31 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
-
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-          <Select
-            isMulti
-            name="categories"
-            options={categories}
-            className="basic-multi-select"
-            noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`}
-            styles={customStyles}
-            onChange={setSelectedCategories}
-            placeholder="Filter Categories..."
-          />
+          <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories}
+            placeholder="Filter Categories..." />
           <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>
     </>
   )
 
-  return (
-    <div className="wrapper">
-      {isLoadingLocal || isLoading ? <div className="loadingWrapper"><PulseLoader
+  const loader = (
+    <div className="loadingWrapper">
+      <PulseLoader
         cssOverride={override}
         size={12}
         color={"var(--text-colour)"}
         speedMultiplier={1}
         aria-label="Loading Spinner"
         data-testid="loader"
-      /></div> : content}
+      />
+    </div>
+  )
+
+  return (
+    <div className="wrapper">
+      {isLoadingLocal || isLoading ? loader : content}
     </div >
   );
 };

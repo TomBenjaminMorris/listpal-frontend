@@ -30,16 +30,22 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
     </>
   )
 
-  return (
-    <div className="wrapper">
-      {isLoading ? <div className="loadingWrapper"><PulseLoader
+  const loader = (
+    <div className="loadingWrapper">
+      <PulseLoader
         cssOverride={override}
         size={12}
         color={"var(--text-colour)"}
         speedMultiplier={1}
         aria-label="Loading Spinner"
         data-testid="loader"
-      /></div> : content}
+      />
+    </div>
+  )
+
+  return (
+    <div className="wrapper">
+      {isLoading ? loader : content}
     </div >
   );
 };
