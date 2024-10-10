@@ -91,7 +91,7 @@
     margin-top: -2px;
 }
 
-.edit-icon:hover {
+.edit-icon:hover, .delete-icon:hover, .clear-icon:hover {
     opacity: 0.5;
     -webkit-animation-duration: 0.5s;
     -webkit-animation-name: bulge;
@@ -105,15 +105,13 @@
     margin-left: 10px;
 }
 
-.delete-icon:hover {
-    opacity: 0.5;
-    -webkit-animation-duration: 0.5s;
-    -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial;
-    -webkit-animation-timing-function: ease-in;
+.clear-icon {
+    width: 27px;
+    margin-right: 10px;
+    margin-left: 6px;
 }
 
-.settings-icon {
+/* .settings-icon {
     width: 30px;
     transition: transform .7s ease-in-out;
     margin-right: 20px;
@@ -122,7 +120,7 @@
 
 .settings-icon:hover {
     transform: rotate(180deg);
-}
+} */
 
 .line-icon {
     height: 40px;

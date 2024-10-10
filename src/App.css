@@ -152,7 +152,7 @@ button {
     /* font-size: 25px; */
   }
 
-  .delete-icon, .edit-icon, .line-icon, .listpal-board-logo {
+  .delete-icon, .edit-icon, .clear-icon, .line-icon, .listpal-board-logo {
     display: none !important;
   }
 

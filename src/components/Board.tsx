@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI } from '../utils/apiGatewayClient';
+import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks } from '../utils/apiGatewayClient';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import lineIcon from '../assets/icons8-line-50.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import menuIcon from '../assets/icons8-menu-50.png';
+import clearIcon from '../assets/icons8-clear-60.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
@@ -70,6 +71,9 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     if (!confirm("Delete board?")) {
       return
     }
+    if (!confirm("u sure...?")) {
+      return
+    }
     setIsLoadingLocal(true);
     deleteBoard(boardID).then(() => {
       setBoards((boards) => {
@@ -77,6 +81,20 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
       })
       navigate('/home');
     });
+  }
+
+  const handleClearTasks = async () => {
+    if (!confirm("Clear all completed tasks?")) {
+      return
+    }
+    const tmpSortedTasks = { ...sortedTasks };
+    const tasksToDelete = [];
+    for (const category in tmpSortedTasks) {
+      tasksToDelete.push(...tmpSortedTasks[category].filter((t) => t.CompletedDate != 'nil'));
+      tmpSortedTasks[category] = tmpSortedTasks[category].filter((t) => t.CompletedDate == 'nil')
+    }
+    setSortedTasks(tmpSortedTasks);
+    deleteTasks(tasksToDelete)
   }
 
   const sortTasks = (data) => {
@@ -251,6 +269,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
           <img className="line-icon" src={lineIcon} />
           <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
           <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
+          <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
         </div>
       </div>
 
