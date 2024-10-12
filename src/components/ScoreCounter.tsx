@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import ConfettiExplosion from 'react-confetti-explosion';
-// import starIcon from '../assets/icons8-star-50.png';
+import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css'
 
@@ -58,9 +58,9 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
     }
   }, [percent, score])
 
-  // const starImg = (
-  //   <img className="star-icon" src={starIcon} alt="star icon" />
-  // )
+  const starImg = (
+    <img className="star-icon" src={starIcon} alt="star icon" />
+  )
 
   // const scoreRendered = (
   //   isExploding ? starImg : <input className="score-input" type="number" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
@@ -81,6 +81,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
         })}>
           <div style={{ fontSize: 15, marginTop: 0 }}>
             <input className="score-input" type="text" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
+            {isExploding ? starImg : null}
           </div>
         </CircularProgressbarWithChildren>
       </div>
