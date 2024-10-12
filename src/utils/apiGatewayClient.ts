@@ -361,3 +361,22 @@ export const updateBoardScoresAPI = async (boardID, scores) => {
     throw err;
   }
 };
+
+export const updateBoardTargetsAPI = async (boardID, targets) => {
+  const body = { boardID, targets }
+  try {
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/board-targets', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
+    }
+  } catch (err) {
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};

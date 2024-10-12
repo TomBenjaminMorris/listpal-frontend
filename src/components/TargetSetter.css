@@ -5,7 +5,7 @@
 }
 
 .settings-headers {
-    font-size: 28px;
+    font-size: 24px;
 }
 
 .settings-line {
@@ -32,6 +32,30 @@
     gap: 15px;
 }
 
+.set-targets-board-select-wrapper label {
+    /* width: 200px; */
+    margin: auto;
+}
+
+.set-targets-board-select-wrapper label {
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+    gap: 15px;
+}
+
+.set-targets-board-select {
+    padding: 10px;
+    font-size: 18px;
+    background-color: var(--foreground);
+    color: var(--text-colour);
+    border: none;
+    margin: auto;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
 .set-targets-input {
     font-size: 25px;
     padding: 10px;
@@ -43,8 +67,10 @@
     color: var(--text-colour);
 }
 
-.set-targets-input:focus {
+.set-targets-input:focus, .set-targets-submit:focus, .set-targets-board-select:focus {
     outline-color: var(--accent);
+    outline-style:solid;
+    box-shadow: 0 0 0 1px var(--accent);
 }
 
 .set-targets-submit {

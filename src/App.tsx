@@ -121,6 +121,7 @@ const App = () => {
           handleLogout={handleLogout}
           sidebarIsOpen={sidebarIsOpen}
           boards={boards}
+          setBoards={setBoards}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
           isLoading={isLoading}

@@ -1,5 +1,5 @@
 import { useState, useEffect, CSSProperties } from 'react';
-// import { updateTargetsAPI } from '../utils/apiGatewayClient';
+import { updateBoardTargetsAPI } from '../utils/apiGatewayClient';
 import PulseLoader from "react-spinners/PulseLoader";
 import './TargetSetter.css'
 
@@ -8,18 +8,28 @@ const override: CSSProperties = {
   marginTop: "15px",
 };
 
-const TargetSetter = ({ userDetails, setUserDetails, title }) => {
+const TargetSetter = ({ title, boards, setBoards }) => {
   // console.log("rendering: TargetSetter")
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
+  const [activeBoard, setActiveBoard] = useState(boards[0].SK);
   const [loadingTargets, setLoadingTargets] = useState(false);
 
   useEffect(() => {
-    userDetails.YTarget && setFormData({ weekly: userDetails.WTarget, monthly: userDetails.MTarget, yearly: userDetails.YTarget })
-  }, [userDetails])
+    boards.forEach(b => {
+      if (activeBoard == b.SK) {
+        setFormData({ weekly: b.WTarget, monthly: b.MTarget, yearly: b.YTarget })
+      }
+    });
+  }, [activeBoard])
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevState) => ({ ...prevState, [name]: value && parseInt(value) }));
+  };
+
+  const handleSelectChange = (event) => {
+    const { value } = event.target;
+    setActiveBoard(value)
   };
 
   const handleSubmit = (event) => {
@@ -33,14 +43,18 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
       alert("Monthly can't be more than yearly");
       return;
     }
-    const tmpUserDetails = { ...userDetails };
-    tmpUserDetails["YTarget"] = formData.yearly;
-    tmpUserDetails["MTarget"] = formData.monthly;
-    tmpUserDetails["WTarget"] = formData.weekly;
-    // updateTargetsAPI({ YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
-    //   setUserDetails(tmpUserDetails);
-    //   setLoadingTargets(false);
-    // })
+    const tmpBoards = [...boards];
+    tmpBoards.forEach(b => {
+      if (activeBoard == b.SK) {
+        b["YTarget"] = formData.yearly;
+        b["MTarget"] = formData.monthly;
+        b["WTarget"] = formData.weekly;
+      }
+    });
+    updateBoardTargetsAPI(activeBoard, { YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
+      setBoards(tmpBoards)
+      setLoadingTargets(false);
+    })
   };
 
   return (
@@ -89,6 +103,19 @@ const TargetSetter = ({ userDetails, setUserDetails, title }) => {
             />
           </label>
         </div>
+
+        <div className="set-targets-board-select-wrapper">
+          <label>
+            Board
+            <select className="set-targets-board-select" onChange={handleSelectChange}>
+              {boards.map((b) => {
+                return <option key={b.SK} id={b.SK} value={b.SK}>{b.Board}</option>
+              })}
+            </select>
+          </label>
+        </div>
+
+
         {loadingTargets ? <PulseLoader
           cssOverride={override}
           size={5}

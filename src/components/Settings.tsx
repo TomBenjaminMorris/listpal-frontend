@@ -11,7 +11,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen }) => {
+const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, handleSidebarCollapse, boards, setBoards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen }) => {
   // console.log("rendering: Settings")
   useEffect(() => {
     document.title = "ListPal | Settings";
@@ -23,7 +23,7 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
         <div className="settings-content-sub-wrapper">
-          {/* <TargetSetter userDetails={userDetails} setUserDetails={setUserDetails} title="Set Targets" /> */}
+          <TargetSetter boards={boards} setBoards={setBoards} title="Set Board Targets" />
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>
       </div>

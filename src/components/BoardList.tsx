@@ -38,7 +38,10 @@ const BoardList = ({ boards, setBoards }) => {
 
   const boardsRendered = boards.map((b) => {
     return (
-      <Link key={b.SK} className="boardLink" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>{`${b.Board} (${b.YScore})`}</Link>
+      <div key={b.SK} className="board-list-item-wrapper">
+        <div className="board-list-item-score">{b.YScore}</div>
+        <Link className="boardLink" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>{b.Board}</Link>
+      </div>
     )
   });
 
