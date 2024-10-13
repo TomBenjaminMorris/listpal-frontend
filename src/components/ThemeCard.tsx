@@ -21,20 +21,19 @@ const ThemeCard = ({ name, setUserDetails, highlight }) => {
   };
 
   return (
-    <div className={`selected-wrapper ${highlight ? "outline" : null}`}>
-      <div
-        className="theme-card-wrapper"
-        onClick={handleChoice}
-        style={{
-          backgroundColor: `var(--${name}-bg)`,
-          color: `var(--${name}-text-colour)`,
-          borderColor: `var(--${name}-accent-2)`
-        }}
-      >
-        <h2 style={{ color: `var(--${name}-accent)` }}>{nameMap[name]}</h2>
-        <div className="theme-card-inner-wrapper" style={{ backgroundColor: `var(--${name}-fg)`, color: `var(--${name}-text-colour)` }}>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris iaculis semper pharetra.</p>
-        </div>
+    <div
+      className="theme-card-wrapper"
+      onClick={handleChoice}
+      style={{
+        backgroundColor: `var(--${name}-bg)`,
+        color: `var(--${name}-text-colour)`,
+        borderColor: `var(--${name}-accent-2)`
+      }}
+    >
+      <div className={`selected-indicator ${highlight ? "selected-indicator-display" : null}`}></div>
+      <h2 style={{ color: `var(--${name}-accent)` }}>{nameMap[name]}</h2>
+      <div className="theme-card-inner-wrapper" style={{ backgroundColor: `var(--${name}-fg)`, color: `var(--${name}-text-colour)` }}>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris iaculis semper pharetra.</p>
       </div>
     </div>
   );
