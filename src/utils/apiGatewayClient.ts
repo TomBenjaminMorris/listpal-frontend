@@ -128,8 +128,8 @@ export const updateTaskDescription = async (taskID, description) => {
   }
 };
 
-export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1SK) => {
-  const body = { taskID, completedDate, expiryDate, GSI1SK }
+export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL) => {
+  const body = { taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL }
   try {
     const ok = await tokenCheck();
     if (ok) {

@@ -22,6 +22,7 @@
 
 .board-list-item-score {
     background-color: var(--background);
+    color: var(--text-colour);
     padding: 6px;
     width: 35px;
     height: 25px;
