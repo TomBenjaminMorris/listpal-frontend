@@ -60,7 +60,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           t.CompletedDate = String(Date.now());
           t["GSI1-SK"] = expiryDate;
           t.ExpiryDate = expiryDate;
-          t.ExpiryDateTTL = Math.trunc(parseInt(expiryDate)/1000);
+          t.ExpiryDateTTL = Math.trunc(parseInt(expiryDate) / 1000);
           setBoards(current => {
             const tmpBoards = current.map(b => {
               if (b.SK == JSON.parse(localStorage.getItem('activeBoard')).SK) {

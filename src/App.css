@@ -138,6 +138,7 @@ button {
 
   .card-container {
     min-width: 0px;
+    flex-basis: 48%;
   }
 
   .deleteTask {
@@ -167,6 +168,5 @@ button {
   .basic-multi-select {
     margin-top: 20px;
     width: 80%;
-
   }
 }

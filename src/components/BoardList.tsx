@@ -41,7 +41,6 @@ const BoardList = ({ boards, setBoards }) => {
       <Link key={b.SK} className="board-list-item-wrapper" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>
         <div className="board-list-item-score">{b.YScore}</div>
         <div className="boardLink" >{b.Board}</div>
-        {/* <Link className="boardLink" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>{b.Board}</Link> */}
       </Link>
     )
   });

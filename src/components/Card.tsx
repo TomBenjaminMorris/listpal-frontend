@@ -146,6 +146,25 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     )
   });
 
+  const newTaskRendered = (
+    <div className="addTaskWrapper" onClick={handleNewTask}>
+      <img className="addTask" src={addIcon} alt="add icon" />
+      {/* <input className="addTask" type="checkbox" name="checkbox" /> */}
+      <div className="addTaskText">new task...</div>
+    </div>
+  )
+
+  const loader = (
+    <PulseLoader
+      cssOverride={override}
+      size={5}
+      color={"var(--text-colour)"}
+      speedMultiplier={1}
+      aria-label="Loading Spinner"
+      data-testid="loader"
+    />
+  )
+
   return (
     <div ref={measuredRef} className="card-container">
       <div className="headingWrapper">
@@ -155,19 +174,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       <hr />
       {tasksRendered}
       <div className="task-container">
-        {loadingTask ? <PulseLoader
-          cssOverride={override}
-          size={5}
-          color={"var(--text-colour)"}
-          speedMultiplier={1}
-          aria-label="Loading Spinner"
-          data-testid="loader"
-        /> :
-          <img
-            className="addTask"
-            onClick={handleNewTask}
-            src={addIcon}
-            alt="add icon" />}
+        {loadingTask ? loader : newTaskRendered}
       </div>
     </div>
   );

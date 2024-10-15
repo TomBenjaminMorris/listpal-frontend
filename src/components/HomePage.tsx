@@ -52,7 +52,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
         <div className="home-page-content-sub-wrapper">
           {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
-          {<h2>{`The total score across your boards this year is...`}</h2>}
+          {<h2>The total score across your boards this year is...</h2>}
           {<h1 className="totalScore" style={{ fontSize: "40px" }}>
             {totalScore && `${emojiList[3]} ${totalScore} ${emojiList[3]}`}
           </h1>}
