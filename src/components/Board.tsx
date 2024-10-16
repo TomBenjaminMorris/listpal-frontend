@@ -68,7 +68,10 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   }
 
   const handleDeleteBoard = async () => {
-    if (!confirm("Delete board?")) {
+    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+    let message = '';
+    ls_currentBoard ? message = `Delete board - ${ls_currentBoard.Board}?` : "Delete board?";
+    if (!confirm(message)) {
       return
     }
     if (!confirm("u sure...?")) {

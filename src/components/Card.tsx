@@ -1,7 +1,7 @@
 import { useReducer, useState, useEffect, CSSProperties, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks } from '../utils/apiGatewayClient';
-import addIcon from "../assets/icons8-add-24-white.png"
+import addIcon from "../assets/icons8-plus-30.png"
 import closeIcon from "../assets/icons8-close-50-white.png"
 import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
@@ -9,7 +9,8 @@ import './Card.css'
 
 const override: CSSProperties = {
   marginLeft: "30px",
-  marginTop: "8px",
+  marginTop: "6px",
+  marginBottom: "19px",
   opacity: "0.8",
 };
 
@@ -173,8 +174,9 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       </div>
       <hr />
       {tasksRendered}
-      <div className="task-container">
-        {loadingTask ? loader : newTaskRendered}
+      <div className="new-task-container">
+        {loadingTask ? loader : null}
+        {newTaskRendered}
       </div>
     </div>
   );

@@ -41,6 +41,7 @@
 .deleteTask img:hover{
     cursor: pointer;
     background-color: var(--accent);
+    border-radius: 3px;
 }
 
 .deleteTask img {
