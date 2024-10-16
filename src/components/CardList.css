@@ -22,6 +22,7 @@
     display: grid;
     align-items: center;
     opacity: 0.7;
+    min-width: 550px;
     flex-grow: 1;
     /* flex-basis: 48%; */
     flex-basis: 30%;

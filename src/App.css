@@ -138,7 +138,8 @@ button {
 
   .card-container {
     min-width: 0px;
-    flex-basis: 48%;
+    flex-basis: 100%;
+    /* flex-basis: 30%; */
   }
 
   .deleteTask {
@@ -169,4 +170,8 @@ button {
     margin-top: 20px;
     width: 80%;
   }
+
+  #addCardButton {
+    min-width: 0px;
+}
 }
