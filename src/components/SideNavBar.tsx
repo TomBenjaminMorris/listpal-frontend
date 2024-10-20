@@ -11,7 +11,7 @@ import logoutIcon from '../assets/icons8-logout-48.png';
 // import statsIcon from '../assets/icons8-graph-48.png';
 import './SideNavBar.css'
 
-const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar }) => {
+const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setIsLoading }) => {
   // console.log("rendering: SideNavBar")
   var idToken = parseJwt(sessionStorage.idToken.toString());
   const navigate = useNavigate();
@@ -21,7 +21,8 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
     return (
       <div key={b.SK} className={`${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
         <Link key={b.SK} to={"/board/" + b.SK} className={`${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link-text" : null}`} onClick={() => {
-          localStorage.setItem('activeBoard', JSON.stringify(b))
+          localStorage.setItem('activeBoard', JSON.stringify(b));
+          setIsLoading(true);
         }}>{b.Board}</Link>
       </div>
     )

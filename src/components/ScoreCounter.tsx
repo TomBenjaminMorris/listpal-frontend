@@ -9,7 +9,6 @@ import './ScoreCounter.css'
 const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   // console.log("rendering: ScoreCounter")
   const [scoreValue, setScoreValue] = useState(score);
-  const [showScore, setShowScore] = useState(false);
   const [animate, setAnimate] = useState(true);
   const [isExploding, setIsExploding] = useState(false);
   const [isTargetMet, setIsTargetMet] = useState(true);
@@ -62,16 +61,10 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
     <img className="star-icon" src={starIcon} alt="star icon" />
   )
 
-  // const scoreRendered = (
-  //   isExploding ? starImg : <input className="score-input" type="number" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
-  // )
-
   return (
     <div className={listClassName} onAnimationEnd={() => setAnimate(false)}>
       {isExploding && !isTargetMet && <ConfettiExplosion zIndex={1000} duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div style={{ width: 50, height: 50 }}
-      // onMouseEnter={isExploding ? () => setShowScore(true) : null}
-      // onMouseLeave={isExploding ? () => setShowScore(false) : null}
       >
         <CircularProgressbarWithChildren value={percent} styles={buildStyles({
           trailColor: 'var(--text-colour)',

@@ -108,6 +108,7 @@ const App = () => {
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
           isLoading={isLoading}
+          setIsLoading={setIsLoading}
           setHideMobileSidebar={setHideMobileSidebar}
           setSidebarIsOpen={setSidebarIsOpen}
           isMobile={isMobile}
