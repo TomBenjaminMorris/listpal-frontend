@@ -84,6 +84,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
             {isExploding ? starImg : null}
           </div>
         </CircularProgressbarWithChildren>
+        <div className="score-type-tooltip">{type}</div>
       </div>
     </div>
   );

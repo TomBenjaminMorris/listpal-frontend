@@ -16,8 +16,41 @@
   font-family: CircularMedium;
 }
 
-.score-input:focus{
+.score-input:focus {
   outline: none;
+}
+
+.score-button:hover .score-type-tooltip {
+  display: block;
+}
+
+.score-type-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  margin-left: 6px;
+  margin-top: 15px;
+  font-size: 16px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--accent);
+  line-height: 30px;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.score-type-tooltip:before {
+  content: "";
+  position: absolute;
+  height: 0px;
+  width: 0px;
+  /* top: 60px; */
+  left: 8px;
+  top: -19px;
+  /* 1px buffer for zooming problems while rendering*/
+  border-width: 10px;
+  border-color: transparent transparent var(--accent) transparent;
+  border-style: solid;
 }
 
 @-webkit-keyframes bulge {
