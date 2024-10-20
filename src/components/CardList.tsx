@@ -4,7 +4,7 @@ import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayC
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards }) => {
+const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards }) => {
   // console.log("rendering: CardList")
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   
@@ -13,12 +13,6 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards }) => {
     const tmp = tmpSortedTasks[title].filter((t) => t.CompletedDate == "nil");
     const isLastUncheckedTask = tmp.length == 1 && tmp[0].SK == taskID;
     if (tmpSortedTasks[title] && isLastUncheckedTask) {
-      // const ok = confirm("Removing the last task will delete the category. Are you sure?");
-      // if (ok) {
-      //   delete tmpSortedTasks[title];
-      // } else {
-      //   return
-      // }
       tmpSortedTasks[title] = tmpSortedTasks[title].map(t => {
         if (t.SK === taskID) {
           if (t.Description != "") {
@@ -72,7 +66,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards }) => {
     forceUpdate();
   }
 
-  const cards = Object.keys(sortedTasks).map(function (key) {
+  const cards = Object.keys(filteredSortedTasks).map(function (key) {
     return <Card
       key={key}
       title={key}

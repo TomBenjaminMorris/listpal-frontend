@@ -19,7 +19,7 @@ const override: CSSProperties = {
 
 const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
   // console.log("rendering: Board")
-  const [localSortedTasks, setLocalSortedTasks] = useState({});
+  const [filteredSortedTasks, setFilteredSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [categories, setCategories] = useState([{ label: null, value: null }]);
   const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
@@ -119,9 +119,9 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   }
 
   const getTasks = async () => {
-    var firstKey = Object.keys(localSortedTasks)[0];
-    const currentBoardID = localSortedTasks[firstKey] && localSortedTasks[firstKey][0]['GSI1-PK'];
-    if (Object.keys(localSortedTasks).length === 0 || currentBoardID !== boardID) {
+    var firstKey = Object.keys(filteredSortedTasks)[0];
+    const currentBoardID = filteredSortedTasks[firstKey] && filteredSortedTasks[firstKey][0]['GSI1-PK'];
+    if (Object.keys(filteredSortedTasks).length === 0 || currentBoardID !== boardID) {
       getActiveTasks(boardID).then((data) => {
         sortTasks(data);
       });
@@ -139,7 +139,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
   useEffect(() => {
     if ((selectedCategories && selectedCategories.length == 0) || selectedCategories == null) {
-      setLocalSortedTasks(sortedTasks)
+      setFilteredSortedTasks(sortedTasks)
     } else {
       const tmpCat = selectedCategories && selectedCategories.map((c) => {
         return c.label
@@ -148,8 +148,9 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
       Object.keys(sortedTasks).forEach((t) => {
         tmpCat && tmpCat.includes(t) ? tmp[t] = sortedTasks[t] : null
       })
-      setLocalSortedTasks(tmp)
+      setFilteredSortedTasks(tmp)
     }
+    // }, [selectedCategories, sortedTasks])
   }, [selectedCategories, sortedTasks])
 
   useEffect(() => {
@@ -280,7 +281,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
-          <CardList sortedTasks={localSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
+          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>
     </>
