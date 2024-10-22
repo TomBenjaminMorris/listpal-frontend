@@ -76,7 +76,7 @@ button {
 
   .header-right {
     margin-right: 15px;
-}
+  }
 
   .logo-text-wrapper {
     margin-right: 0px;
@@ -154,10 +154,6 @@ button {
     font-size: 17px;
   }
 
-  .edit-title-input {
-    /* font-size: 25px; */
-  }
-
   .listpal-board-logo {
     display: none !important;
   }
@@ -171,8 +167,7 @@ button {
   }
 
   .basic-multi-select {
-    /* margin-top: 20px; */
-    /* width: 80%; */
+    width: 95%;
   }
 
   #addCardButton {
@@ -181,6 +176,6 @@ button {
 
   .board-filter-actions-wrapper {
     margin-top: 20px;
-}
-
+    margin-bottom: 10px;
+  }
 }

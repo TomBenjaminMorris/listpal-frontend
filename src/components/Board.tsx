@@ -2,7 +2,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks } from '../utils/apiGatewayClient';
 import deleteIcon from '../assets/icons8-delete-48.png';
-import lineIcon from '../assets/icons8-line-50.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import menuIcon from '../assets/icons8-menu-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
@@ -10,7 +9,6 @@ import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
-import DropdownMenu from "./DropdownMenu";
 import Select, { MultiValue } from "react-select";
 import './Board.css';
 
@@ -24,19 +22,10 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [categories, setCategories] = useState([{ label: null, value: null }]);
   const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
-
-  const handleMouseEnter = () => {
-    setDropdownVisible(true);
-  };
-
-  const handleMouseLeave = () => {
-    setDropdownVisible(false);
-  };
 
   const handleEditBoard = async () => {
     // console.log("TTT triggered: handleEditBoard")
@@ -281,7 +270,6 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
         </div>
         <div className="header-right">
           <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
-          {/* <img className="line-icon" src={lineIcon} />           */}
         </div>
       </div>
 
@@ -296,10 +284,6 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
               <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
             </div>
           </div>
-          {/* <div className="menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} >
-            <button>Dropdown Menu</button>
-            {isDropdownVisible && <DropdownMenu />}
-          </div> */}
           <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>

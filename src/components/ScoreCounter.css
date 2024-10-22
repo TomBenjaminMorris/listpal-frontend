@@ -60,7 +60,7 @@
   }
 
   10% {
-    transform: scale(1.1);
+    transform: scale(1.2);
     color: var(--text-colour);
   }
 
