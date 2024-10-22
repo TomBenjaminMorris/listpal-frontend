@@ -8,7 +8,8 @@ const ScoreBoard = ({ boards, setBoards, boardID }) => {
   const [currentBoard, setCurrentBoard] = useState({ WScore: 0, MScore: 0, YScore: 0, WTarget: 0, MTarget: 0, YTarget: 0 });
 
   useEffect(() => {
-    if (Object.keys(currentBoard).length != 0) {
+    // if (Object.keys(currentBoard).length != 0) {
+      if (currentBoard && Object.keys(currentBoard).length != 0) {
       const percents = calcPercents(currentBoard);
       setPercentValues(percents);
     }

@@ -54,7 +54,7 @@
     display: flex;
     align-items: center;
     margin-left: auto;
-    margin-right: 15px;
+    margin-right: 25px;
     margin-top: 5px;
 }
 
@@ -82,34 +82,6 @@
 
 .back-icon {
     width: 18px;
-}
-
-.edit-icon {
-    width: 28px;
-    height: 28px;
-    padding: 15px;
-    /* margin-right: 20px; */
-    margin-top: -2px;
-}
-
-.edit-icon:hover, .delete-icon:hover, .clear-icon:hover {
-    opacity: 0.5;
-    -webkit-animation-duration: 0.5s;
-    -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial;
-    -webkit-animation-timing-function: ease-in;
-}
-
-.delete-icon {
-    width: 25px;
-    margin-right: 10px;
-    margin-left: 10px;
-}
-
-.clear-icon {
-    width: 27px;
-    margin-right: 10px;
-    margin-left: 6px;
 }
 
 /* .settings-icon {

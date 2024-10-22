@@ -10,6 +10,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
+import DropdownMenu from "./DropdownMenu";
 import Select, { MultiValue } from "react-select";
 import './Board.css';
 
@@ -23,10 +24,19 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [categories, setCategories] = useState([{ label: null, value: null }]);
   const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
+
+  const handleMouseEnter = () => {
+    setDropdownVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    setDropdownVisible(false);
+  };
 
   const handleEditBoard = async () => {
     // console.log("TTT triggered: handleEditBoard")
@@ -135,7 +145,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
     ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board) : null;
     getTasks();
-    setTimeout(() => setIsLoading(false), 500);
+    setTimeout(() => setIsLoading(false), 500); // if the app crashes anytime soon this line might need to be commented out
   }, [boardID])
 
   useEffect(() => {
@@ -271,17 +281,25 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
         </div>
         <div className="header-right">
           <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
-          <img className="line-icon" src={lineIcon} />
-          <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
-          <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
-          <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
+          {/* <img className="line-icon" src={lineIcon} />           */}
         </div>
       </div>
 
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-          <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
+          <div className="board-filter-actions-wrapper">
+            <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
+            <div className="board-actions-wrapper">
+              <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
+              <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
+              <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
+            </div>
+          </div>
+          {/* <div className="menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} >
+            <button>Dropdown Menu</button>
+            {isDropdownVisible && <DropdownMenu />}
+          </div> */}
           <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>
       </div>
