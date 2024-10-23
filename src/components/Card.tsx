@@ -181,7 +181,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         {/* <img className="deleteCategory" onClick={handleDeleteCategory} src={closeIcon} alt="delete icon" /> */}
         <div className="menu" onClick={handleClickMenu}>
           <img className={`card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : null}`} src={dotsIcon} alt="menu icon" />
-          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory}/>}
+          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory} setDropdownVisible={setDropdownVisible}/>}
         </div>
       </div>
       <hr />
