@@ -14,7 +14,8 @@ li {
   gap: 14px;
   padding: 8px 20px 8px 15px;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
 }
 
 li:hover {
@@ -23,20 +24,21 @@ li:hover {
 }
 
 .dropdown-icons{
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .dropdown-menu {
   background-color: var(--background);
-  box-shadow: rgba(33, 33, 33, 0.35) 0px 0px 15px;
+  box-shadow: rgba(54, 54, 54, 0.35) 0px 0px 15px;
+  /* box-shadow: rgba(33, 33, 33, 0.35) 0px 0px 15px; */
   transition: all linear 0.3s;
   position: absolute;
-  margin-left: -162px;
+  margin-left: -242px;
   z-index: 100;
   border-radius: 10px;
-  padding: 10px;
-  /* margin-top: -12px; */
+  padding: 7px;
+  margin-top: -42px;
 }
 
 .rotate {

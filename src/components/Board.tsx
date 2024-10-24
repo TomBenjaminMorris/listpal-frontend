@@ -134,7 +134,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
     ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board) : null;
     getTasks();
-    setTimeout(() => setIsLoading(false), 500); // if the app crashes anytime soon this line might need to be commented out
+    setTimeout(() => setIsLoading(false), 1000); // if the app crashes anytime soon this line might need to be commented out
   }, [boardID])
 
   useEffect(() => {

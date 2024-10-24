@@ -140,10 +140,10 @@ hr {
 
 .card-menu-dots {
     opacity: 0.6;
-    width: 28px;
-    margin-right: 20px;
-    margin-top: 10px;
-    padding: 8px;
+    width: 24px;
+    margin-right: 18px;
+    margin-top: 12px;
+    padding: 6px;
     border-radius: 10px;
     /* border-top-left-radius: 10px;
     border-top-right-radius: 10px; */
@@ -152,6 +152,7 @@ hr {
 .card-menu-dots:hover {
     opacity: 1;
     cursor: pointer;
+    background-color: var(--background);
 }
 
 .card-menu-dots-bg-fill {

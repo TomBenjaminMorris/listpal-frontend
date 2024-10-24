@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, CSSProperties, useCallback } from 'react';
+import { useReducer, useState, useEffect, CSSProperties, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks } from '../utils/apiGatewayClient';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -8,6 +8,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import './Card.css';
 import DropdownMenu from "./DropdownMenu";
+import { useOnClickOutside } from 'usehooks-ts'
 
 
 const override: CSSProperties = {
@@ -174,14 +175,22 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     />
   )
 
+  const ref = useRef(null)
+  
+  const handleClickOutside = () => {
+    setDropdownVisible(false)
+  }
+
+  useOnClickOutside(ref, handleClickOutside)
+
   return (
     <div ref={measuredRef} className="card-container">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} />
         {/* <img className="deleteCategory" onClick={handleDeleteCategory} src={closeIcon} alt="delete icon" /> */}
-        <div className="menu" onClick={handleClickMenu}>
-          <img className={`card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : null}`} src={dotsIcon} alt="menu icon" />
-          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory} setDropdownVisible={setDropdownVisible}/>}
+        <div className="menu" onClick={handleClickMenu} ref={ref}>
+          <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : null}`} src={dotsIcon} alt="menu icon" />
+          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory}/>}
         </div>
       </div>
       <hr />
