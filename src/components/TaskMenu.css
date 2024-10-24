@@ -1,0 +1,55 @@
+.task-dropdown-menu {
+  background-color: var(--background);
+  box-shadow: rgba(54, 54, 54, 0.35) 0px 0px 15px;
+  transition: all linear 0.3s;
+  position: absolute;
+  z-index: 100;
+  border-radius: 10px;
+  padding: 8px;
+  margin-left: -205px;
+  margin-top: -30px;
+}
+
+.task-dropdown-icons{
+  width: 16px;
+  height: 16px;
+}
+
+.task-dropdown-li{
+  padding: 5px;
+  padding-right: 14px;
+  padding-left: 10px;
+  gap: 10px;
+}
+
+.taskMenu {
+  display: none;
+  margin-left: 8px;
+  height: 0px;
+}
+
+.taskMenu img:hover{
+  cursor: pointer;
+  /* background-color: var(--background); */
+  /* border-radius: 3px; */
+}
+
+.taskMenu img {
+  width: 15px;
+  padding: 1px;
+}
+
+.task-container:hover .taskMenu {
+  display: block;
+}
+
+.menu-background-display .task-three-dots-vertical {
+  /* border-radius: 3px; */
+  /* background-color: var(--background) !important; */
+  background-color: var(--background) !important;
+  opacity: 1;
+}
+
+.menu-background-display {
+  display: block !important;
+}

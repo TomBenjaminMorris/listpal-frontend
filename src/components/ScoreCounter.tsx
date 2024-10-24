@@ -66,7 +66,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
       {isExploding && !isTargetMet && <ConfettiExplosion zIndex={1000} duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div style={{ width: 50, height: 50 }}
       >
-        <CircularProgressbarWithChildren value={percent} styles={buildStyles({
+        {(percent || percent >= 0) && <CircularProgressbarWithChildren value={percent} styles={buildStyles({
           trailColor: 'var(--text-colour)',
           textColor: 'var(--text-colour)',
           pathColor: `${isExploding ? "var(--accent-2)" : "var(--accent)"}`,
@@ -76,7 +76,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
             <input className="score-input" type="text" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
             {isExploding ? starImg : null}
           </div>
-        </CircularProgressbarWithChildren>
+        </CircularProgressbarWithChildren>}
         <div className="score-type-tooltip">{type}</div>
       </div>
     </div>

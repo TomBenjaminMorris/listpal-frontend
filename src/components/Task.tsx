@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { updateBoardScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask } from '../utils/apiGatewayClient';
 import { v4 as uuidv4 } from 'uuid';
-import binIcon from "../assets/icons8-close-50-white.png"
-import importantIcon from "../assets/icons8-important-30-white.png"
+import menuIcon from "../assets/icons8-dots-50.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import './Task.css'
+import TaskMenu from './TaskMenu';
+import { useOnClickOutside } from 'usehooks-ts'
 
 const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards }) => {
   // console.log("rendering: Task")
@@ -12,6 +13,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [timer, setTimer] = useState(null);
   const [display, setDisplay] = useState(true);
+  const [taskMenuVisible, setTaskMenuVisible] = useState(false);
 
   useEffect(() => {
     setDescription(task.Description);
@@ -120,6 +122,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       return
     }
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
+    setTaskMenuVisible(false);
   }
 
   const handleMarkAsImportant = (taskID) => {
@@ -135,6 +138,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     updateTaskImportance(taskID, isImportant).then(() => {
       setSortedTasks(tmpSortedTasks);
     })
+    setTaskMenuVisible(false);
   }
 
   const onKeyDown = (e, taskID, title) => {
@@ -163,6 +167,18 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     }
   }
 
+  const handleClickMenu = () => {
+    setTaskMenuVisible(current => !current);
+  };
+
+  const ref = useRef(null)
+  
+  const handleClickOutside = () => {
+    setTaskMenuVisible(false)
+  }
+  
+  useOnClickOutside(ref, handleClickOutside)
+
   return (
     <div className="task-container" style={display ? null : { display: "none" }}>
       <input
@@ -173,7 +189,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         onChange={handleCheckBox}
       />
       <TextareaAutosize
-        className={`task-textarea-box ${task.Important == "true" ? "highlight" : null}`}
+        className={`task-textarea-box ${task.Important == "true" ? "highlight" : null} ${taskMenuVisible ? "highlight-2" : null}`}
         value={description}
         disabled={checked}
         placeholder='new task...'
@@ -182,17 +198,13 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         onKeyDown={(e) => onKeyDown(e, task.SK, title)}
         style={checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null}
       />
-      <div className="deleteTask">
+      <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : null}`} ref={ref}>
         <img
-          src={importantIcon}
-          alt="important icon"
-          onClick={() => handleMarkAsImportant(task.SK)} />
-      </div>
-      <div className="deleteTask" >
-        <img
-          src={binIcon}
-          alt="delete icon"
-          onClick={() => handleDeleteAndHideTask(task.SK, title, false)} />
+          className="task-three-dots-vertical"
+          src={menuIcon}
+          alt="menu icon"
+          onClick={handleClickMenu} />
+      {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title, false)} isImportant={task.Important == "true"} />}
       </div>
     </div>
   );

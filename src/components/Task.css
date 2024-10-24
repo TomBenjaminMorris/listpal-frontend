@@ -2,6 +2,8 @@
     display: flex;
     padding: 5px;
     padding-left: 20px;
+    /* align-items: center; */
+    /* gap: 5px; */
 }
 
 .task-container:hover textarea{
@@ -16,9 +18,9 @@
     background-color: var(--foreground);
     border: none;
     border-radius: 5px;
-    width: -webkit-calc(100% - 85px);
-    width: -moz-calc(100% - 85px);
-    width: calc(100% - 85px);
+    width: -webkit-calc(100% - 75px);
+    width: -moz-calc(100% - 75px);
+    width: calc(100% - 75px);
     resize: none;
     margin-left: 12px;
     margin-top: -5px;
@@ -27,6 +29,10 @@
 
 .highlight {
     background-color: var(--accent-2);
+}
+
+.highlight-2 {
+    
 }
 
 .task-textarea-box:focus {
@@ -52,6 +58,20 @@
 .task-container:hover .deleteTask {
     display: block;
 }
+
+.task-three-dots-vertical{
+    /* background-color: var(--background) !important; */
+    border-radius: 20px;
+    padding: 4px !important;
+    margin-top: -2px;
+    opacity: 0.6;
+}
+
+.task-three-dots-vertical:hover{
+    background-color: var(--background) !important;
+    opacity: 1;
+}
+
 
 :root {
     --form-control-color: rgb(255, 255, 255);
