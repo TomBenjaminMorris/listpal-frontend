@@ -11,9 +11,10 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
-  const [timer, setTimer] = useState(null);
+  // const [timer, setTimer] = useState(null);
   const [display, setDisplay] = useState(true);
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
+  const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
 
   useEffect(() => {
     setDescription(task.Description);
@@ -25,14 +26,15 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   }
 
   const handleTextUpdate = e => {
+    setDescriptionHasChanged(true);
     setDescription(e.target.value);
-    clearTimeout(timer);
-    const newTimer = setTimeout(() => {
-      updateTaskDescription(task.SK, e.target.value).then(() => {
-        updateActiveTaskDescription(e.target.value)
-      });
-    }, 2000);
-    setTimer(newTimer);
+    // clearTimeout(timer);
+    // const newTimer = setTimeout(() => {
+    //   updateTaskDescription(task.SK, e.target.value).then(() => {
+    //     updateActiveTaskDescription(e.target.value)
+    //   });
+    // }, 2000);
+    // setTimer(newTimer);
   }
 
   const updateActiveTaskDescription = (value) => {
@@ -143,7 +145,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
 
   const onKeyDown = (e, taskID, title) => {
     if (e.keyCode === 8 && e.target.value === "") {
-      clearTimeout(timer);
+      // clearTimeout(timer);
       handleDeleteAndHideTask(taskID, title, true)
     } else if (e.keyCode === 13) {
       e.preventDefault()
@@ -171,13 +173,24 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     setTaskMenuVisible(current => !current);
   };
 
-  const ref = useRef(null)
-  
+  const taskMenuRef = useRef(null)
   const handleClickOutside = () => {
-    setTaskMenuVisible(false)
+    if (taskMenuVisible) {
+      setTaskMenuVisible(false)
+    }
   }
-  
-  useOnClickOutside(ref, handleClickOutside)
+  useOnClickOutside(taskMenuRef, handleClickOutside)
+
+  const descriptionRef = useRef(null)
+  const handleClickOutsideDescription = () => {
+    if (descriptionHasChanged) {
+      updateTaskDescription(task.SK, description).then(() => {
+        updateActiveTaskDescription(description)
+      });
+      setDescriptionHasChanged(false)
+    }
+  }
+  useOnClickOutside(descriptionRef, handleClickOutsideDescription)
 
   return (
     <div className="task-container" style={display ? null : { display: "none" }}>
@@ -197,14 +210,15 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         autoFocus={description === "" ? true : false}
         onKeyDown={(e) => onKeyDown(e, task.SK, title)}
         style={checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null}
+        ref={descriptionRef}
       />
-      <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : null}`} ref={ref}>
+      <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : null}`} ref={taskMenuRef}>
         <img
           className="task-three-dots-vertical"
           src={menuIcon}
           alt="menu icon"
           onClick={handleClickMenu} />
-      {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title, false)} isImportant={task.Important == "true"} />}
+        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title, false)} isImportant={task.Important == "true"} />}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
+import { useOnClickOutside } from 'usehooks-ts'
 import ConfettiExplosion from 'react-confetti-explosion';
 import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
@@ -12,7 +13,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   const [animate, setAnimate] = useState(true);
   const [isExploding, setIsExploding] = useState(false);
   const [isTargetMet, setIsTargetMet] = useState(true);
-  const [timer, setTimer] = useState(null);
+  const [scoreHasChanged, setScoreHasChanged] = useState(false);
 
   const listClassName = `score-button ${animate ? "bulge-now" : ""}`
   const vw = window.innerWidth * 1;
@@ -24,24 +25,8 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   }
 
   const handleScoreUpdate = e => {
+    setScoreHasChanged(true)
     setScoreValue(e.target.value);
-    clearTimeout(timer);
-    const newTimer = setTimeout(() => {
-      const tmpBoardDetails = { ...currentBoard };
-      tmpBoardDetails[typeToUserDetailMap[type]] = e.target.value;
-      updateBoardScoresAPI(currentBoard.SK, { YScore: tmpBoardDetails["YScore"], MScore: tmpBoardDetails["MScore"], WScore: tmpBoardDetails["WScore"] }).then(() => {
-        setBoards(current => {
-          return current.map((c) => {
-            if (c.SK === currentBoard.SK) {
-              return tmpBoardDetails
-            } else {
-              return c
-            }
-          });
-        });
-      })
-    }, 500);
-    setTimer(newTimer);
   }
 
   useEffect(() => {
@@ -57,12 +42,33 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
     }
   }, [percent, score])
 
+  const scoreRef = useRef(null)
+  const handleClickOutsideDescription = () => {
+    if (scoreHasChanged) {
+      const tmpBoardDetails = { ...currentBoard };
+      tmpBoardDetails[typeToUserDetailMap[type]] = scoreValue;
+      updateBoardScoresAPI(currentBoard.SK, { YScore: tmpBoardDetails["YScore"], MScore: tmpBoardDetails["MScore"], WScore: tmpBoardDetails["WScore"] }).then(() => {
+        setBoards(current => {
+          return current.map((c) => {
+            if (c.SK === currentBoard.SK) {
+              return tmpBoardDetails
+            } else {
+              return c
+            }
+          });
+        });
+      })
+      setScoreHasChanged(false)
+    }
+  }
+  useOnClickOutside(scoreRef, handleClickOutsideDescription)
+
   const starImg = (
     <img className="star-icon" src={starIcon} alt="star icon" />
   )
 
   return (
-    <div className={listClassName} onAnimationEnd={() => setAnimate(false)}>
+    <div className={listClassName} onAnimationEnd={() => setAnimate(false)} ref={scoreRef}>
       {isExploding && !isTargetMet && <ConfettiExplosion zIndex={1000} duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
       <div style={{ width: 50, height: 50 }}
       >
