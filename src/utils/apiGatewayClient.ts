@@ -128,8 +128,8 @@ export const updateTaskDescription = async (taskID, description) => {
   }
 };
 
-export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL) => {
-  const body = { taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL }
+export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL, link) => {
+  const body = { taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL, link }
   try {
     const ok = await tokenCheck();
     if (ok) {
@@ -147,8 +147,8 @@ export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1S
   }
 };
 
-export const newTask = async (taskID, createdDate, completedDate, expiryDate, boardID, description, category) => {
-  const body = { taskID, createdDate, completedDate, expiryDate, boardID, description, category }
+export const newTask = async (taskID, createdDate, completedDate, expiryDate, boardID, description, category, link) => {
+  const body = { taskID, createdDate, completedDate, expiryDate, boardID, description, category, link }
   try {
     const ok = await tokenCheck();
     if (ok) {

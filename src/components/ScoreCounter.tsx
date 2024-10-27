@@ -25,8 +25,8 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   }
 
   const handleScoreUpdate = e => {
-    setScoreHasChanged(true)
     setScoreValue(e.target.value);
+    setScoreHasChanged(true)
   }
 
   useEffect(() => {
@@ -44,6 +44,14 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
 
   const scoreRef = useRef(null)
   const handleClickOutsideDescription = () => {
+    if (scoreValue < 0 ){
+      alert("Score can't be less than 0");
+      return
+    }
+    if (scoreValue === "" ){
+      alert("Score can't be empty");
+      return
+    }
     if (scoreHasChanged) {
       const tmpBoardDetails = { ...currentBoard };
       tmpBoardDetails[typeToUserDetailMap[type]] = scoreValue;

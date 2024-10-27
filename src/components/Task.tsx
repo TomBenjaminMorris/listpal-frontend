@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { updateBoardScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask } from '../utils/apiGatewayClient';
 import { v4 as uuidv4 } from 'uuid';
+import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import './Task.css'
@@ -95,7 +96,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             return tmpBoards;
           })
         }
-        updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL)
+        updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "")
       }
       return t;
     })
@@ -114,7 +115,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     }
     if (isLastUncheckedTask) {
       tmpSortedTasks[title].push(newCardDefaultTask);
-      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category);
+      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "");
     }
     setSortedTasks(tmpSortedTasks);
   }
@@ -201,6 +202,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         checked={checked}
         onChange={handleCheckBox}
       />
+
       <TextareaAutosize
         className={`task-textarea-box ${task.Important == "true" ? "highlight" : null} ${taskMenuVisible ? "highlight-2" : null}`}
         value={description}
@@ -212,13 +214,19 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
         style={checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null}
         ref={descriptionRef}
       />
+
+      {/* Link Icon */}
+      {task.Link != undefined ? <a href={task.Link} target="_blank" rel="noreferrer"><img className="task-dropdown-icons task-three-dots-vertical" src={linkIcon} alt="follow link icon" /></a>
+        : <img className="task-dropdown-icons task-three-dots-vertical no-background" src={linkIcon} alt="follow link icon" style={{ opacity: '0.08' }} />}
+
+      {/* Menu Icon */}
       <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : null}`} ref={taskMenuRef}>
         <img
           className="task-three-dots-vertical"
           src={menuIcon}
           alt="menu icon"
           onClick={handleClickMenu} />
-        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title, false)} isImportant={task.Important == "true"} />}
+        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title, false)} isImportant={task.Important == "true"} task={task} setSortedTasks={setSortedTasks} sortedTasks={sortedTasks} />}
       </div>
     </div>
   );

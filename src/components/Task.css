@@ -6,8 +6,15 @@
     /* gap: 5px; */
 }
 
-.task-container:hover textarea{
+/* .task-container:hover input[type="checkbox"]{
     opacity: 0.6;
+    background-color: var(--accent-2);
+    border-color: var(--text-colour);
+} */
+
+.task-container:hover textarea{
+    /* opacity: 0.6; */
+    background-color: var(--background);
 }
 
 .task-textarea-box {
@@ -18,9 +25,9 @@
     background-color: var(--foreground);
     border: none;
     border-radius: 5px;
-    width: -webkit-calc(100% - 75px);
-    width: -moz-calc(100% - 75px);
-    width: calc(100% - 75px);
+    width: -webkit-calc(100% - 92px);
+    width: -moz-calc(100% - 92px);
+    width: calc(100% - 92px);
     resize: none;
     margin-left: 12px;
     margin-top: -5px;
@@ -33,6 +40,10 @@
 
 .highlight-2 {
     
+}
+
+.no-background:hover {
+    background-color: transparent !important;
 }
 
 .task-textarea-box:focus {
@@ -62,13 +73,16 @@
 .task-three-dots-vertical{
     /* background-color: var(--background) !important; */
     border-radius: 20px;
-    padding: 4px !important;
+    padding: 3px !important;
     margin-top: -2px;
-    opacity: 0.6;
+    opacity: 0.8;
+    margin-left: 6px;
+    margin-right: -8px;
 }
 
 .task-three-dots-vertical:hover{
-    background-color: var(--background) !important;
+    /* background-color: var(--background) !important; */
+    background-color: var(--accent);
     opacity: 1;
 }
 
@@ -129,5 +143,6 @@ input[type="checkbox"]:disabled {
 }
 
 input[type="checkbox"]:hover {
-    background-color: var(--accent);
+    background-color: var(--accent) !important;
+    opacity: 1 !important;
 }
