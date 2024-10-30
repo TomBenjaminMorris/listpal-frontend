@@ -12,8 +12,8 @@ li {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 8px 20px 8px 15px;
-  border-radius: 10px;
+  padding: 7px 20px 7px 15px;
+  /* border-radius: 10px; */
   font-size: 15px;
   letter-spacing: 0.3px;
 }
@@ -31,13 +31,15 @@ li:hover {
 .dropdown-menu {
   background-color: var(--background);
   box-shadow: rgba(54, 54, 54, 0.35) 0px 0px 15px;
+  border: solid 3px var(--accent-2);
+
   /* box-shadow: rgba(33, 33, 33, 0.35) 0px 0px 15px; */
   transition: all linear 0.3s;
   position: absolute;
-  margin-left: -242px;
+  margin-left: -235px;
   z-index: 100;
   border-radius: 10px;
-  padding: 7px;
+  padding: 8px 0px 8px 0px;
   margin-top: -42px;
 }
 

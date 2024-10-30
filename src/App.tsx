@@ -94,7 +94,8 @@ const App = () => {
           isMobile={isMobile}
           hideMobileSidebar={hideMobileSidebar}
           setHideMobileSidebar={setHideMobileSidebar}
-          setSidebarIsOpen={setSidebarIsOpen} /> : <Navigate replace to="/login" />} />
+          setSidebarIsOpen={setSidebarIsOpen}
+          setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
 
         {/* BOARD */}
         <Route path="/board/*" element={isAuthenticated() ? <Board
@@ -129,7 +130,8 @@ const App = () => {
           setHideMobileSidebar={setHideMobileSidebar}
           setSidebarIsOpen={setSidebarIsOpen}
           isMobile={isMobile}
-          hideMobileSidebar={hideMobileSidebar} /> : <Navigate replace to="/login" />} />
+          hideMobileSidebar={hideMobileSidebar}
+          setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

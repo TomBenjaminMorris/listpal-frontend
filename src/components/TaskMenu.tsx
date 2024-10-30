@@ -1,6 +1,5 @@
 import importantIcon from '../assets/icons8-important-30-white.png';
 import deleteIcon from '../assets/icons8-delete-48.png';
-import linkIcon from '../assets/icons8-link-64.png';
 import plusIcon from '../assets/icons8-plus-30.png';
 import editIcon from '../assets/icons8-edit-48.png';
 import { updateTaskDetails } from '../utils/apiGatewayClient';
@@ -41,12 +40,6 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
 
   const withLink = (
     <>
-      {/* <a href={task.Link} target="_blank" rel="noreferrer">
-        <li className="task-dropdown-li">
-          <img className="task-dropdown-icons" src={linkIcon} alt="down icon" />
-          Follow Link
-        </li>
-      </a> */}
       <li className="task-dropdown-li" onClick={handleAddLink}>
         <img className="task-dropdown-icons" src={editIcon} alt="down icon" />
         Edit Link
@@ -62,8 +55,9 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
       </li>
     </>
   )
+  
   return (
-    <div className="task-dropdown-menu" style={isImportant ? { marginLeft: "-218px" } : null}>
+    <div className="task-dropdown-menu fadeIn-animation" style={isImportant ? { marginLeft: "-220px" } : null}>
       <ul>
         <li className="task-dropdown-li" onClick={markAsImportant}>
           <img className="task-dropdown-icons" src={importantIcon} alt="up icon" />

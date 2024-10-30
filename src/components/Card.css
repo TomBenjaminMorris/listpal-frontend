@@ -145,6 +145,7 @@ hr {
     margin-top: 12px;
     padding: 6px;
     border-radius: 10px;
+
     /* border-top-left-radius: 10px;
     border-top-right-radius: 10px; */
 }
@@ -158,4 +159,6 @@ hr {
 .card-menu-dots-bg-fill {
     background-color: var(--background);
     opacity: 1;
+    border: solid 3px var(--accent-2);
+    padding: 3px !important;
 }

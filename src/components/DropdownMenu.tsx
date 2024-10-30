@@ -6,7 +6,7 @@ const DropdownMenu = ({handleDeleteCategory}) => {
 
   
   return (
-    <div className="dropdown-menu">
+    <div className="dropdown-menu fadeIn-animation">
       <ul>
         <li onClick={() => alert("move up")}>
           <img className="dropdown-icons rotate-back" src={moveIcon} alt="up icon"/>

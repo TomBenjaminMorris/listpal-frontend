@@ -81,7 +81,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards 
   return (
     <div className="card-list-container">
       {cards}
-      <div id="addCardButton" onClick={handleNewCard}>+</div>
+      <div id="addCardButton" className="fadeUp-animation" onClick={handleNewCard}>+</div>
     </div>
   );
 };

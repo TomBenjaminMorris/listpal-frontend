@@ -15,6 +15,7 @@
 .task-container:hover textarea{
     /* opacity: 0.6; */
     background-color: var(--background);
+    transition-duration: 500ms;
 }
 
 .task-textarea-box {
@@ -22,7 +23,7 @@
     line-height: 25px;
     letter-spacing: 0.1px;
     color: var(--text-colour);
-    background-color: var(--foreground);
+    background-color: transparent;
     border: none;
     border-radius: 5px;
     width: -webkit-calc(100% - 92px);
@@ -31,11 +32,13 @@
     resize: none;
     margin-left: 12px;
     margin-top: -5px;
-    font-family: CircularMedium;
+    font-family: CircularMedium;    
 }
 
 .highlight {
     background-color: var(--accent-2);
+    /* transition-duration: 500ms; */
+    /* color: var(--accent); */
 }
 
 .highlight-2 {
@@ -82,7 +85,7 @@
 
 .task-three-dots-vertical:hover{
     /* background-color: var(--background) !important; */
-    background-color: var(--accent);
+    background-color: var(--accent-2);
     opacity: 1;
 }
 

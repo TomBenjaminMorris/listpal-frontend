@@ -26,10 +26,11 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
-
+  
   const handleEditBoard = async () => {
     // console.log("TTT triggered: handleEditBoard")
-    const boardName = prompt("Enter new name")
+    let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+    const boardName = prompt("Enter new name", ls_currentBoard && ls_currentBoard.Board)
     if (boardName == "") {
       alert("Board name can't be empty");
       return;
@@ -275,14 +276,18 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
+        
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           <div className="board-filter-actions-wrapper">
+            
             <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
+
             <div className="board-actions-wrapper">
               <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
               <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
               <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
             </div>
+        
           </div>
           <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>

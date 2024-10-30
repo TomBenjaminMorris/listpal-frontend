@@ -11,7 +11,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, handleSidebarCollapse, boards, setBoards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen }) => {
+const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, handleSidebarCollapse, boards, setBoards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading }) => {
   // console.log("rendering: Settings")
   useEffect(() => {
     document.title = "ListPal | Settings";
@@ -21,8 +21,8 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
     <>
       <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} />
-        <div className="settings-content-sub-wrapper">
+        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
+        <div className="settings-content-sub-wrapper fadeUp-animation">
           <TargetSetter boards={boards} setBoards={setBoards} title="Set Board Targets" />
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>
@@ -30,7 +30,7 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
     </>
   )
 
-  const loader = (
+  const loader = ( 
     <div className="loadingWrapper">
       <PulseLoader
         cssOverride={override}

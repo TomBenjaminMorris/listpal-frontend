@@ -188,7 +188,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   useOnClickOutside(cardTitleRef, handleClickOutsideTitle)
 
   return (
-    <div ref={measuredRef} className="card-container">
+    <div ref={measuredRef} className="card-container fadeUp-animation">
       <div className="headingWrapper">
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} ref={cardTitleRef} />
         {/* <img className="deleteCategory" onClick={handleDeleteCategory} src={closeIcon} alt="delete icon" /> */}

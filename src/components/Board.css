@@ -48,30 +48,40 @@
     justify-content: center;
     align-items: center;
     gap: 25px;
+    background-color: var(--foreground);
+    padding: 10px 15px 10px 15px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .edit-icon {
     width: 28px;
     height: 28px;
     margin-top: -2px;
-    opacity: 0.7;
+    transition-duration: 100ms;
+    /* opacity: 0.7; */
 }
 
 .edit-icon:hover, .delete-icon:hover, .clear-icon:hover {
-    opacity: 1;
-    -webkit-animation-duration: 0.5s;
-    -webkit-animation-name: bulge;
+    /* opacity: 1; */
+    /* -webkit-animation-name: bulge; */
+    /* -webkit-animation-duration: 1s;
     -webkit-animation-iteration-count: initial;
-    -webkit-animation-timing-function: ease-in;
+    -webkit-animation-timing-function: ease-in; */
+    cursor: pointer;
+    transform: scale(1.2);
+    transition-duration: 100ms;
 }
 
 .delete-icon {
-    opacity: 0.7;
+    /* opacity: 0.7; */
+    transition-duration: 100ms;
     width: 25px;
 }
 
 .clear-icon {
-    opacity: 0.7;
+    /* opacity: 0.7; */
     width: 27px;
+    transition-duration: 100ms;
     margin-left: -2px;
 }
