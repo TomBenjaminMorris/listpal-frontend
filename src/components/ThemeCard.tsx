@@ -14,6 +14,7 @@ const ThemeCard = ({ name, setUserDetails, highlight }) => {
     setUserDetails(current => {
       let tmpUserDetails = { ...current };
       tmpUserDetails.Theme = name;
+      localStorage.setItem('userDetails', JSON.stringify(tmpUserDetails));
       return tmpUserDetails
     });
     updateThemeAPI(name).then(() => {

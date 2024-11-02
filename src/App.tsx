@@ -30,7 +30,9 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
+    const ls_userDetails = JSON.parse(localStorage.getItem('userDetails'))
+    const theme = ls_userDetails ? ls_userDetails.Theme : userDetails.Theme ? userDetails.Theme : 'purple-haze';
+    // const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
     document.documentElement.style.setProperty("--background", `var(--${theme}-bg)`);
     document.documentElement.style.setProperty("--foreground", `var(--${theme}-fg)`);
     document.documentElement.style.setProperty("--text-colour", `var(--${theme}-text-colour)`);
@@ -40,11 +42,13 @@ const App = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    getUser().then((u) => {
+    isAuthenticated() && getUser().then((u) => {
       getBoards().then((b) => {
         setUserDetails(u[0]);
         setBoards(b);
         setIsLoading(false);
+        const ls_userDetails = JSON.parse(localStorage.getItem('userDetails'))
+        ls_userDetails ? null : localStorage.setItem('userDetails', JSON.stringify(u[0]));
       });
     })
   }, [])

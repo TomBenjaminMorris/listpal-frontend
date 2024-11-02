@@ -13,6 +13,7 @@
 * https://www.npmjs.com/package/react-confetti-explosion
 * https://stackoverflow.com/questions/68175873/detect-element-reference-height-change
 * https://react-select.com/home#fixed-options
+* https://www.npmjs.com/package/react-gauge-chart
 
 ### Git
 * https://stackoverflow.com/questions/23546865/how-to-configure-command-line-git-to-use-ssh-key

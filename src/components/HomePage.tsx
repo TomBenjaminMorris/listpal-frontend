@@ -6,6 +6,8 @@ import BoardList from './BoardList';
 import Header from './Header';
 import './HomePage.css'
 import SideNavBar from './SideNavBar';
+import GaugeChart from 'react-gauge-chart'
+
 
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 // const emoji = emojiList[Math.floor(Math.random() * 4)];
@@ -31,6 +33,7 @@ const override: CSSProperties = {
 const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading }) => {
   // console.log("rendering: HomePage")
   const [totalScore, setTotalScore] = useState(0);
+  const [totalTargets, setTotalTargets] = useState(0);
   var idToken = parseJwt(sessionStorage.idToken.toString());
 
   useEffect(() => {
@@ -43,7 +46,18 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
       score += Number(element.YScore)
     });
     setTotalScore(score)
+
+    let targets = 0
+    boards && boards.forEach(element => {
+      targets += Number(element.YTarget)
+    });
+    setTotalTargets(targets)
   }, [boards])
+
+  const chartStyle = {
+    width: 300,
+    margin: "auto"
+  }
 
   const content = (
     <>
@@ -54,8 +68,23 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
           {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
           {<h2>The total score across your boards this year is...</h2>}
           {<h1 className="totalScore" style={{ fontSize: "40px" }}>
-            {totalScore && `${emojiList[3]} ${totalScore} ${emojiList[3]}`}
+            {totalScore && `${emojiList[3]} ${totalScore} / ${totalTargets} ${emojiList[3]}`}
           </h1>}
+          {totalScore && <GaugeChart id="gauge-chart"
+            animate={false}
+            arcPadding={0.03}
+            cornerRadius={3} 
+            style={chartStyle}
+            percent={totalScore / totalTargets}
+            hideText={true}
+            textColor="var(--accent)"
+            needleColor="var(--accent)"
+            needleBaseColor	="var(--accent)"
+            needleScale={0.6}
+            nrOfLevels={4}
+            colors={['#FFFE']}
+            arcWidth={0.15}
+          />}
           <div className="homePageContent">
             <BoardList boards={boards} setBoards={setBoards} />
           </div>
@@ -63,6 +92,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
       </div>
     </>
   )
+  
 
   const loader = (
     <div className="loadingWrapper">

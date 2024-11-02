@@ -9,10 +9,11 @@
 }
 
 .login-buttons:hover {
-    background-color: var(--accent);
-    -webkit-animation-duration: 1s;
+    /* background-color: var(--accent-2); */
+    /* -webkit-animation-duration: 1s;
     -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial;
+    -webkit-animation-iteration-count: initial; */
+    transform: scale(1.05);
 }
 
 .login-buttons:focus {

@@ -66,6 +66,7 @@ export const getActiveTasks = async (boardID) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to get tasks, please refresh the page.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -84,6 +85,7 @@ export const getBoards = async () => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to get boards, please refresh the page.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -102,6 +104,7 @@ export const getUser = async () => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to get user details, please refresh the page.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -123,6 +126,7 @@ export const updateTaskDescription = async (taskID, description) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to update the description, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -142,6 +146,7 @@ export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1S
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to update the task details, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -161,6 +166,7 @@ export const newTask = async (taskID, createdDate, completedDate, expiryDate, bo
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to create a new task, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -180,6 +186,7 @@ export const deleteTask = async (taskID) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to delete the task, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -205,6 +212,7 @@ export const renameCatagoryAPI = async (taskIDs, category) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to rename the category, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -262,6 +270,7 @@ export const updateThemeAPI = async (theme) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to update the theme, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -281,6 +290,7 @@ export const newBoardAPI = async (boardID, boardName) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to create a new board, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -300,6 +310,7 @@ export const renameBoardAPI = async (boardID, name) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to rename the board, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -319,6 +330,7 @@ export const deleteBoard = async (boardID) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to delete the board, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -338,6 +350,7 @@ export const updateTaskImportance = async (taskID, isImportant) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to update the task, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -357,6 +370,7 @@ export const updateBoardScoresAPI = async (boardID, scores) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to update the score, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
@@ -376,6 +390,7 @@ export const updateBoardTargetsAPI = async (boardID, targets) => {
       console.log("TTTT request was not attempted as token refresh was not successful");
     }
   } catch (err) {
+    alert("Failed to update the targets, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }
