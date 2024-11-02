@@ -159,6 +159,6 @@ hr {
 .card-menu-dots-bg-fill {
     background-color: var(--background);
     opacity: 1;
-    border: solid 3px var(--accent-2);
+    border: solid 2px var(--accent-2);
     padding: 3px !important;
 }

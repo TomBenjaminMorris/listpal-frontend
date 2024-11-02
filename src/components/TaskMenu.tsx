@@ -13,16 +13,16 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
     if (enteredLink === null) {
       return;
     }
-    if (!enteredLink || enteredLink == "") {
-      alert("Name can't be empty");
-      return;
-    }
-    if (!isUrlValid(enteredLink)) {
+    // if (!enteredLink || enteredLink == "") {
+    //   alert("Name can't be empty");
+    //   return;
+    // }
+    if (!isUrlValid(enteredLink) && enteredLink != "") {
       alert("URL is not valid")
       return
     }
 
-    if (!enteredLink.startsWith("https://")) {
+    if (!enteredLink.startsWith("https://")  && enteredLink != "") {
       enteredLink = "https://".concat(enteredLink)
     }
 
@@ -63,7 +63,7 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
           <img className="task-dropdown-icons" src={importantIcon} alt="up icon" />
           {`${isImportant ? "Unmark" : "Mark"} as Important`}
         </li>
-        {task.Link === undefined ? withoutLink : withLink}
+        {task.Link === undefined || task.Link === "" ? withoutLink : withLink}
         <li className="task-dropdown-li" onClick={deleteAndHideTask}>
           <img className="task-dropdown-icons" src={deleteIcon} alt="down icon" />
           Delete Task

@@ -216,7 +216,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       />
 
       {/* Link Icon */}
-      {task.Link != undefined ? <a href={task.Link} target="_blank" rel="noreferrer"><img className="task-dropdown-icons task-three-dots-vertical" src={linkIcon} alt="follow link icon" /></a>
+      {task.Link != undefined && task.Link !== "" ? <a href={task.Link} target="_blank" rel="noreferrer"><img className="task-dropdown-icons task-three-dots-vertical" src={linkIcon} alt="follow link icon" /></a>
         : <img className="task-dropdown-icons task-three-dots-vertical no-background" src={linkIcon} alt="follow link icon" style={{ opacity: '0.08' }} />}
 
       {/* Menu Icon */}

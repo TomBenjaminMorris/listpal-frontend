@@ -1,6 +1,6 @@
 .task-dropdown-menu {
   background-color: var(--background);
-  border: solid 3px var(--accent-2);
+  border: solid 2px var(--accent-2);
   box-shadow: rgba(54, 54, 54, 0.35) 0px 0px 15px;
   transition: all linear 0.3s;
   position: absolute;
@@ -51,7 +51,7 @@
   /* background-color: var(--background) !important; */
   background-color: var(--background) !important;
   opacity: 1;
-  border: solid 3px var(--accent-2);
+  border: solid 2px var(--accent-2);
   padding: 0px !important;
 }
 
