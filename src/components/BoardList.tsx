@@ -28,7 +28,8 @@ const BoardList = ({ boards, setBoards }) => {
       "MTarget": 31,
       "WScore": 0,
       "MScore": 0,
-      "YScore": 0
+      "YScore": 0,
+      "Emoji": "🚀"
     }
     let tmpBoards = [...boards];
     tmpBoards.push(newBoard);
@@ -40,7 +41,10 @@ const BoardList = ({ boards, setBoards }) => {
     return (
       <Link key={b.SK} className="board-list-item-wrapper" to={"/board/" + b.SK} onClick={() => handleBoardSelect(b)}>
         <div className="board-list-item-score">{b.YScore}</div>
-        <div className="boardLink" >{b.Board}</div>
+        <div className="board-list-text-emoji-wrapper">
+          <div className="boardLink">{b.Board}</div>
+          <div className="boardLink">{b.Emoji}</div>
+        </div>
       </Link>
     )
   });

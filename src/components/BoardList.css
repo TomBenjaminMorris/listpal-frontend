@@ -60,3 +60,9 @@
     background-color: rgb(86, 86, 86);
     opacity: 1;
 }
+
+.board-list-text-emoji-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}

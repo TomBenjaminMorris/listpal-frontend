@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState, CSSProperties } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks } from '../utils/apiGatewayClient';
+import { useEffect, useState, CSSProperties, useRef } from 'react';
+import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import menuIcon from '../assets/icons8-menu-50.png';
@@ -12,6 +12,10 @@ import SideNavBar from './SideNavBar';
 import Select, { MultiValue } from "react-select";
 import './Board.css';
 
+import emojiData from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
+import { useOnClickOutside } from 'usehooks-ts'
+
 const override: CSSProperties = {
   opacity: "0.8",
 };
@@ -22,11 +26,13 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [categories, setCategories] = useState([{ label: null, value: null }]);
   const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
+  const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
+  const [boardEmoji, setBoardEmoji] = useState("");
 
   const navigate = useNavigate();
   const url = window.location.href;
   const boardID = url.split('/').pop();
-  
+
   const handleEditBoard = async () => {
     // console.log("TTT triggered: handleEditBoard")
     let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
@@ -45,7 +51,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
         let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
         ls_currentBoard['Board'] = boardName;
         localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
-        document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board);
+        document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board + " " + ls_currentBoard.Emoji);
 
         let tmpBoards = [...current];
         if (tmpBoards.length != 0) {
@@ -131,11 +137,53 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     }
   }
 
+  const handleEmojiSelect = (e) => {
+    setBoardEmoji(e.native)
+    updateBoardEmojiAPI(boardID, e.native)
+    setBoards(current => {
+      let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+      ls_currentBoard['Emoji'] = e.native;
+      localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
+      document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board + " " + ls_currentBoard.Emoji);
+
+      let tmpBoards = [...current];
+      if (tmpBoards.length != 0) {
+        return tmpBoards.map(b => {
+          if (b.SK == boardID) {
+            let tmpB = b
+            tmpB['Emoji'] = e.native;
+            return tmpB
+          }
+          return b
+        })
+      }
+    })
+  }
+
+  const loadEmoji = () => {
+    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+    if (ls_currentBoard.Emoji) {
+      setBoardEmoji(ls_currentBoard.Emoji)
+    } else {
+      boards.forEach(b => {
+        if (b.SK === boardID) {
+          setBoardEmoji(b.Emoji)
+        }
+      });
+    }
+  }
+
+  useEffect(() => {
+    loadEmoji()
+  }, [])
+
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-    ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board) : null;
-    getTasks();
-    setTimeout(() => setIsLoading(false), 1000); // if the app crashes anytime soon this line might need to be commented out
+    ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board + " " + ls_currentBoard.Emoji) : null;
+    loadEmoji()
+    getTasks().then(() => {
+      setTimeout(() => setIsLoading(false), 1000); // if the app crashes anytime soon this line might need to be commented out
+    });
   }, [boardID])
 
   useEffect(() => {
@@ -160,6 +208,14 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     });
     setCategories(tmpCategories)
   }, [sortedTasks])
+
+  const emojiMenuRef = useRef(null)
+  const handleClickOutside = () => {
+    if (displayEmojiPicker) {
+      setDisplayEmojiPicker(false)
+    }
+  }
+  useOnClickOutside(emojiMenuRef, handleClickOutside)
 
   const customStyles = {
     option: (defaultStyles, state) => ({
@@ -276,18 +332,26 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
-        
+
         <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           <div className="board-filter-actions-wrapper">
-            
+
             <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
+
+            <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
+              <div className="emoji-icon" onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
+              {displayEmojiPicker ? <div className="board-emoji-wrapper">
+                <Picker data={emojiData} onEmojiSelect={handleEmojiSelect} theme="light" autoFocus navPosition="none" previewPosition="none" perLine={8} />
+              </div> : null}
+            </div>
 
             <div className="board-actions-wrapper">
               <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
               <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
               <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
             </div>
-        
+
+
           </div>
           <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
         </div>

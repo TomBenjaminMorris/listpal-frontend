@@ -316,6 +316,26 @@ export const renameBoardAPI = async (boardID, name) => {
   }
 };
 
+export const updateBoardEmojiAPI = async (boardID, emoji) => {
+  const body = { boardID, emoji }
+  try {
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/board-emoji', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
+    }
+  } catch (err) {
+    alert("Failed to set the board emoji, please try again.")
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
 export const deleteBoard = async (boardID) => {
   const body = { boardID }
   try {

@@ -20,10 +20,13 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
   const boardsRendered = boards.map((b) => {
     return (
       <div key={b.SK} className={`${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
-        <Link key={b.SK} to={"/board/" + b.SK} className={`${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link-text" : null}`} onClick={() => {
+        <Link key={b.SK} to={"/board/" + b.SK} className={`sidenav-boards-link-item ${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link-text" : null}`} onClick={() => {
           localStorage.setItem('activeBoard', JSON.stringify(b));
           activeBoard.SK !== b.SK ? setIsLoading(true) : null
-        }}>{b.Board}</Link>
+        }}>
+          <div>{b.Emoji}</div>
+          <div>{b.Board}</div>
+        </Link>
       </div>
     )
   });

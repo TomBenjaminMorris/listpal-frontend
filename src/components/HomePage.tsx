@@ -73,13 +73,13 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
           {totalScore && <GaugeChart id="gauge-chart"
             animate={false}
             arcPadding={0.03}
-            cornerRadius={3} 
+            cornerRadius={3}
             style={chartStyle}
             percent={totalScore / totalTargets}
             hideText={true}
             textColor="var(--accent)"
             needleColor="var(--accent)"
-            needleBaseColor	="var(--accent)"
+            needleBaseColor="var(--accent)"
             needleScale={0.6}
             nrOfLevels={4}
             colors={['#FFFE']}
@@ -92,7 +92,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
       </div>
     </>
   )
-  
+
 
   const loader = (
     <div className="loadingWrapper">
