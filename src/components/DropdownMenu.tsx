@@ -1,11 +1,11 @@
+import { updateBoardCategoryOrder } from '../utils/apiGatewayClient';
+import { getBoardIdFromUrl } from '../utils/utils';
 import closeIcon from '../assets/icons8-delete-48.png';
 import moveIcon from '../assets/icons8-arrow-50.png';
 import "./DropdownMenu.css";
-import { updateBoardCategoryOrder } from '../utils/apiGatewayClient';
-import { getBoardIdFromUrl } from '../utils/utils';
 
 const DropdownMenu = ({ handleDeleteCategory, boards, title, setSortedTasks, sortedTasks, setBoards }) => {
-  
+
   const boardID = getBoardIdFromUrl();
 
   const move = (array, element, delta) => {

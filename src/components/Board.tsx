@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
+import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import menuIcon from '../assets/icons8-menu-50.png';
@@ -29,8 +30,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const [boardEmoji, setBoardEmoji] = useState("");
 
   const navigate = useNavigate();
-  const url = window.location.href;
-  const boardID = url.split('/').pop();
+  const boardID = getBoardIdFromUrl()
 
   const handleEditBoard = async () => {
     // console.log("TTT triggered: handleEditBoard")

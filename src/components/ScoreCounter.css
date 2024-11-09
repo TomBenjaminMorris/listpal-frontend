@@ -1,11 +1,9 @@
 .score-button {
   padding-left: 12px;
-  /* padding-top: 10px; */
 }
 
 .score-input {
-  /* background-color: var(--background); */
-  background: none;
+  background: transparent;
   color: var(--text-colour);
   border: none;
   text-align: center;
@@ -44,10 +42,8 @@
   position: absolute;
   height: 0px;
   width: 0px;
-  /* top: 60px; */
   left: 8px;
   top: -19px;
-  /* 1px buffer for zooming problems while rendering*/
   border-width: 10px;
   border-color: transparent transparent var(--accent) transparent;
   border-style: solid;
@@ -60,7 +56,7 @@
   }
 
   10% {
-    transform: scale(1.2);
+    transform: scale(1.1);
     color: var(--text-colour);
   }
 
