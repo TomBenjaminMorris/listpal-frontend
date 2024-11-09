@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
-import { isAuthenticated } from './utils/utils';
+import { getSortArray, isAuthenticated } from './utils/utils';
 import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
 import ConfirmUserPage from './components/ConfirmUserPage';
@@ -32,7 +32,6 @@ const App = () => {
   useEffect(() => {
     const ls_userDetails = JSON.parse(localStorage.getItem('userDetails'))
     const theme = ls_userDetails ? ls_userDetails.Theme : userDetails.Theme ? userDetails.Theme : 'purple-haze';
-    // const theme = userDetails.Theme ? userDetails.Theme : 'purple-haze';
     document.documentElement.style.setProperty("--background", `var(--${theme}-bg)`);
     document.documentElement.style.setProperty("--foreground", `var(--${theme}-fg)`);
     document.documentElement.style.setProperty("--text-colour", `var(--${theme}-text-colour)`);
@@ -43,18 +42,25 @@ const App = () => {
   useEffect(() => {
     setIsLoading(true);
     isAuthenticated() && getUser().then((u) => {
-      getBoards().then((b) => {
+      getBoards().then((br) => {
         setUserDetails(u[0]);
-        setBoards(b);
+        const tmpBr = br.map(b => {
+          b['CategoryOrder'] = b.CategoryOrder && JSON.parse(b.CategoryOrder);
+          return b;
+        })
+        setBoards(tmpBr);
         setIsLoading(false);
-        const ls_userDetails = JSON.parse(localStorage.getItem('userDetails'))
-        ls_userDetails ? null : localStorage.setItem('userDetails', JSON.stringify(u[0]));
+        localStorage.setItem('userDetails', JSON.stringify(u[0]))
       });
     })
   }, [])
 
   const setOrderedSortedTasks = (tasks) => {
-    const tmpOrderedSortedTasks = Object.keys(tasks).sort().reduce(
+    let sortArr = getSortArray(boards)
+    const sortFunc = (a, b) => {
+      return sortArr.indexOf(a) - sortArr.indexOf(b)
+    }
+    const tmpOrderedSortedTasks = Object.keys(tasks).sort(sortArr === undefined || sortArr.length === 0 ? undefined : sortFunc).reduce(
       (obj, key) => {
         obj[key] = tasks[key];
         return obj;
@@ -86,56 +92,59 @@ const App = () => {
         <Route path="/confirm" element={<ConfirmUserPage />} />
 
         {/* HOME PAGE */}
-        <Route path="/home" element={isAuthenticated() ? <HomePage
-          boards={boards}
-          setBoards={setBoards}
-          handleSidebarCollapse={handleSidebarCollapse}
-          handleLogout={handleLogout}
-          sidebarIsOpen={sidebarIsOpen}
-          isLoading={isLoading}
-          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          isMobile={isMobile}
-          hideMobileSidebar={hideMobileSidebar}
-          setHideMobileSidebar={setHideMobileSidebar}
-          setSidebarIsOpen={setSidebarIsOpen}
-          setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
+        <Route path="/home" element={isAuthenticated() ?
+          <HomePage
+            boards={boards}
+            setBoards={setBoards}
+            handleSidebarCollapse={handleSidebarCollapse}
+            handleLogout={handleLogout}
+            sidebarIsOpen={sidebarIsOpen}
+            isLoading={isLoading}
+            sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+            setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+            isMobile={isMobile}
+            hideMobileSidebar={hideMobileSidebar}
+            setHideMobileSidebar={setHideMobileSidebar}
+            setSidebarIsOpen={setSidebarIsOpen}
+            setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
 
         {/* BOARD */}
-        <Route path="/board/*" element={isAuthenticated() ? <Board
-          sortedTasks={sortedTasks}
-          setBoards={setBoards}
-          setSortedTasks={setOrderedSortedTasks}
-          handleSidebarCollapse={handleSidebarCollapse}
-          handleLogout={handleLogout}
-          sidebarIsOpen={sidebarIsOpen}
-          boards={boards}
-          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
-          setHideMobileSidebar={setHideMobileSidebar}
-          setSidebarIsOpen={setSidebarIsOpen}
-          isMobile={isMobile}
-          hideMobileSidebar={hideMobileSidebar} /> : <Navigate replace to="/login" />} />
+        <Route path="/board/*" element={isAuthenticated() ?
+          <Board
+            sortedTasks={sortedTasks}
+            setBoards={setBoards}
+            setSortedTasks={setOrderedSortedTasks}
+            handleSidebarCollapse={handleSidebarCollapse}
+            handleLogout={handleLogout}
+            sidebarIsOpen={sidebarIsOpen}
+            boards={boards}
+            sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+            setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+            setHideMobileSidebar={setHideMobileSidebar}
+            setSidebarIsOpen={setSidebarIsOpen}
+            isMobile={isMobile}
+            hideMobileSidebar={hideMobileSidebar} /> : <Navigate replace to="/login" />} />
 
         {/* SETTINGS */}
-        <Route path="/settings" element={isAuthenticated() ? <Settings
-          userDetails={userDetails}
-          setUserDetails={setUserDetails}
-          handleSidebarCollapse={handleSidebarCollapse}
-          handleLogout={handleLogout}
-          sidebarIsOpen={sidebarIsOpen}
-          boards={boards}
-          setBoards={setBoards}
-          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          isLoading={isLoading}
-          setHideMobileSidebar={setHideMobileSidebar}
-          setSidebarIsOpen={setSidebarIsOpen}
-          isMobile={isMobile}
-          hideMobileSidebar={hideMobileSidebar}
-          setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
+        <Route path="/settings" element={isAuthenticated() ?
+          <Settings
+            userDetails={userDetails}
+            setUserDetails={setUserDetails}
+            handleSidebarCollapse={handleSidebarCollapse}
+            handleLogout={handleLogout}
+            sidebarIsOpen={sidebarIsOpen}
+            boards={boards}
+            setBoards={setBoards}
+            sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+            setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+            isLoading={isLoading}
+            setHideMobileSidebar={setHideMobileSidebar}
+            setSidebarIsOpen={setSidebarIsOpen}
+            isMobile={isMobile}
+            hideMobileSidebar={hideMobileSidebar}
+            setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

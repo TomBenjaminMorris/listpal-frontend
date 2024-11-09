@@ -1,13 +1,14 @@
 import { useReducer, useState, useEffect, CSSProperties, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks } from '../utils/apiGatewayClient';
+import { useOnClickOutside } from 'usehooks-ts'
+import { getSortArray, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
+import DropdownMenu from "./DropdownMenu";
 import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import './Card.css';
-import DropdownMenu from "./DropdownMenu";
-import { useOnClickOutside } from 'usehooks-ts'
 
 const override: CSSProperties = {
   marginLeft: "30px",
@@ -16,16 +17,15 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards }) => {
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
-  // const [timer, setTimer] = useState(null);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
   const [, forceUpdate] = useReducer(x => x + 1, 0);
-  
+
   const handleClickMenu = () => {
     setDropdownVisible(current => !current);
   };
@@ -46,7 +46,6 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     notDoneList.sort(function (a, b) {
       return parseInt(a.CreatedDate) - parseInt(b.CreatedDate);
     });
-    // return [...notDoneList, ...doneList];
     return [...doneList, ...notDoneList];
   }
 
@@ -80,6 +79,14 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     renameCatagoryAPI(taskIDs, newTitle).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
+
+    // Update Category Order
+    let sortArr = getSortArray(boards)
+    var index = sortArr.indexOf(title);
+    if (index !== -1) {
+      sortArr[index] = newTitle
+    }
+    updateCategoryOrder(sortArr, boards, setBoards)
   }
 
   const handleNewTask = async () => {
@@ -100,7 +107,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       "EntityType": "Task",
     }
 
-    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category, "" ).then(() => {
+    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category, "").then(() => {
       let tmpSortedTasks = { ...sortedTasks };
       // tmpSortedTasks[title].push(emptyTask);
       tmpSortedTasks[title].unshift(emptyTask);
@@ -123,6 +130,14 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       deleteTasks(tmpSortedTasks[title])
       delete tmpSortedTasks[title];
       setSortedTasks(tmpSortedTasks);
+
+      // Update Category Order
+      let sortArr = getSortArray(boards)
+      var index = sortArr.indexOf(title);
+      if (index !== -1) {
+        sortArr.splice(index, 1);
+      }
+      updateCategoryOrder(sortArr, boards, setBoards)
     } else {
       return
     }
@@ -194,7 +209,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         {/* <img className="deleteCategory" onClick={handleDeleteCategory} src={closeIcon} alt="delete icon" /> */}
         <div className="menu" onClick={handleClickMenu} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : null}`} src={dotsIcon} alt="menu icon" />
-          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory}/>}
+          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory} boards={boards} title={title} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} />}
         </div>
       </div>
       <hr />

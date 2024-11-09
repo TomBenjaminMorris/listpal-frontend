@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
+import { useOnClickOutside } from 'usehooks-ts'
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import menuIcon from '../assets/icons8-menu-50.png';
@@ -10,11 +11,9 @@ import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
 import Select, { MultiValue } from "react-select";
-import './Board.css';
-
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
-import { useOnClickOutside } from 'usehooks-ts'
+import './Board.css';
 
 const override: CSSProperties = {
   opacity: "0.8",
@@ -162,7 +161,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
   const loadEmoji = () => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-    if (ls_currentBoard.Emoji) {
+    if (ls_currentBoard && ls_currentBoard.Emoji) {
       setBoardEmoji(ls_currentBoard.Emoji)
     } else {
       boards.forEach(b => {
@@ -175,7 +174,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
   useEffect(() => {
     loadEmoji()
-  }, [])
+  }, [boards])
 
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
@@ -353,7 +352,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
 
           </div>
-          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards}></CardList>
+          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards}></CardList>
         </div>
       </div>
     </>

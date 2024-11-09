@@ -1,13 +1,14 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayClient';
+import { newTask, deleteTask, updateTaskDescription, updateBoardCategoryOrder } from '../utils/apiGatewayClient';
 import Card from './Card';
 import './CardList.css'
+import { getBoardIdFromUrl, getSortArray, updateCategoryOrder } from '../utils/utils';
 
-const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards }) => {
+const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards, boards }) => {
   // console.log("rendering: CardList")
   const [, forceUpdate] = useReducer(x => x + 1, 0);
-  
+
   const handleDeleteTask = (taskID, title) => {
     const tmpSortedTasks = { ...sortedTasks };
     const tmp = tmpSortedTasks[title].filter((t) => t.CompletedDate == "nil");
@@ -46,8 +47,10 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards 
       alert("That category already exists on this board, chose another");
       return;
     }
-    const url = window.location.href;
-    const boardID = url.split('/').pop();
+
+    let sortArr = getSortArray(boards);
+    sortArr.unshift(name)
+    const boardID = getBoardIdFromUrl();
 
     const newCardDefaultTask = {
       "CreatedDate": String(Date.now()),
@@ -61,7 +64,10 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards 
       "EntityType": "Task"
     }
     tmpSortedTasks[name] = [newCardDefaultTask];
-    newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "");
+
+    newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "").then(() => {
+      updateCategoryOrder(sortArr, boards, setBoards)
+    });
     setSortedTasks(tmpSortedTasks);
     forceUpdate();
   }
@@ -75,6 +81,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards 
       sortedTasks={sortedTasks}
       handleDeleteTask={handleDeleteTask}
       setBoards={setBoards}
+      boards={boards}
     />
   });
 

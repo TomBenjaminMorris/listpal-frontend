@@ -336,6 +336,26 @@ export const updateBoardEmojiAPI = async (boardID, emoji) => {
   }
 };
 
+export const updateBoardCategoryOrder = async (boardID, categoryOrder) => {
+  const body = { boardID, categoryOrder }
+  try {
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/board-category-order', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
+    }
+  } catch (err) {
+    alert("Failed to set the board category order, please try again.")
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
 export const deleteBoard = async (boardID) => {
   const body = { boardID }
   try {

@@ -1,3 +1,5 @@
+import { updateBoardCategoryOrder } from "./apiGatewayClient";
+
 /*eslint-disable*/
 export function parseJwt(token) {
     var base64Url = token.split('.')[1];
@@ -37,4 +39,42 @@ export function isUrlValid(userInput) {
         return false;
     else
         return true;
+}
+
+export function getSortArray(boards) {
+    let sortArr = []
+    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+    const boardID = getBoardIdFromUrl()
+
+    if (ls_currentBoard && ls_currentBoard.CategoryOrder) {
+        sortArr = ls_currentBoard.CategoryOrder;
+    } else {
+        boards.forEach(b => {
+            if (b.SK === boardID) {
+                sortArr = b.CategoryOrder
+            }
+        });
+    }
+    return sortArr;
+}
+
+export function updateCategoryOrder(sortArr, boards, setBoards) {
+    let tmpBoards = [...boards]
+    const boardID = getBoardIdFromUrl();
+    tmpBoards.forEach(b => {
+        if (b.SK === boardID) {
+            let tmpBoard = b
+            tmpBoard['CategoryOrder'] = sortArr;
+            localStorage.setItem('activeBoard', JSON.stringify(tmpBoard));
+            b['CategoryOrder'] = sortArr
+            updateBoardCategoryOrder(boardID, JSON.stringify(sortArr));
+        }
+    });
+    setBoards(tmpBoards);
+}
+
+export function getBoardIdFromUrl() {
+    const url = window.location.href;
+    const boardID = url.split('/').pop();
+    return boardID;
 }

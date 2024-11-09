@@ -29,7 +29,8 @@ const BoardList = ({ boards, setBoards }) => {
       "WScore": 0,
       "MScore": 0,
       "YScore": 0,
-      "Emoji": "🚀"
+      "Emoji": "🚀",
+      "CategoryOrder": [],
     }
     let tmpBoards = [...boards];
     tmpBoards.push(newBoard);

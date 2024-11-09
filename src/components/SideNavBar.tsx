@@ -22,7 +22,7 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
       <div key={b.SK} className={`${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link" : null}`}>
         <Link key={b.SK} to={"/board/" + b.SK} className={`sidenav-boards-link-item ${activeBoard && activeBoard.SK === b.SK ? "highlight-board-link-text" : null}`} onClick={() => {
           localStorage.setItem('activeBoard', JSON.stringify(b));
-          activeBoard.SK !== b.SK ? setIsLoading(true) : null
+          activeBoard.SK && b.SK && activeBoard.SK !== b.SK ? setIsLoading(true) : null
         }}>
           <div>{b.Emoji}</div>
           <div>{b.Board}</div>
