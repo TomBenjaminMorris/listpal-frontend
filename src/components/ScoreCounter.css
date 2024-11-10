@@ -1,5 +1,5 @@
 .score-button {
-  padding-left: 12px;
+  /* padding-left: 12px; */
 }
 
 .score-input {
@@ -12,6 +12,7 @@
   font-size: 15px;
   font-weight: bold;
   font-family: CircularMedium;
+  z-index: 200 !important;
 }
 
 .score-input:focus {
@@ -26,7 +27,7 @@
   display: none;
   position: absolute;
   z-index: 1000;
-  margin-left: 6px;
+  margin-left: 4px;
   margin-top: 15px;
   font-size: 16px;
   width: 30px;
@@ -84,6 +85,6 @@
   top: 0;
   margin-top: 4px;
   margin-left: 5px;
-  width: 40px;
-  z-index: -100;
+  width: 35px;
+  z-index: -1;
 }

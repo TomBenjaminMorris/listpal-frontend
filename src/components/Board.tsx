@@ -1,16 +1,16 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, CSSProperties, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
-import menuIcon from '../assets/icons8-menu-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
+import Header from './Header';
 import Select, { MultiValue } from "react-select";
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
@@ -129,10 +129,13 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     if (Object.keys(filteredSortedTasks).length === 0 || currentBoardID !== boardID) {
       getActiveTasks(boardID).then((data) => {
         sortTasks(data);
+        setIsLoading(false)
+        // setTimeout(() => setIsLoading(false), 500); // if the app crashes anytime soon this line might need to be commented out
       });
     }
     else {
-      setIsLoadingLocal(false);
+      setIsLoadingLocal(false)
+      // setTimeout(() => setIsLoadingLocal(false), 500); // if the app crashes anytime soon this line might need to be commented out
     }
   }
 
@@ -180,9 +183,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
     ls_currentBoard ? document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board + " " + ls_currentBoard.Emoji) : null;
     loadEmoji()
-    getTasks().then(() => {
-      setTimeout(() => setIsLoading(false), 1000); // if the app crashes anytime soon this line might need to be commented out
-    });
+    getTasks()
   }, [boardID])
 
   useEffect(() => {
@@ -311,29 +312,27 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     }),
   };
 
+  const loader = (
+    <div className="loadingWrapper" style={{marginLeft: `${sidebarIsOpen ? "260px" : "90px"}`}}>
+      <PulseLoader
+        cssOverride={override}
+        size={12}
+        color={"var(--text-colour)"}
+        speedMultiplier={1}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
+    </div>
+  )
+
   const content = (
     <>
-      <div className="header sticky">
-        <div className="header-left">
-          <Link className="back-button board-back-button listpal-board-logo " to="/home" >
-            <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}`, marginTop: "15px" }}>
-              <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
-            </div>
-          </Link>
-          {isMobile && <div className="toggle-wrapper">
-            <img className="menu-icon-mobile" src={menuIcon} alt="menu icon" onClick={handleMenuClick} />
-          </div>}
-        </div>
-        <div className="header-right">
-          <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
-        </div>
-      </div>
-
+      <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
 
-        <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-          <div className="board-filter-actions-wrapper">
+        {isLoadingLocal || isLoading ? loader : <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+          <div className="board-filter-actions-wrapper fadeUp-animation">
 
             <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
 
@@ -350,30 +349,18 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
               <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
             </div>
 
+            <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
 
           </div>
           <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards}></CardList>
-        </div>
+        </div>}
       </div>
     </>
   )
 
-  const loader = (
-    <div className="loadingWrapper">
-      <PulseLoader
-        cssOverride={override}
-        size={12}
-        color={"var(--text-colour)"}
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      />
-    </div>
-  )
-
   return (
     <div className="wrapper">
-      {isLoadingLocal || isLoading ? loader : content}
+      {content}
     </div >
   );
 };

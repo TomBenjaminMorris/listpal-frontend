@@ -29,13 +29,6 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   const handleTextUpdate = e => {
     setDescriptionHasChanged(true);
     setDescription(e.target.value);
-    // clearTimeout(timer);
-    // const newTimer = setTimeout(() => {
-    //   updateTaskDescription(task.SK, e.target.value).then(() => {
-    //     updateActiveTaskDescription(e.target.value)
-    //   });
-    // }, 2000);
-    // setTimer(newTimer);
   }
 
   const updateActiveTaskDescription = (value) => {
@@ -194,7 +187,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
   useOnClickOutside(descriptionRef, handleClickOutsideDescription)
 
   return (
-    <div className="task-container" style={display ? null : { display: "none" }}>
+    <div className="task-container fadeUp-animation" style={display ? null : { display: "none" }}>
       <input
         style={checked ? { opacity: taskExpiryOpacity() } : null}
         type="checkbox"

@@ -63,8 +63,6 @@ a {
   color: var(--text-colour);
 }
 
-
-
 @keyframes fadeIn {
   0% {
     transform: translateX(10%);
@@ -80,7 +78,6 @@ a {
   animation: 300ms fadeIn;
 }
 
-
 @keyframes fadeUp {
   0% {
     transform: translateY(10%);
@@ -94,4 +91,19 @@ a {
 
 .fadeUp-animation {
   animation: 600ms fadeUp;
+}
+
+@keyframes fadeDown {
+  0% {
+    transform: translateY(-10%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+}
+
+.fadeDown-animation {
+  animation: 600ms fadeDown;
 }

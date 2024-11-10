@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { calcPercents } from '../utils/utils';
 import ScoreCounter from './ScoreCounter';
+import './ScoreBoard.css';
 
 const ScoreBoard = ({ boards, setBoards, boardID }) => {
   // console.log("rendering: ScoreBoard")
@@ -8,8 +9,7 @@ const ScoreBoard = ({ boards, setBoards, boardID }) => {
   const [currentBoard, setCurrentBoard] = useState({ WScore: 0, MScore: 0, YScore: 0, WTarget: 0, MTarget: 0, YTarget: 0 });
 
   useEffect(() => {
-    // if (Object.keys(currentBoard).length != 0) {
-      if (currentBoard && Object.keys(currentBoard).length != 0) {
+    if (currentBoard && Object.keys(currentBoard).length != 0) {
       const percents = calcPercents(currentBoard);
       setPercentValues(percents);
     }
@@ -20,11 +20,11 @@ const ScoreBoard = ({ boards, setBoards, boardID }) => {
   }, [boards, boardID])
 
   return (
-    <>
+    <div className="score-counter-wrapper">
       <ScoreCounter score={currentBoard && currentBoard.WScore} percent={percentValues.W} type="W" currentBoard={currentBoard} setBoards={setBoards} />
       <ScoreCounter score={currentBoard && currentBoard.MScore} percent={percentValues.M} type="M" currentBoard={currentBoard} setBoards={setBoards} />
       <ScoreCounter score={currentBoard && currentBoard.YScore} percent={percentValues.Y} type="Y" currentBoard={currentBoard} setBoards={setBoards} />
-    </>
+    </div>
   );
 };
 

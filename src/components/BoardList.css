@@ -14,10 +14,13 @@
     background-color: var(--foreground);
     border-radius: 10px;
     position: relative;
+    transition-duration: 400ms;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .board-list-item-wrapper:hover {
     background-color: var(--accent);
+    transform: translateY(-5px);
 }
 
 .board-list-item-score {

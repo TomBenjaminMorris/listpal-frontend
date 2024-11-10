@@ -44,11 +44,11 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
 
   const scoreRef = useRef(null)
   const handleClickOutsideDescription = () => {
-    if (scoreValue < 0 ){
+    if (scoreValue < 0) {
       alert("Score can't be less than 0");
       return
     }
-    if (scoreValue === "" ){
+    if (scoreValue === "") {
       alert("Score can't be empty");
       return
     }
@@ -78,7 +78,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   return (
     <div className={listClassName} onAnimationEnd={() => setAnimate(false)} ref={scoreRef}>
       {isExploding && !isTargetMet && <ConfettiExplosion zIndex={1000} duration={3000} width={vw} particleSize={15} particleCount={80} onComplete={handleConfettiCompleted} />}
-      <div style={{ width: 50, height: 50 }}
+      <div style={{ width: 45, height: 45 }}
       >
         {(percent || percent >= 0) && <CircularProgressbarWithChildren value={percent} styles={buildStyles({
           trailColor: 'var(--text-colour)',
@@ -88,7 +88,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
         })}>
           <div style={{ fontSize: 15, marginTop: 0 }}>
             <input className="score-input" type="text" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
-            {isExploding ? starImg : null}
+            {/* {isExploding ? starImg : null} */}
           </div>
         </CircularProgressbarWithChildren>}
         <div className="score-type-tooltip">{type}</div>
