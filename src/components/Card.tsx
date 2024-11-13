@@ -1,6 +1,6 @@
 import { useReducer, useState, useEffect, CSSProperties, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask, renameCatagoryAPI, deleteTasks } from '../utils/apiGatewayClient';
+import { newTask, renameCatagoryAPI, deleteTasks, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -8,6 +8,8 @@ import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
 import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
+import emojiData from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 import './Card.css';
 
 const override: CSSProperties = {
@@ -25,6 +27,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
   const [, forceUpdate] = useReducer(x => x + 1, 0);
+  const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
+  const [cardEmoji, setCardEmoji] = useState(tasks && tasks[0].Emoji ? tasks[0].Emoji : "✅");
 
   const handleClickMenu = () => {
     setDropdownVisible(current => !current);
@@ -105,6 +109,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       "CompletedDate": "nil",
       "Category": title,
       "EntityType": "Task",
+      "Emoji": "✅",
     }
 
     newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category, "").then(() => {
@@ -141,6 +146,19 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     } else {
       return
     }
+  }
+
+  const handleEmojiSelect = (e) => {
+    setCardEmoji(e.native)
+    const updatedCategoryArray = sortedTasks[title].map((t) => {
+      t.Emoji = e.native
+      return t
+    });
+    const tmpSortedTasks = { ...sortedTasks }
+    tmpSortedTasks[title] = updatedCategoryArray
+    updateTaskEmojiAPI(tasks.map(t => t.SK), e.native).then(() => {
+      setSortedTasks(tmpSortedTasks);
+    });
   }
 
   const measuredRef = useCallback(node => {
@@ -202,11 +220,27 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   }
   useOnClickOutside(cardTitleRef, handleClickOutsideTitle)
 
+  const emojiMenuRef = useRef(null)
+  const handleClickOutsideEmoji = () => {
+    if (displayEmojiPicker) {
+      setDisplayEmojiPicker(false)
+    }
+  }
+  useOnClickOutside(emojiMenuRef, handleClickOutsideEmoji)
+
   return (
     <div ref={measuredRef} className="card-container fadeUp-animation">
       <div className="headingWrapper">
+
+        <div className={`card-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef} >
+          <div className="card-emoji-icon" onClick={() => setDisplayEmojiPicker(current => !current)}>{cardEmoji}</div>
+          {displayEmojiPicker ? <div className="board-emoji-wrapper">
+            <Picker data={emojiData} onEmojiSelect={handleEmojiSelect} theme="light" autoFocus navPosition="none" previewPosition="none" perLine={8} />
+          </div> : null}
+        </div>
+
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleEditTitle} ref={cardTitleRef} />
-        {/* <img className="deleteCategory" onClick={handleDeleteCategory} src={closeIcon} alt="delete icon" /> */}
+
         <div className="menu" onClick={handleClickMenu} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : null}`} src={dotsIcon} alt="menu icon" />
           {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory} boards={boards} title={title} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} />}

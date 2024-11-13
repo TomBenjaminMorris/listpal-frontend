@@ -104,7 +104,8 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       "Description": "",
       "CompletedDate": "nil",
       "Category": title,
-      "EntityType": "Task"
+      "EntityType": "Task",
+      "Emoji": "✅",
     }
     if (isLastUncheckedTask) {
       tmpSortedTasks[title].push(newCardDefaultTask);

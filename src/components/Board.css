@@ -101,7 +101,9 @@
     position: absolute !important;
     z-index: 2001;
     margin-top: 500px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: rgba(65, 65, 65, 0.35) 0px 5px 15px;
+    /* border: solid var(--text-colour) 2px; */
+    border-radius: 12px;
 }
 
 .emoji-icon {
@@ -112,4 +114,8 @@
 
 .emoji-highlight {
     background-color: var(--text-colour);
+}
+
+.emoji-highlight-dark {
+    background-color: var(--background);
 }

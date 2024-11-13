@@ -61,7 +61,8 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
       "Description": "",
       "CompletedDate": "nil",
       "Category": name,
-      "EntityType": "Task"
+      "EntityType": "Task",
+      "Emoji": "✅",
     }
     tmpSortedTasks[name] = [newCardDefaultTask];
 

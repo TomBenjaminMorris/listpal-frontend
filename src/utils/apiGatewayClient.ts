@@ -152,6 +152,26 @@ export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1S
   }
 };
 
+export const updateTaskEmojiAPI = async (taskIDs, emoji) => {
+  const body = { taskIDs, emoji }
+  try {
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/card-emoji', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
+    }
+  } catch (err) {
+    alert("Failed to set the card emoji, please try again.")
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
 export const newTask = async (taskID, createdDate, completedDate, expiryDate, boardID, description, category, link) => {
   const body = { taskID, createdDate, completedDate, expiryDate, boardID, description, category, link }
   try {
