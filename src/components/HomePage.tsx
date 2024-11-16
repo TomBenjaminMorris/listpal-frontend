@@ -65,17 +65,23 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
       <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
         <div className="home-page-content-sub-wrapper fadeUp-animation">
-          {<h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>}
-          {<h2>The total score across your boards this year is...</h2>}
-          {<h1 className="totalScore" style={{ fontSize: "40px" }}>
-            {totalScore && `${emojiList[3]} ${totalScore} / ${totalTargets} ${emojiList[3]}`}
-          </h1>}
-          {totalScore && <GaugeChart id="gauge-chart"
+          <h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>
+          {totalScore == 0 || totalScore == undefined ? 
+          <>
+          <div style={{ fontSize: "22px" }}>Create your first board and start completing tasks to see your score...</div>
+          </> :
+            <>
+              <h2>The total score across your boards this year is...</h2>
+              <h1 className="totalScore" style={{ fontSize: "40px" }}>
+                {totalScore && `${emojiList[3]} ${totalScore} ${emojiList[3]}`}
+              </h1>
+            </>}
+          {totalScore !=0 && <GaugeChart id="gauge-chart"
             animate={false}
             arcPadding={0.03}
             cornerRadius={3}
             style={chartStyle}
-            percent={totalScore / totalTargets}
+            percent={Math.round(totalScore / totalTargets * 100) / 100}
             hideText={true}
             textColor="var(--accent)"
             needleColor="var(--accent)"
@@ -85,6 +91,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
             colors={['#FFFE']}
             arcWidth={0.15}
           />}
+          {totalScore !=0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>}
           <div className="homePageContent">
             <BoardList boards={boards} setBoards={setBoards} />
           </div>

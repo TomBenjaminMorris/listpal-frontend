@@ -84,6 +84,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     }
     setIsLoadingLocal(true);
     deleteBoard(boardID).then(() => {
+      localStorage.removeItem('activeBoard');
       setBoards((boards) => {
         return boards.filter(b => b.SK !== boardID);
       })
@@ -313,7 +314,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   };
 
   const loader = (
-    <div className="loadingWrapper" style={{marginLeft: `${sidebarIsOpen ? "260px" : "90px"}`}}>
+    <div className="loadingWrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
       <PulseLoader
         cssOverride={override}
         size={12}
@@ -352,6 +353,10 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
             <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
 
           </div>
+          {sortedTasks == undefined || sortedTasks == "" || Object.keys(sortedTasks).length == 0 ?
+            <div style={{ fontSize: "20px", marginTop: "40px", marginBottom: "30px", }}>
+              Create a category to get going...
+            </div> : null}
           <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards}></CardList>
         </div>}
       </div>

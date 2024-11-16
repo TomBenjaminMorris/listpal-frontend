@@ -35,7 +35,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
 
   const handleNewCard = () => {
     let tmpSortedTasks = { ...sortedTasks };
-    const name = prompt("Enter new name...");
+    const name = prompt("Enter category name...");
     if (name === null) {
       return;
     }

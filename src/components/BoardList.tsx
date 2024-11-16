@@ -12,7 +12,7 @@ const BoardList = ({ boards, setBoards }) => {
 
   const handleNewBoard = async () => {
     // console.log("TTT triggered: handleNewTask")
-    const name = prompt("Enter new name...");
+    const name = prompt("Enter board name...");
     if (name == "") {
       alert("Board name can't be empty");
       return;

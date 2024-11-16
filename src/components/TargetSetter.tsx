@@ -11,7 +11,7 @@ const override: CSSProperties = {
 const TargetSetter = ({ title, boards, setBoards }) => {
   // console.log("rendering: TargetSetter")
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
-  const [activeBoard, setActiveBoard] = useState(boards[0].SK);
+  const [activeBoard, setActiveBoard] = useState(boards[0] && boards[0].SK);
   const [loadingTargets, setLoadingTargets] = useState(false);
 
   useEffect(() => {
