@@ -57,11 +57,14 @@
     border-style: dashed;
     border-width: 4px;
     font-size: 50px;
+    transition-duration: 400ms;
 }
 
 #addBoardButton:hover {
     background-color: rgb(86, 86, 86);
     opacity: 1;
+    cursor: pointer;
+    transform: translateY(-5px);
 }
 
 .board-list-text-emoji-wrapper {
