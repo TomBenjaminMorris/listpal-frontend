@@ -8,7 +8,7 @@ import './Task.css'
 import TaskMenu from './TaskMenu';
 import { useOnClickOutside } from 'usehooks-ts'
 
-const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji }) => {
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
@@ -105,11 +105,11 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
       "CompletedDate": "nil",
       "Category": title,
       "EntityType": "Task",
-      "Emoji": "✅",
+      "Emoji": cardEmoji,
     }
     if (isLastUncheckedTask) {
       tmpSortedTasks[title].push(newCardDefaultTask);
-      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "");
+      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "", newCardDefaultTask.Emoji);
     }
     setSortedTasks(tmpSortedTasks);
   }

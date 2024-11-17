@@ -66,7 +66,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
     }
     tmpSortedTasks[name] = [newCardDefaultTask];
 
-    newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "").then(() => {
+    newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "", newCardDefaultTask.Emoji).then(() => {
       updateCategoryOrder(sortArr, boards, setBoards)
     });
     setSortedTasks(tmpSortedTasks);

@@ -1,6 +1,7 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
 import config from "../config.json";
 import { useNavigate } from 'react-router-dom';
+import { newUser } from "./apiGatewayClient";
 
 export const cognitoClient = new CognitoIdentityProviderClient({
   region: config.region,
@@ -30,7 +31,7 @@ export const signIn = async (email: string, password: string) => {
   }
 };
 
-export const signUp = async (given_name: string, family_name: string, email: string, password: string) => {
+export const signUp = async (given_name: string, family_name: string, email: string, password: string, setUserDetails) => {
   const params = {
     ClientId: config.clientId,
     Username: email,
@@ -53,7 +54,13 @@ export const signUp = async (given_name: string, family_name: string, email: str
   try {
     const command = new SignUpCommand(params);
     const response = await cognitoClient.send(command);
-    // console.log("Sign up success: ", response);
+    const userID = "u#" + response.UserSub
+    const user = {
+      "Theme": "purple-haze"
+    }
+    newUser(userID, email, given_name);
+    setUserDetails(user)
+    localStorage.setItem('userDetails', JSON.stringify(user))
     return response;
   } catch (error) {
     console.error("Error signing up: ", error);

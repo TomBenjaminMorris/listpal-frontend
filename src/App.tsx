@@ -76,7 +76,6 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    console.log("TTT triggered: handleLogout")
     setBoards([]);
     setSortedTasks([]);
     setUserDetails({})
@@ -88,7 +87,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage setUserDetails={setUserDetails} />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
 
         {/* HOME PAGE */}

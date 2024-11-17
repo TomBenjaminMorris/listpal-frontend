@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../utils/authService';
 import "./LoginPage.css";
 
-const LoginPage = () => {
+const LoginPage = ({setUserDetails}) => {
   const [given_name, setGivenName] = useState('');
   const [family_name, setFamilyName] = useState('');
   const [email, setEmail] = useState('');
@@ -38,7 +38,7 @@ const LoginPage = () => {
       return;
     }
     try {
-      await signUp(given_name, family_name, email, password);
+      await signUp(given_name, family_name, email, password, setUserDetails);
       navigate('/confirm', { state: { email } });
     } catch (error) {
       alert(`Sign up failed: ${error}`);

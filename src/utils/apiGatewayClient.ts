@@ -172,8 +172,8 @@ export const updateTaskEmojiAPI = async (taskIDs, emoji) => {
   }
 };
 
-export const newTask = async (taskID, createdDate, completedDate, expiryDate, boardID, description, category, link) => {
-  const body = { taskID, createdDate, completedDate, expiryDate, boardID, description, category, link }
+export const newTask = async (taskID, createdDate, completedDate, expiryDate, boardID, description, category, link, emoji) => {
+  const body = { taskID, createdDate, completedDate, expiryDate, boardID, description, category, link, emoji }
   try {
     const ok = await tokenCheck();
     if (ok) {
@@ -451,6 +451,20 @@ export const updateBoardTargetsAPI = async (boardID, targets) => {
     }
   } catch (err) {
     alert("Failed to update the targets, please try again.")
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
+export const newUser = async (userID, email, name) => {
+  const body = { userID, email, name }
+  try {
+    const response = await axios.post('/new-user', body);
+    if (response) {
+      return response.data.data;
+    }
+  } catch (err) {
+    alert("Failed to create a new user, please try again.")
     console.error("Error getting data: ", err);
     throw err;
   }

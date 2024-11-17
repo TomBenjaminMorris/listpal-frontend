@@ -109,10 +109,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       "CompletedDate": "nil",
       "Category": title,
       "EntityType": "Task",
-      "Emoji": "✅",
+      "Emoji": cardEmoji,
     }
 
-    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category, "").then(() => {
+    newTask(emptyTask.SK, emptyTask.CreatedDate, emptyTask.CompletedDate, emptyTask.ExpiryDate, emptyTask['GSI1-PK'], emptyTask.Description, emptyTask.Category, "", emptyTask.Emoji).then(() => {
       let tmpSortedTasks = { ...sortedTasks };
       // tmpSortedTasks[title].push(emptyTask);
       tmpSortedTasks[title].unshift(emptyTask);
@@ -180,6 +180,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         handleDeleteTask={handleDeleteTask}
         handleNewTask={handleNewTask}
         setBoards={setBoards}
+        cardEmoji={cardEmoji}
       ></Task>
     )
   });
