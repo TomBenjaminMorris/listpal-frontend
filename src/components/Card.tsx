@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
+import { confirmAlert } from 'react-confirm-alert';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
@@ -29,6 +30,43 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [cardEmoji, setCardEmoji] = useState(tasks && tasks[0].Emoji ? tasks[0].Emoji : "✅");
+
+  const deleteCategoryOptions = {
+    title: `Delete Category - "${title}" ?`,
+    message: 'This action can\'t be undone  ⚠️',
+    buttons: [
+      {
+        label: 'Cancel',
+        onClick: () => {}
+      },
+      {
+        label: 'Delete',
+        onClick: () => {
+          const tmpSortedTasks = { ...sortedTasks };
+          deleteTasks(tmpSortedTasks[title])
+          delete tmpSortedTasks[title];
+          setSortedTasks(tmpSortedTasks);
+
+          // Update Category Order
+          let sortArr = getSortArray(boards)
+          var index = sortArr.indexOf(title);
+          if (index !== -1) {
+            sortArr.splice(index, 1);
+          }
+          updateCategoryOrder(sortArr, boards, setBoards)
+        }
+      }
+    ],
+    closeOnEscape: true,
+    closeOnClickOutside: true,
+    keyCodeForClose: [8, 32],
+    willUnmount: () => { },
+    afterClose: () => { },
+    onClickOutside: () => { },
+    onKeypress: () => { },
+    onKeypressEscape: () => { },
+    overlayClassName: "overlay-custom-class-name"
+  };
 
   const handleClickMenu = () => {
     setDropdownVisible(current => !current);
@@ -129,23 +167,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   }
 
   const handleDeleteCategory = () => {
-    const ok = confirm(`Delete catagory - ${title}?`);
-    if (ok) {
-      const tmpSortedTasks = { ...sortedTasks };
-      deleteTasks(tmpSortedTasks[title])
-      delete tmpSortedTasks[title];
-      setSortedTasks(tmpSortedTasks);
-
-      // Update Category Order
-      let sortArr = getSortArray(boards)
-      var index = sortArr.indexOf(title);
-      if (index !== -1) {
-        sortArr.splice(index, 1);
-      }
-      updateCategoryOrder(sortArr, boards, setBoards)
-    } else {
-      return
-    }
+    confirmAlert(deleteCategoryOptions);
   }
 
   const handleEmojiSelect = (e) => {

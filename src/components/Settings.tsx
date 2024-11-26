@@ -5,6 +5,7 @@ import ThemeSetter from './ThemeSetter';
 import SideNavBar from './SideNavBar';
 import Header from './Header';
 import PulseLoader from "react-spinners/PulseLoader";
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 const override: CSSProperties = {
   paddingTop: "50px",
@@ -19,6 +20,7 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
 
   const content = (
     <>
+      <span className="transparent_gradient"></span>
       <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />

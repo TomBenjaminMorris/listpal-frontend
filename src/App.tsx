@@ -33,6 +33,7 @@ const App = () => {
     const ls_userDetails = JSON.parse(localStorage.getItem('userDetails'))
     const theme = ls_userDetails ? ls_userDetails.Theme : userDetails.Theme ? userDetails.Theme : 'purple-haze';
     document.documentElement.style.setProperty("--background", `var(--${theme}-bg)`);
+    document.documentElement.style.setProperty("--background-faded", `var(--${theme}-bg-faded)`);
     document.documentElement.style.setProperty("--foreground", `var(--${theme}-fg)`);
     document.documentElement.style.setProperty("--text-colour", `var(--${theme}-text-colour)`);
     document.documentElement.style.setProperty("--accent", `var(--${theme}-accent)`);

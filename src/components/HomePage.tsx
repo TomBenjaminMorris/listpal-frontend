@@ -8,7 +8,6 @@ import './HomePage.css'
 import SideNavBar from './SideNavBar';
 import GaugeChart from 'react-gauge-chart'
 
-
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 // const emoji = emojiList[Math.floor(Math.random() * 4)];
 
@@ -61,6 +60,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
 
   const content = (
     <>
+      <span className="transparent_gradient"></span>
       <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
