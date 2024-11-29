@@ -5,31 +5,26 @@ import './TargetSetter.css'
 
 const override: CSSProperties = {
   margin: "auto",
-  marginTop: "15px",
+  marginTop: "23px",
+  marginBottom: "12px",
 };
 
-const TargetSetter = ({ title, boards, setBoards, setAlertConf }) => {
+const TargetSetter = ({ boards, setBoards, setAlertConf, boardID, handleSave }) => {
   // console.log("rendering: TargetSetter")
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
-  const [activeBoard, setActiveBoard] = useState(boards[0] && boards[0].SK);
   const [loadingTargets, setLoadingTargets] = useState(false);
 
   useEffect(() => {
     boards.forEach(b => {
-      if (activeBoard == b.SK) {
+      if (boardID == b.SK) {
         setFormData({ weekly: b.WTarget, monthly: b.MTarget, yearly: b.YTarget })
       }
     });
-  }, [activeBoard])
+  }, [boardID])
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevState) => ({ ...prevState, [name]: value && parseInt(value) }));
-  };
-
-  const handleSelectChange = (event) => {
-    const { value } = event.target;
-    setActiveBoard(value)
   };
 
   const handleSubmit = (event) => {
@@ -55,21 +50,22 @@ const TargetSetter = ({ title, boards, setBoards, setAlertConf }) => {
     }
     const tmpBoards = [...boards];
     tmpBoards.forEach(b => {
-      if (activeBoard == b.SK) {
+      if (boardID == b.SK) {
         b["YTarget"] = formData.yearly;
         b["MTarget"] = formData.monthly;
         b["WTarget"] = formData.weekly;
       }
     });
-    updateBoardTargetsAPI(activeBoard, { YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
+    updateBoardTargetsAPI(boardID, { YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }).then(() => {
       setBoards(tmpBoards)
       setLoadingTargets(false);
+      handleSave();
     })
   };
 
   return (
     <div className="set-targets-wrapper">
-      <h2 className="settings-headers">{title}</h2>
+      <h2 className="target-setter-header">Update Board Targets</h2>
       <hr className="settings-line" />
       <form onSubmit={handleSubmit}>
         <div className="set-targets-inputs">
@@ -113,18 +109,6 @@ const TargetSetter = ({ title, boards, setBoards, setAlertConf }) => {
             />
           </label>
         </div>
-
-        <div className="set-targets-board-select-wrapper">
-          <label>
-            Board
-            <select className="set-targets-board-select" onChange={handleSelectChange}>
-              {boards.map((b) => {
-                return <option key={b.SK} id={b.SK} value={b.SK}>{b.Board}</option>
-              })}
-            </select>
-          </label>
-        </div>
-
 
         {loadingTargets ? <PulseLoader
           cssOverride={override}

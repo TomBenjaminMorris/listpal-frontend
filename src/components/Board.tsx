@@ -5,12 +5,14 @@ import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
+import targetIcon from '../assets/icons8-bullseye-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import SideNavBar from './SideNavBar';
 import Header from './Header';
+import TargetSetterModal from './TargetSetterModal';
 import Select, { MultiValue } from "react-select";
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
@@ -27,6 +29,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const [categories, setCategories] = useState([{ label: null, value: null }]);
   const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
+  const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
   const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
 
@@ -325,6 +328,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const content = (
     <>
       <span className="transparent_gradient"></span>
+      <TargetSetterModal display={displayTargetSetter} setDisplay={setDisplayTargetSetter} boardID={boardID} boards={boards} setBoards={setBoards} setAlertConf={setAlertConf} />
       <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="board-content-wrapper">
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
@@ -361,6 +365,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
                 textValue: "✨ Time for a spring clean ✨",
                 callbackFunc: handleClearTasks,
               })} />
+              <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
             </div>
 
             <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} setAlertConf={setAlertConf} />

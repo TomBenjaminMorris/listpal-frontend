@@ -24,7 +24,6 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
         <div className="settings-content-sub-wrapper fadeUp-animation">
-          {boards.length != 0 ? <TargetSetter boards={boards} setBoards={setBoards} title="Set Board Targets" /> : null}
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>
       </div>
