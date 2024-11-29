@@ -7,7 +7,7 @@ import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css'
 
-const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
+const ScoreCounter = ({ score, percent, type, currentBoard, setBoards, setAlertConf }) => {
   // console.log("rendering: ScoreCounter")
   const [scoreValue, setScoreValue] = useState(score);
   const [animate, setAnimate] = useState(true);
@@ -18,9 +18,15 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   const listClassName = `score-button ${animate ? "bulge-now" : ""}`
   const vw = window.innerWidth * 1;
   const typeToUserDetailMap = { "W": "WScore", "M": "MScore", "Y": "YScore" }
+  const typeToLabelMap = { "W": "weekly", "M": "monthly", "Y": "yearly" }
 
   const handleConfettiCompleted = () => {
-    // alert(`You've hit your ${typeToMessageMap[type]} target... keep going!`);
+    setAlertConf({
+      display: true,
+      title: "Great News! 🎉",
+      animate: true,
+      textValue: `You've hit your ${typeToLabelMap[type]} target... Keep going!`,
+    })
     setIsTargetMet(true);
   }
 
@@ -45,11 +51,21 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards }) => {
   const scoreRef = useRef(null)
   const handleClickOutsideDescription = () => {
     if (scoreValue < 0) {
-      alert("Score can't be less than 0");
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Error 💀",
+        textValue: "Score can't be less than 0.",
+      })
       return
     }
     if (scoreValue === "") {
-      alert("Score can't be empty");
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Error 💀",
+        textValue: "Score can't be empty.",
+      })
       return
     }
     if (scoreHasChanged) {

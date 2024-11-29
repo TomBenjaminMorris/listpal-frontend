@@ -29,7 +29,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading, setPromptConf }) => {
+const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading, setPromptConf, setAlertConf }) => {
   // console.log("rendering: HomePage")
   const [totalScore, setTotalScore] = useState(0);
   const [totalTargets, setTotalTargets] = useState(0);
@@ -93,7 +93,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
           />}
           {totalScore !=0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>}
           <div className="homePageContent">
-            <BoardList boards={boards} setBoards={setBoards} setPromptConf={setPromptConf} />
+            <BoardList boards={boards} setBoards={setBoards} setPromptConf={setPromptConf} setAlertConf={setAlertConf} />
           </div>
         </div>
       </div>

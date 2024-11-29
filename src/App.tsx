@@ -9,6 +9,7 @@ import Board from './components/Board';
 import Settings from './components/Settings';
 import Prompt from './components/Prompt';
 import Confirm from './components/Confirm';
+import Alert from './components/Alert';
 import _debounce from 'lodash.debounce';
 import './App.css'
 
@@ -35,6 +36,11 @@ const App = () => {
     // title: "",
     // textValue: "",
     callbackFunc: () => { },
+  });
+  const [alertConf, setAlertConf] = useState({
+    // display: true,
+    // title: "Warning!",
+    // textValue: "This thing is about to happen",
   });
 
   useEffect(() => {
@@ -105,11 +111,13 @@ const App = () => {
 
       {Object.keys(confirmConf).length > 1 && <Confirm confirmConf={confirmConf} setConfirmConf={setConfirmConf} />}
 
+      {Object.keys(alertConf).length > 1 && <Alert alertConf={alertConf} setAlertConf={setAlertConf} />}
+
       <BrowserRouter>
         <Routes>
           <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
-          <Route path="/login" element={<LoginPage setUserDetails={setUserDetails} />} />
-          <Route path="/confirm" element={<ConfirmUserPage />} />
+          <Route path="/login" element={<LoginPage setUserDetails={setUserDetails} setAlertConf={setAlertConf} />} />
+          <Route path="/confirm" element={<ConfirmUserPage setAlertConf={setAlertConf} />} />
 
           {/* HOME PAGE */}
           <Route path="/home" element={isAuthenticated() ?
@@ -127,7 +135,8 @@ const App = () => {
               setHideMobileSidebar={setHideMobileSidebar}
               setSidebarIsOpen={setSidebarIsOpen}
               setIsLoading={setIsLoading}
-              setPromptConf={setPromptConf} /> : <Navigate replace to="/login" />} />
+              setPromptConf={setPromptConf}
+              setAlertConf={setAlertConf} /> : <Navigate replace to="/login" />} />
 
           {/* BOARD */}
           <Route path="/board/*" element={isAuthenticated() ?
@@ -148,7 +157,8 @@ const App = () => {
               isMobile={isMobile}
               hideMobileSidebar={hideMobileSidebar}
               setPromptConf={setPromptConf}
-              setConfirmConf={setConfirmConf} /> : <Navigate replace to="/login" />} />
+              setConfirmConf={setConfirmConf}
+              setAlertConf={setAlertConf} /> : <Navigate replace to="/login" />} />
 
           {/* SETTINGS */}
           <Route path="/settings" element={isAuthenticated() ?

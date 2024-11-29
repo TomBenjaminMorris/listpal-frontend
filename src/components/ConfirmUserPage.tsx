@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { confirmSignUp } from '../utils/authService';
 
-const ConfirmUserPage = () => {
+const ConfirmUserPage = ({ setAlertConf }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState(location.state?.email || '');
@@ -12,10 +12,20 @@ const ConfirmUserPage = () => {
     e.preventDefault();
     try {
       await confirmSignUp(email, confirmationCode);
-      alert("Account confirmed successfully!\nSign in on next page.");
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Confirmation 👍",
+        textValue: "Account confirmed successfully! Sign in on next page...",
+      })
       navigate('/login');
     } catch (error) {
-      alert(`Failed to confirm account: ${error}`);
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Error 💀",
+        textValue: `Failed to confirm account: ${error}`,
+      })
     }
   };
 

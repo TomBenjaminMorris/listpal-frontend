@@ -6,14 +6,18 @@ import { updateTaskDetails } from '../utils/apiGatewayClient';
 import { isUrlValid } from '../utils/utils';
 import "./TaskMenu.css";
 
-const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks, setPromptConf, setConfirmConf }) => {
+const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks, setPromptConf, setConfirmConf, setAlertConf }) => {
 
   const handleAddLink = (enteredLink) => {
     if (enteredLink === null) {
       return;
     }
     if (!isUrlValid(enteredLink) && enteredLink != "") {
-      alert("URL is not valid")
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "URL is not valid.",
+      })
       return
     }
 

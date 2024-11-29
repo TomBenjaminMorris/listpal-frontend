@@ -8,7 +8,7 @@ import './Task.css'
 import TaskMenu from './TaskMenu';
 import { useOnClickOutside } from 'usehooks-ts'
 
-const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
@@ -214,7 +214,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           src={menuIcon}
           alt="menu icon"
           onClick={handleClickMenu} />
-        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)} isImportant={task.Important == "true"} task={task} setSortedTasks={setSortedTasks} sortedTasks={sortedTasks} setPromptConf={setPromptConf} setConfirmConf={setConfirmConf} />}
+        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)} isImportant={task.Important == "true"} task={task} setSortedTasks={setSortedTasks} sortedTasks={sortedTasks} setPromptConf={setPromptConf} setConfirmConf={setConfirmConf} setAlertConf={setAlertConf} />}
       </div>
     </div>
   );

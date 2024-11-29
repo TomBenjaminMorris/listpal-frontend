@@ -20,7 +20,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, setIsLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar, setPromptConf, setConfirmConf }) => {
+const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, setIsLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar, setPromptConf, setConfirmConf, setAlertConf }) => {
   // console.log("rendering: Board")
   const [filteredSortedTasks, setFilteredSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
@@ -38,7 +38,11 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
   const handleEditBoard = async (name) => {
     if (name == "") {
-      alert("Board name can't be empty");
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "Board name can't be empty...",
+      })
       return;
     }
     if (!name) {
@@ -67,7 +71,11 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
         }
       })
     }).catch((e) => {
-      alert(e);
+      setAlertConf({
+        display: true,
+        title: "Error 💀",
+        textValue: e,
+      })
       setIsLoadingLocal(false);
     });
   }
@@ -355,14 +363,14 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
               })} />
             </div>
 
-            <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
+            <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} setAlertConf={setAlertConf} />
 
           </div>
           {sortedTasks == undefined || sortedTasks == "" || Object.keys(sortedTasks).length == 0 ?
             <div style={{ fontSize: "20px", marginTop: "40px", marginBottom: "30px", }}>
               Create a category to get going...
             </div> : null}
-          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards} setPromptConf={setPromptConf} setConfirmConf={setConfirmConf}></CardList>
+          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards} setPromptConf={setPromptConf} setConfirmConf={setConfirmConf} setAlertConf={setAlertConf}></CardList>
         </div>}
       </div>
     </>

@@ -5,7 +5,7 @@ import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayC
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf }) => {
+const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   // console.log("rendering: CardList")
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
@@ -20,7 +20,11 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
             t.Description = "";
             updateTaskDescription(taskID, "");
           } else {
-            alert("Last task cannot be removed");
+            setAlertConf({
+              display: true,
+              title: "Notice ⚠️",
+              textValue: "The last task cannot be removed...",
+            })
           }
         }
         return t;
@@ -35,16 +39,23 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
 
   const handleNewCard = (name) => {
     let tmpSortedTasks = { ...sortedTasks };
-    // const name = prompt("Enter category name...");
     if (name === null) {
       return;
     }
     if (!name || name == "") {
-      alert("Name can't be empty");
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "Category name can't be empty...",
+      })
       return;
     }
     if (Object.keys(tmpSortedTasks).includes(name)) {
-      alert("That category already exists on this board, chose another");
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "That category already exists on this board, chose another...",
+      })
       return;
     }
 
@@ -85,6 +96,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
       boards={boards}
       setPromptConf={setPromptConf}
       setConfirmConf={setConfirmConf}
+      setAlertConf={setAlertConf}
     />
   });
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../utils/authService';
 import "./LoginPage.css";
 
-const LoginPage = ({setUserDetails}) => {
+const LoginPage = ({ setUserDetails, setAlertConf }) => {
   const [given_name, setGivenName] = useState('');
   const [family_name, setFamilyName] = useState('');
   const [email, setEmail] = useState('');
@@ -27,21 +27,34 @@ const LoginPage = ({setUserDetails}) => {
         console.error('SignIn session or AccessToken is undefined.');
       }
     } catch (error) {
-      alert(`Sign in failed: ${error}`);
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Error 💀",
+        textValue: `Sign in failed: ${error}`,
+      })
     }
   };
 
   const handleSignUp = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "Passwords do not match",
+      })
       return;
     }
     try {
       await signUp(given_name, family_name, email, password, setUserDetails);
       navigate('/confirm', { state: { email } });
     } catch (error) {
-      alert(`Sign up failed: ${error}`);
+      setAlertConf({
+        display: true,
+        title: "Error 💀",
+        textValue: `Sign up failed: ${error}`,
+      })
     }
   };
 

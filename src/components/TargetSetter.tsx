@@ -8,7 +8,7 @@ const override: CSSProperties = {
   marginTop: "15px",
 };
 
-const TargetSetter = ({ title, boards, setBoards }) => {
+const TargetSetter = ({ title, boards, setBoards, setAlertConf }) => {
   // console.log("rendering: TargetSetter")
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
   const [activeBoard, setActiveBoard] = useState(boards[0] && boards[0].SK);
@@ -36,11 +36,21 @@ const TargetSetter = ({ title, boards, setBoards }) => {
     setLoadingTargets(true);
     event.preventDefault();
     if (formData.weekly > formData.monthly) {
-      alert("Weekly can't be more than monthly");
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Notice ⚠️",
+        textValue: "Weekly target can't be more than monthly.",
+      })
       return;
     }
     if (formData.monthly > formData.yearly) {
-      alert("Monthly can't be more than yearly");
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Notice ⚠️",
+        textValue: "Monthly target can't be more than yearly.",
+      })
       return;
     }
     const tmpBoards = [...boards];

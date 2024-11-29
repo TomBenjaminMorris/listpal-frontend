@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { newBoardAPI } from '../utils/apiGatewayClient';
 import './BoardList.css'
 
-const BoardList = ({ boards, setBoards, setPromptConf }) => {
+const BoardList = ({ boards, setBoards, setPromptConf, setAlertConf }) => {
   // console.log("rendering: BoardList")
 
   const handleBoardSelect = (b) => {
@@ -12,7 +12,11 @@ const BoardList = ({ boards, setBoards, setPromptConf }) => {
 
   const handleNewBoard = async (name) => {
     if (name == "") {
-      alert("Board name can't be empty");
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "Board name can't be empty...",
+      })
       return;
     }
     if (!name) {

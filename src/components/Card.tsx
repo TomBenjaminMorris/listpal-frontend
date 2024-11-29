@@ -19,7 +19,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
@@ -61,12 +61,20 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const renameCategory = (newTitle) => {
     const tmpSortedTasks = { ...sortedTasks }
     if (!newTitle || newTitle == "") {
-      alert("Name can't be empty");
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "Category name can't be empty...",
+      })
       setTitleEdited(title);
       return;
     }
     if (Object.keys(tmpSortedTasks).includes(newTitle)) {
-      alert("That category already exists on this board, chose another");
+      setAlertConf({
+        display: true,
+        title: "Notice ⚠️",
+        textValue: "That category already exists on this board, chose another...",
+      })
       setTitleEdited(title);
       return;
     }
@@ -178,6 +186,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         cardEmoji={cardEmoji}
         setPromptConf={setPromptConf}
         setConfirmConf={setConfirmConf}
+        setAlertConf={setAlertConf}
       ></Task>
     )
   });
