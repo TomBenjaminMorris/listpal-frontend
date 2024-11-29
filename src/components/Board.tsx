@@ -3,7 +3,6 @@ import { useEffect, useState, CSSProperties, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
-import { confirmAlert } from 'react-confirm-alert';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import clearIcon from '../assets/icons8-clear-60.png';
@@ -21,7 +20,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, setIsLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar }) => {
+const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, setIsLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar, setPromptConf, setConfirmConf }) => {
   // console.log("rendering: Board")
   const [filteredSortedTasks, setFilteredSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
@@ -34,89 +33,22 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   const navigate = useNavigate();
   const boardID = getBoardIdFromUrl()
 
-  const deleteBoardOptions = {
-    title: deleteMessage,
-    message: 'This action can\'t be undone  ⚠️',
-    buttons: [
-      {
-        label: 'Cancel',
-        onClick: () => { }
-      },
-      {
-        label: 'Delete',
-        onClick: () => {
-          setIsLoadingLocal(true);
-          deleteBoard(boardID).then(() => {
-            localStorage.removeItem('activeBoard');
-            setBoards((boards) => {
-              return boards.filter(b => b.SK !== boardID);
-            })
-            navigate('/home');
-          });
-        }
-      }
-    ],
-    closeOnEscape: true,
-    closeOnClickOutside: true,
-    keyCodeForClose: [8, 32],
-    willUnmount: () => { },
-    afterClose: () => { },
-    onClickOutside: () => { },
-    onKeypress: () => { },
-    onKeypressEscape: () => { },
-    overlayClassName: "overlay-custom-class-name"
-  };
+  let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
+  const boardName = ls_currentBoard && ls_currentBoard.Board
 
-  const clearBoardOptions = {
-    title: "Clear All Completed Tasks?",
-    message: '✨ Time for a spring clean ✨',
-    buttons: [
-      {
-        label: 'Cancel',
-        onClick: () => { }
-      },
-      {
-        label: 'Yes',
-        onClick: () => {
-          const tmpSortedTasks = { ...sortedTasks };
-          const tasksToDelete = [];
-          for (const category in tmpSortedTasks) {
-            tasksToDelete.push(...tmpSortedTasks[category].filter((t) => t.CompletedDate != 'nil'));
-            tmpSortedTasks[category] = tmpSortedTasks[category].filter((t) => t.CompletedDate == 'nil')
-          }
-          setSortedTasks(tmpSortedTasks);
-          deleteTasks(tasksToDelete)
-        }
-      }
-    ],
-    closeOnEscape: true,
-    closeOnClickOutside: true,
-    keyCodeForClose: [8, 32],
-    willUnmount: () => { },
-    afterClose: () => { },
-    onClickOutside: () => { },
-    onKeypress: () => { },
-    onKeypressEscape: () => { },
-    overlayClassName: "overlay-custom-class-name"
-  };
-
-  const handleEditBoard = async () => {
-    // console.log("TTT triggered: handleEditBoard")
-    let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-    const boardName = prompt("Enter new name", ls_currentBoard && ls_currentBoard.Board)
-    if (boardName == "") {
+  const handleEditBoard = async (name) => {
+    if (name == "") {
       alert("Board name can't be empty");
       return;
     }
-    if (!boardName) {
+    if (!name) {
       return;
     }
     setIsLoadingLocal(true);
-
-    renameBoardAPI(boardID, boardName).then(() => {
+    renameBoardAPI(boardID, name).then(() => {
       setBoards(current => {
         let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-        ls_currentBoard['Board'] = boardName;
+        ls_currentBoard['Board'] = name;
         localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
         document.title = "ListPal" + (ls_currentBoard && " | " + ls_currentBoard.Board + " " + ls_currentBoard.Emoji);
 
@@ -125,7 +57,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
           return tmpBoards.map(b => {
             if (b.SK == boardID) {
               let tmpB = b
-              tmpB['Board'] = boardName;
+              tmpB['Board'] = name;
               setIsLoadingLocal(false);
               return tmpB
             }
@@ -141,11 +73,25 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
   }
 
   const handleDeleteBoard = async () => {
-    confirmAlert(deleteBoardOptions);
+    setIsLoadingLocal(true);
+    deleteBoard(boardID).then(() => {
+      localStorage.removeItem('activeBoard');
+      setBoards((boards) => {
+        return boards.filter(b => b.SK !== boardID);
+      })
+      navigate('/home');
+    });
   }
 
   const handleClearTasks = async () => {
-    confirmAlert(clearBoardOptions);
+    const tmpSortedTasks = { ...sortedTasks };
+    const tasksToDelete = [];
+    for (const category in tmpSortedTasks) {
+      tasksToDelete.push(...tmpSortedTasks[category].filter((t) => t.CompletedDate != 'nil'));
+      tmpSortedTasks[category] = tmpSortedTasks[category].filter((t) => t.CompletedDate == 'nil')
+    }
+    setSortedTasks(tmpSortedTasks);
+    deleteTasks(tasksToDelete)
   }
 
   const sortTasks = (data) => {
@@ -161,10 +107,10 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     setIsLoadingLocal(false);
   }
 
-  const handleMenuClick = async () => {
-    setHideMobileSidebar(current => !current);
-    setSidebarIsOpen(current => !current);
-  }
+  // const handleMenuClick = async () => {
+  //   setHideMobileSidebar(current => !current);
+  //   setSidebarIsOpen(current => !current);
+  // }
 
   const getTasks = async () => {
     var firstKey = Object.keys(filteredSortedTasks)[0];
@@ -173,12 +119,10 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
       getActiveTasks(boardID).then((data) => {
         sortTasks(data);
         setIsLoading(false)
-        // setTimeout(() => setIsLoading(false), 500); // if the app crashes anytime soon this line might need to be commented out
       });
     }
     else {
       setIsLoadingLocal(false)
-      // setTimeout(() => setIsLoadingLocal(false), 500); // if the app crashes anytime soon this line might need to be commented out
     }
   }
 
@@ -245,7 +189,6 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
       })
       setFilteredSortedTasks(tmp)
     }
-    // }, [selectedCategories, sortedTasks])
   }, [selectedCategories, sortedTasks])
 
   useEffect(() => {
@@ -391,9 +334,25 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
             </div>
 
             <div className="board-actions-wrapper">
-              <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={handleDeleteBoard} />
-              <img className="edit-icon" src={editIcon} alt="edit icon" onClick={handleEditBoard} />
-              <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearTasks} />
+              <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
+                display: true,
+                title: deleteMessage,
+                textValue: "🚨 This action can't be undone 🚨",
+                callbackFunc: handleDeleteBoard,
+              })} />
+              <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
+                display: true,
+                isEdit: true,
+                defaultText: boardName,
+                title: "Enter New Board Name...",
+                callbackFunc: handleEditBoard,
+              })} />
+              <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={() => setConfirmConf({
+                display: true,
+                title: "Clear All Completed Tasks?",
+                textValue: "✨ Time for a spring clean ✨",
+                callbackFunc: handleClearTasks,
+              })} />
             </div>
 
             <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} />
@@ -403,7 +362,7 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
             <div style={{ fontSize: "20px", marginTop: "40px", marginBottom: "30px", }}>
               Create a category to get going...
             </div> : null}
-          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards}></CardList>
+          <CardList sortedTasks={sortedTasks} filteredSortedTasks={filteredSortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} boards={boards} setPromptConf={setPromptConf} setConfirmConf={setConfirmConf}></CardList>
         </div>}
       </div>
     </>

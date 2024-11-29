@@ -8,11 +8,10 @@ import './Task.css'
 import TaskMenu from './TaskMenu';
 import { useOnClickOutside } from 'usehooks-ts'
 
-const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji }) => {
+const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf }) => {
   // console.log("rendering: Task")
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
-  // const [timer, setTimer] = useState(null);
   const [display, setDisplay] = useState(true);
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
   const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
@@ -114,10 +113,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
     setSortedTasks(tmpSortedTasks);
   }
 
-  const handleDeleteAndHideTask = (taskID, title, fromKeybord) => {
-    if (!fromKeybord && !confirm("Delete task?")) {
-      return
-    }
+  const handleDeleteAndHideTask = (taskID, title) => {
     handleDeleteTask(taskID, title) ? setDisplay(false) : null;
     setTaskMenuVisible(false);
   }
@@ -140,11 +136,9 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
 
   const onKeyDown = (e, taskID, title) => {
     if (e.keyCode === 8 && e.target.value === "") {
-      // clearTimeout(timer);
-      handleDeleteAndHideTask(taskID, title, true)
+      handleDeleteAndHideTask(taskID, title)
     } else if (e.keyCode === 13) {
       e.preventDefault()
-      // clearTimeout(timer);
       handleNewTask()
     }
   }
@@ -220,7 +214,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
           src={menuIcon}
           alt="menu icon"
           onClick={handleClickMenu} />
-        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title, false)} isImportant={task.Important == "true"} task={task} setSortedTasks={setSortedTasks} sortedTasks={sortedTasks} />}
+        {taskMenuVisible && <TaskMenu markAsImportant={() => handleMarkAsImportant(task.SK)} deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)} isImportant={task.Important == "true"} task={task} setSortedTasks={setSortedTasks} sortedTasks={sortedTasks} setPromptConf={setPromptConf} setConfirmConf={setConfirmConf} />}
       </div>
     </div>
   );

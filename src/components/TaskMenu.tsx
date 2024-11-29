@@ -6,23 +6,18 @@ import { updateTaskDetails } from '../utils/apiGatewayClient';
 import { isUrlValid } from '../utils/utils';
 import "./TaskMenu.css";
 
-const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks }) => {
+const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks, setPromptConf, setConfirmConf }) => {
 
-  const handleAddLink = (e) => {
-    let enteredLink = prompt("Enter Link", task.Link)
+  const handleAddLink = (enteredLink) => {
     if (enteredLink === null) {
       return;
     }
-    // if (!enteredLink || enteredLink == "") {
-    //   alert("Name can't be empty");
-    //   return;
-    // }
     if (!isUrlValid(enteredLink) && enteredLink != "") {
       alert("URL is not valid")
       return
     }
 
-    if (!enteredLink.startsWith("https://")  && enteredLink != "") {
+    if (!enteredLink.startsWith("https://") && enteredLink != "") {
       enteredLink = "https://".concat(enteredLink)
     }
 
@@ -40,7 +35,13 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
 
   const withLink = (
     <>
-      <li className="task-dropdown-li" onClick={handleAddLink}>
+      <li className="task-dropdown-li" onClick={() => setPromptConf({
+        display: true,
+        isEdit: true,
+        defaultText: task.Link,
+        title: "Enter Link...",
+        callbackFunc: handleAddLink,
+      })}>
         <img className="task-dropdown-icons" src={editIcon} alt="down icon" />
         Edit Link
       </li>
@@ -49,13 +50,19 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
 
   const withoutLink = (
     <>
-      <li className="task-dropdown-li" onClick={handleAddLink}>
+      <li className="task-dropdown-li" onClick={() => setPromptConf({
+        display: true,
+        isEdit: false,
+        defaultText: "",
+        title: "Enter Link...",
+        callbackFunc: handleAddLink,
+      })}>
         <img className="task-dropdown-icons" src={plusIcon} alt="down icon" />
         Add Link
       </li>
     </>
   )
-  
+
   return (
     <div className="task-dropdown-menu fadeIn-animation" style={isImportant ? { marginLeft: "-220px" } : null}>
       <ul>
@@ -64,7 +71,12 @@ const TaskMenu = ({ markAsImportant, deleteAndHideTask, isImportant, task, setSo
           {`${isImportant ? "Unmark" : "Mark"} as Important`}
         </li>
         {task.Link === undefined || task.Link === "" ? withoutLink : withLink}
-        <li className="task-dropdown-li" onClick={deleteAndHideTask}>
+        <li className="task-dropdown-li" onClick={() => setConfirmConf({
+          display: true,
+          title: "Delete Task?",
+          textValue: "🚨 This action can't be undone 🚨",
+          callbackFunc: deleteAndHideTask,
+        })}>
           <img className="task-dropdown-icons" src={deleteIcon} alt="down icon" />
           Delete Task
         </li>

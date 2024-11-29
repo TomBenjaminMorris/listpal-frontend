@@ -3,16 +3,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { newBoardAPI } from '../utils/apiGatewayClient';
 import './BoardList.css'
 
-const BoardList = ({ boards, setBoards }) => {
+const BoardList = ({ boards, setBoards, setPromptConf }) => {
   // console.log("rendering: BoardList")
 
   const handleBoardSelect = (b) => {
     localStorage.setItem('activeBoard', JSON.stringify(b));
   }
 
-  const handleNewBoard = async () => {
-    // console.log("TTT triggered: handleNewTask")
-    const name = prompt("Enter board name...");
+  const handleNewBoard = async (name) => {
     if (name == "") {
       alert("Board name can't be empty");
       return;
@@ -53,7 +51,13 @@ const BoardList = ({ boards, setBoards }) => {
   return (
     <div className="flex-container-board-list">
       {boardsRendered}
-      <div id="addBoardButton" onClick={handleNewBoard}>+</div>
+      <div id="addBoardButton" onClick={() => setPromptConf({
+        display: true,
+        isEdit: false,
+        defaultText: "",
+        title: "Enter New Board Name...",
+        callbackFunc: handleNewBoard,
+      })}>+</div>
     </div>
   );
 };

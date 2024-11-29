@@ -4,7 +4,7 @@ import closeIcon from '../assets/icons8-delete-48.png';
 import moveIcon from '../assets/icons8-arrow-50.png';
 import "./DropdownMenu.css";
 
-const DropdownMenu = ({ handleDeleteCategory, boards, title, setSortedTasks, sortedTasks, setBoards }) => {
+const DropdownMenu = ({ handleDeleteCategory, boards, title, setSortedTasks, sortedTasks, setBoards, setConfirmConf }) => {
 
   const boardID = getBoardIdFromUrl();
 
@@ -53,7 +53,12 @@ const DropdownMenu = ({ handleDeleteCategory, boards, title, setSortedTasks, sor
           <img className="dropdown-icons rotate" src={moveIcon} alt="down icon" />
           Move Category Down
         </li>
-        <li onClick={handleDeleteCategory}>
+        <li onClick={() => setConfirmConf({
+          display: true,
+          title: "Delete Category?",
+          textValue: "🚨 This action can't be undone 🚨",
+          callbackFunc: handleDeleteCategory,
+        })}>
           <img className="dropdown-icons" src={closeIcon} alt="delete icon" />
           Delete Category
         </li>

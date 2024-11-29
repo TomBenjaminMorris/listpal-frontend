@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
-import { confirmAlert } from 'react-confirm-alert';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
@@ -20,7 +19,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf }) => {
   // console.log("rendering: Card")
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
@@ -30,43 +29,6 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [cardEmoji, setCardEmoji] = useState(tasks && tasks[0].Emoji ? tasks[0].Emoji : "✅");
-
-  const deleteCategoryOptions = {
-    title: `Delete Category - "${title}" ?`,
-    message: 'This action can\'t be undone  ⚠️',
-    buttons: [
-      {
-        label: 'Cancel',
-        onClick: () => {}
-      },
-      {
-        label: 'Delete',
-        onClick: () => {
-          const tmpSortedTasks = { ...sortedTasks };
-          deleteTasks(tmpSortedTasks[title])
-          delete tmpSortedTasks[title];
-          setSortedTasks(tmpSortedTasks);
-
-          // Update Category Order
-          let sortArr = getSortArray(boards)
-          var index = sortArr.indexOf(title);
-          if (index !== -1) {
-            sortArr.splice(index, 1);
-          }
-          updateCategoryOrder(sortArr, boards, setBoards)
-        }
-      }
-    ],
-    closeOnEscape: true,
-    closeOnClickOutside: true,
-    keyCodeForClose: [8, 32],
-    willUnmount: () => { },
-    afterClose: () => { },
-    onClickOutside: () => { },
-    onKeypress: () => { },
-    onKeypressEscape: () => { },
-    overlayClassName: "overlay-custom-class-name"
-  };
 
   const handleClickMenu = () => {
     setDropdownVisible(current => !current);
@@ -167,7 +129,18 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   }
 
   const handleDeleteCategory = () => {
-    confirmAlert(deleteCategoryOptions);
+    const tmpSortedTasks = { ...sortedTasks };
+    deleteTasks(tmpSortedTasks[title])
+    delete tmpSortedTasks[title];
+    setSortedTasks(tmpSortedTasks);
+
+    // Update Category Order
+    let sortArr = getSortArray(boards)
+    var index = sortArr.indexOf(title);
+    if (index !== -1) {
+      sortArr.splice(index, 1);
+    }
+    updateCategoryOrder(sortArr, boards, setBoards)
   }
 
   const handleEmojiSelect = (e) => {
@@ -203,6 +176,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
         handleNewTask={handleNewTask}
         setBoards={setBoards}
         cardEmoji={cardEmoji}
+        setPromptConf={setPromptConf}
+        setConfirmConf={setConfirmConf}
       ></Task>
     )
   });
@@ -266,7 +241,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
 
         <div className="menu" onClick={handleClickMenu} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : null}`} src={dotsIcon} alt="menu icon" />
-          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory} boards={boards} title={title} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} />}
+          {isDropdownVisible && <DropdownMenu handleDeleteCategory={handleDeleteCategory} boards={boards} title={title} sortedTasks={sortedTasks} setSortedTasks={setSortedTasks} setBoards={setBoards} setConfirmConf={setConfirmConf} />}
         </div>
       </div>
       <hr />

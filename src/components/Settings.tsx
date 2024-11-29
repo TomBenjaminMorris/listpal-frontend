@@ -1,11 +1,10 @@
 import { useEffect, CSSProperties } from 'react';
-import './Settings.css';
 import TargetSetter from './TargetSetter';
 import ThemeSetter from './ThemeSetter';
 import SideNavBar from './SideNavBar';
 import Header from './Header';
 import PulseLoader from "react-spinners/PulseLoader";
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import './Settings.css';
 
 const override: CSSProperties = {
   paddingTop: "50px",

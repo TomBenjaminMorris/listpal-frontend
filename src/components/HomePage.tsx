@@ -4,9 +4,9 @@ import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
 import Header from './Header';
-import './HomePage.css'
 import SideNavBar from './SideNavBar';
 import GaugeChart from 'react-gauge-chart'
+import './HomePage.css'
 
 const emojiList = ["🎉", "💫", "⭐", "✨"];
 // const emoji = emojiList[Math.floor(Math.random() * 4)];
@@ -29,7 +29,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading }) => {
+const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading, setPromptConf }) => {
   // console.log("rendering: HomePage")
   const [totalScore, setTotalScore] = useState(0);
   const [totalTargets, setTotalTargets] = useState(0);
@@ -93,7 +93,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
           />}
           {totalScore !=0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>}
           <div className="homePageContent">
-            <BoardList boards={boards} setBoards={setBoards} />
+            <BoardList boards={boards} setBoards={setBoards} setPromptConf={setPromptConf} />
           </div>
         </div>
       </div>

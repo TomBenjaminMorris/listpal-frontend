@@ -5,7 +5,7 @@ import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayC
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards, boards }) => {
+const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf }) => {
   // console.log("rendering: CardList")
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
@@ -33,9 +33,9 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
     }
   }
 
-  const handleNewCard = () => {
+  const handleNewCard = (name) => {
     let tmpSortedTasks = { ...sortedTasks };
-    const name = prompt("Enter category name...");
+    // const name = prompt("Enter category name...");
     if (name === null) {
       return;
     }
@@ -83,13 +83,21 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
       handleDeleteTask={handleDeleteTask}
       setBoards={setBoards}
       boards={boards}
+      setPromptConf={setPromptConf}
+      setConfirmConf={setConfirmConf}
     />
   });
 
   return (
     <div className="card-list-container">
       {cards}
-      <div id="addCardButton" className="fadeUp-animation" onClick={handleNewCard}>+</div>
+      <div id="addCardButton" className="fadeUp-animation" onClick={() => setPromptConf({
+        display: true,
+        isEdit: false,
+        defaultText: "",
+        title: "Enter New Category Name...",
+        callbackFunc: handleNewCard,
+      })}>+</div>
     </div>
   );
 };

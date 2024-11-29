@@ -107,3 +107,16 @@ a {
 .fadeDown-animation {
   animation: 600ms fadeDown;
 }
+
+@keyframes fadeInPure {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.fadeInPure-animation {
+  animation: 400ms fadeInPure;
+}
