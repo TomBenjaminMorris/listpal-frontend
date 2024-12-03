@@ -52,6 +52,7 @@ const ConfirmUserPage = ({ setAlertConf }) => {
             placeholder="Confirmation Code"
             required />
         </div>
+        <br />
         <button type="submit">Confirm Account</button>
       </form>
     </div>

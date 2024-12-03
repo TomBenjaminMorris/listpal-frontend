@@ -10,8 +10,6 @@ import clearIcon from '../assets/icons8-clear-60.png';
 import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
-import SideNavBar from './SideNavBar';
-import Header from './Header';
 import TargetSetterModal from './TargetSetterModal';
 import Select, { MultiValue } from "react-select";
 import emojiData from '@emoji-mart/data'
@@ -22,7 +20,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSidebarCollapse, sidebarIsOpen, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, setIsLoading, hideMobileSidebar, isMobile, setSidebarIsOpen, setHideMobileSidebar, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf }) => {
   // console.log("rendering: Board")
   const [filteredSortedTasks, setFilteredSortedTasks] = useState({});
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
@@ -117,11 +115,6 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
     setSortedTasks(sortedData);
     setIsLoadingLocal(false);
   }
-
-  // const handleMenuClick = async () => {
-  //   setHideMobileSidebar(current => !current);
-  //   setSidebarIsOpen(current => !current);
-  // }
 
   const getTasks = async () => {
     var firstKey = Object.keys(filteredSortedTasks)[0];
@@ -327,11 +320,11 @@ const Board = ({ handleLogout, sortedTasks, setSortedTasks, setBoards, handleSid
 
   const content = (
     <>
+
       <span className="transparent_gradient"></span>
       <TargetSetterModal display={displayTargetSetter} setDisplay={setDisplayTargetSetter} boardID={boardID} boards={boards} setBoards={setBoards} setAlertConf={setAlertConf} />
-      <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
+
       <div className="board-content-wrapper">
-        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
 
         {isLoadingLocal || isLoading ? loader : <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
           <div className="board-filter-actions-wrapper fadeUp-animation">

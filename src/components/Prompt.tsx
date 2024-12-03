@@ -56,7 +56,7 @@ const Prompt = ({ promptConf, setPromptConf }) => {
             <input className="prompt-input" type="text" value={inputText} onChange={e => setInputText(e.target.value)} autoFocus />
             <div style={{ display: "flex", flexDirection: "row-reverse", marginBottom: "-10px" }}>
               <button className="prompt-button" onClick={handleConfirm}>Confirm</button>
-              <button className="prompt-button" onClick={handleCancel}>Cancel</button>
+              <button className="prompt-button-cancel" onClick={handleCancel}>Cancel</button>
             </div>
           </div>
         </div>

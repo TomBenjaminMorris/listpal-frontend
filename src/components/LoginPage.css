@@ -9,23 +9,17 @@
 }
 
 .login-buttons:hover {
-    /* background-color: var(--accent-2); */
-    /* -webkit-animation-duration: 1s;
-    -webkit-animation-name: bulge;
-    -webkit-animation-iteration-count: initial; */
-    transform: scale(1.05);
+    background-color: var(--accent-2);
 }
 
 .login-buttons:focus {
     outline-color: transparent;
     outline-style: solid;
-    box-shadow: 0 0 0 1px #ffffff8a;
+    /* box-shadow: 0 0 0 1px #ffffff8a; */
 }
-
 
 .inputText {
     font-size: 1.3em;
-    /* width: 100%; */
     padding: 8px;
     background-color: var(--foreground);
     color: var(--text-colour);
@@ -35,4 +29,18 @@
 
 .inputText:focus {
     outline-color: var(--accent);
+}
+
+.resend-confirmation {
+    margin-top: 10px;
+}
+
+.resend-confirmation > a {
+    font-size: 14px;
+    color: rgb(58, 58, 171);
+    text-decoration: underline;
+}
+
+.resend-confirmation > a:hover {
+    opacity: 0.6;
 }

@@ -17,7 +17,8 @@ const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobil
         </div>}
       </div>
       <div className="header-right">
-        <Link className="back-button board-back-button " to="/home" >
+
+        <Link to="/home" >
           <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
             <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
           </div>

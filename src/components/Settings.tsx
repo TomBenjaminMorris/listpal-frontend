@@ -1,8 +1,5 @@
 import { useEffect, CSSProperties } from 'react';
-import TargetSetter from './TargetSetter';
 import ThemeSetter from './ThemeSetter';
-import SideNavBar from './SideNavBar';
-import Header from './Header';
 import PulseLoader from "react-spinners/PulseLoader";
 import './Settings.css';
 
@@ -11,7 +8,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, handleSidebarCollapse, boards, setBoards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isLoading, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading }) => {
+const Settings = ({ userDetails, setUserDetails, sidebarIsOpen, isLoading }) => {
   // console.log("rendering: Settings")
   useEffect(() => {
     document.title = "ListPal | Settings";
@@ -20,9 +17,7 @@ const Settings = ({ handleLogout, userDetails, setUserDetails, sidebarIsOpen, ha
   const content = (
     <>
       <span className="transparent_gradient"></span>
-      <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
         <div className="settings-content-sub-wrapper fadeUp-animation">
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>

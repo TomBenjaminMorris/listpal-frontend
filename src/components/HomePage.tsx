@@ -1,10 +1,7 @@
 import { CSSProperties, useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { parseJwt } from '../utils/utils';
 import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
-import Header from './Header';
-import SideNavBar from './SideNavBar';
 import GaugeChart from 'react-gauge-chart'
 import './HomePage.css'
 
@@ -29,7 +26,7 @@ const override: CSSProperties = {
   opacity: "0.8",
 };
 
-const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, sidebarIsOpen, isLoading, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setHideMobileSidebar, setSidebarIsOpen, setIsLoading, setPromptConf, setAlertConf }) => {
+const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, setAlertConf }) => {
   // console.log("rendering: HomePage")
   const [totalScore, setTotalScore] = useState(0);
   const [totalTargets, setTotalTargets] = useState(0);
@@ -61,9 +58,7 @@ const HomePage = ({ handleLogout, boards, setBoards, handleSidebarCollapse, side
   const content = (
     <>
       <span className="transparent_gradient"></span>
-      <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} />
       <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
-        <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} />
         <div className="home-page-content-sub-wrapper fadeUp-animation">
           <h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>
           {totalScore == 0 || totalScore == undefined ? 

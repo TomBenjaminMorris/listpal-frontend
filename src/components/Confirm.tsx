@@ -51,7 +51,7 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", flexDirection: "row-reverse", marginBottom: "-10px" }}>
               <button className="prompt-button" onClick={handleConfirm}>Confirm</button>
-              <button className="prompt-button" onClick={handleCancel}>Cancel</button>
+              <button className="prompt-button-cancel" onClick={handleCancel}>Cancel</button>
             </div>
           </div>
         </div>

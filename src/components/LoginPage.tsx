@@ -130,6 +130,9 @@ const LoginPage = ({ setUserDetails, setAlertConf }) => {
       <button className="login-buttons" onClick={() => setIsSignUp(!isSignUp)}>
         {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
       </button>
+      <div className="resend-confirmation">
+        <a onClick={() => navigate('/confirm', { state: { email } })}>Resend Confirmation Code</a>
+      </div>
     </div>
   );
 };

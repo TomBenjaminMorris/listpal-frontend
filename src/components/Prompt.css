@@ -54,3 +54,14 @@
 .prompt-button:focus {
   outline: none;
 }
+
+.prompt-button-cancel{
+}
+
+.prompt-button-cancel:hover{
+  background-color: var(--accent-2);
+}
+
+.prompt-button-cancel:focus {
+  outline: none;
+}

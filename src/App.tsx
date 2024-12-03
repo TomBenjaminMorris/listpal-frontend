@@ -12,6 +12,8 @@ import Confirm from './components/Confirm';
 import Alert from './components/Alert';
 import _debounce from 'lodash.debounce';
 import './App.css'
+import Header from './components/Header';
+import SideNavBar from './components/SideNavBar';
 
 
 const App = () => {
@@ -107,16 +109,22 @@ const App = () => {
 
   return (
     <>
-      {Object.keys(promptConf).length > 1 && <Prompt promptConf={promptConf} setPromptConf={setPromptConf} />}
-
-      {Object.keys(confirmConf).length > 1 && <Confirm confirmConf={confirmConf} setConfirmConf={setConfirmConf} />}
-
-      {Object.keys(alertConf).length > 1 && <Alert alertConf={alertConf} setAlertConf={setAlertConf} />}
-
       <BrowserRouter>
+
+        {/* Prompt/Confirm/Alert */}
+        {Object.keys(promptConf).length > 1 && <Prompt promptConf={promptConf} setPromptConf={setPromptConf} />}
+        {Object.keys(confirmConf).length > 1 && <Confirm confirmConf={confirmConf} setConfirmConf={setConfirmConf} />}
+        {Object.keys(alertConf).length > 1 && <Alert alertConf={alertConf} setAlertConf={setAlertConf} />}
+
+        {isAuthenticated() ? <Header sidebarIsOpen={sidebarIsOpen} setHideMobileSidebar={setHideMobileSidebar} setSidebarIsOpen={setSidebarIsOpen} isMobile={isMobile} /> : null}
+
+        {isAuthenticated() ? <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} /> : null}
+
         <Routes>
           <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
+
           <Route path="/login" element={<LoginPage setUserDetails={setUserDetails} setAlertConf={setAlertConf} />} />
+
           <Route path="/confirm" element={<ConfirmUserPage setAlertConf={setAlertConf} />} />
 
           {/* HOME PAGE */}
@@ -124,19 +132,12 @@ const App = () => {
             <HomePage
               boards={boards}
               setBoards={setBoards}
-              handleSidebarCollapse={handleSidebarCollapse}
-              handleLogout={handleLogout}
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}
-              sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-              setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-              isMobile={isMobile}
-              hideMobileSidebar={hideMobileSidebar}
-              setHideMobileSidebar={setHideMobileSidebar}
-              setSidebarIsOpen={setSidebarIsOpen}
-              setIsLoading={setIsLoading}
               setPromptConf={setPromptConf}
-              setAlertConf={setAlertConf} /> : <Navigate replace to="/login" />} />
+              setAlertConf={setAlertConf}
+            /> : <Navigate replace to="/login" />}
+          />
 
           {/* BOARD */}
           <Route path="/board/*" element={isAuthenticated() ?
@@ -144,40 +145,25 @@ const App = () => {
               sortedTasks={sortedTasks}
               setBoards={setBoards}
               setSortedTasks={setOrderedSortedTasks}
-              handleSidebarCollapse={handleSidebarCollapse}
-              handleLogout={handleLogout}
               sidebarIsOpen={sidebarIsOpen}
               boards={boards}
-              sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-              setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
               isLoading={isLoading}
               setIsLoading={setIsLoading}
-              setHideMobileSidebar={setHideMobileSidebar}
-              setSidebarIsOpen={setSidebarIsOpen}
-              isMobile={isMobile}
-              hideMobileSidebar={hideMobileSidebar}
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
-              setAlertConf={setAlertConf} /> : <Navigate replace to="/login" />} />
+              setAlertConf={setAlertConf}
+            /> : <Navigate replace to="/login" />}
+          />
 
           {/* SETTINGS */}
           <Route path="/settings" element={isAuthenticated() ?
             <Settings
               userDetails={userDetails}
               setUserDetails={setUserDetails}
-              handleSidebarCollapse={handleSidebarCollapse}
-              handleLogout={handleLogout}
               sidebarIsOpen={sidebarIsOpen}
-              boards={boards}
-              setBoards={setBoards}
-              sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-              setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
               isLoading={isLoading}
-              setHideMobileSidebar={setHideMobileSidebar}
-              setSidebarIsOpen={setSidebarIsOpen}
-              isMobile={isMobile}
-              hideMobileSidebar={hideMobileSidebar}
-              setIsLoading={setIsLoading} /> : <Navigate replace to="/login" />} />
+            /> : <Navigate replace to="/login" />}
+          />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
