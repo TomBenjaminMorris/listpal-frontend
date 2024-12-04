@@ -2,10 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { getSortArray, isAuthenticated, isDev } from './utils/utils';
-import { setTokensFromCode } from './utils/authService';
-// import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
-// import ConfirmUserPage from './components/ConfirmUserPage';
 import Board from './components/Board';
 import Settings from './components/Settings';
 import Prompt from './components/Prompt';
@@ -14,6 +11,7 @@ import Alert from './components/Alert';
 import _debounce from 'lodash.debounce';
 import Header from './components/Header';
 import SideNavBar from './components/SideNavBar';
+import RedirectPage from './components/RedirectPage';
 import config from "./config.json";
 import './App.css'
 
@@ -45,33 +43,15 @@ const App = () => {
     // title: "Warning!",
     // textValue: "This thing is about to happen",
   });
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
-  // code ? window.location.replace(window.location.href.split("?")[0]) : null
-  console.log("isDev: ", isDev())
-  const isDevel = false
+
+  // console.log("isDev: ", isDev())
 
   useEffect(() => {
+    isAuthenticated() ? loadRequests() : null
     const handleResize = _debounce(() => setIsMobile(window.innerWidth < 650), 10)
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
-    }
-  }, [])
-
-  useEffect(() => {
-    if (code) {
-      setIsLoading(true);
-      !isAuthenticated() ? setTokensFromCode(code, isDevel ? config.redirectURLLocal : config.redirectURLRemote).then(() => {
-        loadRequests();
-      }) : loadRequests();
-    } else {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        loadRequests();
-      } else {
-        window.location.replace(isDevel ? config.managedLoginUIURLLocal : config.managedLoginUIURLRemote)
-      }
     }
   }, [])
 
@@ -128,7 +108,7 @@ const App = () => {
     setUserDetails({})
     localStorage.clear();
     sessionStorage.clear();
-    window.location.replace(isDevel ? config.managedLoginUIURLLocal : config.managedLoginUIURLRemote)
+    window.location.replace(isDev() ? config.managedLoginLocal : config.managedLoginRemote)
   };
 
   return (
@@ -147,6 +127,7 @@ const App = () => {
 
         <Routes>
           <Route path="/" element={<Navigate replace to="/home" />} />
+          <Route path="/redirect" element={<RedirectPage />} />
 
           {/* HOME PAGE */}
           <Route path="/home" element={

@@ -15,9 +15,8 @@ export const setTokensFromCode = async (authorizationCode: string, redirectUri: 
     client_id: "4vi87ls8jg8pj6o2fbvmlj5l3g",
     redirect_uri: redirectUri
   };
-
   const formBody = Object.keys(details).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(details[key])}`).join("&");
-  // console.log(formBody);
+
   await axios.post('https://listpal-dev.auth.eu-west-2.amazoncognito.com/oauth2/token', formBody, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -26,7 +25,7 @@ export const setTokensFromCode = async (authorizationCode: string, redirectUri: 
     sessionStorage.setItem("idToken", res.data.id_token || '');
     sessionStorage.setItem("accessToken", res.data.access_token || '');
     sessionStorage.setItem("refreshToken", res.data.refresh_token || '');
-    // console.log(res);
+    window.location.replace("/home")
   }).catch((err) => {
     console.log(err);
   });

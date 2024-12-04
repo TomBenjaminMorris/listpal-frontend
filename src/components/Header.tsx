@@ -10,7 +10,7 @@ const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobil
   }
 
   return (
-    <div className="header sticky">
+    <div className="header sticky fadeInPure-animation">
       <div className="header-left">
         {isMobile && <div className="toggle-wrapper">
           <img className="menu-icon-mobile" src={menuIcon} alt="menu icon" onClick={handleMenuClick} />
