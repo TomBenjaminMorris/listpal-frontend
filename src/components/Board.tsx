@@ -320,8 +320,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
 
   const content = (
     <>
-
-      <span className="transparent_gradient"></span>
       <TargetSetterModal display={displayTargetSetter} setDisplay={setDisplayTargetSetter} boardID={boardID} boards={boards} setBoards={setBoards} setAlertConf={setAlertConf} />
 
       <div className="board-content-wrapper">

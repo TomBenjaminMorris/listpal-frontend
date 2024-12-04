@@ -16,7 +16,6 @@ const Settings = ({ userDetails, setUserDetails, sidebarIsOpen, isLoading }) => 
 
   const content = (
     <>
-      <span className="transparent_gradient"></span>
       <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <div className="settings-content-sub-wrapper fadeUp-animation">
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />

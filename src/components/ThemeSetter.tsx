@@ -10,7 +10,7 @@ const ThemeSetter = ({ userDetails, setUserDetails }) => {
       key={themeOption}
       name={themeOption}
       setUserDetails={setUserDetails}
-      highlight={themeOption === userDetails.Theme}
+      highlight={userDetails && themeOption === userDetails.Theme}
     />
   });
 

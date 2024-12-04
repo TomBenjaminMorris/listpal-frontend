@@ -1,20 +1,21 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
-import { getSortArray, isAuthenticated } from './utils/utils';
-import LoginPage from './components/LoginPage';
+import { getSortArray, isAuthenticated, isDev } from './utils/utils';
+import { setTokensFromCode } from './utils/authService';
+// import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
-import ConfirmUserPage from './components/ConfirmUserPage';
+// import ConfirmUserPage from './components/ConfirmUserPage';
 import Board from './components/Board';
 import Settings from './components/Settings';
 import Prompt from './components/Prompt';
 import Confirm from './components/Confirm';
 import Alert from './components/Alert';
 import _debounce from 'lodash.debounce';
-import './App.css'
 import Header from './components/Header';
 import SideNavBar from './components/SideNavBar';
-
+import config from "./config.json";
+import './App.css'
 
 const App = () => {
   // console.log("rendering: App")
@@ -44,6 +45,11 @@ const App = () => {
     // title: "Warning!",
     // textValue: "This thing is about to happen",
   });
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  // code ? window.location.replace(window.location.href.split("?")[0]) : null
+  console.log("isDev: ", isDev())
+  const isDevel = false
 
   useEffect(() => {
     const handleResize = _debounce(() => setIsMobile(window.innerWidth < 650), 10)
@@ -54,8 +60,25 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    const ls_userDetails = JSON.parse(localStorage.getItem('userDetails'))
-    const theme = ls_userDetails ? ls_userDetails.Theme : userDetails.Theme ? userDetails.Theme : 'purple-haze';
+    if (code) {
+      setIsLoading(true);
+      !isAuthenticated() ? setTokensFromCode(code, isDevel ? config.redirectURLLocal : config.redirectURLRemote).then(() => {
+        loadRequests();
+      }) : loadRequests();
+    } else {
+      if (isAuthenticated()) {
+        setIsLoading(true);
+        loadRequests();
+      } else {
+        window.location.replace(isDevel ? config.managedLoginUIURLLocal : config.managedLoginUIURLRemote)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const userDetailsTmp = localStorage.getItem('userDetails')
+    const ls_userDetails = userDetailsTmp != "undefined" ? JSON.parse(userDetailsTmp) : null
+    const theme = ls_userDetails && ls_userDetails != null ? ls_userDetails.Theme : userDetails ? userDetails.Theme : 'purple-haze';
     document.documentElement.style.setProperty("--background", `var(--${theme}-bg)`);
     document.documentElement.style.setProperty("--foreground", `var(--${theme}-fg)`);
     document.documentElement.style.setProperty("--text-colour", `var(--${theme}-text-colour)`);
@@ -63,9 +86,8 @@ const App = () => {
     document.documentElement.style.setProperty("--accent-2", `var(--${theme}-accent-2)`);
   }, [userDetails])
 
-  useEffect(() => {
-    setIsLoading(true);
-    isAuthenticated() && getUser().then((u) => {
+  const loadRequests = () => {
+    getUser().then((u) => {
       getBoards().then((br) => {
         setUserDetails(u[0]);
         const tmpBr = br.map(b => {
@@ -77,7 +99,7 @@ const App = () => {
         localStorage.setItem('userDetails', JSON.stringify(u[0]))
       });
     })
-  }, [])
+  }
 
   const setOrderedSortedTasks = (tasks) => {
     let sortArr = getSortArray(boards)
@@ -100,15 +122,18 @@ const App = () => {
   }
 
   const handleLogout = () => {
+    setIsLoading(true);
     setBoards([]);
     setSortedTasks([]);
     setUserDetails({})
     localStorage.clear();
     sessionStorage.clear();
+    window.location.replace(isDevel ? config.managedLoginUIURLLocal : config.managedLoginUIURLRemote)
   };
 
   return (
     <>
+      <span className="transparent_gradient"></span>
       <BrowserRouter>
 
         {/* Prompt/Confirm/Alert */}
@@ -121,14 +146,10 @@ const App = () => {
         {isAuthenticated() ? <SideNavBar handleLogout={handleLogout} sidebarIsOpen={sidebarIsOpen} handleSidebarCollapse={handleSidebarCollapse} boards={boards} sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen} setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen} isMobile={isMobile} hideMobileSidebar={hideMobileSidebar} setIsLoading={setIsLoading} /> : null}
 
         <Routes>
-          <Route path="/" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/login" />} />
-
-          <Route path="/login" element={<LoginPage setUserDetails={setUserDetails} setAlertConf={setAlertConf} />} />
-
-          <Route path="/confirm" element={<ConfirmUserPage setAlertConf={setAlertConf} />} />
+          <Route path="/" element={<Navigate replace to="/home" />} />
 
           {/* HOME PAGE */}
-          <Route path="/home" element={isAuthenticated() ?
+          <Route path="/home" element={
             <HomePage
               boards={boards}
               setBoards={setBoards}
@@ -136,11 +157,11 @@ const App = () => {
               isLoading={isLoading}
               setPromptConf={setPromptConf}
               setAlertConf={setAlertConf}
-            /> : <Navigate replace to="/login" />}
+            />}
           />
 
           {/* BOARD */}
-          <Route path="/board/*" element={isAuthenticated() ?
+          <Route path="/board/*" element={
             <Board
               sortedTasks={sortedTasks}
               setBoards={setBoards}
@@ -152,17 +173,17 @@ const App = () => {
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}
-            /> : <Navigate replace to="/login" />}
+            />}
           />
 
           {/* SETTINGS */}
-          <Route path="/settings" element={isAuthenticated() ?
+          <Route path="/settings" element={
             <Settings
               userDetails={userDetails}
               setUserDetails={setUserDetails}
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}
-            /> : <Navigate replace to="/login" />}
+            />}
           />
 
           <Route path="*" element={<Navigate to="/" />} />
