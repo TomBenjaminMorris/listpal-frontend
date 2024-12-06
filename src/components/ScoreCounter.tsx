@@ -104,7 +104,7 @@ const ScoreCounter = ({ score, percent, type, currentBoard, setBoards, setAlertC
         })}>
           <div style={{ fontSize: 15, marginTop: 0 }}>
             <input className="score-input" type="text" value={scoreValue} onChange={e => handleScoreUpdate(e)} />
-            {/* {isExploding ? starImg : null} */}
+            {isExploding ? starImg : null}
           </div>
         </CircularProgressbarWithChildren>}
         <div className="score-type-tooltip">{type}</div>

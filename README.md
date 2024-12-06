@@ -6,6 +6,7 @@
 * https://docs.amazonaws.cn/en_us/cognito-user-identity-pools/latest/APIReference/API_InitiateAuth.html
 * https://docs.aws.amazon.com/cognito/latest/developerguide/getting-started-test-application-react.html
 * https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javascriptv3/example_code/cognito-identity-provider/scenarios/cognito-developer-guide-react-example/frontend-client
+* https://medium.com/@ravindu.18/authentication-using-amazon-cognito-hosted-ui-for-simple-react-application-part-2-fc8e44272f6e
 
 ### ReactJS
 * https://www.npmjs.com/package/react-circular-progressbar

@@ -17,7 +17,7 @@ const RedirectPage = ({}) => {
 
   return (
     <div className="loadingWrapper fadeInPure-animation" style={{ color: "white", fontSize: "35px", backgroundColor: "var(--purple-haze-bg)" }}>
-      <div className="logo-text-wrapper" style={{ marginTop: "-10vh" }}>
+      <div className="logo-text-wrapper">
         <div className="logo-text-1">List</div>
         <div className="logo-text-2">Pal</div>
         {/* Welcome */}

@@ -5,13 +5,12 @@ import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
-// import userIcon from '../assets/icons8-user-48.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
 import logoutIcon from '../assets/icons8-logout-48.png';
 // import statsIcon from '../assets/icons8-graph-48.png';
 import './SideNavBar.css'
 
-const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setIsLoading }) => {
+const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setIsLoading }) => {
   // console.log("rendering: SideNavBar")
   var idToken = sessionStorage.idToken && parseJwt(sessionStorage.idToken.toString());
   const navigate = useNavigate();
@@ -56,8 +55,6 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
           {boardsRendered}
         </div>
 
-
-
         {/* STATS */}
         {/* <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/stats" >
           <img src={statsIcon} />
@@ -65,26 +62,17 @@ const SideNavBar = ({ handleLogout, sidebarIsOpen, handleSidebarCollapse, boards
         </Link> */}
       </div>
 
-      
-
       {/* LOGOUT */}
-      {/* <Link onClick={() => handleLogout()} className={`sidenav-user sidenav-link sidenav-logout ${sidebarIsOpen ? "open" : "collapsed"}`} to="/login" > */}
-      <div onClick={() => handleLogout()} className={`sidenav-user sidenav-link sidenav-logout ${sidebarIsOpen ? "open" : "collapsed"}`} >
+      <Link to="/logout" className={`sidenav-user sidenav-link sidenav-logout ${sidebarIsOpen ? "open" : "collapsed"}`} >
         <img src={logoutIcon} />
         <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>{"Log Out"}</div>
-      </div>
+      </Link>
 
       {/* SETTINGS */}
       <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/settings" >
         <img src={settingsIcon} />
         <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Settings</div>
       </Link>
-
-      {/* USER */}
-      {/* <Link className={`sidenav-user sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/home" >
-        <img src={userIcon} />
-        <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>{`${idToken.given_name} ${idToken.family_name}`}</div>
-      </Link> */}
     </div>
   );
 };
