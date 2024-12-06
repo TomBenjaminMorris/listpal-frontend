@@ -1,20 +1,27 @@
 import { useLocation } from "react-router-dom";
-import config from "../config.json";
 import { setTokensFromCode } from "../utils/authService";
+import config from "../config.json";
 
 const RedirectPage = ({}) => {
   const location = useLocation();
   const authCode = new URLSearchParams(location.search).get('code');
-  
+  const isDev = config.isDev;
+
   if (authCode) {
-    setTokensFromCode(authCode, true ? config.redirectLocal : config.redirectRemote);
+    setTimeout(() => {
+      setTokensFromCode(authCode, isDev ? config.redirectLocal : config.redirectRemote);
+    }, 800);
   } else {
     window.location.replace("/home")
   }
 
   return (
-    <div className="loadingWrapper" style={{color: "white", backgroundColor: "var(--purple-haze-bg)"}}>
-      logging in...
+    <div className="loadingWrapper fadeInPure-animation" style={{ color: "white", fontSize: "35px", backgroundColor: "var(--purple-haze-bg)" }}>
+      <div className="logo-text-wrapper" style={{ marginTop: "-10vh" }}>
+        <div className="logo-text-1">List</div>
+        <div className="logo-text-2">Pal</div>
+        {/* Welcome */}
+      </div>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
-import { getSortArray, isAuthenticated, isDev } from './utils/utils';
+import { getSortArray, isAuthenticated } from './utils/utils';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
 import Settings from './components/Settings';
@@ -14,6 +14,7 @@ import SideNavBar from './components/SideNavBar';
 import RedirectPage from './components/RedirectPage';
 import config from "./config.json";
 import './App.css'
+import Logout from './components/Logout';
 
 const App = () => {
   // console.log("rendering: App")
@@ -43,10 +44,10 @@ const App = () => {
     // title: "Warning!",
     // textValue: "This thing is about to happen",
   });
-
-  // console.log("isDev: ", isDev())
+  const isDev = config.isDev;
 
   useEffect(() => {
+    setTheme();
     isAuthenticated() ? loadRequests() : null
     const handleResize = _debounce(() => setIsMobile(window.innerWidth < 650), 10)
     window.addEventListener('resize', handleResize);
@@ -56,6 +57,10 @@ const App = () => {
   }, [])
 
   useEffect(() => {
+    setTheme()
+  }, [userDetails])
+
+  const setTheme = () => {
     const userDetailsTmp = localStorage.getItem('userDetails')
     const ls_userDetails = userDetailsTmp != "undefined" ? JSON.parse(userDetailsTmp) : null
     const theme = ls_userDetails && ls_userDetails != null ? ls_userDetails.Theme : userDetails ? userDetails.Theme : 'purple-haze';
@@ -64,7 +69,7 @@ const App = () => {
     document.documentElement.style.setProperty("--text-colour", `var(--${theme}-text-colour)`);
     document.documentElement.style.setProperty("--accent", `var(--${theme}-accent)`);
     document.documentElement.style.setProperty("--accent-2", `var(--${theme}-accent-2)`);
-  }, [userDetails])
+  }
 
   const loadRequests = () => {
     getUser().then((u) => {
@@ -108,7 +113,7 @@ const App = () => {
     setUserDetails({})
     localStorage.clear();
     sessionStorage.clear();
-    window.location.replace(isDev() ? config.managedLoginLocal : config.managedLoginRemote)
+    window.location.replace(isDev ? config.managedLoginLocal : config.managedLoginRemote)
   };
 
   return (
@@ -128,9 +133,10 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Navigate replace to="/home" />} />
           <Route path="/redirect" element={<RedirectPage />} />
+          <Route path="/logout" element={<Logout handleLogout={handleLogout} />} />
 
           {/* HOME PAGE */}
-          <Route path="/home" element={
+          <Route path="/home" element={isAuthenticated() ?
             <HomePage
               boards={boards}
               setBoards={setBoards}
@@ -138,11 +144,11 @@ const App = () => {
               isLoading={isLoading}
               setPromptConf={setPromptConf}
               setAlertConf={setAlertConf}
-            />}
+            /> : <Navigate replace to="/logout" />}
           />
 
           {/* BOARD */}
-          <Route path="/board/*" element={
+          <Route path="/board/*" element={isAuthenticated() ?
             <Board
               sortedTasks={sortedTasks}
               setBoards={setBoards}
@@ -154,20 +160,20 @@ const App = () => {
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}
-            />}
+            /> : <Navigate replace to="/logout" />}
           />
 
           {/* SETTINGS */}
-          <Route path="/settings" element={
+          <Route path="/settings" element={isAuthenticated() ?
             <Settings
               userDetails={userDetails}
               setUserDetails={setUserDetails}
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}
-            />}
+            /> : <Navigate replace to="/logout" />}
           />
 
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={isAuthenticated() ? <Navigate to="/" /> : <Navigate replace to="/logout" />} />
         </Routes>
       </BrowserRouter>
     </>

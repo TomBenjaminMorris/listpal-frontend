@@ -1,5 +1,4 @@
 import { updateBoardCategoryOrder } from "./apiGatewayClient";
-import process from "process";
 
 /*eslint-disable*/
 export function parseJwt(token) {
@@ -78,10 +77,4 @@ export function getBoardIdFromUrl() {
     const url = window.location.href;
     const boardID = url.split('/').pop();
     return boardID;
-}
-
-const development = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
-
-export function isDev() {
-    return development;
 }
