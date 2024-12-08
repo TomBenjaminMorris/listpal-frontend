@@ -51,7 +51,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
   }, [boards])
 
   const chartStyle = {
-    width: 300,
+    width: 250,
     margin: "auto"
   }
 
@@ -70,7 +70,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
                 {totalScore && `${emojiList[3]} ${totalScore} ${emojiList[3]}`}
               </h1>
             </>}
-          {totalScore != 0 && <GaugeChart id="gauge-chart"
+          {/* {totalScore != 0 && <GaugeChart id="gauge-chart"
             animate={false}
             arcPadding={0.03}
             cornerRadius={3}
@@ -85,7 +85,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
             colors={['#FFFE']}
             arcWidth={0.15}
           />}
-          {totalScore != 0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>}
+          {totalScore != 0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>} */}
           <div className="homePageContent">
             <BoardList boards={boards} setBoards={setBoards} setPromptConf={setPromptConf} setAlertConf={setAlertConf} />
           </div>

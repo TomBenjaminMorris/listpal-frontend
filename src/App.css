@@ -74,6 +74,7 @@ button {
 
   .header {
     /* height: 50px; */
+    padding: 5 px 0px 5px 0px;
   }
 
   .header-right {
@@ -90,8 +91,8 @@ button {
   }
 
   .menu-icon-mobile {
-    margin-left: 20px;
-    margin-top: 5px;
+    margin-left: 10px;
+    /* margin-top: 5px; */
     width: 25px;
     height: 25px;
     padding: 10px;
@@ -102,14 +103,27 @@ button {
     padding-left: 0px !important;
   }
 
+  .boardLink {
+    font-size: 22px;
+  }
+
+  .homePageContent {
+    margin-top: 20px;
+  }
+
   .home-page-content-sub-wrapper {
-    margin-top: 90px;
+    margin-top: 70px;
   }
 
   .home-page-content-sub-wrapper>h2 {
     width: 90%;
     margin: auto;
     margin-top: 20px;
+    font-size: 20px;
+  }
+
+  .home-page-content-sub-wrapper>h1 {
+    font-size: 30px !important;
   }
 
   /* SETTINGS STYLES */
@@ -126,6 +140,7 @@ button {
   /* BOARD STYLES */
   .flex-container-board-list {
     margin-bottom: 30px;
+    width: 65%;
   }
 
   .flex-container {
@@ -149,7 +164,10 @@ button {
   }
 
   .task-textarea-box {
-    font-size: 17px;
+    font-size: 15px;
+    width: -webkit-calc(100% - 55px);
+    width: -moz-calc(100% - 55px);
+    width: calc(100% - 55px);
   }
 
   .listpal-board-logo {
@@ -175,5 +193,10 @@ button {
   .board-filter-actions-wrapper {
     margin-top: 20px;
     margin-bottom: 10px;
+    display: none;
+  }
+
+  .task-dropdown-icons { 
+    display: none;
   }
 }
