@@ -22,7 +22,6 @@ const RedirectPage = ({}) => {
       <div className="logo-text-wrapper">
         <div className="logo-text-1">List</div>
         <div className="logo-text-2">Pal</div>
-        {/* Welcome */}
       </div>
     </div>
   )

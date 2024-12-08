@@ -110,14 +110,14 @@ const App = () => {
         {Object.keys(confirmConf).length > 1 && <Confirm confirmConf={confirmConf} setConfirmConf={setConfirmConf} />}
         {Object.keys(alertConf).length > 1 && <Alert alertConf={alertConf} setAlertConf={setAlertConf} />}
 
-        {isAuthenticated() ? <Header
+        {isAuthenticated() && !isLoading ? <Header
           setHideMobileSidebar={setHideMobileSidebar}
           setSidebarIsOpen={setSidebarIsOpen}
           sidebarIsOpen={sidebarIsOpen}
           isMobile={isMobile}
         /> : null}
 
-        {isAuthenticated() ? <SideNavBar
+        {isAuthenticated() && !isLoading ? <SideNavBar
           handleSidebarCollapse={handleSidebarCollapse}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
           setIsLoading={setIsLoading}

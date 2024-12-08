@@ -31,7 +31,7 @@ const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBo
   });
 
   return (
-    <div className="sidebar-wrapper fadeInPure-animation" style={{ width: `${sidebarIsOpen ? "250px" : "80px"}`, display: isMobile && hideMobileSidebar ? "none" : "flex" }}>
+    <div className={`sidebar-wrapper ${!isMobile ? "fadeInPure-animation" : null} `} style={{ width: `${sidebarIsOpen ? "250px" : "80px"}`, display: isMobile && hideMobileSidebar ? "none" : "flex" }}>
 
       {/* MENU HAMBURGER */}
       <div className="toggle-wrapper">
