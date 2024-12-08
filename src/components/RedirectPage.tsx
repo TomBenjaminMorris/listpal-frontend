@@ -12,7 +12,9 @@ const RedirectPage = ({}) => {
       setTokensFromCode(authCode, isDev ? config.redirectLocal : config.redirectRemote);
     }, 800);
   } else {
-    window.location.replace("/home")
+    setTimeout(() => {
+      window.location.replace("/home")
+    }, 800);
   }
 
   return (

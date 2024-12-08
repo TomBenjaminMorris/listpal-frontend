@@ -17,7 +17,7 @@ export const setTokensFromCode = async (authorizationCode: string, redirectUri: 
   };
   const formBody = Object.keys(details).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(details[key])}`).join("&");
 
-  await axios.post('https://listpal-dev.auth.eu-west-2.amazoncognito.com/oauth2/token', formBody, {
+  await axios.post('https://auth.listpal.dev.vinsp.in/oauth2/token', formBody, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
