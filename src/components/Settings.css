@@ -1,6 +1,8 @@
 .settings-content-wrapper {
   display: flex;
   justify-content: space-evenly;
+  max-width: 1500px;
+  margin: auto;
 }
 
 .settings-content-sub-wrapper {

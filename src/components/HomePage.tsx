@@ -30,7 +30,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
   // console.log("rendering: HomePage")
   const [totalScore, setTotalScore] = useState(0);
   const [totalTargets, setTotalTargets] = useState(0);
-  var idToken = parseJwt(sessionStorage.idToken.toString());
+  var idToken = sessionStorage.idToken && parseJwt(sessionStorage.idToken.toString());
 
   useEffect(() => {
     document.title = "ListPal | Home";
@@ -57,21 +57,20 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
 
   const content = (
     <>
-      <span className="transparent_gradient"></span>
       <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
         <div className="home-page-content-sub-wrapper fadeUp-animation">
-          <h2>{`Good ${getGreeting()}, ${idToken.given_name} 👋`}</h2>
-          {totalScore == 0 || totalScore == undefined ? 
-          <>
-          <div style={{ fontSize: "22px" }}>Create your first board and start completing tasks to see your score...</div>
-          </> :
+          <h2>{`Good ${getGreeting()}${idToken && idToken.given_name != undefined ? ", " + idToken.given_name : ""} 👋`}</h2>
+          {totalScore == 0 || totalScore == undefined ?
+            <>
+              <div style={{ fontSize: "22px" }}>Create your first board and start completing tasks to see your score...</div>
+            </> :
             <>
               <h2>The total score across your boards this year is...</h2>
               <h1 className="totalScore" style={{ fontSize: "40px" }}>
                 {totalScore && `${emojiList[3]} ${totalScore} ${emojiList[3]}`}
               </h1>
             </>}
-          {totalScore !=0 && <GaugeChart id="gauge-chart"
+          {totalScore != 0 && <GaugeChart id="gauge-chart"
             animate={false}
             arcPadding={0.03}
             cornerRadius={3}
@@ -86,7 +85,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
             colors={['#FFFE']}
             arcWidth={0.15}
           />}
-          {totalScore !=0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>}
+          {totalScore != 0 && <div style={{ fontSize: "24px", marginTop: "-10px" }}>{totalScore && `${Math.round(totalScore / totalTargets * 100)}%`}</div>}
           <div className="homePageContent">
             <BoardList boards={boards} setBoards={setBoards} setPromptConf={setPromptConf} setAlertConf={setAlertConf} />
           </div>

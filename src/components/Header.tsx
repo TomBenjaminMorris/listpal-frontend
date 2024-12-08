@@ -10,7 +10,7 @@ const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobil
   }
 
   return (
-    <div className="header sticky">
+    <div className="header sticky fadeInPure-animation">
       <div className="header-left">
         {isMobile && <div className="toggle-wrapper">
           <img className="menu-icon-mobile" src={menuIcon} alt="menu icon" onClick={handleMenuClick} />
@@ -19,7 +19,7 @@ const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobil
       <div className="header-right">
 
         <Link to="/home" >
-          <div className="logo-text-wrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
+          <div className="logo-text-wrapper">
             <div className="logo-text-1">List</div><div className="logo-text-2">Pal</div>
           </div>
         </Link>

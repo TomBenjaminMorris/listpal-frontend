@@ -2,87 +2,33 @@ import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, Conf
 import config from "../config.json";
 import { useNavigate } from 'react-router-dom';
 import { newUser } from "./apiGatewayClient";
+import axios from 'axios';
 
 export const cognitoClient = new CognitoIdentityProviderClient({
   region: config.region,
 });
 
-export const signIn = async (email: string, password: string) => {
-  const params = {
-    AuthFlow: "USER_PASSWORD_AUTH",
-    ClientId: config.clientId,
-    AuthParameters: {
-      USERNAME: email,
-      PASSWORD: password,
-    },
+export const setTokensFromCode = async (authorizationCode: string, redirectUri: string) => {
+  const details = {
+    grant_type: "authorization_code",
+    code: authorizationCode,
+    client_id: "4vi87ls8jg8pj6o2fbvmlj5l3g",
+    redirect_uri: redirectUri
   };
-  try {
-    const command = new InitiateAuthCommand(params);
-    const { AuthenticationResult } = await cognitoClient.send(command);
-    if (AuthenticationResult) {
-      sessionStorage.setItem("idToken", AuthenticationResult.IdToken || '');
-      sessionStorage.setItem("accessToken", AuthenticationResult.AccessToken || '');
-      sessionStorage.setItem("refreshToken", AuthenticationResult.RefreshToken || '');
-      return AuthenticationResult;
-    }
-  } catch (error) {
-    console.error("Error signing in: ", error);
-    throw error;
-  }
-};
+  const formBody = Object.keys(details).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(details[key])}`).join("&");
 
-export const signUp = async (given_name: string, family_name: string, email: string, password: string, setUserDetails) => {
-  const params = {
-    ClientId: config.clientId,
-    Username: email,
-    Password: password,
-    UserAttributes: [
-      {
-        Name: "email",
-        Value: email,
-      },
-      {
-        Name: "given_name",
-        Value: given_name,
-      },
-      {
-        Name: "family_name",
-        Value: family_name,
-      },
-    ],
-  };
-  try {
-    const command = new SignUpCommand(params);
-    const response = await cognitoClient.send(command);
-    const userID = "u#" + response.UserSub
-    const user = {
-      "Theme": "purple-haze"
+  await axios.post('https://auth.listpal.dev.vinsp.in/oauth2/token', formBody, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
     }
-    newUser(userID, email, given_name);
-    setUserDetails(user)
-    localStorage.setItem('userDetails', JSON.stringify(user))
-    return response;
-  } catch (error) {
-    console.error("Error signing up: ", error);
-    throw error;
-  }
-};
-
-export const confirmSignUp = async (email: string, code: string) => {
-  const params = {
-    ClientId: config.clientId,
-    Username: email,
-    ConfirmationCode: code,
-  };
-  try {
-    const command = new ConfirmSignUpCommand(params);
-    await cognitoClient.send(command);
-    console.log("User confirmed successfully");
-    return true;
-  } catch (error) {
-    console.error("Error confirming sign up: ", error);
-    throw error;
-  }
+  }).then((res) => {
+    sessionStorage.setItem("idToken", res.data.id_token || '');
+    sessionStorage.setItem("accessToken", res.data.access_token || '');
+    sessionStorage.setItem("refreshToken", res.data.refresh_token || '');
+    window.location.replace("/home")
+  }).catch((err) => {
+    console.log(err);
+  });
 };
 
 export const refreshTokens = async (refreshToken: string) => {
@@ -97,7 +43,6 @@ export const refreshTokens = async (refreshToken: string) => {
     const command = new InitiateAuthCommand(params);
     const { AuthenticationResult } = await cognitoClient.send(command);
     if (AuthenticationResult) {
-      // console.log("TTTT refreshing tokens")
       sessionStorage.setItem("idToken", AuthenticationResult.IdToken || '');
       sessionStorage.setItem("accessToken", AuthenticationResult.AccessToken || '');
       if (AuthenticationResult.RefreshToken) {
@@ -108,13 +53,13 @@ export const refreshTokens = async (refreshToken: string) => {
     else {
       sessionStorage.clear();
       const navigate = useNavigate();
-      navigate('/login');
+      navigate('/logout');
     }
   } catch (error) {
     console.error("Error refreshing token: ", error);
     sessionStorage.clear();
     const navigate = useNavigate();
-    navigate('/login');
+    navigate('/logout');
     throw error;
   }
 };
