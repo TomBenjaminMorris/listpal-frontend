@@ -16,7 +16,7 @@ const Settings = ({ userDetails, setUserDetails, sidebarIsOpen, isLoading }) => 
 
   const content = (
     <>
-      <div className="settings-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+      <div className={`settings-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
         <div className="settings-content-sub-wrapper fadeUp-animation">
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>

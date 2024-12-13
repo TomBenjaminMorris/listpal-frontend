@@ -151,8 +151,9 @@ const App = () => {
             <WeeklyReports
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}
-              setPromptConf={setPromptConf}
-              setAlertConf={setAlertConf}
+              setIsLoading={setIsLoading}
+              // setPromptConf={setPromptConf}
+              // setAlertConf={setAlertConf}
             /> : <Navigate replace to="/logout" />}
           />
 
