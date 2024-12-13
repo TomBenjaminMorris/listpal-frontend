@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { updateBoardScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask } from '../utils/apiGatewayClient';
+import { updateBoardScoresAPI, updateTaskDescription, updateTaskDetails, updateTaskImportance, newTask, updateTaskChecked } from '../utils/apiGatewayClient';
 import { v4 as uuidv4 } from 'uuid';
 import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
@@ -88,7 +88,7 @@ const Task = ({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, hand
             return tmpBoards;
           })
         }
-        updateTaskDetails(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "")
+        updateTaskChecked(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "", c, description, title, cardEmoji)
       }
       return t;
     })

@@ -110,6 +110,25 @@ export const getUser = async () => {
   }
 };
 
+export const getReports = async () => {
+  try {
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.get('/weekly-reports', { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
+    }
+  } catch (err) {
+    alert("Failed to get weekly reports, please refresh the page.")
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
 /////// POST ///////
 
 export const updateTaskDescription = async (taskID, description) => {
@@ -138,6 +157,26 @@ export const updateTaskDetails = async (taskID, completedDate, expiryDate, GSI1S
     const ok = await tokenCheck();
     if (ok) {
       const response = await axios.post('/task-details', body, { headers: getHeaders() });
+      if (response) {
+        return response.data.data;
+      }
+    }
+    else {
+      console.log("TTTT request was not attempted as token refresh was not successful");
+    }
+  } catch (err) {
+    alert("Failed to update the task details, please try again.")
+    console.error("Error getting data: ", err);
+    throw err;
+  }
+};
+
+export const updateTaskChecked = async (taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL, link, checked, description, category, emoji) => {
+  const body = { taskID, completedDate, expiryDate, GSI1SK, expiryDateTTL, link, checked, description, category, emoji }
+  try {
+    const ok = await tokenCheck();
+    if (ok) {
+      const response = await axios.post('/task-checked', body, { headers: getHeaders() });
       if (response) {
         return response.data.data;
       }
