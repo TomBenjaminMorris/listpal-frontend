@@ -33,7 +33,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
   var idToken = sessionStorage.idToken && parseJwt(sessionStorage.idToken.toString());
 
   useEffect(() => {
-    document.title = "ListPal | Home";
+    document.title = "ListPal | Home 🏠";
   }, [])
 
   useEffect(() => {

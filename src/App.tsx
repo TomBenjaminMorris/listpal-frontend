@@ -147,7 +147,7 @@ const App = () => {
           />
 
           {/* AI SUMMARIES */}
-          <Route path="/weekly-reports" element={isAuthenticated() ?
+          <Route path="/weekly-roundups" element={isAuthenticated() ?
             <WeeklyReports
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}

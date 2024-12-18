@@ -11,7 +11,7 @@ const override: CSSProperties = {
 const Settings = ({ userDetails, setUserDetails, sidebarIsOpen, isLoading }) => {
   // console.log("rendering: Settings")
   useEffect(() => {
-    document.title = "ListPal | Settings";
+    document.title = "ListPal | Settings ⚙️";
   }, [])
 
   const content = (

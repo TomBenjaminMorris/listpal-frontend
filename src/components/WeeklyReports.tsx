@@ -16,7 +16,7 @@ const WeeklyReports = ({ sidebarIsOpen, isLoading, setIsLoading }) => {
     const fetchReports = async () => {
       try {
         setIsLoading(true);
-        document.title = 'ListPal | Weekly Reports';
+        document.title = 'ListPal | Weekly Roundups 🗓️';
         const response = await getReports();
         const formattedReports = response
           .map(({ SK, Score, Summary, WOTY }) => {
@@ -68,7 +68,7 @@ const WeeklyReports = ({ sidebarIsOpen, isLoading, setIsLoading }) => {
     <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
       <div className="weekly-reports-content-sub-wrapper fadeUp-animation">
         <div className="weekly-report-title-wrapper">
-          <h2 className="weekly-report-title">AI Weekly Reports</h2>
+          <h2 className="weekly-report-title">AI Weekly Roundups</h2>
           <img src={aiIcon} />
         </div>
         {renderReports}

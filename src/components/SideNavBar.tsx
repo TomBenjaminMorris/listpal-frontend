@@ -46,10 +46,10 @@ const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBo
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Home</div>
         </Link>
 
-        {/* HOME */}
-        <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/weekly-reports" >
+        {/* AI WEEKLY ROUNDUPS */}
+        <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/weekly-roundups" >
           <img src={aiIcon} />
-          <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Weekly Reports</div>
+          <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Weekly Roundups</div>
         </Link>
 
         {/* BOARD LINKS */}
