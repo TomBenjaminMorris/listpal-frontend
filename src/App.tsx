@@ -4,6 +4,7 @@ import { getBoards, getUser } from './utils/apiGatewayClient';
 import { getSortArray, isAuthenticated } from './utils/utils';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
+import WeeklyReports from './components/WeeklyReports';
 import Board from './components/Board';
 import Settings from './components/Settings';
 import Prompt from './components/Prompt';
@@ -110,14 +111,14 @@ const App = () => {
         {Object.keys(confirmConf).length > 1 && <Confirm confirmConf={confirmConf} setConfirmConf={setConfirmConf} />}
         {Object.keys(alertConf).length > 1 && <Alert alertConf={alertConf} setAlertConf={setAlertConf} />}
 
-        {isAuthenticated() && !isLoading ? <Header
+        {isAuthenticated() ? <Header
           setHideMobileSidebar={setHideMobileSidebar}
           setSidebarIsOpen={setSidebarIsOpen}
           sidebarIsOpen={sidebarIsOpen}
           isMobile={isMobile}
         /> : null}
 
-        {isAuthenticated() && !isLoading ? <SideNavBar
+        {isAuthenticated() ? <SideNavBar
           handleSidebarCollapse={handleSidebarCollapse}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
           setIsLoading={setIsLoading}
@@ -142,6 +143,17 @@ const App = () => {
               isLoading={isLoading}
               setPromptConf={setPromptConf}
               setAlertConf={setAlertConf}
+            /> : <Navigate replace to="/logout" />}
+          />
+
+          {/* AI SUMMARIES */}
+          <Route path="/weekly-roundups" element={isAuthenticated() ?
+            <WeeklyReports
+              sidebarIsOpen={sidebarIsOpen}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
+              // setPromptConf={setPromptConf}
+              // setAlertConf={setAlertConf}
             /> : <Navigate replace to="/logout" />}
           />
 

@@ -3,6 +3,7 @@ import { parseJwt } from '../utils/utils';
 import menuIcon from '../assets/icons8-menu-50.png';
 import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
+import aiIcon from '../assets/icons8-ai-96.png';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
@@ -43,6 +44,12 @@ const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBo
         <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/home" >
           <img src={homeIcon} />
           <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Home</div>
+        </Link>
+
+        {/* AI WEEKLY ROUNDUPS */}
+        <Link className={`sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`} to="/weekly-roundups" >
+          <img src={aiIcon} />
+          <div className={`${sidebarIsOpen ? "sidenav-link-text" : "hidden"}`}>Weekly Roundups</div>
         </Link>
 
         {/* BOARD LINKS */}

@@ -33,7 +33,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
   var idToken = sessionStorage.idToken && parseJwt(sessionStorage.idToken.toString());
 
   useEffect(() => {
-    document.title = "ListPal | Home";
+    document.title = "ListPal | Home 🏠";
   }, [])
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const HomePage = ({ boards, setBoards, sidebarIsOpen, isLoading, setPromptConf, 
 
   const content = (
     <>
-      <div className="home-page-content-wrapper" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+      <div className={`home-page-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
         <div className="home-page-content-sub-wrapper fadeUp-animation">
           <h2>{`Good ${getGreeting()}${idToken && idToken.given_name != undefined ? ", " + idToken.given_name : ""} 👋`}</h2>
           {totalScore == 0 || totalScore == undefined ?

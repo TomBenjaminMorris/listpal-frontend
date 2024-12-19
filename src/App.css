@@ -64,6 +64,14 @@ button {
   margin: 0.5em;
 }
 
+.with-sidebar {
+  padding-left: 250px;
+}
+
+.without-sidebar {
+  padding-left: 80px;
+}
+
 
 @media screen and (max-width: 650px) {
 
@@ -196,7 +204,7 @@ button {
     display: none;
   }
 
-  .task-dropdown-icons { 
+  .task-dropdown-icons {
     display: none;
   }
 }

@@ -324,7 +324,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
 
       <div className="board-content-wrapper">
 
-        {isLoadingLocal || isLoading ? loader : <div className="flex-container" style={{ paddingLeft: `${sidebarIsOpen ? "250px" : "80px"}` }}>
+        {isLoadingLocal || isLoading ? loader : <div className={`flex-container ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
           <div className="board-filter-actions-wrapper fadeUp-animation">
 
             <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll />
