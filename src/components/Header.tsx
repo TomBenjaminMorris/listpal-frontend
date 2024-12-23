@@ -2,7 +2,7 @@ import './Header.css'
 import menuIcon from '../assets/icons8-menu-50.png';
 import { Link } from 'react-router-dom';
 
-const Header = ({ sidebarIsOpen, setHideMobileSidebar, setSidebarIsOpen, isMobile }) => {
+const Header = ({ setHideMobileSidebar, setSidebarIsOpen, isMobile }) => {
   // console.log("rendering: Header")
   const handleMenuClick = async () => {
     setHideMobileSidebar(current => !current);
