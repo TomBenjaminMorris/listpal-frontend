@@ -37,7 +37,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     }
   }
 
-  // done
   const updateActiveTaskDescription = (value) => {
     let tmpSortedTasks = { ...sortedTasks };
     tmpSortedTasks[title] = sortedTasks[title].map(t =>
@@ -46,7 +45,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setSortedTasks(tmpSortedTasks);
   }
 
-  // done
   const updateActiveTaskChecked = (isChecked) => {
     let tmpSortedTasks = { ...sortedTasks };
     const activeBoard = JSON.parse(localStorage.getItem('activeBoard'));
@@ -117,13 +115,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setSortedTasks(tmpSortedTasks);
   };
 
-  // done
   const handleDeleteAndHideTask = (taskID, title) => {
     handleDeleteTask(taskID, title)
     setTaskMenuVisible(false);
   };
 
-  // done
   const handleMarkAsImportant = (taskID) => {
     const updatedTasks = { ...sortedTasks };
     const task = updatedTasks[title]?.find(t => t.SK === taskID);
@@ -137,7 +133,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setTaskMenuVisible(false);
   };
 
-  // done
   const onKeyDown = (e, taskID, title) => {
     const { key, target } = e;
     if (key === "Backspace" && target.value === "") {
@@ -150,7 +145,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     }
   };
 
-  // done
   const taskExpiryOpacity = () => {
     const now = Date.now();
     const expiryDate = parseInt(task.ExpiryDate);
@@ -163,7 +157,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     return "1";
   };
 
-  // done
   const handleClickMenu = () => setTaskMenuVisible(prev => !prev);
 
   // Handle click outside task menu

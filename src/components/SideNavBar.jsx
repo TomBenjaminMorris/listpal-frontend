@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, memo } from 'react';
 import menuIcon from '../assets/icons8-menu-50.png';
 import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
@@ -11,7 +11,7 @@ import logoutIcon from '../assets/icons8-logout-48.png';
 import statsIcon from '../assets/icons8-graph-48.png';
 import './SideNavBar.css';
 
-const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setIsLoading }) => {
+const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setIsLoading }) => {
   const navigate = useNavigate();
   const activeBoard = JSON.parse(localStorage.getItem('activeBoard'));
 
@@ -50,7 +50,7 @@ const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBo
     <div className={`sidebar-wrapper ${!isMobile ? "fadeInPure-animation" : ""}`} style={{
       width: sidebarIsOpen ? "250px" : "80px", display: isMobile && hideMobileSidebar ? "none" : "flex"
     }} >
-      
+
       <div className="toggle-wrapper">
         <img
           className={sidebarIsOpen ? "sidebar-icon" : "menu-icon"}
@@ -105,6 +105,6 @@ const SideNavBar = ({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBo
       </Link>
     </div>
   );
-};
+});
 
 export default SideNavBar;

@@ -1,6 +1,6 @@
 import { memo, useEffect, useState, useCallback } from 'react';
-import PulseLoader from 'react-spinners/PulseLoader';
 import { getReports } from '../utils/apiGatewayClient';
+import PulseLoader from 'react-spinners/PulseLoader';
 import aiIcon from '../assets/icons8-ai-96.png';
 import './WeeklyRoundups.css';
 

@@ -63,6 +63,10 @@ a {
   color: var(--text-colour);
 }
 
+.task-dropdown-menu.important-menu {
+  margin-left: -220px;
+}
+
 @keyframes fadeIn {
   0% {
     transform: translateX(10%);
