@@ -116,7 +116,6 @@ const App = () => {
 
 
   const handleLogout = useCallback(() => {
-    setIsLoading(true);
     localStorage.clear();
     sessionStorage.clear();
     window.location.replace(
@@ -213,7 +212,7 @@ const App = () => {
             />) : (<Navigate replace to="/logout" />)}
           />
 
-          <Route path="*" element={<Navigate replace to="/logout" />} />
+          <Route path="*" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/logout" />} />
         </Routes>
       </BrowserRouter>
     </>

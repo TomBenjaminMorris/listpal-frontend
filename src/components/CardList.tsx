@@ -24,6 +24,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
               display: true,
               title: "Notice ⚠️",
               textValue: "The last task cannot be removed...",
+              animate: true
             })
           }
         }
