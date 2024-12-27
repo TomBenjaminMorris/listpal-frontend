@@ -76,10 +76,7 @@ const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSide
           <div className={textClass}>Stats</div>
         </Link>
 
-        <div
-          className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`}
-          onClick={handleBoardsMenuClick}
-        >
+        <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={handleBoardsMenuClick}>
           <img src={listsIcon} alt="boards" />
           <div className={textClass}>Boards</div>
           <img

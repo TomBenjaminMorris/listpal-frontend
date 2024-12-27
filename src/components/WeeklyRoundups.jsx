@@ -81,9 +81,9 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
           <h2 className="weekly-report-title">AI Weekly Roundups</h2>
           <img src={aiIcon} alt="AI Icon" />
         </div>
-        {reports.map(report => (
+        {reports.length > 0 ? reports.map(report => (
           <WeeklyReport key={report.SK} {...report} />
-        ))}
+        )) : "No roundups found... Check back here at the end of the week."}
       </div>
     </div>
   );
