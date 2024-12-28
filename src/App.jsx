@@ -20,6 +20,17 @@ import './App.css';
 const DEFAULT_THEME = 'purple-haze';
 const MOBILE_BREAKPOINT = 650;
 
+let isDev = true;
+if (process.env.NODE_ENV === 'development') {
+  console.log('Running in Development Mode');
+  isDev = true;
+} else if (process.env.NODE_ENV === 'production') {
+  isDev = false;
+  console.log('Running in Production Mode');
+} else {
+  console.log('Unknown Environment');
+}
+
 const App = () => {
   const [boards, setBoards] = useState([]);
   const [sortedTasks, setSortedTasks] = useState({});
@@ -119,7 +130,7 @@ const App = () => {
     localStorage.clear();
     sessionStorage.clear();
     window.location.replace(
-      config.isDev ? config.managedLoginLocal : config.managedLoginRemote
+      isDev ? config.managedLoginLocal : config.managedLoginRemote
     );
   }, []);
 
@@ -161,7 +172,7 @@ const App = () => {
 
         <Routes>
           <Route path="/" element={<Navigate replace to="/home" />} />
-          <Route path="/redirect" element={<RedirectPage />} />
+          <Route path="/redirect" element={<RedirectPage isDev={isDev} />} />
           <Route path="/logout" element={<Logout handleLogout={handleLogout} />} />
 
           <Route

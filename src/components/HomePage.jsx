@@ -51,7 +51,7 @@ const ScoreContent = memo(({ totalScore, totalTargets }) => {
       <h1 className="totalScore" style={{ fontSize: "40px" }}>
         {`${EMOJIS.SPARKLES} ${totalScore} ${EMOJIS.SPARKLES}`}
       </h1>
-        ...out of {totalTargets}
+        {/* ...out of {totalTargets} */}
     </>
   );
 });

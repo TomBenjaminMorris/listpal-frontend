@@ -3,11 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { setTokensFromCode } from "../utils/authService";
 import config from "../config.json";
 
-const RedirectPage = () => {
+const RedirectPage = ({ isDev }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const authCode = new URLSearchParams(location.search).get('code');
-  const redirectUrl = config.isDev ? config.redirectLocal : config.redirectRemote;
+  const redirectUrl = isDev ? config.redirectLocal : config.redirectRemote;
 
   useEffect(() => {
     if (authCode) {
