@@ -1,21 +1,23 @@
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { setTokensFromCode } from "../utils/authService";
 import config from "../config.json";
 
-const RedirectPage = ({}) => {
+const RedirectPage = ({ isDev }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const authCode = new URLSearchParams(location.search).get('code');
-  const isDev = config.isDev;
+  const redirectUrl = isDev ? config.redirectLocal : config.redirectRemote;
 
-  if (authCode) {
-    setTimeout(() => {
-      setTokensFromCode(authCode, isDev ? config.redirectLocal : config.redirectRemote);
-    }, 800);
-  } else {
-    setTimeout(() => {
-      window.location.replace("/home")
-    }, 800);
-  }
+  useEffect(() => {
+    if (authCode) {
+      setTimeout(() => {
+        setTokensFromCode(authCode, redirectUrl);
+      }, 800);
+    } else {
+      navigate("/home");
+    }
+  }, [authCode, redirectUrl, navigate]);
 
   return (
     <div className="loadingWrapper fadeInPure-animation" style={{ color: "white", fontSize: "35px", backgroundColor: "var(--purple-haze-bg)" }}>
@@ -24,7 +26,8 @@ const RedirectPage = ({}) => {
         <div className="logo-text-2">Pal</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default RedirectPage;
+
