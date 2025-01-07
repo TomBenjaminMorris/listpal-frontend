@@ -54,13 +54,14 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
       setIsLoading(true);
       const response = await getReports();
       const formattedReports = response
-        .map(({ SK, Score, Summary, WOTY }) => ({
+        .map(({ SK, Score, Summary, WOTY, YearNum }) => ({
           SK,
           Score,
           Summary: JSON.parse(Summary).summaries,
-          WOTY
+          WOTY,
+          YearNum
         }))
-        .sort((a, b) => b.WOTY - a.WOTY);
+        .sort((a, b) => b.YearNum - a.YearNum || b.WOTY - a.WOTY);
       setReports(formattedReports);
     } catch (error) {
       console.error('Error fetching reports:', error);
@@ -94,5 +95,10 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
     </div>
   );
 });
+
+Loader.displayName = 'WeeklyRoundups.Loader';
+ReportSummary.displayName = 'WeeklyRoundups.ReportSummary';
+WeeklyReport.displayName = 'WeeklyRoundups.WeeklyReport';
+WeeklyRoundups.displayName = 'WeeklyRoundups';
 
 export default WeeklyRoundups;

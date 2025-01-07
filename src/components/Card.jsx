@@ -28,10 +28,17 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [cardEmoji, setCardEmoji] = useState(tasks?.[0]?.Emoji || "✅");
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const cardMenuRef = useRef(null);
   const cardTitleRef = useRef(null);
   const emojiMenuRef = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsFirstLoad(false)
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     setOrderedTasks(sortList(tasks));
@@ -86,7 +93,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     renameCatagoryAPI(taskIDs, newTitle).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
-    // Update Category Order
+
     let sortArr = getSortArray(boards)
     var index = sortArr.indexOf(title);
     if (index !== -1) {
@@ -158,7 +165,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   useOnClickOutside(emojiMenuRef, () => displayEmojiPicker && setDisplayEmojiPicker(false));
 
   return (
-    <div ref={measuredRef} className="card-container fadeUp-animation">
+    <div ref={measuredRef} className={`card-container ${isFirstLoad ? "fadeUp-animation" : ""}`}>
       <div className="headingWrapper">
         <div className={`card-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : ""}`} ref={emojiMenuRef}>
           <div className="card-emoji-icon" onClick={() => setDisplayEmojiPicker(prev => !prev)}>

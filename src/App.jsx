@@ -22,7 +22,6 @@ const MOBILE_BREAKPOINT = 650;
 
 let isDev = true;
 if (process.env.NODE_ENV === 'development') {
-  console.log('Running in Development Mode');
   isDev = true;
 } else if (process.env.NODE_ENV === 'production') {
   isDev = false;
