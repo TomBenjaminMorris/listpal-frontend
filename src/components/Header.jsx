@@ -13,9 +13,9 @@ const Header = memo(({ setHideMobileSidebar, setSidebarIsOpen, isMobile }) => {
     <header className="header sticky fadeInPure-animation">
       {isMobile && (
         <div className="header-left">
-          <button className="toggle-wrapper" onClick={handleMenuClick} aria-label="Toggle mobile sidebar">
+          <div className="toggle-wrapper" onClick={handleMenuClick} aria-label="Toggle mobile sidebar">
             <img className="menu-icon-mobile" src={menuIcon} alt="" />
-          </button>
+          </div>
         </div>
       )}
 
