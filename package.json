@@ -27,7 +27,8 @@
     "react-spinners": "^0.14.1",
     "react-textarea-autosize": "^8.5.3",
     "usehooks-ts": "^3.1.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "victory": "^37.3.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",

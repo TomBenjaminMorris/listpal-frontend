@@ -59,6 +59,7 @@ export const getActiveTasks = (boardID) => apiGet('/active-tasks', { boardID });
 export const getBoards = () => apiGet('/boards');
 export const getUser = () => apiGet('/user');
 export const getReports = () => apiGet('/weekly-reports');
+export const getStats = () => apiGet('/stats');
 
 // POST API methods
 export const updateTaskDescription = (taskID, description) =>

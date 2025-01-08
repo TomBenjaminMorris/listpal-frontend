@@ -16,6 +16,7 @@
 * https://react-select.com/home#fixed-options
 * https://www.npmjs.com/package/react-gauge-chart
 * https://github.com/missive/emoji-mart
+* https://commerce.nearform.com/open-source/victory/
 
 ### Git
 * https://stackoverflow.com/questions/23546865/how-to-configure-command-line-git-to-use-ssh-key

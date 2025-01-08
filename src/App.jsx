@@ -14,6 +14,7 @@ import Header from './components/Header';
 import SideNavBar from './components/SideNavBar';
 import RedirectPage from './components/RedirectPage';
 import Logout from './components/Logout';
+import Stats from './components/Stats';
 import config from "./config.json";
 import './App.css';
 
@@ -46,7 +47,6 @@ const App = () => {
       : { Theme: DEFAULT_THEME };
   });
 
-  // Memoized theme settings
   const applyTheme = useCallback((theme) => {
     const cssVars = {
       '--background': `var(--${theme}-bg)`,
@@ -189,6 +189,16 @@ const App = () => {
           <Route
             path="/weekly-roundups"
             element={isAuthenticated() ? (<WeeklyRoundups
+              sidebarIsOpen={sidebarIsOpen}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
+            />
+            ) : (<Navigate replace to="/logout" />)}
+          />
+
+          <Route
+            path="/stats"
+            element={isAuthenticated() ? (<Stats
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}
               setIsLoading={setIsLoading}

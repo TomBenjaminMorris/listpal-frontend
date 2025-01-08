@@ -29,11 +29,11 @@ const ReportSummary = memo(({ category, summary }) => (
   </div>
 ));
 
-const WeeklyReport = memo(({ SK, Score, Summary, WOTY }) => (
-  <div className="weekly-report-card-wrapper" key={SK}>
+const WeeklyReport = memo(({ SK, Score, Summary, WOTY, YearNum }) => (
+  <div className="weekly-report-card-wrapper fadeUp-animation" key={SK}>
     <div style={{ display: "flex", gap: "10px" }}>
       <h2 className="weekly-report-h2">🗓️</h2>
-      <h2 className="weekly-report-h2">Week {WOTY}</h2>
+      <h2 className="weekly-report-h2">Week {WOTY} - {YearNum}</h2>
     </div>
     <h3>Tasks Completed: ✨ {Score} ✨</h3>
     {Summary.map(summary => (
@@ -77,9 +77,9 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
 
   const content = (
     <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
-      <div className="weekly-reports-content-sub-wrapper fadeUp-animation">
+      <div className="weekly-reports-content-sub-wrapper">
         <div className="weekly-report-title-wrapper">
-          <h2 className="weekly-report-title">AI Weekly Roundups</h2>
+          <h2 className="weekly-report-title fadeUp-animation">AI Weekly Roundups</h2>
           <img src={aiIcon} alt="AI Icon" />
         </div>
         {reports.length > 0 ? reports.map(report => (
