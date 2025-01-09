@@ -78,8 +78,8 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
   const content = (
     <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
       <div className="weekly-reports-content-sub-wrapper">
-        <div className="weekly-report-title-wrapper">
-          <h2 className="weekly-report-title fadeUp-animation">AI Weekly Roundups</h2>
+        <div className="weekly-report-title-wrapper fadeUp-animation">
+          <h2 className="weekly-report-title">AI Weekly Roundups</h2>
           <img src={aiIcon} alt="AI Icon" />
         </div>
         {reports.length > 0 ? reports.map(report => (

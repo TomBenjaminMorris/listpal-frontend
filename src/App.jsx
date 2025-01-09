@@ -202,6 +202,7 @@ const App = () => {
               sidebarIsOpen={sidebarIsOpen}
               isLoading={isLoading}
               setIsLoading={setIsLoading}
+              boards={boards}
             />
             ) : (<Navigate replace to="/logout" />)}
           />

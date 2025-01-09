@@ -1,8 +1,8 @@
-import { memo, useEffect, useState, useCallback } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { getStats } from '../utils/apiGatewayClient';
 import PulseLoader from 'react-spinners/PulseLoader';
 import graphIcon from '../assets/icons8-graph-48.png';
-import LineChart from './LineChart';
+import ChartList from './ChartList';
 import './Stats.css';
 
 const LOADER_STYLE = {
@@ -23,30 +23,16 @@ const Loader = memo(({ sidebarIsOpen }) => (
   </div>
 ));
 
-const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
+const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
   const [stats, setStats] = useState([]);
-  const [formattedStats, setFormattedStats] = useState([]);
+  const [totalTargets, setTotalTargets] = useState(0);
 
+  // Fetch stats and set them
   const fetchStats = async () => {
     try {
       setIsLoading(true);
       const response = await getStats();
-      const currentYear = new Date().getFullYear();
-
-      const aggregatedStats = response
-        .sort((a, b) => a.WOTY - b.WOTY)
-        .reduce((acc, stat) => {
-          if (stat.YearNum !== currentYear) {
-            return acc;
-          }
-          const lastEntry = acc[acc.length - 1];
-          const totalScore = (lastEntry?.y || 0) + stat.Score;
-          acc.push({ x: stat.WOTY, y: totalScore });
-          return acc;
-        }, [{ x: 0, y: 0 }]);
-
       setStats(response);
-      setFormattedStats(aggregatedStats)
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -54,19 +40,26 @@ const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
     }
   };
 
+  // Calculate total targets from boards
+  const calculateTotalTargets = () => {
+    if (!boards?.length) return 0;
+    return boards.reduce((acc, board) => acc + Number(board.YTarget), 0);
+  };
+
   useEffect(() => {
     document.title = 'ListPal | Stats 📈';
     fetchStats();
-  }, []);
+    setTotalTargets(calculateTotalTargets());
+  }, [boards]); // Re-run the effect if boards change
 
   const content = (
     <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
-      <div className="weekly-reports-content-sub-wrapper fadeUp-animation">
-        <div className="weekly-report-title-wrapper">
-          <h2 className="weekly-report-title">Stats</h2>
+      <div className="weekly-reports-content-sub-wrapper">
+        <div className="weekly-report-title-wrapper fadeUp-animation">
+          <h2 className="weekly-report-title">Your Stats</h2>
           <img src={graphIcon} alt="Graph Icon" />
         </div>
-        {stats.length > 0 ? <LineChart data={formattedStats} /> : "No stats found... Check back here at the end of the week."}
+        {stats.length > 0 ? <ChartList stats={stats} totalTargets={totalTargets} /> : "No stats found... Check back here at the end of the week."}
       </div>
     </div>
   );

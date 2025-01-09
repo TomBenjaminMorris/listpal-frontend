@@ -1,56 +1,39 @@
 import { memo, useEffect, useState } from 'react';
-import { VictoryChart, VictoryLine, VictoryTheme, VictoryScatter, VictoryAxis, VictoryLabel, VictoryArea } from "victory";
-import './LineChart.css';
+import { VictoryChart, VictoryTheme, VictoryScatter, VictoryAxis, VictoryLabel, VictoryBar } from "victory";
 
-const LineChart = ({ stats, measurements, fontSize }) => {
+const BarChart = ({ stats, measurements, fontSize }) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
-    const cumulativeData = stats
+    const individualData = stats
       .filter(stat => stat.YearNum === currentYear)
       .sort((a, b) => a.WOTY - b.WOTY)
-      .reduce((acc, stat) => {
-        const lastTotal = acc[acc.length - 1].y;
-        return [...acc, {
-          x: stat.WOTY,
-          y: lastTotal + stat.Score
-        }];
-      }, [{ x: 0, y: 0 }]);
-    setData(cumulativeData);
+      .map(stat => ({
+        x: stat.WOTY,
+        y: stat.Score
+      }));
+    setData([{ x: 0, y: 0 }, ...individualData]);
   }, [stats]);
 
   return (
     <VictoryChart width={measurements.width} height={measurements.height} theme={VictoryTheme.clean}>
 
-      <VictoryArea
-        data={data}
-        interpolation="natural"
+      <VictoryBar
+        data={data.filter(d => d.y !== 0)}
         style={{
           data: {
-            fill: "var(--accent)",
-            opacity: 0.25,
-          },
-        }}
-      />
-
-      <VictoryLine
-        interpolation="natural"
-        data={data}
-        style={{
-          data: {
-            stroke: "var(--accent)",
-            strokeWidth: 2,
+            fill: "var(--accent-2)",
           },
         }}
       />
 
       <VictoryScatter
-        data={data}
+        data={data.filter(d => d.y !== 0)}
         size={5}
         style={{
           data: {
-            fill: "var(--accent)",
+            fill: "var(--accent-2)",
           },
           labels: {
             fontSize: fontSize,
@@ -126,7 +109,7 @@ const LineChart = ({ stats, measurements, fontSize }) => {
       />
 
       <VictoryLabel
-        text="Total Score"
+        text="Weekly Score"
         x={10}
         y={measurements.height / 2}
         textAnchor="middle"
@@ -143,4 +126,4 @@ const LineChart = ({ stats, measurements, fontSize }) => {
   );
 };
 
-export default memo(LineChart);
+export default memo(BarChart);

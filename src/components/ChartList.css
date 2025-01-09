@@ -1,0 +1,21 @@
+.chart-list-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 95%;
+  max-width: 1600px;
+  gap: 25px;
+  margin: auto;
+}
+
+.chart-list-inner-wrapper {
+  background-color: var(--foreground);
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.chart-list-title {
+  margin-bottom: -20px;
+  margin-top: 10px;
+}
