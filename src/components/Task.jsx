@@ -13,6 +13,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
   const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
+  const [timer, setTimer] = useState(null);
 
   // Update description when task.Description changes
   useEffect(() => {
@@ -20,6 +21,15 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       setDescription(task.Description);
     }
   }, [task.Description]);
+
+  // Cleanup on unmount or when the component re-renders
+  useEffect(() => {
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [timer]);
 
   // Toggle checkbox state
   const handleCheckBox = () => {
@@ -31,12 +41,21 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
   // Handle text update (only set state if the value has changed)
   const handleTextUpdate = e => {
     const newDescription = e.target.value;
-    if (newDescription !== description) {  // Only update if value changes
+    if (newDescription !== description) {
       setDescriptionHasChanged(true);
       setDescription(newDescription);
+      if (timer) {
+        clearTimeout(timer);
+      }
+      // Start a new timer to save data after a delay. Save after 10 seconds of inactivity
+      const newTimer = setTimeout(() => {
+        saveAndUpdate();
+      }, 10000);
+      setTimer(newTimer);
     }
   }
 
+  // Persist changes to app state
   const updateActiveTaskDescription = (value) => {
     let tmpSortedTasks = { ...sortedTasks };
     tmpSortedTasks[title] = sortedTasks[title].map(t =>
@@ -45,6 +64,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setSortedTasks(tmpSortedTasks);
   }
 
+  // Perform update actions to the DB and app state on checkbox toggle
   const updateActiveTaskChecked = (isChecked) => {
     let tmpSortedTasks = { ...sortedTasks };
     const activeBoard = JSON.parse(localStorage.getItem('activeBoard'));
@@ -115,11 +135,13 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setSortedTasks(tmpSortedTasks);
   };
 
+  // Delete the task and remove from the view
   const handleDeleteAndHideTask = (taskID, title) => {
     handleDeleteTask(taskID, title)
     setTaskMenuVisible(false);
   };
 
+  // Perform update actions to the DB and app state on importance toggle
   const handleMarkAsImportant = (taskID) => {
     const updatedTasks = { ...sortedTasks };
     const task = updatedTasks[title]?.find(t => t.SK === taskID);
@@ -133,6 +155,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setTaskMenuVisible(false);
   };
 
+  // Keyboard shortcuts for creating and deleting tasks
   const onKeyDown = (e, taskID, title) => {
     const { key, target } = e;
     if (key === "Backspace" && target.value === "") {
@@ -145,6 +168,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     }
   };
 
+  // Calculate completed task opacity based on time since completed
   const taskExpiryOpacity = () => {
     const now = Date.now();
     const expiryDate = parseInt(task.ExpiryDate);
@@ -157,7 +181,17 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     return "1";
   };
 
-  const handleClickMenu = () => setTaskMenuVisible(prev => !prev);
+  // Save update task description to the DB and persist to app state
+  const saveAndUpdate = () => {
+    if (descriptionHasChanged) {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      updateTaskDescription(task.SK, description)
+        .then(() => updateActiveTaskDescription(description))
+        .finally(() => setDescriptionHasChanged(false)); // Reset after update
+    }
+  }
 
   // Handle click outside task menu
   const taskMenuRef = useRef(null);
@@ -166,14 +200,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
   // Handle click outside description field, update description if changed
   const descriptionRef = useRef(null);
-  const handleClickOutsideDescription = () => {
-    if (descriptionHasChanged) {
-      updateTaskDescription(task.SK, description)
-        .then(() => updateActiveTaskDescription(description))
-        .finally(() => setDescriptionHasChanged(false)); // Reset after update
-    }
-  };
-  useOnClickOutside(descriptionRef, handleClickOutsideDescription);
+  useOnClickOutside(descriptionRef, saveAndUpdate);
 
   // Extract repeated logic
   const isImportant = task.Important === "true";
@@ -182,12 +209,13 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
   const taskAutoFocus = description === "";
   const isLinkAvailable = task.Link && task.Link !== "";
 
-  // Main JSX rendering
   return (
     <div className="task-container">
 
+      {/* Checkbox */}
       <input style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 
+      {/* Description Input */}
       <TextareaAutosize
         className={`task-textarea-box ${isImportant ? "highlight" : ""} ${taskMenuVisible ? "highlight-2" : ""}`}
         value={description}
@@ -211,7 +239,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
       {/* Menu Icon */}
       <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : ""}`} ref={taskMenuRef}>
-        <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={handleClickMenu} />
+        <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
             markAsImportant={() => handleMarkAsImportant(task.SK)}

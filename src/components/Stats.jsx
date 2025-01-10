@@ -50,7 +50,7 @@ const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
     document.title = 'ListPal | Stats 📈';
     fetchStats();
     setTotalTargets(calculateTotalTargets());
-  }, [boards]); // Re-run the effect if boards change
+  }, [boards]);
 
   const content = (
     <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
