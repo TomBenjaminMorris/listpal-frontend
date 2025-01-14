@@ -6,7 +6,7 @@ import './ChartList.css';
 
 const ChartList = ({ stats, totalTargets }) => {
 
-  const measurements = { width: 550, height: 350 }
+  const measurements = { width: 600, height: 350 }
   const fontSize = "14px"
   const charts = [
     { Component: LineChart, title: "Aggregate Score by Week", key: 'aggScoreByWeek' },
@@ -18,7 +18,7 @@ const ChartList = ({ stats, totalTargets }) => {
   return (
     <div className="chart-list-wrapper">
       {charts.map(({ Component, key, title }) => (
-        <div key={key} className="chart-list-inner-wrapper fadeUp-animation" style={{ maxWidth: measurements.width }}>
+        <div key={key} className="chart-list-inner-wrapper fadeUp-animation" style={{ maxHeight: measurements.height }}>
           <div className="chart-list-title">{title}</div>
           <Component stats={stats} measurements={measurements} fontSize={fontSize} totalTargets={totalTargets} />
         </div>

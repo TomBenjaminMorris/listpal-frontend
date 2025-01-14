@@ -9,7 +9,8 @@
     align-items: center;
     /* padding-left: 250px; */
     flex-grow: 1;
-    margin-top: 15px;
+    margin-top: 20px;
+    /* padding-right: 20px; */
 }
 
 /* .board-filter-wrapper {
@@ -44,15 +45,15 @@
 }
 
 .board-filter-actions-wrapper {
-    width: 95%;
+    width: 100%;
     display: flex;
     /* background-color: black; */
     flex-wrap: wrap;
     /* justify-content: center; */
     justify-content: flex-end;
     align-items: center;
-    gap: 20px;
-    margin-top: 10px;
+    gap: 15px;
+    /* margin-top: 20px; */
     flex-grow: 1;
     /* position: relative; */
 }

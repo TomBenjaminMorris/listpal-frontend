@@ -7,7 +7,6 @@ import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
-import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
@@ -16,10 +15,6 @@ import Select, { MultiValue } from "react-select";
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
-
-// const override: CSSProperties = {
-//   opacity: "0.8",
-// };
 
 // const customStyles = {
 //   option: (defaultStyles, state) => ({
@@ -316,25 +311,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
     setCategories(categories);
   }, [sortedTasks]);
 
-  const handleClickOutside = () => {
+  useOnClickOutside(emojiMenuRef, () => {
     if (displayEmojiPicker) {
       setDisplayEmojiPicker(false)
     }
-  }
-  useOnClickOutside(emojiMenuRef, handleClickOutside)
-
-  // const loader = (
-  //   <div className="loadingWrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
-  //     <PulseLoader
-  //       cssOverride={override}
-  //       size={12}
-  //       color={"var(--text-colour)"}
-  //       speedMultiplier={1}
-  //       aria-label="Loading Spinner"
-  //       data-testid="loader"
-  //     />
-  //   </div>
-  // )
+  })
 
   return (
     <div className="wrapper">

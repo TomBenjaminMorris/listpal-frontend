@@ -195,8 +195,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
   // Handle click outside task menu
   const taskMenuRef = useRef(null);
-  const handleClickOutside = () => taskMenuVisible && setTaskMenuVisible(false);
-  useOnClickOutside(taskMenuRef, handleClickOutside);
+  useOnClickOutside(taskMenuRef, () => taskMenuVisible && setTaskMenuVisible(false));
 
   // Handle click outside description field, update description if changed
   const descriptionRef = useRef(null);

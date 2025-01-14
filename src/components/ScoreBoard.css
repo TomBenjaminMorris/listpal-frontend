@@ -1,6 +1,6 @@
 .score-counter-wrapper {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   /* background-color: var(--foreground); */
   /* padding: 10px; */
   border-radius: 10px;

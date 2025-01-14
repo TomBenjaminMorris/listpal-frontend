@@ -36,8 +36,7 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
   }, [setDisplay]);
 
   // Close modal when clicking outside
-  const handleClickOutside = () => setDisplay(false);
-  useOnClickOutside(ref, handleClickOutside);
+  useOnClickOutside(ref, () => setDisplay(false));
 
   // Return early if not displaying
   if (!display) return null;

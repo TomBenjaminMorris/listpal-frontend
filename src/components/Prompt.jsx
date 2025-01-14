@@ -47,12 +47,7 @@ const Prompt = memo(({ promptConf, setPromptConf }) => {
     }
   }, [handleClose]);
 
-
-  const handleClickOutside = useCallback(() => {
-    handleClose();
-  }, [handleClose]);
-
-  useOnClickOutside(ref, handleClickOutside)
+  useOnClickOutside(ref, handleClose)
 
   if (!promptConf?.display) return null;
 
