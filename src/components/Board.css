@@ -9,7 +9,7 @@
     align-items: center;
     /* padding-left: 250px; */
     flex-grow: 1;
-    margin-top: 70px;
+    margin-top: 15px;
 }
 
 /* .board-filter-wrapper {
@@ -21,6 +21,18 @@
     margin-left: 35px;
     margin-right: auto;
 } */
+
+.board-name-wrapper {
+    margin-right: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.board-name {
+    margin-right: auto;
+    font-size: 20px;
+    opacity: 0.9;
+}
 
 .basic-multi-select {
     /* width: 95%; */
@@ -36,7 +48,8 @@
     display: flex;
     /* background-color: black; */
     flex-wrap: wrap;
-    justify-content: center;
+    /* justify-content: center; */
+    justify-content: flex-end;
     align-items: center;
     gap: 20px;
     margin-top: 10px;

@@ -150,11 +150,11 @@ const App = () => {
 
         {isAuthenticated() ? (
           <>
-            <Header
+            {/* <Header
               setHideMobileSidebar={setHideMobileSidebar}
               setSidebarIsOpen={setSidebarIsOpen}
               isMobile={isMobile}
-            />
+            /> */}
 
             <SideNavBar
               handleSidebarCollapse={handleSidebarCollapse}

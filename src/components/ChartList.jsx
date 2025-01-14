@@ -12,7 +12,7 @@ const ChartList = ({ stats, totalTargets }) => {
     { Component: LineChart, title: "Aggregate Score by Week", key: 'aggScoreByWeek' },
     { Component: BarChart, title: "Score by Week", key: 'scoreByWeek' },
     { Component: BurndownChart, title: "Yearly Burndown", key: 'burndownYear' },
-    { Component: BarChart, title: "Score by Week", key: 'bar' },
+    // { Component: BarChart, title: "Score by Week", key: 'bar' },
   ];
 
   return (
