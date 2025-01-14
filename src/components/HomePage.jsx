@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo } from 'react';
 import { parseJwt } from '../utils/utils';
-import PulseLoader from "react-spinners/PulseLoader";
 import BoardList from './BoardList';
+import Loader from './Loader';
 import './HomePage.css';
 
 const EMOJIS = {
@@ -14,26 +14,6 @@ const getGreeting = () => {
   if (hour < 18) return "Afternoon";
   return "Evening";
 };
-
-const LOADER_STYLE = {
-  paddingTop: "50px",
-  opacity: "0.8"
-};
-
-const Loader = memo(() => (
-  <div className="wrapper">
-    <div className="loadingWrapper">
-      <PulseLoader
-        cssOverride={LOADER_STYLE}
-        size={12}
-        color="var(--text-colour)"
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      />
-    </div>
-  </div>
-));
 
 // Memoized score content component
 const ScoreContent = memo(({ totalScore, totalTargets }) => {
@@ -82,7 +62,7 @@ const HomePage = memo(({ boards = [], setBoards, sidebarIsOpen, isLoading, setPr
     <div className="wrapper">
       <div className={`home-page-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
         {
-          isLoading ? <Loader /> : <div className="home-page-content-sub-wrapper fadeUp-animation">
+          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen}/> : <div className="home-page-content-sub-wrapper fadeUp-animation">
             <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} 👋`}</h2>
             <ScoreContent totalScore={totalScore} totalTargets={totalTargets} />
             <div className="homePageContent">

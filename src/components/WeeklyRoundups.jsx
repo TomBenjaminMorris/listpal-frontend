@@ -1,26 +1,8 @@
 import { memo, useEffect, useState, useCallback } from 'react';
 import { getReports } from '../utils/apiGatewayClient';
-import PulseLoader from 'react-spinners/PulseLoader';
+import Loader from './Loader';
 import aiIcon from '../assets/icons8-ai-96.png';
 import './WeeklyRoundups.css';
-
-const LOADER_STYLE = {
-  paddingTop: '50px',
-  opacity: '0.8',
-};
-
-const Loader = memo(({ sidebarIsOpen }) => (
-  <div className={`loadingWrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
-    <PulseLoader
-      cssOverride={LOADER_STYLE}
-      size={12}
-      color="var(--text-colour)"
-      speedMultiplier={1}
-      aria-label="Loading Spinner"
-      data-testid="loader"
-    />
-  </div>
-));
 
 const ReportSummary = memo(({ category, summary }) => (
   <div>
@@ -80,7 +62,7 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
       <div className="weekly-reports-content-sub-wrapper">
         <div className="weekly-report-title-wrapper fadeUp-animation">
           <h2 className="weekly-report-title">AI Weekly Roundups</h2>
-          <img src={aiIcon} alt="AI Icon" />
+          <img className="heading-icon" src={aiIcon} alt="AI Icon" />
         </div>
         {reports.length > 0 ? reports.map(report => (
           <WeeklyReport key={report.SK} {...report} />

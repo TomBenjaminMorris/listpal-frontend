@@ -1,11 +1,10 @@
-.theme-card-outer-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 92%;
+.theme-setter-wrapper {
+    
+}
+
+.settings-headers {
+    justify-self: flex-start;
+    width: 80%;
+    text-align: left;    
     margin: auto;
-    align-items: stretch;
-    gap: 25px;
-    margin-top: 40px;
-    margin-bottom: 80px;
 }

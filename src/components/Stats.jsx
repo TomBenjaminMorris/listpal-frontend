@@ -1,27 +1,9 @@
 import { memo, useEffect, useState } from 'react';
 import { getStats } from '../utils/apiGatewayClient';
-import PulseLoader from 'react-spinners/PulseLoader';
 import graphIcon from '../assets/icons8-graph-48.png';
 import ChartList from './ChartList';
+import Loader from './Loader';
 import './Stats.css';
-
-const LOADER_STYLE = {
-  paddingTop: '50px',
-  opacity: '0.8',
-};
-
-const Loader = memo(({ sidebarIsOpen }) => (
-  <div className={`loadingWrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
-    <PulseLoader
-      cssOverride={LOADER_STYLE}
-      size={12}
-      color="var(--text-colour)"
-      speedMultiplier={1}
-      aria-label="Loading Spinner"
-      data-testid="loader"
-    />
-  </div>
-));
 
 const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
   const [stats, setStats] = useState([]);
@@ -57,7 +39,7 @@ const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
       <div className="weekly-reports-content-sub-wrapper">
         <div className="weekly-report-title-wrapper fadeUp-animation">
           <h2 className="weekly-report-title">Your Stats</h2>
-          <img src={graphIcon} alt="Graph Icon" />
+          <img className="heading-icon" src={graphIcon} alt="Graph Icon" />
         </div>
         {stats.length > 0 ? <ChartList stats={stats} totalTargets={totalTargets} /> : "No stats found... Check back here at the end of the week."}
       </div>
@@ -66,7 +48,7 @@ const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
 
   return (
     <div className="wrapper">
-      {isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : content}
+      {isLoading ? <Loader sidebarIsOpen={sidebarIsOpen}/> : content}
     </div>
   );
 });

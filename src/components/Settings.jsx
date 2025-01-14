@@ -1,25 +1,9 @@
 import { memo, useEffect } from 'react';
 import ThemeSetter from './ThemeSetter';
-import PulseLoader from "react-spinners/PulseLoader";
+import Loader from './Loader';
+import settingsIcon from '../assets/icons8-settings-50-white.png';
 import './Settings.css';
 
-const LOADER_STYLE = {
-  paddingTop: "50px",
-  opacity: "0.8",
-};
-
-const Loader = memo(() => (
-  <div className="loadingWrapper">
-    <PulseLoader
-      cssOverride={LOADER_STYLE}
-      size={12}
-      color="var(--text-colour)"
-      speedMultiplier={1}
-      aria-label="Loading Spinner"
-      data-testid="loader"
-    />
-  </div>
-));
 
 const SettingsContent = memo(({ userDetails, setUserDetails }) => (
   <div className="settings-content-sub-wrapper fadeUp-animation">
@@ -37,11 +21,31 @@ const Settings = ({
     document.title = "ListPal | Settings ⚙️";
   }, []);
 
+  const content = (
+    <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+      <div className="weekly-reports-content-sub-wrapper">
+        <div className="weekly-report-title-wrapper fadeUp-animation">
+          <h2 className="weekly-report-title">User Settings</h2>
+          <img className="heading-icon" src={settingsIcon} alt="Settings Icon" />
+        </div>
+        <div className="settings-content-sub-wrapper fadeUp-animation">
+          <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="wrapper">
+      {isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : content}
+    </div>
+  );
+
   return (
     <div className="wrapper">
       <div className={`settings-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
         {
-          isLoading ? <Loader /> : <SettingsContent
+          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : <SettingsContent
             sidebarIsOpen={sidebarIsOpen}
             userDetails={userDetails}
             setUserDetails={setUserDetails}

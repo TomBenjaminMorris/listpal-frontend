@@ -49,7 +49,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       }
       // Start a new timer to save data after a delay. Save after 10 seconds of inactivity
       const newTimer = setTimeout(() => {
-        saveAndUpdate();
+        saveAndUpdate(newDescription);
       }, 10000);
       setTimer(newTimer);
     }
@@ -182,13 +182,13 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
   };
 
   // Save update task description to the DB and persist to app state
-  const saveAndUpdate = () => {
+  const saveAndUpdate = (newDescription) => {
     if (descriptionHasChanged) {
       if (timer) {
         clearTimeout(timer);
       }
-      updateTaskDescription(task.SK, description)
-        .then(() => updateActiveTaskDescription(description))
+      updateTaskDescription(task.SK, newDescription)
+        .then(() => updateActiveTaskDescription(newDescription))
         .finally(() => setDescriptionHasChanged(false)); // Reset after update
     }
   }
@@ -200,7 +200,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
   // Handle click outside description field, update description if changed
   const descriptionRef = useRef(null);
-  useOnClickOutside(descriptionRef, saveAndUpdate);
+  useOnClickOutside(descriptionRef, () => saveAndUpdate(description));
 
   // Extract repeated logic
   const isImportant = task.Important === "true";

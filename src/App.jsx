@@ -26,7 +26,6 @@ if (process.env.NODE_ENV === 'development') {
   isDev = true;
 } else if (process.env.NODE_ENV === 'production') {
   isDev = false;
-  console.log('Running in Production Mode');
 } else {
   console.log('Unknown Environment');
 }

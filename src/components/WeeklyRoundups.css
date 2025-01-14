@@ -41,3 +41,9 @@
 .weekly-report-h2 {
   margin: 0px;
 }
+
+.heading-icon {
+  width: 30px !important;
+  height: 30px !important;
+  margin-bottom: -3px;
+}

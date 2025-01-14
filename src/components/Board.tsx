@@ -11,109 +11,110 @@ import PulseLoader from "react-spinners/PulseLoader";
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
+import Loader from './Loader';
 import Select, { MultiValue } from "react-select";
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
-const override: CSSProperties = {
-  opacity: "0.8",
-};
+// const override: CSSProperties = {
+//   opacity: "0.8",
+// };
 
-const customStyles = {
-  option: (defaultStyles, state) => ({
-    color: "var(--text-colour)",
-    padding: "10px",
-    borderRadius: "10px",
-    ':hover': {
-      backgroundColor: "var(--accent)"
-    },
-  }),
-  multiValue: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-    backgroundColor: "var(--accent)",
-    borderRadius: "10px",
-    marginTop: "5px",
-    marginBottom: "5px",
-    padding: "5px",
-    marginRight: "10px",
-  }),
-  multiValueLabel: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-  }),
-  placeholder: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-    fontFamily: "CircularBook",
-    fontSize: "20px",
-    marginLeft: "5px",
-    opacity: "0.6",
-  }),
-  multiValueRemove: (defaultStyles, state) => ({
-    ...defaultStyles,
-  }),
-  clearIndicator: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-    padding: "5px",
-    marginRight: "10px",
-    borderRadius: "10px",
-    backgroundColor: "var(--background)",
-  }),
-  dropdownIndicator: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-    padding: "5px",
-    marginRight: "10px",
-    borderRadius: "10px",
-    // display: "none",
-    backgroundColor: "var(--background)",
-  }),
-  container: (defaultStyles, state) => ({
-    ...defaultStyles,
-    border: "none",
-  }),
-  input: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-  }),
-  indicatorSeparator: (defaultStyles, state) => ({
-    display: "none",
-  }),
-  menu: (defaultStyles, state) => ({
-    ...defaultStyles,
-    backgroundColor: "var(--background)",
-    borderRadius: "10px",
-    fontSize: "20px",
-    padding: "20px",
-    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;",
-  }),
-  menuList: (defaultStyles, state) => ({
-    ...defaultStyles,
-    backgroundColor: "var(--background)",
-  }),
-  control: (defaultStyles, state) => ({
-    backgroundColor: "var(--foreground)",
-    padding: "3px",
-    borderRadius: "10px",
-    fontFamily: "CircularBold",
-    fontSize: "20px",
-    label: "control",
-    display: "flex",
-    transition: "all 100ms",
-    border: "none",
-    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"
-  }),
-  noOptionsMessage: (defaultStyles, state) => ({
-    ...defaultStyles,
-    color: "var(--text-colour)",
-    borderRadius: "10px",
-    fontFamily: "CircularBold",
-    fontSize: "20px",
-  }),
-};
+// const customStyles = {
+//   option: (defaultStyles, state) => ({
+//     color: "var(--text-colour)",
+//     padding: "10px",
+//     borderRadius: "10px",
+//     ':hover': {
+//       backgroundColor: "var(--accent)"
+//     },
+//   }),
+//   multiValue: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//     backgroundColor: "var(--accent)",
+//     borderRadius: "10px",
+//     marginTop: "5px",
+//     marginBottom: "5px",
+//     padding: "5px",
+//     marginRight: "10px",
+//   }),
+//   multiValueLabel: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//   }),
+//   placeholder: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//     fontFamily: "CircularBook",
+//     fontSize: "20px",
+//     marginLeft: "5px",
+//     opacity: "0.6",
+//   }),
+//   multiValueRemove: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//   }),
+//   clearIndicator: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//     padding: "5px",
+//     marginRight: "10px",
+//     borderRadius: "10px",
+//     backgroundColor: "var(--background)",
+//   }),
+//   dropdownIndicator: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//     padding: "5px",
+//     marginRight: "10px",
+//     borderRadius: "10px",
+//     // display: "none",
+//     backgroundColor: "var(--background)",
+//   }),
+//   container: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     border: "none",
+//   }),
+//   input: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//   }),
+//   indicatorSeparator: (defaultStyles, state) => ({
+//     display: "none",
+//   }),
+//   menu: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     backgroundColor: "var(--background)",
+//     borderRadius: "10px",
+//     fontSize: "20px",
+//     padding: "20px",
+//     boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;",
+//   }),
+//   menuList: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     backgroundColor: "var(--background)",
+//   }),
+//   control: (defaultStyles, state) => ({
+//     backgroundColor: "var(--foreground)",
+//     padding: "3px",
+//     borderRadius: "10px",
+//     fontFamily: "CircularBold",
+//     fontSize: "20px",
+//     label: "control",
+//     display: "flex",
+//     transition: "all 100ms",
+//     border: "none",
+//     boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"
+//   }),
+//   noOptionsMessage: (defaultStyles, state) => ({
+//     ...defaultStyles,
+//     color: "var(--text-colour)",
+//     borderRadius: "10px",
+//     fontFamily: "CircularBold",
+//     fontSize: "20px",
+//   }),
+// };
 
 const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [filteredSortedTasks, setFilteredSortedTasks] = useState({});
@@ -322,18 +323,18 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
   }
   useOnClickOutside(emojiMenuRef, handleClickOutside)
 
-  const loader = (
-    <div className="loadingWrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
-      <PulseLoader
-        cssOverride={override}
-        size={12}
-        color={"var(--text-colour)"}
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      />
-    </div>
-  )
+  // const loader = (
+  //   <div className="loadingWrapper" style={{ marginLeft: `${sidebarIsOpen ? "260px" : "90px"}` }}>
+  //     <PulseLoader
+  //       cssOverride={override}
+  //       size={12}
+  //       color={"var(--text-colour)"}
+  //       speedMultiplier={1}
+  //       aria-label="Loading Spinner"
+  //       data-testid="loader"
+  //     />
+  //   </div>
+  // )
 
   return (
     <div className="wrapper">
@@ -349,7 +350,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
 
       <div className="board-content-wrapper">
         {
-          isLoading ? loader : <div className={`flex-container ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen}/> : <div className={`flex-container ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
             <div className="board-filter-actions-wrapper fadeUp-animation">
 
               {/* <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll /> */}
