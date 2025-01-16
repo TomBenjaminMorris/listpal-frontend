@@ -1,16 +1,18 @@
 .flex-container-board-list {
     width: 80%;
-    max-width: 2000px;
+    max-width: 1000px;
     margin: auto;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 30px;
+    margin-top: 50px;
+    margin-bottom: 40px;
 }
 
 .board-list-item-wrapper {
-    width: 280px;
+    width: 250px;
     background-color: var(--foreground);
     border-radius: 10px;
     position: relative;
@@ -41,16 +43,15 @@
 .boardLink {
     color: var(--text-colour);
     text-align: center;
-    line-height: 100px;
-    font-size: 25px;
+    line-height: 105px;
+    font-size: 22px;
 }
-
 
 #addBoardButton {
     color: var(--text-colour);
     height: 92px;
     line-height: 92px;
-    width: 280px;
+    width: 250px;
     text-align: center;
     border-radius: 10px;
     border: rgb(158, 158, 158);

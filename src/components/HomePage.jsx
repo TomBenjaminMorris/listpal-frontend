@@ -31,7 +31,7 @@ const ScoreContent = memo(({ totalScore, totalTargets }) => {
       <h1 className="totalScore" style={{ fontSize: "40px" }}>
         {`${EMOJIS.SPARKLES} ${totalScore} ${EMOJIS.SPARKLES}`}
       </h1>
-        {/* ...out of {totalTargets} */}
+      {/* ...out of {totalTargets} */}
     </>
   );
 });
@@ -62,16 +62,21 @@ const HomePage = memo(({ boards = [], setBoards, sidebarIsOpen, isLoading, setPr
     <div className="wrapper">
       <div className={`home-page-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
         {
-          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen}/> : <div className="home-page-content-sub-wrapper fadeUp-animation">
+          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : <div className="home-page-content-sub-wrapper fadeUp-animation">
             <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} 👋`}</h2>
             <ScoreContent totalScore={totalScore} totalTargets={totalTargets} />
             <div className="homePageContent">
+              <h2 className="settings-headers">Your Boards</h2>
+              <hr className="settings-line" />
               <BoardList
                 boards={boards}
                 setBoards={setBoards}
                 setPromptConf={setPromptConf}
                 setAlertConf={setAlertConf}
               />
+
+              {/* <h2 className="settings-headers">Latest Roundup</h2>
+              <hr className="settings-line" /> */}
             </div>
           </div>
         }

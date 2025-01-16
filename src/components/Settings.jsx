@@ -40,20 +40,6 @@ const Settings = ({
       {isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : content}
     </div>
   );
-
-  return (
-    <div className="wrapper">
-      <div className={`settings-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
-        {
-          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : <SettingsContent
-            sidebarIsOpen={sidebarIsOpen}
-            userDetails={userDetails}
-            setUserDetails={setUserDetails}
-          />
-        }
-      </div>
-    </div>
-  );
 };
 
 export default memo(Settings);

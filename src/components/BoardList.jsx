@@ -4,15 +4,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { newBoardAPI } from '../utils/apiGatewayClient';
 import './BoardList.css';
 
-const BoardCard = memo(({ board, onSelect }) => (
-  <Link className="board-list-item-wrapper" to={"/board/" + board.SK} onClick={() => onSelect(board)}  >
-    <div className="board-list-item-score">{board.YScore}</div>
-    <div className="board-list-text-emoji-wrapper">
-      <div className="boardLink">{board.Board}</div>
-      <div className="boardLink">{board.Emoji}</div>
-    </div>
-  </Link>
-));
+const BoardCard = memo(({ board, onSelect }) => {
+  const maxLength = 12;
+  const truncatedText = board.Board.length > maxLength
+    ? `${board.Board.substring(0, maxLength)}...`
+    : board.Board;
+
+  return (
+    <Link className="board-list-item-wrapper" to={"/board/" + board.SK} onClick={() => onSelect(board)}  >
+      <div className="board-list-item-score">{board.YScore}</div>
+      <div className="board-list-text-emoji-wrapper">
+        <div className="boardLink">{truncatedText}</div>
+        <div className="boardLink">{board.Emoji}</div>
+      </div>
+    </Link>
+  );
+});
 
 const AddBoardButton = memo(({ onClick }) => (
   <div id="addBoardButton" onClick={onClick}>

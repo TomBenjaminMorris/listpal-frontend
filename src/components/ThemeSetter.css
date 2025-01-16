@@ -1,5 +1,6 @@
 .theme-setter-wrapper {
-    
+    max-width: 1200px;
+    margin: auto;
 }
 
 .settings-headers {
@@ -7,4 +8,5 @@
     width: 80%;
     text-align: left;    
     margin: auto;
+    max-width: 900px;
 }
