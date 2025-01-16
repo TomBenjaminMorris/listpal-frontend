@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useOnClickOutside } from 'usehooks-ts'
 import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
+import arrowIcon from "../assets/icons8-line-50.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
@@ -210,6 +211,8 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
   return (
     <div className="task-container">
+
+      <img className="task-hover-indicator" src={arrowIcon} alt="follow link icon" />
 
       {/* Checkbox */}
       <input style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
