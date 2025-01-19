@@ -20,7 +20,7 @@ const RedirectPage = ({ isDev }) => {
   }, [authCode, redirectUrl, navigate]);
 
   return (
-    <div className="loadingWrapper fadeInPure-animation" style={{ color: "white", fontSize: "35px", backgroundColor: "var(--purple-haze-bg)" }}>
+    <div className="loadingWrapper fadeInPure-animation" style={{ color: "white", fontSize: "35px", backgroundColor: "var(--purple-haze-bg)", marginLeft: "-80px" }}>
       <div className="logo-text-wrapper">
         <div className="logo-text-1">List</div>
         <div className="logo-text-2">Pal</div>

@@ -147,93 +147,82 @@ const App = () => {
         {Object.keys(modalStates.confirm).length > 1 && (<Confirm confirmConf={modalStates.confirm} setConfirmConf={modalSetters.setConfirmConf} />)}
         {Object.keys(modalStates.alert).length > 1 && (<Alert alertConf={modalStates.alert} setAlertConf={modalSetters.setAlertConf} />)}
 
-        {isAuthenticated() ? (
-          <>
-            {/* <Header
-              setHideMobileSidebar={setHideMobileSidebar}
-              setSidebarIsOpen={setSidebarIsOpen}
-              isMobile={isMobile}
-            /> */}
+        {isAuthenticated() ? (<SideNavBar
+          handleSidebarCollapse={handleSidebarCollapse}
+          setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
+          setIsLoading={setIsLoading}
+          sidebarIsOpen={sidebarIsOpen}
+          boards={boards}
+          sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
+          isMobile={isMobile}
+          hideMobileSidebar={hideMobileSidebar}
+        />) : null}
 
-            <SideNavBar
-              handleSidebarCollapse={handleSidebarCollapse}
-              setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-              setIsLoading={setIsLoading}
-              sidebarIsOpen={sidebarIsOpen}
-              boards={boards}
-              sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-              isMobile={isMobile}
-              hideMobileSidebar={hideMobileSidebar}
+        <div className={`${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+
+          <Routes>
+            <Route path="/" element={<Navigate replace to="/home" />} />
+            <Route path="/redirect" element={<RedirectPage isDev={isDev} />} />
+            <Route path="/logout" element={<Logout handleLogout={handleLogout} />} />
+
+            <Route
+              path="/home"
+              element={isAuthenticated() ? (<HomePage
+                boards={boards}
+                setBoards={setBoards}
+                isLoading={isLoading}
+                setPromptConf={modalSetters.setPromptConf}
+                setAlertConf={modalSetters.setAlertConf}
+              />) : (<Navigate replace to="/logout" />)}
             />
-          </>
-        ) : null}
 
-        <Routes>
-          <Route path="/" element={<Navigate replace to="/home" />} />
-          <Route path="/redirect" element={<RedirectPage isDev={isDev} />} />
-          <Route path="/logout" element={<Logout handleLogout={handleLogout} />} />
-
-          <Route
-            path="/home"
-            element={isAuthenticated() ? (<HomePage
-              boards={boards}
-              setBoards={setBoards}
-              sidebarIsOpen={sidebarIsOpen}
-              isLoading={isLoading}
-              setPromptConf={modalSetters.setPromptConf}
-              setAlertConf={modalSetters.setAlertConf}
-            />) : (<Navigate replace to="/logout" />)}
-          />
-
-          <Route
-            path="/weekly-roundups"
-            element={isAuthenticated() ? (<WeeklyRoundups
-              sidebarIsOpen={sidebarIsOpen}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
+            <Route
+              path="/weekly-roundups"
+              element={isAuthenticated() ? (<WeeklyRoundups
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+              />
+              ) : (<Navigate replace to="/logout" />)}
             />
-            ) : (<Navigate replace to="/logout" />)}
-          />
 
-          <Route
-            path="/stats"
-            element={isAuthenticated() ? (<Stats
-              sidebarIsOpen={sidebarIsOpen}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-              boards={boards}
+            <Route
+              path="/stats"
+              element={isAuthenticated() ? (<Stats
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+                boards={boards}
+              />
+              ) : (<Navigate replace to="/logout" />)}
             />
-            ) : (<Navigate replace to="/logout" />)}
-          />
 
-          <Route
-            path="/board/*"
-            element={isAuthenticated() ? (<Board
-              sortedTasks={sortedTasks}
-              setBoards={setBoards}
-              setSortedTasks={setOrderedSortedTasks}
-              sidebarIsOpen={sidebarIsOpen}
-              boards={boards}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-              setPromptConf={modalSetters.setPromptConf}
-              setConfirmConf={modalSetters.setConfirmConf}
-              setAlertConf={modalSetters.setAlertConf}
-            />) : (<Navigate replace to="/logout" />)}
-          />
+            <Route
+              path="/board/*"
+              element={isAuthenticated() ? (<Board
+                sortedTasks={sortedTasks}
+                setBoards={setBoards}
+                setSortedTasks={setOrderedSortedTasks}
+                boards={boards}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+                setPromptConf={modalSetters.setPromptConf}
+                setConfirmConf={modalSetters.setConfirmConf}
+                setAlertConf={modalSetters.setAlertConf}
+              />) : (<Navigate replace to="/logout" />)}
+            />
 
-          <Route
-            path="/settings"
-            element={isAuthenticated() ? (<Settings
-              userDetails={userDetails}
-              setUserDetails={setUserDetails}
-              sidebarIsOpen={sidebarIsOpen}
-              isLoading={isLoading}
-            />) : (<Navigate replace to="/logout" />)}
-          />
+            <Route
+              path="/settings"
+              element={isAuthenticated() ? (<Settings
+                userDetails={userDetails}
+                setUserDetails={setUserDetails}
+                isLoading={isLoading}
+              />) : (<Navigate replace to="/logout" />)}
+            />
 
-          <Route path="*" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/logout" />} />
-        </Routes>
+            <Route path="*" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/logout" />} />
+          </Routes>
+
+        </div>
       </BrowserRouter>
     </>
   );

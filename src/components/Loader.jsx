@@ -6,8 +6,8 @@ const LOADER_STYLE = {
   opacity: '0.8',
 };
 
-const Loader = memo(({ sidebarIsOpen }) => (
-  <div className={`loadingWrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+const Loader = memo(() => (
+  <div className="loadingWrapper">
     <PulseLoader
       cssOverride={LOADER_STYLE}
       size={12}

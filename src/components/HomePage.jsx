@@ -37,7 +37,7 @@ const ScoreContent = memo(({ totalScore, totalTargets }) => {
 });
 
 // Main HomePage component
-const HomePage = memo(({ boards = [], setBoards, sidebarIsOpen, isLoading, setPromptConf, setAlertConf }) => {
+const HomePage = memo(({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf }) => {
 
   // Calculate totals using useMemo to avoid unnecessary recalculations
   const { totalScore, totalTargets } = useMemo(() => {
@@ -60,9 +60,9 @@ const HomePage = memo(({ boards = [], setBoards, sidebarIsOpen, isLoading, setPr
 
   return (
     <div className="wrapper">
-      <div className={`home-page-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+      <div className="home-page-content-wrapper">
         {
-          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : <div className="home-page-content-sub-wrapper fadeUp-animation">
+          isLoading ? <Loader /> : <div className="home-page-content-sub-wrapper fadeUp-animation">
             <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} 👋`}</h2>
             <ScoreContent totalScore={totalScore} totalTargets={totalTargets} />
             <div className="homePageContent">

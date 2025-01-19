@@ -30,6 +30,8 @@ const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSide
     setSidebarBoardsMenuIsOpen(current => !current);
   }, [sidebarIsOpen, activeBoard, navigate, setSidebarBoardsMenuIsOpen]);
 
+  const maxLength = 14;
+
   const boardsRendered = useMemo(() => boards.map(board => (
     <div key={board.SK} className={activeBoard?.SK === board.SK ? "highlight-board-link" : ""}>
       <Link
@@ -38,7 +40,8 @@ const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSide
         onClick={() => handleBoardClick(board)}
       >
         <div>{board.Emoji}</div>
-        <div>{board.Board}</div>
+        {/* <div>{board.Board}</div> */}
+        <div>{board.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board.Board}</div>
       </Link>
     </div>
   )), [boards, activeBoard, handleBoardClick]);

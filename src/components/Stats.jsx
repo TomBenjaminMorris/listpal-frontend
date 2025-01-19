@@ -5,7 +5,7 @@ import ChartList from './ChartList';
 import Loader from './Loader';
 import './Stats.css';
 
-const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
+const Stats = memo(({ isLoading, setIsLoading, boards }) => {
   const [stats, setStats] = useState([]);
   const [totalTargets, setTotalTargets] = useState(0);
 
@@ -35,7 +35,7 @@ const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
   }, [boards]);
 
   const content = (
-    <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+    <div className="weekly-reports-content-wrapper">
       <div className="weekly-reports-content-sub-wrapper">
         <div className="weekly-report-title-wrapper fadeUp-animation">
           <h2 className="weekly-report-title">Your Stats</h2>
@@ -48,7 +48,7 @@ const Stats = memo(({ sidebarIsOpen, isLoading, setIsLoading, boards }) => {
 
   return (
     <div className="wrapper">
-      {isLoading ? <Loader sidebarIsOpen={sidebarIsOpen}/> : content}
+      {isLoading ? <Loader /> : content}
     </div>
   );
 });

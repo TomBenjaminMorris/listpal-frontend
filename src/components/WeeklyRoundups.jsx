@@ -28,7 +28,7 @@ const WeeklyReport = memo(({ SK, Score, Summary, WOTY, YearNum }) => (
   </div>
 ));
 
-const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
+const WeeklyRoundups = memo(({ isLoading, setIsLoading }) => {
   const [reports, setReports] = useState([]);
 
   const fetchReports = useCallback(async () => {
@@ -58,7 +58,7 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
   }, [fetchReports]);
 
   const content = (
-    <div className={`weekly-reports-content-wrapper ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+    <div className="weekly-reports-content-wrapper">
       <div className="weekly-reports-content-sub-wrapper">
         <div className="weekly-report-title-wrapper fadeUp-animation">
           <h2 className="weekly-report-title">AI Weekly Roundups</h2>
@@ -73,7 +73,7 @@ const WeeklyRoundups = memo(({ sidebarIsOpen, isLoading, setIsLoading }) => {
 
   return (
     <div className="wrapper">
-      {isLoading ? <Loader sidebarIsOpen={sidebarIsOpen} /> : content}
+      {isLoading ? <Loader /> : content}
     </div>
   );
 });

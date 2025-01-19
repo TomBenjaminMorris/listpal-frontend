@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, CSSProperties, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
@@ -11,116 +11,18 @@ import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
 import Loader from './Loader';
-import Select, { MultiValue } from "react-select";
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
-// const customStyles = {
-//   option: (defaultStyles, state) => ({
-//     color: "var(--text-colour)",
-//     padding: "10px",
-//     borderRadius: "10px",
-//     ':hover': {
-//       backgroundColor: "var(--accent)"
-//     },
-//   }),
-//   multiValue: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//     backgroundColor: "var(--accent)",
-//     borderRadius: "10px",
-//     marginTop: "5px",
-//     marginBottom: "5px",
-//     padding: "5px",
-//     marginRight: "10px",
-//   }),
-//   multiValueLabel: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//   }),
-//   placeholder: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//     fontFamily: "CircularBook",
-//     fontSize: "20px",
-//     marginLeft: "5px",
-//     opacity: "0.6",
-//   }),
-//   multiValueRemove: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//   }),
-//   clearIndicator: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//     padding: "5px",
-//     marginRight: "10px",
-//     borderRadius: "10px",
-//     backgroundColor: "var(--background)",
-//   }),
-//   dropdownIndicator: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//     padding: "5px",
-//     marginRight: "10px",
-//     borderRadius: "10px",
-//     // display: "none",
-//     backgroundColor: "var(--background)",
-//   }),
-//   container: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     border: "none",
-//   }),
-//   input: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//   }),
-//   indicatorSeparator: (defaultStyles, state) => ({
-//     display: "none",
-//   }),
-//   menu: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     backgroundColor: "var(--background)",
-//     borderRadius: "10px",
-//     fontSize: "20px",
-//     padding: "20px",
-//     boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;",
-//   }),
-//   menuList: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     backgroundColor: "var(--background)",
-//   }),
-//   control: (defaultStyles, state) => ({
-//     backgroundColor: "var(--foreground)",
-//     padding: "3px",
-//     borderRadius: "10px",
-//     fontFamily: "CircularBold",
-//     fontSize: "20px",
-//     label: "control",
-//     display: "flex",
-//     transition: "all 100ms",
-//     border: "none",
-//     boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px;"
-//   }),
-//   noOptionsMessage: (defaultStyles, state) => ({
-//     ...defaultStyles,
-//     color: "var(--text-colour)",
-//     borderRadius: "10px",
-//     fontFamily: "CircularBold",
-//     fontSize: "20px",
-//   }),
-// };
-
-const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf }) => {
-  const [filteredSortedTasks, setFilteredSortedTasks] = useState({});
-  const [categories, setCategories] = useState([{ label: null, value: null }]);
-  const [selectedCategories, setSelectedCategories] = useState<MultiValue<{ value: string; label: string; }> | null>(null);
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
   const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
   const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
   const boardName = ls_currentBoard && ls_currentBoard.Board
+  const maxLength = 20;
   const navigate = useNavigate();
   const boardID = getBoardIdFromUrl()
   const emojiMenuRef = useRef(null)
@@ -223,11 +125,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
   };
 
   const getTasks = async () => {
-    const firstKey = Object.keys(filteredSortedTasks)[0];
-    const currentBoardID = firstKey && filteredSortedTasks[firstKey]?.[0]?.['GSI1-PK'];
+    const currentBoardID = Object.keys(boards)[0];
 
     // If no tasks are filtered or the current board ID doesn't match, fetch tasks
-    if (!filteredSortedTasks || Object.keys(filteredSortedTasks).length === 0 || currentBoardID !== boardID) {
+    if (currentBoardID !== boardID) {
       setIsLoading(true);
       try {
         const data = await getActiveTasks(boardID);
@@ -289,28 +190,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
     getTasks();
   }, [boardID]);
 
-  useEffect(() => {
-    // Filter tasks based on selected categories or reset to all tasks
-    if (!selectedCategories || selectedCategories.length === 0) {
-      setFilteredSortedTasks(sortedTasks);
-    } else {
-      const selectedCategoryLabels = selectedCategories.map(c => c.label);
-      const filteredTasks = Object.keys(sortedTasks).reduce((acc, category) => {
-        if (selectedCategoryLabels.includes(category)) {
-          acc[category] = sortedTasks[category];
-        }
-        return acc;
-      }, {});
-      setFilteredSortedTasks(filteredTasks);
-    }
-  }, [selectedCategories, sortedTasks]);
-
-  useEffect(() => {
-    // Set categories based on the sorted tasks
-    const categories = Object.keys(sortedTasks).map(t => ({ label: t, value: t.toLowerCase() }));
-    setCategories(categories);
-  }, [sortedTasks]);
-
   useOnClickOutside(emojiMenuRef, () => {
     if (displayEmojiPicker) {
       setDisplayEmojiPicker(false)
@@ -331,15 +210,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
 
       <div className="board-content-wrapper">
         {
-          isLoading ? <Loader sidebarIsOpen={sidebarIsOpen}/> : <div className={`flex-container ${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+          isLoading ? <Loader /> : <div className="flex-container">
             <div className="board-filter-actions-wrapper fadeUp-animation">
 
-              {/* <Select isMulti name="categories" options={categories} className="basic-multi-select" noOptionsMessage={({ inputValue }) => `No category for "${inputValue}"`} styles={customStyles} onChange={setSelectedCategories} placeholder="Filter Categories..." autoFocus menuShouldBlockScroll /> */}
-
               <div className="board-name-wrapper">
-                <div className="board-name board-actions-wrapper">
-                  {boardName}
-                </div>
                 <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
                   <div className="emoji-icon" onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
                   {
@@ -356,8 +230,19 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
                     </div> : null
                   }
                 </div>
-              </div>
 
+                <div className="board-name board-actions-wrapper">
+                  {boardName.length > maxLength ? `${boardName.substring(0, maxLength)}...` : boardName}
+                  <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
+                    display: true,
+                    isEdit: true,
+                    defaultText: boardName,
+                    title: "Enter New Board Name...",
+                    callbackFunc: handleEditBoard,
+                  })} />
+                </div>
+
+              </div>
 
               <div className="board-actions-wrapper">
                 <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
@@ -366,19 +251,14 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
                   textValue: "🚨 This action can't be undone 🚨",
                   callbackFunc: handleDeleteBoard,
                 })} />
-                <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
-                  display: true,
-                  isEdit: true,
-                  defaultText: boardName,
-                  title: "Enter New Board Name...",
-                  callbackFunc: handleEditBoard,
-                })} />
+
                 <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={() => setConfirmConf({
                   display: true,
                   title: "Clear All Completed Tasks?",
                   textValue: "✨ Time for a spring clean ✨",
                   callbackFunc: handleClearTasks,
                 })} />
+                
                 <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
               </div>
 
@@ -394,7 +274,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, sidebarIsOpen, boards, 
             }
             <CardList
               sortedTasks={sortedTasks}
-              filteredSortedTasks={filteredSortedTasks}
               setSortedTasks={setSortedTasks}
               setBoards={setBoards}
               boards={boards}

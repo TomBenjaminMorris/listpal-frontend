@@ -1,6 +1,7 @@
 .weekly-reports-content-wrapper {
   display: flex;
   justify-content: space-evenly;
+  padding: 0px 20px 0px 20px;
 }
 
 .weekly-reports-content-sub-wrapper {

@@ -1,6 +1,8 @@
 .board-content-wrapper {
     display: flex;
     justify-content: space-evenly;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .flex-container {
@@ -72,7 +74,7 @@
 .edit-icon {
     width: 28px;
     height: 28px;
-    margin-top: -2px;
+    margin-top: -2px;margin-left: -15px;
     transition-duration: 100ms;
     /* opacity: 0.7; */
 }

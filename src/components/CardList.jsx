@@ -5,7 +5,7 @@ import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayC
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -86,7 +86,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
 
   return (
     <div className="card-list-container">
-      {Object.entries(filteredSortedTasks).map(([key]) => (
+      {Object.entries(sortedTasks).map(([key]) => (
         <Card
           key={key}
           title={key}
@@ -101,7 +101,7 @@ const CardList = ({ filteredSortedTasks, sortedTasks, setSortedTasks, setBoards,
           setAlertConf={setAlertConf}
         />
       ))}
-      {filteredSortedTasks && (
+      {sortedTasks && (
         <div
           id="addCardButton"
           className="fadeUp-animation"
