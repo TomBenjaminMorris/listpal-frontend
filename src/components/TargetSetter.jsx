@@ -15,7 +15,7 @@ const TARGET_FIELDS = [
   { name: 'yearly', label: 'Yearly', placeholder: 'Y', dbField: 'YTarget' }
 ];
 
-const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleSave }) => {
+const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClose }) => {
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
   const [loadingTargets, setLoadingTargets] = useState(false);
 
@@ -31,7 +31,18 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleSav
   }, [boardID, boards]);
 
   const validateTargets = () => {
+    if (formData.weekly < 1 || formData.monthly < 1 || formData.yearly < 1) {
+      handleClose()
+      setAlertConf({
+        display: true,
+        animate: true,
+        title: "Notice ⚠️",
+        textValue: "Targets must be greater than 0."
+      });
+      return false;
+    }
     if (formData.weekly > formData.monthly) {
+      handleClose()
       setAlertConf({
         display: true,
         animate: true,
@@ -41,6 +52,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleSav
       return false;
     }
     if (formData.monthly > formData.yearly) {
+      handleClose()
       setAlertConf({
         display: true,
         animate: true,
@@ -70,7 +82,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleSav
           : board
       ));
 
-      handleSave();
+      handleClose();
     } catch (error) {
       setAlertConf({
         display: true,
