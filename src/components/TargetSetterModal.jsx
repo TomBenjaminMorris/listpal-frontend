@@ -49,7 +49,10 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
           boards={boards}
           setBoards={setBoards}
           setAlertConf={setAlertConf}
-          handleClose={() => setDisplay(false)}
+          handleClose={() => {
+            unlock();
+            setDisplay(false);
+          }}
         />
       </div>
     </div>
