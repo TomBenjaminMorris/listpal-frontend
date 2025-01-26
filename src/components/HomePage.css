@@ -15,7 +15,7 @@
     flex-grow: 1;
 }
 
-.loadingWrapper {   
+.loadingWrapper {
     height: 100vh;
     display: flex;
     align-items: center;
@@ -28,4 +28,36 @@
 
 .totalScore:hover {
     cursor: default;
+}
+
+.home-page-total-score-wrapper {
+    display: flex;
+    font-size: 30px;
+    width: 300px;
+    gap: 10px;
+    margin: auto;
+    margin-top: -3px;
+    margin-bottom: 40px;
+}
+
+.home-page-total-score-inner-wrapper {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.home-page-total-score-inner-label {
+    font-size: 18px;
+    opacity: 0.5;
+}
+
+.home-page-total-score-inner-score {
+    font-size: 30px;
+    padding: 4px;
+    width: 80px;
+    background-color: var(--foreground);
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+
 }

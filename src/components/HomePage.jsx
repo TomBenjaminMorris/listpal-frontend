@@ -1,59 +1,64 @@
-import { memo, useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { parseJwt } from '../utils/utils';
 import BoardList from './BoardList';
 import Loader from './Loader';
 import './HomePage.css';
 
-const EMOJIS = {
-  SPARKLES: "✨"
-};
-
+// Determine greeting based on current time of day
 const getGreeting = () => {
   const hour = new Date().getHours();
-  if (hour < 12) return "Morning";
-  if (hour < 18) return "Afternoon";
-  return "Evening";
+  return hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
 };
 
-// Memoized score content component
-const ScoreContent = memo(({ totalScore, totalTargets }) => {
-  if (!totalScore) {
-    return (
-      <div style={{ fontSize: "22px" }}>
-        Create your first board and start completing tasks to see your score...
-      </div>
-    );
+// Determine greeting emoji based on current time of day
+const getGreetingEmoji = () => {
+  const hour = new Date().getHours();
+  return hour < 18 ? "☀️" : "🌙";
+}
+
+// Component to display total scores or initial message
+const ScoreContent = ({ totalYScore, totalMScore, totalWScore }) => {
+  // Show prompt if no scores exist
+  if (!totalYScore) {
+    return <div style={{ fontSize: "22px" }}>Create your first board to see your score...</div>;
   }
 
+  // Map for displaying weekly/monthly/yearly scores
+  const SCORE_MAP = [
+    { name: "Weekly", score: totalWScore },
+    { name: "Monthly", score: totalMScore },
+    { name: "Yearly", score: totalYScore },
+  ]
+
+  // Display total scores
   return (
     <>
-      <h2>The total score across your boards this year is...</h2>
-      <h1 className="totalScore" style={{ fontSize: "40px" }}>
-        {`${EMOJIS.SPARKLES} ${totalScore} ${EMOJIS.SPARKLES}`}
-      </h1>
-      {/* ...out of {totalTargets} */}
+      <h2>✨ Total scores across your boards...</h2>
+      <div className="home-page-total-score-wrapper">
+        {SCORE_MAP.map(({ name, score }) => (
+          <div key={name} className="home-page-total-score-inner-wrapper">
+            <div className="home-page-total-score-inner-label">{name}</div>
+            <div className="home-page-total-score-inner-score">{score}</div>
+          </div>
+        ))}
+      </div>
     </>
   );
-});
+};
 
-// Main HomePage component
-const HomePage = memo(({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf }) => {
+// Main HomePage component for displaying boards and user information
+const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf }) => {
+  // Calculate total scores by reducing board data
+  const { totalYScore, totalMScore, totalWScore } = boards.reduce((acc, board) => ({
+    totalWScore: acc.totalWScore + Number(board.WScore),
+    totalMScore: acc.totalMScore + Number(board.MScore),
+    totalYScore: acc.totalYScore + Number(board.YScore)
+  }), { totalWScore: 0, totalMScore: 0, totalYScore: 0 });
 
-  // Calculate totals using useMemo to avoid unnecessary recalculations
-  const { totalScore, totalTargets } = useMemo(() => {
-    if (!boards?.length) return { totalScore: 0, totalTargets: 0 };
-    return boards.reduce((acc, board) => ({
-      totalScore: acc.totalScore + Number(board.YScore),
-      totalTargets: acc.totalTargets + Number(board.YTarget)
-    }), { totalScore: 0, totalTargets: 0 });
-  }, [boards]);
+  // Extract username from JWT token in session storage
+  const userName = parseJwt(sessionStorage.idToken?.toString())?.given_name;
 
-  // Get user's name from session storage, memoized to avoid recalculation
-  const userName = useMemo(() => {
-    const idToken = sessionStorage.idToken && parseJwt(sessionStorage.idToken.toString());
-    return idToken?.given_name;
-  }, []);
-
+  // Set page title on component mount
   useEffect(() => {
     document.title = "ListPal | Home 🏠";
   }, []);
@@ -62,27 +67,38 @@ const HomePage = memo(({ boards = [], setBoards, isLoading, setPromptConf, setAl
     <div className="wrapper">
       <div className="home-page-content-wrapper">
         {
-          isLoading ? <Loader /> : <div className="home-page-content-sub-wrapper fadeUp-animation">
-            <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} 👋`}</h2>
-            <ScoreContent totalScore={totalScore} totalTargets={totalTargets} />
-            <div className="homePageContent">
-              <h2 className="settings-headers">Your Boards</h2>
-              <hr className="settings-line" />
-              <BoardList
-                boards={boards}
-                setBoards={setBoards}
-                setPromptConf={setPromptConf}
-                setAlertConf={setAlertConf}
+          isLoading ? <Loader /> : (
+            <div className="home-page-content-sub-wrapper fadeUp-animation">
+              {/* Personalized greeting with optional username */}
+              <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
+
+              {/* Display total scores */}
+              <ScoreContent
+                totalYScore={totalYScore}
+                totalMScore={totalMScore}
+                totalWScore={totalWScore}
               />
+
+              {/* Board list section */}
+              <div className="homePageContent">
+                <h2 className="settings-headers">Your Boards</h2>
+                <hr className="settings-line" />
+                <BoardList
+                  boards={boards}
+                  setBoards={setBoards}
+                  setPromptConf={setPromptConf}
+                  setAlertConf={setAlertConf}
+                />
+              </div>
 
               {/* <h2 className="settings-headers">Latest Roundup</h2>
               <hr className="settings-line" /> */}
             </div>
-          </div>
+          )
         }
       </div>
     </div>
   );
-});
+};
 
 export default HomePage;

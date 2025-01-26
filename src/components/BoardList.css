@@ -12,7 +12,7 @@
 }
 
 .board-list-item-wrapper {
-    width: 250px;
+    width: 240px;
     background-color: var(--foreground);
     border-radius: 10px;
     position: relative;
