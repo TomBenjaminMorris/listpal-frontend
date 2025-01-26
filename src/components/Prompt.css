@@ -65,3 +65,25 @@
 .prompt-button-cancel:focus {
   outline: none;
 }
+
+.prompt-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-bottom: -10px;
+}
+
+.prompt-button-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-button-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-bottom: -10px;
+}

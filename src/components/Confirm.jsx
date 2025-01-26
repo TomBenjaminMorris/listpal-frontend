@@ -1,38 +1,38 @@
-import { useRef, useEffect, useCallback, memo } from 'react';
-import { useOnClickOutside, useScrollLock } from 'usehooks-ts';
+import { useRef, useEffect } from 'react';
+import { useOnClickOutside } from 'usehooks-ts';
 import './Prompt.css';
 
-const Confirm = memo(({ confirmConf, setConfirmConf }) => {
+const Confirm = ({ confirmConf, setConfirmConf }) => {
+
   const ref = useRef(null);
-  const { lock, unlock } = useScrollLock({
-    autoLock: false,
-    lockTarget: '#scrollable'
-  });
 
-  const closeConfirm = useCallback(() => {
+  // Close the confirmation modal
+  const closeConfirm = () => {
     setConfirmConf({ display: false });
-  }, [setConfirmConf]);
+  };
 
-  const handleConfirm = useCallback(() => {
+  // Handle confirmation action
+  const handleConfirm = () => {
     confirmConf.callbackFunc();
     closeConfirm();
-  }, [confirmConf, closeConfirm]);
+  };
 
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Escape") closeConfirm();
-  }, [closeConfirm]);
+  // Handle keyboard events for modal interaction
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') closeConfirm();
+    if (e.key === 'Enter') handleConfirm();
+  };
 
+  // Add and remove keyboard event listener
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+  }, []);
 
-  useEffect(() => {
-    confirmConf?.display ? lock() : unlock();
-  }, [confirmConf ]);
-
+  // Close modal when clicking outside
   useOnClickOutside(ref, closeConfirm);
 
+  // Don't render if modal is not displayed
   if (!confirmConf?.display) return null;
 
   return (
@@ -40,8 +40,8 @@ const Confirm = memo(({ confirmConf, setConfirmConf }) => {
       <div className="prompt-inner-wrapper" ref={ref}>
         <h1>{confirmConf.title}</h1>
         <p>{confirmConf.textValue}</p>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", flexDirection: "row-reverse", marginBottom: "-10px" }}>
+        <div className="prompt-button-container">
+          <div className="prompt-button-wrapper">
             <button className="prompt-button" onClick={handleConfirm}>Confirm</button>
             <button className="prompt-button-cancel" onClick={closeConfirm}>Cancel</button>
           </div>
@@ -49,6 +49,6 @@ const Confirm = memo(({ confirmConf, setConfirmConf }) => {
       </div>
     </div>
   );
-});
+};
 
 export default Confirm;
