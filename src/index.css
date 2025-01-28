@@ -82,6 +82,14 @@ button:focus-visible {
 }
 
 @font-face {
+  font-family: "CircularMediumItalic";
+  src: local("CircularMediumItalic"),
+    url("./fonts/circular-medium-italic.otf") format("opentype");
+  font-weight: normal;
+}
+
+
+@font-face {
   font-family: "CircularBookItalic";
   src: local("CircularBookItalic"),
     url("./fonts/circular-bold-italic.otf") format("opentype");
