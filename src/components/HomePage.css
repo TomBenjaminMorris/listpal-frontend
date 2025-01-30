@@ -11,10 +11,11 @@
     border-radius: 20px;
     padding: 1px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    margin-bottom: 23px;
 }
 
 .home-page-content-sub-wrapper {
-    margin-top: 80px;
+    margin-top: 100px;
     margin-bottom: 100px;
     flex-grow: 1;
 }
@@ -86,4 +87,8 @@
     margin-top: 20px;
     text-align: start;
     opacity: 0.5;
+}
+
+.logo-text-wrapper {
+    display: flex;
 }

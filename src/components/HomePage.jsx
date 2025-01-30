@@ -108,11 +108,14 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
       {
         isLoading ? <Loader /> : (
           <div className="home-page-content-sub-wrapper fadeUp-animation">
+            {/* Personalized greeting with optional username */}
+            {/* <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2> */}
+            <div className="weekly-report-title-wrapper fadeUp-animation">
+              <h2 className="weekly-report-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
+            </div>
             <div className="home-page-week">
               {"Week of the Year: " + getCurrentWeekOfYear()}
             </div>
-            {/* Personalized greeting with optional username */}
-            <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
 
             {/* Display total scores */}
             <ScoreContent
@@ -133,7 +136,8 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
               />
             </div>
 
-            <div className="homePageContent">
+            {/* Today's Tip section */}
+            {/* <div className="homePageContent">
               <h2 className="settings-headers">Today's Tip</h2>
               <hr className="settings-line" />
               <div className="home-page-todays-tip-wrapper">
@@ -144,7 +148,7 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
                   - {quote.attribute}
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* <h2 className="settings-headers">Latest Roundup</h2>
               <hr className="settings-line" /> */}

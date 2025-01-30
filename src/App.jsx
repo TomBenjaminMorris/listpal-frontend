@@ -10,7 +10,6 @@ import Settings from './components/Settings';
 import Prompt from './components/Prompt';
 import Confirm from './components/Confirm';
 import Alert from './components/Alert';
-import Header from './components/Header';
 import SideNavBar from './components/SideNavBar';
 import RedirectPage from './components/RedirectPage';
 import Logout from './components/Logout';

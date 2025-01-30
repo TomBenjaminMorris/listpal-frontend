@@ -4,7 +4,6 @@ import Loader from './Loader';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
 import './Settings.css';
 
-
 const SettingsContent = memo(({ userDetails, setUserDetails }) => (
   <div className="settings-content-sub-wrapper fadeUp-animation">
     <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
@@ -16,6 +15,7 @@ const Settings = ({
   setUserDetails,
   isLoading
 }) => {
+
   useEffect(() => {
     document.title = "ListPal | Settings ⚙️";
   }, []);
@@ -30,6 +30,10 @@ const Settings = ({
         <div className="settings-content-sub-wrapper fadeUp-animation">
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>
+        {/* <div className="settings-content-sub-wrapper fadeUp-animation">
+          <h2 className="settings-headers">User</h2>
+          <hr className="settings-line" />
+        </div> */}
       </div>
     </div>
   );
