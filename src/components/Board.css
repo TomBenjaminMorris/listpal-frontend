@@ -32,9 +32,17 @@
 }
 
 .board-name {
-    margin-right: auto;
+    /* margin-right: auto; */
     font-size: 20px;
-    opacity: 0.9;
+    /* opacity: 0.9; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--foreground);
+    padding: 10px 15px 10px 10px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .basic-multi-select {
@@ -64,7 +72,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 22px;
+    gap: 20px;
     background-color: var(--foreground);
     padding: 10px 15px 10px 15px;
     border-radius: 10px;
@@ -75,7 +83,7 @@
     width: 28px;
     height: 28px;
     margin-top: -3px;
-    margin-left: -16px;
+    margin-left: 3px;
     transition-duration: 100ms;
     /* opacity: 0.7; */
 }
@@ -87,8 +95,9 @@
     -webkit-animation-iteration-count: initial;
     -webkit-animation-timing-function: ease-in; */
     cursor: pointer;
-    transform: scale(1.2);
+    /* transform: scale(1.2); */
     transition-duration: 100ms;
+    opacity: 0.3;
 }
 
 .delete-icon {
@@ -108,17 +117,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--foreground);
-    padding: 8px 15px 8px 15px;
+    padding: 0px 3px 0px 3px;
     border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .board-emoji-wrapper {
     position: absolute !important;
     z-index: 2001;
-    margin-top: 495px;
-    margin-left: 250px;
+    margin-top: 505px;
+    margin-left: 260px;
     box-shadow: rgba(65, 65, 65, 0.35) 0px 5px 15px;
     /* border: solid var(--text-colour) 2px; */
     border-radius: 12px;

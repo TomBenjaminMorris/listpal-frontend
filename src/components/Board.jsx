@@ -214,24 +214,24 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
             <div className="board-filter-actions-wrapper fadeUp-animation">
 
               <div className="board-name-wrapper">
-                <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
-                  <div className="emoji-icon" onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
-                  {
-                    displayEmojiPicker ? <div className="board-emoji-wrapper">
-                      <Picker
-                        data={emojiData}
-                        onEmojiSelect={handleEmojiSelect}
-                        theme="light"
-                        autoFocus
-                        navPosition="none"
-                        previewPosition="none"
-                        perLine={8}
-                      />
-                    </div> : null
-                  }
-                </div>
 
-                <div className="board-name board-actions-wrapper">
+                <div className="board-name">
+                  <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
+                    <div className="emoji-icon" onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
+                    {
+                      displayEmojiPicker ? <div className="board-emoji-wrapper">
+                        <Picker
+                          data={emojiData}
+                          onEmojiSelect={handleEmojiSelect}
+                          theme="light"
+                          autoFocus
+                          navPosition="none"
+                          previewPosition="none"
+                          perLine={8}
+                        />
+                      </div> : null
+                    }
+                  </div>
                   {boardName.length > maxLength ? `${boardName.substring(0, maxLength)}...` : boardName}
                   <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
                     display: true,
@@ -241,7 +241,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                     callbackFunc: handleEditBoard,
                   })} />
                 </div>
-
               </div>
 
               <div className="board-actions-wrapper">
@@ -258,7 +257,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                   textValue: "✨ Time for a spring clean ✨",
                   callbackFunc: handleClearTasks,
                 })} />
-                
+
                 <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
               </div>
 
