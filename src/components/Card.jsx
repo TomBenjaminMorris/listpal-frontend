@@ -102,13 +102,13 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     updateCategoryOrder(sortArr, boards, setBoards)
   };
 
-  const handleNewTask = async () => {
+  const handleNewTask = async (incomingTasks) => {
     setLoadingTask(true);
     const boardID = window.location.href.split('/').pop();
 
     const newTaskData = {
       CreatedDate: String(Date.now()),
-      SK: "t#" + uuidv4(),
+      SK: `t#${uuidv4()}`,
       "GSI1-SK": "nil",
       "GSI1-PK": boardID,
       ExpiryDate: "nil",
@@ -131,13 +131,14 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       newTaskData.Emoji
     );
 
-    let tmpSortedTasks = { ...sortedTasks };
-    tmpSortedTasks[title].unshift(newTaskData);
-    setSortedTasks(tmpSortedTasks);
+    const tasks = incomingTasks || { ...sortedTasks };
+    tasks[title] = tasks[title] || [];
+    tasks[title].unshift(newTaskData);
+    setSortedTasks(tasks);
     setOrderedTasks(prev => [...prev, newTaskData]);
     setLoadingTask(false);
-    forceUpdate();
   };
+
 
   const handleEmojiSelect = (e) => {
     const newEmoji = e.native;
@@ -240,7 +241,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
             data-testid="loader"
           />
         )}
-        <div className="addTaskWrapper" onClick={handleNewTask}>
+        <div className="addTaskWrapper" onClick={() => handleNewTask(null)}>
           <img className="addTask" src={addIcon} alt="add icon" />
           <div className="addTaskText">new task...</div>
         </div>

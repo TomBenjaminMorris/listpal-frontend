@@ -165,7 +165,13 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     }
     if (key === "Enter") {
       e.preventDefault();
-      handleNewTask();
+      saveAndUpdate(description)
+      // Pass the latest sortedTasks to the handleNewTask to prevent it being overwritten (bug)
+      let tmpSortedTasks = { ...sortedTasks };
+      tmpSortedTasks[title] = sortedTasks[title].map(t =>
+        t.SK === taskID ? { ...t, Description: description } : t
+      );
+      handleNewTask(tmpSortedTasks);
     }
   };
 
@@ -188,8 +194,8 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       if (timer) {
         clearTimeout(timer);
       }
+      updateActiveTaskDescription(newDescription)
       updateTaskDescription(task.SK, newDescription)
-        .then(() => updateActiveTaskDescription(newDescription))
         .finally(() => setDescriptionHasChanged(false)); // Reset after update
     }
   }

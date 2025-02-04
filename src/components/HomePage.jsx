@@ -17,14 +17,18 @@ const getGreetingEmoji = () => {
 }
 
 // Determine the current week of the year
-function getCurrentWeekOfYear() {
-  const date = new Date();
-  const startOfYear = new Date(date.getFullYear(), 0, 1);
-  const dayOfYear = Math.floor((date - startOfYear) / 86400000);
-  const dayOfWeek = (date.getDay() + 6) % 7;
-  const weekNumber = Math.ceil((dayOfYear + dayOfWeek + 1) / 7);
-  return weekNumber;
+Date.prototype.getWeek = function () {
+  var target = new Date(this.valueOf());
+  var dayNr = (this.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  var firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() != 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  }
+  return 1 + Math.ceil((firstThursday - target) / 604800000);
 }
+var d = new Date();
 
 // Array of quotes and attributes to be used later
 const quotes = [
@@ -108,13 +112,14 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
       {
         isLoading ? <Loader /> : (
           <div className="home-page-content-sub-wrapper fadeUp-animation">
+
             {/* Personalized greeting with optional username */}
-            {/* <h2>{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2> */}
             <div className="weekly-report-title-wrapper fadeUp-animation">
               <h2 className="weekly-report-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
             </div>
+
             <div className="home-page-week">
-              {"Week of the Year: " + getCurrentWeekOfYear()}
+              {"Week of the Year: " + d.getWeek()}
             </div>
 
             {/* Display total scores */}
