@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { updateBoardScoresAPI, updateTaskDescription, updateTaskImportance, newTask, updateTaskChecked } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, readDataFromLocalDB } from '../utils/localDBHelpers';
 import { v4 as uuidv4 } from 'uuid';
 import { useOnClickOutside } from 'usehooks-ts'
 import linkIcon from '../assets/icons8-link-64.png';
@@ -9,7 +10,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
-const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
@@ -45,6 +46,15 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     if (newDescription !== description) {
       setDescriptionHasChanged(true);
       setDescription(newDescription);
+
+      // Check if the task has been created since the last sync and update accordingly
+      let isCreate = false
+      readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
+        isCreate = t.Action == "create"
+      }).catch(() => { }).finally(() => {
+        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: newDescription });
+      })
+
       if (timer) {
         clearTimeout(timer);
       }

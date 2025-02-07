@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { getSortArray, isAuthenticated } from './utils/utils';
+import { openDB, createObjectStore, writeDataToLocalDB, readDataFromLocalDB, updateData, deleteDataFromLocalDB, clearStore } from './utils/localDBHelpers';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import WeeklyRoundups from './components/WeeklyRoundups';
@@ -28,6 +29,27 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   console.log('Unknown Environment');
 }
+
+const localDB = await openDB('listpal-local', 1, (db) => {
+  createObjectStore(db, 'tasks', 'SK');
+});
+
+// const task = { id: 1, description: 'did some stuff today' };
+// await writeDataToLocalDB(db, 'tasks', task);
+
+// let storedTask = await readDataFromLocalDB(db, 'tasks', 1);
+// console.log(storedTask);
+
+// storedTask.description = 'updated brooooo!';
+// await updateData(db, 'tasks', storedTask);
+
+// storedTask = await readDataFromLocalDB(db, 'tasks', 1);
+// console.log(storedTask);
+
+// await deleteDataFromLocalDB(db, 'tasks', 1);
+// await clearStore(db, 'tasks');
+
+
 
 const App = () => {
   const [boards, setBoards] = useState([]);
@@ -206,6 +228,7 @@ const App = () => {
                 setPromptConf={modalSetters.setPromptConf}
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
+                localDB={localDB}
               />) : (<Navigate replace to="/logout" />)}
             />
 

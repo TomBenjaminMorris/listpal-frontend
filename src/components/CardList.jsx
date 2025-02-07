@@ -2,10 +2,11 @@ import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, getSortArray, updateCategoryOrder } from '../utils/utils';
 import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -38,6 +39,23 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     }
 
     deleteTask(taskID);
+
+    // Check if the task has been created since the last sync and update accordingly
+    let localTaskExists = false
+    readDataFromLocalDB(localDB, 'tasks', taskID).then(t => {
+      localTaskExists = true
+      if (t.Action === "create") {
+        deleteDataFromLocalDB(localDB, 'tasks', taskID);
+      } else if (t.Action === "update") {
+        writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
+      }
+    }).catch(() => { }).finally(() => {
+      console.log(localTaskExists)
+      if (!localTaskExists) {
+        writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
+      }
+    })
+
     setSortedTasks({
       ...sortedTasks,
       [title]: tasks.filter(t => t.SK !== taskID)
@@ -99,6 +117,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
+          localDB={localDB}
         />
       ))}
       {sortedTasks && (

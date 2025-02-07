@@ -1,6 +1,7 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { newTask, renameCatagoryAPI, deleteTasks, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, readDataFromLocalDB } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -19,7 +20,7 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
@@ -107,6 +108,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     const boardID = window.location.href.split('/').pop();
 
     const newTaskData = {
+      Action: "create",
       CreatedDate: String(Date.now()),
       SK: `t#${uuidv4()}`,
       "GSI1-SK": "nil",
@@ -130,6 +132,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       "",
       newTaskData.Emoji
     );
+
+    writeDataToLocalDB(localDB, "tasks", newTaskData)
 
     const tasks = incomingTasks || { ...sortedTasks };
     tasks[title] = tasks[title] || [];
@@ -227,6 +231,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
+          localDB={localDB}
         />
       ))}
 
