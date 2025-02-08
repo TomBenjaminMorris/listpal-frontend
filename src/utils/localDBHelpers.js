@@ -54,11 +54,6 @@ function readDataFromLocalDB(db, storeName, key) {
   });
 }
 
-// Same function as writeDataToLocalDB since `put` handles both add and update
-function updateData(db, storeName, data) {
-  return writeDataToLocalDB(db, storeName, data);  // Reuse the writeDataToLocalDB function
-}
-
 function deleteDataFromLocalDB(db, storeName, key) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([storeName], "readwrite");
@@ -70,7 +65,7 @@ function deleteDataFromLocalDB(db, storeName, key) {
   });
 }
 
-function clearStore(db, storeName) {
+function clearLocalDB(db, storeName) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([storeName], "readwrite");
     const store = transaction.objectStore(storeName);
@@ -81,5 +76,28 @@ function clearStore(db, storeName) {
   });
 }
 
+function readAllFromLocalDB(db, storeName) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([storeName], "readonly");
+    const store = transaction.objectStore(storeName);
+    const request = store.openCursor();
 
-export { openDB, createObjectStore, writeDataToLocalDB, readDataFromLocalDB, updateData, deleteDataFromLocalDB, clearStore };
+    const results = [];
+
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+
+      if (cursor) {
+        results.push(cursor.value); // Collect the record
+        cursor.continue(); // Move to the next record
+      } else {
+        resolve(results); // Resolve with the collected results once done
+      }
+    };
+
+    request.onerror = (event) => reject(`Error reading all data: ${event.target.error}`);
+  });
+}
+
+
+export { openDB, createObjectStore, writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB, clearLocalDB, readAllFromLocalDB };

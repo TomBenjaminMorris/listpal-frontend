@@ -6,7 +6,7 @@ import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -48,11 +48,12 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
         deleteDataFromLocalDB(localDB, 'tasks', taskID);
       } else if (t.Action === "update") {
         writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
+        setLocalSyncRequired(true);
       }
     }).catch(() => { }).finally(() => {
-      console.log(localTaskExists)
       if (!localTaskExists) {
         writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
+        setLocalSyncRequired(true);
       }
     })
 
@@ -72,6 +73,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     const newCardDefaultTask = {
       CreatedDate: String(Date.now()),
       SK: "t#" + uuidv4(),
+      PK: "",
       "GSI1-SK": "nil",
       "GSI1-PK": boardID,
       ExpiryDate: "nil",
@@ -80,6 +82,9 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
       Category: name,
       EntityType: "Task",
       Emoji: "✅",
+      Link: "",
+      Important: "false",
+      ExpiryDateTTL: 0
     };
 
     const sortArr = [name, ...getSortArray(boards)];
@@ -94,6 +99,10 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
       "",
       newCardDefaultTask.Emoji
     ).then(() => updateCategoryOrder(sortArr, boards, setBoards));
+
+    writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
+      setLocalSyncRequired(true)
+    })
 
     setSortedTasks({
       ...sortedTasks,
@@ -118,6 +127,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
           localDB={localDB}
+          setLocalSyncRequired={setLocalSyncRequired}
         />
       ))}
       {sortedTasks && (

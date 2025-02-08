@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
+import syncIcon from '../assets/icons8-sync-64.png';
+import tickIcon from '../assets/icons8-tick-64.png';
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
@@ -15,7 +18,7 @@ import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
-const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, localSyncRequired, setLocalSyncRequired }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
@@ -94,6 +97,29 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     }
     // Update the state with the modified tasks
     setSortedTasks({ ...sortedTasks });
+
+    // Add tasks to delete to local DB
+    tasksToDelete.forEach(t => {
+      console.log(t)
+      // Check if the task has been created since the last sync and update accordingly
+      let localTaskExists = false
+      readDataFromLocalDB(localDB, 'tasks', t.SK).then(lt => {
+        localTaskExists = true
+        if (lt.Action === "create") {
+          deleteDataFromLocalDB(localDB, 'tasks', t.SK);
+        } else if (lt.Action === "update") {
+          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: t.SK })
+          setLocalSyncRequired(true);
+        }
+      }).catch(() => { }).finally(() => {
+        if (!localTaskExists) {
+          console.log("here")
+          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: t.SK })
+          setLocalSyncRequired(true);
+        }
+      })
+    })
+
     // Call deleteTasks and await its completion
     try {
       await deleteTasks(tasksToDelete);
@@ -280,9 +306,13 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}
               localDB={localDB}
+              setLocalSyncRequired={setLocalSyncRequired}
             />
           </div>
         }
+      </div>
+      <div className="board-local-sync-indicator-wrapper">
+        <img className={`sync-status-icon ${localSyncRequired ? "spin" : ""}`} src={!localSyncRequired ? tickIcon : syncIcon} alt="sync status icon" />
       </div>
     </div >
   );

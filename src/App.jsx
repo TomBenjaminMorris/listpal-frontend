@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { getSortArray, isAuthenticated } from './utils/utils';
-import { openDB, createObjectStore, writeDataToLocalDB, readDataFromLocalDB, updateData, deleteDataFromLocalDB, clearStore } from './utils/localDBHelpers';
+import { openDB, createObjectStore, clearLocalDB, readAllFromLocalDB } from './utils/localDBHelpers';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import WeeklyRoundups from './components/WeeklyRoundups';
@@ -34,23 +34,6 @@ const localDB = await openDB('listpal-local', 1, (db) => {
   createObjectStore(db, 'tasks', 'SK');
 });
 
-// const task = { id: 1, description: 'did some stuff today' };
-// await writeDataToLocalDB(db, 'tasks', task);
-
-// let storedTask = await readDataFromLocalDB(db, 'tasks', 1);
-// console.log(storedTask);
-
-// storedTask.description = 'updated brooooo!';
-// await updateData(db, 'tasks', storedTask);
-
-// storedTask = await readDataFromLocalDB(db, 'tasks', 1);
-// console.log(storedTask);
-
-// await deleteDataFromLocalDB(db, 'tasks', 1);
-// await clearStore(db, 'tasks');
-
-
-
 const App = () => {
   const [boards, setBoards] = useState([]);
   const [sortedTasks, setSortedTasks] = useState({});
@@ -66,6 +49,8 @@ const App = () => {
       ? JSON.parse(storedDetails)
       : { Theme: DEFAULT_THEME };
   });
+  const [localSyncRequired, setLocalSyncRequired] = useState(false);
+  const intervalRef = useRef(null);
 
   const applyTheme = useCallback((theme) => {
     const cssVars = {
@@ -79,6 +64,39 @@ const App = () => {
     Object.entries(cssVars).forEach(([property, value]) => {
       document.documentElement.style.setProperty(property, value);
     });
+  }, []);
+
+  useEffect(() => {
+    // Set the interval only if it's not already set
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        readAllFromLocalDB(localDB, 'tasks').then(localTasks => {
+          if (localTasks.length > 0) {
+            console.log(localTasks)
+            clearLocalDB(localDB, 'tasks').then(() => {
+              setLocalSyncRequired(false)
+            })
+          } else {
+            setLocalSyncRequired(false)
+          }
+        });
+      }, 15000);
+    }
+
+    // Check if there are any local tasks that have not yet been synced on page load
+    readAllFromLocalDB(localDB, 'tasks').then(localTasks => {
+      if (localTasks.length > 0) {
+        setLocalSyncRequired(true);
+      }
+    })
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, []);
 
 
@@ -229,6 +247,8 @@ const App = () => {
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
                 localDB={localDB}
+                localSyncRequired={localSyncRequired}
+                setLocalSyncRequired={setLocalSyncRequired}
               />) : (<Navigate replace to="/logout" />)}
             />
 

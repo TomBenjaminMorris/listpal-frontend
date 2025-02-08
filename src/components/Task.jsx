@@ -10,7 +10,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
-const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
@@ -53,6 +53,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         isCreate = t.Action == "create"
       }).catch(() => { }).finally(() => {
         writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: newDescription });
+        setLocalSyncRequired(true);
       })
 
       if (timer) {
@@ -120,6 +121,16 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         }
 
         updateTaskChecked(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "", isChecked, description, title, cardEmoji);
+
+        // Check if the task has been created since the last sync and update accordingly
+        // TODO: Factor in the write and deletion of the tasks in the reports table - maybe a separate API call for that
+        let isCreate = false
+        readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
+          isCreate = t.Action == "create"
+        }).catch(() => { }).finally(() => {
+          writeDataToLocalDB(localDB, "tasks", { ...t, Action: isCreate ? "create" : "update" });
+          setLocalSyncRequired(true);
+        })
       }
       return t;
     });
@@ -129,6 +140,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
       const newCardDefaultTask = {
         "CreatedDate": String(Date.now()),
         "SK": "t#" + uuidv4(),
+        "PK": "",
         "GSI1-SK": "nil",
         "GSI1-PK": activeBoard.SK,
         "ExpiryDate": "nil",
@@ -137,6 +149,9 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         "Category": title,
         "EntityType": "Task",
         "Emoji": cardEmoji,
+        "Link": "",
+        "Important": "false",
+        "ExpiryDateTTL": 0
       };
 
       tmpSortedTasks[title].push(newCardDefaultTask);
