@@ -121,16 +121,16 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     })
 
     // Call deleteTasks and await its completion
-    try {
-      await deleteTasks(tasksToDelete);
-    } catch (error) {
-      // Optionally, handle any errors during deletion
-      setAlertConf({
-        display: true,
-        title: "Error 💀",
-        textValue: error.message || "Something went wrong while clearing tasks.",
-      });
-    }
+    // try {
+    //   await deleteTasks(tasksToDelete);
+    // } catch (error) {
+    //   // Optionally, handle any errors during deletion
+    //   setAlertConf({
+    //     display: true,
+    //     title: "Error 💀",
+    //     textValue: error.message || "Something went wrong while clearing tasks.",
+    //   });
+    // }
   };
 
   const sortTasks = (data) => {

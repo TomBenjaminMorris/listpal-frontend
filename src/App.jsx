@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { getBoards, getUser } from './utils/apiGatewayClient';
+import { getBoards, getUser, syncTasks } from './utils/apiGatewayClient';
 import { getSortArray, isAuthenticated } from './utils/utils';
 import { openDB, createObjectStore, clearLocalDB, readAllFromLocalDB } from './utils/localDBHelpers';
 import _debounce from 'lodash.debounce';
@@ -66,15 +66,24 @@ const App = () => {
     });
   }, []);
 
+  // Setup the sync loop
   useEffect(() => {
     // Set the interval only if it's not already set
     if (!intervalRef.current) {
       intervalRef.current = setInterval(() => {
         readAllFromLocalDB(localDB, 'tasks').then(localTasks => {
           if (localTasks.length > 0) {
-            console.log(localTasks)
-            clearLocalDB(localDB, 'tasks').then(() => {
-              setLocalSyncRequired(false)
+            syncTasks(localTasks).then((res) => {
+              clearLocalDB(localDB, 'tasks').then(() => {
+                setLocalSyncRequired(false)
+              })
+            }).catch(e => {
+              modalSetters.setAlertConf({
+                display: true,
+                title: "Error 💀",
+                textValue: "Something went wrong while syncing the tasks to the backend, will retry...",
+              });
+              console.error(e + "will retry the sync")
             })
           } else {
             setLocalSyncRequired(false)

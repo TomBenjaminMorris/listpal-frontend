@@ -62,6 +62,9 @@ export const getReports = () => apiGet('/weekly-reports');
 export const getStats = () => apiGet('/stats');
 
 // POST API methods
+export const syncTasks = (task_actions) =>
+  apiPost('/task-sync', { task_actions });
+
 export const updateTaskDescription = (taskID, description) =>
   apiPost('/task-description', { taskID, description });
 

@@ -60,7 +60,7 @@ export function updateCategoryOrder(sortArr, boards, setBoards) {
         if (b.SK === boardID) {
             const updatedBoard = { ...b, CategoryOrder: sortArr };
             localStorage.setItem('activeBoard', JSON.stringify(updatedBoard));
-            updateBoardCategoryOrder(boardID, JSON.stringify(sortArr));
+            // updateBoardCategoryOrder(boardID, JSON.stringify(sortArr));
             return updatedBoard;
         }
         return b;

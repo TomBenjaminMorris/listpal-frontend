@@ -38,7 +38,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
       return;
     }
 
-    deleteTask(taskID);
+    // deleteTask(taskID);
 
     // Check if the task has been created since the last sync and update accordingly
     let localTaskExists = false
@@ -88,17 +88,18 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     };
 
     const sortArr = [name, ...getSortArray(boards)];
-    newTask(
-      newCardDefaultTask.SK,
-      newCardDefaultTask.CreatedDate,
-      newCardDefaultTask.CompletedDate,
-      newCardDefaultTask.ExpiryDate,
-      newCardDefaultTask["GSI1-PK"],
-      newCardDefaultTask.Description,
-      newCardDefaultTask.Category,
-      "",
-      newCardDefaultTask.Emoji
-    ).then(() => updateCategoryOrder(sortArr, boards, setBoards));
+    updateCategoryOrder(sortArr, boards, setBoards)
+    // newTask(
+    //   newCardDefaultTask.SK,
+    //   newCardDefaultTask.CreatedDate,
+    //   newCardDefaultTask.CompletedDate,
+    //   newCardDefaultTask.ExpiryDate,
+    //   newCardDefaultTask["GSI1-PK"],
+    //   newCardDefaultTask.Description,
+    //   newCardDefaultTask.Category,
+    //   "",
+    //   newCardDefaultTask.Emoji
+    // ).then(() => updateCategoryOrder(sortArr, boards, setBoards));
 
     writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
       setLocalSyncRequired(true)

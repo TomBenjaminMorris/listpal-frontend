@@ -56,14 +56,14 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         setLocalSyncRequired(true);
       })
 
-      if (timer) {
-        clearTimeout(timer);
-      }
-      // Start a new timer to save data after a delay. Save after 10 seconds of inactivity
-      const newTimer = setTimeout(() => {
-        saveAndUpdate(newDescription);
-      }, 10000);
-      setTimer(newTimer);
+      // if (timer) {
+      //   clearTimeout(timer);
+      // }
+      // // Start a new timer to save data after a delay. Save after 10 seconds of inactivity
+      // const newTimer = setTimeout(() => {
+      //   saveAndUpdate(newDescription);
+      // }, 10000);
+      // setTimer(newTimer);
     }
   }
 
@@ -120,7 +120,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
           updateBoardScores(-1); // Decrement board scores
         }
 
-        updateTaskChecked(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "", isChecked, description, title, cardEmoji);
+        // updateTaskChecked(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "", isChecked, description, title, cardEmoji);
 
         // Check if the task has been created since the last sync and update accordingly
         // TODO: Factor in the write and deletion of the tasks in the reports table - maybe a separate API call for that
@@ -155,7 +155,10 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
       };
 
       tmpSortedTasks[title].push(newCardDefaultTask);
-      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "", newCardDefaultTask.Emoji);
+      // newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "", newCardDefaultTask.Emoji);
+      writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
+        setLocalSyncRequired(true)
+      })
     }
 
     setSortedTasks(tmpSortedTasks);
@@ -190,7 +193,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
     }
     if (key === "Enter") {
       e.preventDefault();
-      saveAndUpdate(description)
+      // saveAndUpdate(description)
       // Pass the latest sortedTasks to the handleNewTask to prevent it being overwritten (bug)
       let tmpSortedTasks = { ...sortedTasks };
       tmpSortedTasks[title] = sortedTasks[title].map(t =>
@@ -231,7 +234,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
 
   // Handle click outside description field, update description if changed
   const descriptionRef = useRef(null);
-  useOnClickOutside(descriptionRef, () => saveAndUpdate(description));
+  // useOnClickOutside(descriptionRef, () => saveAndUpdate(description));
 
   // Extract repeated logic
   const isImportant = task.Important === "true";
