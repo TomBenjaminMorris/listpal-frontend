@@ -1,6 +1,6 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask, renameCatagoryAPI, deleteTasks, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
+import { renameCatagoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
 import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
@@ -59,8 +59,6 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
   };
 
   const handleDeleteCategory = () => {
-    // Remove category tasks from remote DB
-    // deleteTasks(sortedTasks[title]);
     // Remove from local DB, as appropriate
     sortedTasks[title]?.forEach(t => {
       // Check if the task has been created since the last sync and update accordingly
@@ -112,24 +110,24 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
       return;
     }
 
-    // Update the local DB, as appropriate
-    sortedTasks[title]?.forEach(t => {
-      // Check if the task has been created since the last sync and update accordingly
-      let localTaskExists = false
-      readDataFromLocalDB(localDB, 'tasks', t.SK).then(lt => {
-        localTaskExists = true
-        if (lt.Action === "create") {
-          writeDataToLocalDB(localDB, "tasks", { ...t, Action: "create", Category: newTitle })
-        } else if (lt.Action === "update") {
-          writeDataToLocalDB(localDB, "tasks", { ...t, Action: "update", Category: newTitle })
-        }
-      }).catch(() => { }).finally(() => {
-        if (!localTaskExists) {
-          writeDataToLocalDB(localDB, "tasks", { ...t, Action: "update", Category: newTitle })
-        }
-      })
-    });
-    setLocalSyncRequired(true);
+    // // Update the local DB, as appropriate
+    // sortedTasks[title]?.forEach(t => {
+    //   // Check if the task has been created since the last sync and update accordingly
+    //   let localTaskExists = false
+    //   readDataFromLocalDB(localDB, 'tasks', t.SK).then(lt => {
+    //     localTaskExists = true
+    //     if (lt.Action === "create") {
+    //       writeDataToLocalDB(localDB, "tasks", { ...t, Action: "create", Category: newTitle })
+    //     } else if (lt.Action === "update") {
+    //       writeDataToLocalDB(localDB, "tasks", { ...t, Action: "update", Category: newTitle })
+    //     }
+    //   }).catch(() => { }).finally(() => {
+    //     if (!localTaskExists) {
+    //       writeDataToLocalDB(localDB, "tasks", { ...t, Action: "update", Category: newTitle })
+    //     }
+    //   })
+    // });
+    // setLocalSyncRequired(true);
 
     const taskIDs = [];
     const updatedTasks = sortedTasks[title].map(t => {
@@ -143,9 +141,9 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[newTitle] = updatedTasks
     delete tmpSortedTasks[title];
-    // renameCatagoryAPI(taskIDs, newTitle).then(() => {
-    //   setSortedTasks(tmpSortedTasks);
-    // });
+    renameCatagoryAPI(taskIDs, newTitle).then(() => {
+      setSortedTasks(tmpSortedTasks);
+    });
 
     let sortArr = getSortArray(boards)
     var index = sortArr.indexOf(title);
@@ -176,27 +174,16 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
       Important: "false",
       ExpiryDateTTL: 0
     };
-
-    // await newTask(
-    //   newTaskData.SK,
-    //   newTaskData.CreatedDate,
-    //   newTaskData.CompletedDate,
-    //   newTaskData.ExpiryDate,
-    //   newTaskData["GSI1-PK"],
-    //   newTaskData.Description,
-    //   newTaskData.Category,
-    //   "",
-    //   newTaskData.Emoji
-    // );
-
+    
+    // newTask
     writeDataToLocalDB(localDB, "tasks", newTaskData).then(() => {
       setLocalSyncRequired(true)
     })
 
-    const tasks = incomingTasks || { ...sortedTasks };
-    tasks[title] = tasks[title] || [];
-    tasks[title].unshift(newTaskData);
-    setSortedTasks(tasks);
+    const tmpTasks = incomingTasks || { ...sortedTasks };
+    tmpTasks[title] = tmpTasks[title] || [];
+    tmpTasks[title].unshift(newTaskData);
+    setSortedTasks(tmpTasks);
     setOrderedTasks(prev => [...prev, newTaskData]);
     setLoadingTask(false);
   };

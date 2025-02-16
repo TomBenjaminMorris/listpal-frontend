@@ -1,7 +1,7 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, getSortArray, updateCategoryOrder } from '../utils/utils';
-import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayClient';
+import { updateTaskDescription } from '../utils/apiGatewayClient';
 import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
 import Card from './Card';
 import './CardList.css'
@@ -37,8 +37,6 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
       });
       return;
     }
-
-    // deleteTask(taskID);
 
     // Check if the task has been created since the last sync and update accordingly
     let localTaskExists = false
@@ -86,20 +84,10 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
       Important: "false",
       ExpiryDateTTL: 0
     };
+    // newTask
 
     const sortArr = [name, ...getSortArray(boards)];
     updateCategoryOrder(sortArr, boards, setBoards)
-    // newTask(
-    //   newCardDefaultTask.SK,
-    //   newCardDefaultTask.CreatedDate,
-    //   newCardDefaultTask.CompletedDate,
-    //   newCardDefaultTask.ExpiryDate,
-    //   newCardDefaultTask["GSI1-PK"],
-    //   newCardDefaultTask.Description,
-    //   newCardDefaultTask.Category,
-    //   "",
-    //   newCardDefaultTask.Emoji
-    // ).then(() => updateCategoryOrder(sortArr, boards, setBoards));
 
     writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
       setLocalSyncRequired(true)

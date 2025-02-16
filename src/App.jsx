@@ -66,38 +66,92 @@ const App = () => {
     });
   }, []);
 
-  // Setup the sync loop
+  // // Setup the sync loop
+  // useEffect(() => {
+  //   // Clear the local DB by default on page refresh or initial load
+  //   clearLocalDB(localDB, 'tasks');
+
+  //   // Set the interval only if it's not already set
+  //   if (!intervalRef.current) {
+  //     intervalRef.current = setInterval(() => {
+  //       readAllFromLocalDB(localDB, 'tasks').then(localTasks => {
+  //         if (localTasks.length > 0) {
+  //           syncTasks(localTasks).then((res) => {
+  //             clearLocalDB(localDB, 'tasks').then(() => {
+  //               setLocalSyncRequired(false)
+  //             })
+  //           }).catch(e => {
+  //             modalSetters.setAlertConf({
+  //               display: true,
+  //               title: "Error 💀",
+  //               textValue: "Something went wrong while syncing the tasks to the backend, will retry...",
+  //             });
+  //             console.error(e + "will retry the sync")
+  //           })
+  //         } else {
+  //           setLocalSyncRequired(false)
+  //         }
+  //       });
+  //     }, 15000);
+  //   }
+
+  //   // Cleanup function to clear the interval when the component unmounts
+  //   return () => {
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //       intervalRef.current = null;
+  //     }
+  //   };
+  // }, []);
+
+
+  // // Catch a page reload, check if the local sync DB is empty, and block the refresh
+  // useEffect(() => {
+  //   const handleBeforeUnload = (event) => {
+  //     // Only show the confirmation if localSyncRequired is true
+  //     if (localSyncRequired) {
+  //       const message = "Are you sure you want to leave? Your changes may not be saved.";
+  //       event.returnValue = message; // Standard way
+  //       return message; // For some browsers like older Firefox versions
+  //     }
+  //   };
+
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+
+  //   return () => {
+  //     window.removeEventListener('beforeunload', handleBeforeUnload);
+  //   };
+  // }, [localSyncRequired]);
+
   useEffect(() => {
+    // Clear the local DB by default on page refresh or initial load
+    clearLocalDB(localDB, 'tasks');
+
+    const syncInterval = async () => {
+      try {
+        const localTasks = await readAllFromLocalDB(localDB, 'tasks');
+
+        if (localTasks.length > 0) {
+          await syncTasks(localTasks);
+          await clearLocalDB(localDB, 'tasks');
+          setLocalSyncRequired(false);
+        } else {
+          setLocalSyncRequired(false);
+        }
+      } catch (e) {
+        modalSetters.setAlertConf({
+          display: true,
+          title: "Error 💀",
+          textValue: "Something went wrong while syncing the tasks to the backend, will retry...",
+        });
+        console.error(e + " will retry the sync");
+      }
+    };
+
     // Set the interval only if it's not already set
     if (!intervalRef.current) {
-      intervalRef.current = setInterval(() => {
-        readAllFromLocalDB(localDB, 'tasks').then(localTasks => {
-          if (localTasks.length > 0) {
-            syncTasks(localTasks).then((res) => {
-              clearLocalDB(localDB, 'tasks').then(() => {
-                setLocalSyncRequired(false)
-              })
-            }).catch(e => {
-              modalSetters.setAlertConf({
-                display: true,
-                title: "Error 💀",
-                textValue: "Something went wrong while syncing the tasks to the backend, will retry...",
-              });
-              console.error(e + "will retry the sync")
-            })
-          } else {
-            setLocalSyncRequired(false)
-          }
-        });
-      }, 15000);
+      intervalRef.current = setInterval(syncInterval, 15000);
     }
-
-    // Check if there are any local tasks that have not yet been synced on page load
-    readAllFromLocalDB(localDB, 'tasks').then(localTasks => {
-      if (localTasks.length > 0) {
-        setLocalSyncRequired(true);
-      }
-    })
 
     // Cleanup function to clear the interval when the component unmounts
     return () => {
@@ -107,6 +161,24 @@ const App = () => {
       }
     };
   }, []);
+
+  
+  // Catch a page reload and handle the unload confirmation based on sync state
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (localSyncRequired) {
+        const message = "Are you sure you want to leave? Your changes may not be saved.";
+        event.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [localSyncRequired]);
 
 
   // Load initial data

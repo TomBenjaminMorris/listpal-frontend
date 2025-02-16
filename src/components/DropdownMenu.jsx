@@ -25,7 +25,7 @@ const DropdownMenu = memo(({ handleDeleteCategory, boards, title, setSortedTasks
       const newCategoryOrder = moveArrayElement(board.CategoryOrder, title, direction);
       const updatedBoard = { ...board, CategoryOrder: newCategoryOrder };
       localStorage.setItem('activeBoard', JSON.stringify(updatedBoard));
-      // updateBoardCategoryOrder(boardID, JSON.stringify(newCategoryOrder));
+      updateBoardCategoryOrder(boardID, JSON.stringify(newCategoryOrder));
       return updatedBoard;
     });
 

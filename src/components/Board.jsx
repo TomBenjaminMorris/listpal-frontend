@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
+import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
@@ -119,18 +119,6 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
         }
       })
     })
-
-    // Call deleteTasks and await its completion
-    // try {
-    //   await deleteTasks(tasksToDelete);
-    // } catch (error) {
-    //   // Optionally, handle any errors during deletion
-    //   setAlertConf({
-    //     display: true,
-    //     title: "Error 💀",
-    //     textValue: error.message || "Something went wrong while clearing tasks.",
-    //   });
-    // }
   };
 
   const sortTasks = (data) => {
