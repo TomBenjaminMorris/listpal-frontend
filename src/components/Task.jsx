@@ -14,7 +14,6 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
-  const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
 
   // Update description when task.Description changes
   useEffect(() => {
@@ -22,7 +21,6 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
       setDescription(task.Description);
     }
   }, [task.Description]);
-
 
   // Toggle checkbox state
   const handleCheckBox = () => {
@@ -35,9 +33,8 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
   const handleTextUpdate = e => {
     const newDescription = e.target.value;
     if (newDescription !== description) {
-      setDescriptionHasChanged(true);
       setDescription(newDescription);
-      saveAndUpdate(newDescription);
+      updateActiveTaskDescription(newDescription)
 
       // Check if the task has been created since the last sync and update accordingly
       let isCreate = false
@@ -76,7 +73,11 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
             b.YScore = Math.max(0, b.YScore + increment);
             b.MScore = Math.max(0, b.MScore + increment);
             b.WScore = Math.max(0, b.WScore + increment);
-            updateBoardScoresAPI(b.SK, { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore });
+            updateBoardScoresAPI(
+              b.SK,
+              { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore },
+              { taskID: task.SK, description: task.Description, category: task.Category, emoji: task.Emoji, checked: isChecked }
+            );
           }
           return b;
         });
@@ -104,10 +105,9 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         }
 
         // Check if the task has been created since the last sync and update accordingly
-        // TODO: Factor in the write and deletion of the tasks in the reports table - maybe a separate API call for that - probably merge into the board-scores API call
         let isCreate = false
-        readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
-          isCreate = t.Action == "create"
+        readDataFromLocalDB(localDB, 'tasks', task.SK).then(localTask => {
+          isCreate = localTask.Action == "create"
         }).catch(() => { }).finally(() => {
           writeDataToLocalDB(localDB, "tasks", { ...t, Action: isCreate ? "create" : "update" });
           setLocalSyncRequired(true);
@@ -201,14 +201,6 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
 
     return "1";
   };
-
-  // Save update task description to the DB and persist to app state
-  const saveAndUpdate = (newDescription) => {
-    if (descriptionHasChanged) {
-      updateActiveTaskDescription(newDescription)
-      setDescriptionHasChanged(false)
-    }
-  }
 
   // Handle click outside task menu
   const taskMenuRef = useRef(null);
