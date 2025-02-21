@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
+import { deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
@@ -98,26 +98,10 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     // Update the state with the modified tasks
     setSortedTasks({ ...sortedTasks });
 
-    // Add tasks to delete to local DB
+    // Add the tasks to delete to the local DB
     tasksToDelete.forEach(t => {
-      console.log(t)
       // Check if the task has been created since the last sync and update accordingly
-      let localTaskExists = false
-      readDataFromLocalDB(localDB, 'tasks', t.SK).then(lt => {
-        localTaskExists = true
-        if (lt.Action === "create") {
-          deleteDataFromLocalDB(localDB, 'tasks', t.SK);
-        } else if (lt.Action === "update") {
-          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: t.SK })
-          setLocalSyncRequired(true);
-        }
-      }).catch(() => { }).finally(() => {
-        if (!localTaskExists) {
-          console.log("here")
-          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: t.SK })
-          setLocalSyncRequired(true);
-        }
-      })
+      deleteTaskFromLocalDBWrapper(localDB, t.SK)
     })
   };
 
@@ -139,26 +123,20 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   };
 
   const getTasks = async () => {
-    const currentBoardID = Object.keys(boards)[0];
-
-    // If no tasks are filtered or the current board ID doesn't match, fetch tasks
-    if (currentBoardID !== boardID) {
-      setIsLoading(true);
-      try {
-        const data = await getActiveTasks(boardID);
-        sortTasks(data);
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        setIsLoading(false);
-        setAlertConf({
-          display: true,
-          title: "Error 💀",
-          textValue: error.message || "Failed to fetch tasks.",
-        });
-      }
-    } else {
+    setIsLoading(true);
+    try {
+      const data = await getActiveTasks(boardID);
+      sortTasks(data);
       setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      setAlertConf({
+        display: true,
+        title: "Error 💀",
+        textValue: error.message || "Failed to fetch tasks.",
+      }).finally(() => {
+        setIsLoading(false);
+      });
     }
   };
 

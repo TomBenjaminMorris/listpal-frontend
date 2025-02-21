@@ -99,5 +99,23 @@ function readAllFromLocalDB(db, storeName) {
   });
 }
 
+function deleteTaskFromLocalDBWrapper(localDB, taskID) {
+  // Check if the task has been created since the last sync and update accordingly
+  let localTaskExists = false
+  readDataFromLocalDB(localDB, 'tasks', taskID).then(localTask => {
+      localTaskExists = true
+      if (localTask.Action === "create") {
+          deleteDataFromLocalDB(localDB, 'tasks', taskID);
+      } else if (localTask.Action === "update") {
+          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
+          setLocalSyncRequired(true);
+      }
+  }).catch(() => { }).finally(() => {
+      if (!localTaskExists) {
+          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
+          setLocalSyncRequired(true);
+      }
+  })
+}
 
-export { openDB, createObjectStore, writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB, clearLocalDB, readAllFromLocalDB };
+export { openDB, createObjectStore, writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB, clearLocalDB, readAllFromLocalDB, deleteTaskFromLocalDBWrapper };

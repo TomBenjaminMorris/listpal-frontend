@@ -1,7 +1,7 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { renameCatagoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
-import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
+import { renameCategoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -62,19 +62,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     // Remove from local DB, as appropriate
     sortedTasks[title]?.forEach(t => {
       // Check if the task has been created since the last sync and update accordingly
-      let localTaskExists = false
-      readDataFromLocalDB(localDB, 'tasks', t.SK).then(lt => {
-        localTaskExists = true
-        if (lt.Action === "create") {
-          deleteDataFromLocalDB(localDB, 'tasks', t.SK);
-        } else if (lt.Action === "update") {
-          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: t.SK })
-        }
-      }).catch(() => { }).finally(() => {
-        if (!localTaskExists) {
-          writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: t.SK })
-        }
-      })
+      deleteTaskFromLocalDBWrapper(localDB, t.SK)
     });
     setLocalSyncRequired(true);
     // Update the state to reflect the deleted category
@@ -90,6 +78,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
   }
 
   const renameCategory = newTitle => {
+    // Perform validations on the new title name
     if (!newTitle) {
       setAlertConf({
         display: true,
@@ -110,25 +99,6 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
       return;
     }
 
-    // // Update the local DB, as appropriate
-    // sortedTasks[title]?.forEach(t => {
-    //   // Check if the task has been created since the last sync and update accordingly
-    //   let localTaskExists = false
-    //   readDataFromLocalDB(localDB, 'tasks', t.SK).then(lt => {
-    //     localTaskExists = true
-    //     if (lt.Action === "create") {
-    //       writeDataToLocalDB(localDB, "tasks", { ...t, Action: "create", Category: newTitle })
-    //     } else if (lt.Action === "update") {
-    //       writeDataToLocalDB(localDB, "tasks", { ...t, Action: "update", Category: newTitle })
-    //     }
-    //   }).catch(() => { }).finally(() => {
-    //     if (!localTaskExists) {
-    //       writeDataToLocalDB(localDB, "tasks", { ...t, Action: "update", Category: newTitle })
-    //     }
-    //   })
-    // });
-    // setLocalSyncRequired(true);
-
     const taskIDs = [];
     const updatedTasks = sortedTasks[title].map(t => {
       if (t.Category === title) {
@@ -141,7 +111,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[newTitle] = updatedTasks
     delete tmpSortedTasks[title];
-    renameCatagoryAPI(taskIDs, newTitle).then(() => {
+    renameCategoryAPI(taskIDs, newTitle).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
 
@@ -174,7 +144,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
       Important: "false",
       ExpiryDateTTL: 0
     };
-    
+
     // newTask
     writeDataToLocalDB(localDB, "tasks", newTaskData).then(() => {
       setLocalSyncRequired(true)
@@ -197,6 +167,12 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     updateTaskEmojiAPI(tasks.map(t => t.SK), newEmoji).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
+  }
+
+  const handleCardTitleEdit = (e) => {
+    const newTitle = e.target.value
+    setTitleHasChanged(true);
+    setTitleEdited(newTitle);
   }
 
   const measuredRef = useCallback(node => {
@@ -227,11 +203,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
           )}
         </div>
 
-        <input className="edit-title-input" type="text" value={titleEdited} onChange={e => {
-          const newTitle = e.target.value
-          setTitleHasChanged(true);
-          setTitleEdited(newTitle);
-        }} ref={cardTitleRef} />
+        <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} ref={cardTitleRef} />
 
         <div className="menu" onClick={() => setDropdownVisible(prev => !prev)} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} src={dotsIcon} alt="menu icon" />

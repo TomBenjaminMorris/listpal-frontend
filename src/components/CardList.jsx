@@ -1,8 +1,7 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, getSortArray, updateCategoryOrder } from '../utils/utils';
-import { updateTaskDescription } from '../utils/apiGatewayClient';
-import { writeDataToLocalDB, readDataFromLocalDB, deleteDataFromLocalDB } from '../utils/localDBHelpers';
+import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper, readDataFromLocalDB } from '../utils/localDBHelpers';
 import Card from './Card';
 import './CardList.css'
 
@@ -23,6 +22,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     const uncheckedTasks = tasks.filter(t => t.CompletedDate === "nil");
     const isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK === taskID;
 
+    // Perform validation against the last task being deleted in a category
     if (isLastUncheckedTask) {
       const task = tasks.find(t => t.SK === taskID);
       if (!task.Description) {
@@ -30,7 +30,15 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
         return;
       }
 
-      updateTaskDescription(taskID, "");
+      // Check if the task has been created since the last sync and update accordingly
+      let isCreate = false
+      readDataFromLocalDB(localDB, 'tasks', taskID).then(t => {
+        isCreate = t.Action == "create"
+      }).catch(() => { }).finally(() => {
+        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: "" });
+        setLocalSyncRequired(true);
+      })
+      
       setSortedTasks({
         ...sortedTasks,
         [title]: tasks.map(t => t.SK === taskID ? { ...t, Description: "" } : t)
@@ -39,21 +47,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     }
 
     // Check if the task has been created since the last sync and update accordingly
-    let localTaskExists = false
-    readDataFromLocalDB(localDB, 'tasks', taskID).then(t => {
-      localTaskExists = true
-      if (t.Action === "create") {
-        deleteDataFromLocalDB(localDB, 'tasks', taskID);
-      } else if (t.Action === "update") {
-        writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
-        setLocalSyncRequired(true);
-      }
-    }).catch(() => { }).finally(() => {
-      if (!localTaskExists) {
-        writeDataToLocalDB(localDB, "tasks", { Action: "delete", SK: taskID })
-        setLocalSyncRequired(true);
-      }
-    })
+    deleteTaskFromLocalDBWrapper(localDB, taskID)
 
     setSortedTasks({
       ...sortedTasks,
