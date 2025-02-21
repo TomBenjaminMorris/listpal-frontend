@@ -47,7 +47,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     }
 
     // Check if the task has been created since the last sync and update accordingly
-    deleteTaskFromLocalDBWrapper(localDB, taskID)
+    deleteTaskFromLocalDBWrapper(localDB, taskID, setLocalSyncRequired)
 
     setSortedTasks({
       ...sortedTasks,

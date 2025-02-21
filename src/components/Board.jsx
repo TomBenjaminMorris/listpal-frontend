@@ -101,7 +101,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     // Add the tasks to delete to the local DB
     tasksToDelete.forEach(t => {
       // Check if the task has been created since the last sync and update accordingly
-      deleteTaskFromLocalDBWrapper(localDB, t.SK)
+      deleteTaskFromLocalDBWrapper(localDB, t.SK, setLocalSyncRequired)
     })
   };
 

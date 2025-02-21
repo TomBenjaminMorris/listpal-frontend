@@ -62,7 +62,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     // Remove from local DB, as appropriate
     sortedTasks[title]?.forEach(t => {
       // Check if the task has been created since the last sync and update accordingly
-      deleteTaskFromLocalDBWrapper(localDB, t.SK)
+      deleteTaskFromLocalDBWrapper(localDB, t.SK, setLocalSyncRequired)
     });
     setLocalSyncRequired(true);
     // Update the state to reflect the deleted category

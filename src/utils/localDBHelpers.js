@@ -99,7 +99,7 @@ function readAllFromLocalDB(db, storeName) {
   });
 }
 
-function deleteTaskFromLocalDBWrapper(localDB, taskID) {
+function deleteTaskFromLocalDBWrapper(localDB, taskID, setLocalSyncRequired) {
   // Check if the task has been created since the last sync and update accordingly
   let localTaskExists = false
   readDataFromLocalDB(localDB, 'tasks', taskID).then(localTask => {
