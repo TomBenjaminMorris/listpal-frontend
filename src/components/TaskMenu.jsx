@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { isUrlValid } from '../utils/utils';
-import { updateTaskDetails } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, readDataFromLocalDB } from '../utils/localDBHelpers';
 import importantIcon from '../assets/icons8-important-30-white.png';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import plusIcon from '../assets/icons8-plus-30.png';
 import editIcon from '../assets/icons8-edit-48.png';
 import "./TaskMenu.css";
 
-const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks, setPromptConf, setConfirmConf, setAlertConf }) => {
+const TaskMenu = memo(({ localDB, setLocalSyncRequired, markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks, setPromptConf, setConfirmConf, setAlertConf }) => {
 
   const handleAddLink = (enteredLink) => {
     if (enteredLink === null) return;
@@ -26,8 +26,14 @@ const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, 
       enteredLink = "https://".concat(enteredLink);
     }
 
-    // Update task details
-    updateTaskDetails(task.SK, task.CompletedDate, task.ExpiryDate, task["GSI1-SK"], task.ExpiryDateTTL || 0, enteredLink).then(() => {
+    // Check if the task has been created since the last sync and update accordingly
+    let isCreate = false
+    readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
+      isCreate = t.Action == "create"
+    }).catch(() => { }).finally(() => {
+      writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Link: enteredLink });
+      setLocalSyncRequired(true);
+      // Update task details
       const tmpSortedTasks = { ...sortedTasks };
       tmpSortedTasks[task.Category] = tmpSortedTasks[task.Category].map(t => {
         if (t.SK === task.SK) {
@@ -36,7 +42,7 @@ const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, 
         return t;
       });
       setSortedTasks(tmpSortedTasks);
-    });
+    })
   };
 
   const handleEditLink = () => {

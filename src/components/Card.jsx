@@ -1,6 +1,7 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { newTask, renameCatagoryAPI, deleteTasks, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
+import { renameCategoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getSortArray, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -19,7 +20,7 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
@@ -57,7 +58,27 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     ];
   };
 
+  const handleDeleteCategory = () => {
+    // Remove from local DB, as appropriate
+    sortedTasks[title]?.forEach(t => {
+      // Check if the task has been created since the last sync and update accordingly
+      deleteTaskFromLocalDBWrapper(localDB, t.SK)
+    });
+    setLocalSyncRequired(true);
+    // Update the state to reflect the deleted category
+    const newSortedTasks = { ...sortedTasks };
+    delete newSortedTasks[title];
+    setSortedTasks(newSortedTasks);
+    const sortArr = getSortArray(boards);
+    const index = sortArr.indexOf(title);
+    if (index !== -1) {
+      sortArr.splice(index, 1);
+      updateCategoryOrder(sortArr, boards, setBoards);
+    }
+  }
+
   const renameCategory = newTitle => {
+    // Perform validations on the new title name
     if (!newTitle) {
       setAlertConf({
         display: true,
@@ -90,7 +111,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[newTitle] = updatedTasks
     delete tmpSortedTasks[title];
-    renameCatagoryAPI(taskIDs, newTitle).then(() => {
+    renameCategoryAPI(taskIDs, newTitle).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
 
@@ -107,8 +128,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     const boardID = window.location.href.split('/').pop();
 
     const newTaskData = {
+      Action: "create",
       CreatedDate: String(Date.now()),
-      SK: `t#${uuidv4()}`,
+      SK: "t#" + uuidv4(),
+      PK: "",
       "GSI1-SK": "nil",
       "GSI1-PK": boardID,
       ExpiryDate: "nil",
@@ -117,28 +140,23 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       Category: title,
       EntityType: "Task",
       Emoji: cardEmoji,
+      Link: "",
+      Important: "false",
+      ExpiryDateTTL: 0
     };
 
-    await newTask(
-      newTaskData.SK,
-      newTaskData.CreatedDate,
-      newTaskData.CompletedDate,
-      newTaskData.ExpiryDate,
-      newTaskData["GSI1-PK"],
-      newTaskData.Description,
-      newTaskData.Category,
-      "",
-      newTaskData.Emoji
-    );
+    // newTask
+    writeDataToLocalDB(localDB, "tasks", newTaskData).then(() => {
+      setLocalSyncRequired(true)
+    })
 
-    const tasks = incomingTasks || { ...sortedTasks };
-    tasks[title] = tasks[title] || [];
-    tasks[title].unshift(newTaskData);
-    setSortedTasks(tasks);
+    const tmpTasks = incomingTasks || { ...sortedTasks };
+    tmpTasks[title] = tmpTasks[title] || [];
+    tmpTasks[title].unshift(newTaskData);
+    setSortedTasks(tmpTasks);
     setOrderedTasks(prev => [...prev, newTaskData]);
     setLoadingTask(false);
   };
-
 
   const handleEmojiSelect = (e) => {
     const newEmoji = e.native;
@@ -149,6 +167,12 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     updateTaskEmojiAPI(tasks.map(t => t.SK), newEmoji).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
+  }
+
+  const handleCardTitleEdit = (e) => {
+    const newTitle = e.target.value
+    setTitleHasChanged(true);
+    setTitleEdited(newTitle);
   }
 
   const measuredRef = useCallback(node => {
@@ -179,27 +203,13 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
           )}
         </div>
 
-        <input className="edit-title-input" type="text" value={titleEdited} onChange={e => {
-          setTitleHasChanged(true);
-          setTitleEdited(e.target.value);
-        }} ref={cardTitleRef} />
+        <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} ref={cardTitleRef} />
 
         <div className="menu" onClick={() => setDropdownVisible(prev => !prev)} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} src={dotsIcon} alt="menu icon" />
           {isDropdownVisible && (
             <DropdownMenu
-              handleDeleteCategory={() => {
-                deleteTasks(sortedTasks[title]);
-                const newSortedTasks = { ...sortedTasks };
-                delete newSortedTasks[title];
-                setSortedTasks(newSortedTasks);
-                const sortArr = getSortArray(boards);
-                const index = sortArr.indexOf(title);
-                if (index !== -1) {
-                  sortArr.splice(index, 1);
-                  updateCategoryOrder(sortArr, boards, setBoards);
-                }
-              }}
+              handleDeleteCategory={handleDeleteCategory}
               boards={boards}
               title={title}
               sortedTasks={sortedTasks}
@@ -227,6 +237,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
+          localDB={localDB}
+          setLocalSyncRequired={setLocalSyncRequired}
         />
       ))}
 

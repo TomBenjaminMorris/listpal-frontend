@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI, deleteTasks, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
+import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
+import { deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
+import syncIcon from '../assets/icons8-sync-64.png';
+import tickIcon from '../assets/icons8-tick-64.png';
 import CardList from './CardList';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
@@ -15,7 +18,7 @@ import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
-const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, localSyncRequired, setLocalSyncRequired }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
@@ -94,17 +97,12 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     }
     // Update the state with the modified tasks
     setSortedTasks({ ...sortedTasks });
-    // Call deleteTasks and await its completion
-    try {
-      await deleteTasks(tasksToDelete);
-    } catch (error) {
-      // Optionally, handle any errors during deletion
-      setAlertConf({
-        display: true,
-        title: "Error 💀",
-        textValue: error.message || "Something went wrong while clearing tasks.",
-      });
-    }
+
+    // Add the tasks to delete to the local DB
+    tasksToDelete.forEach(t => {
+      // Check if the task has been created since the last sync and update accordingly
+      deleteTaskFromLocalDBWrapper(localDB, t.SK)
+    })
   };
 
   const sortTasks = (data) => {
@@ -125,26 +123,20 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   };
 
   const getTasks = async () => {
-    const currentBoardID = Object.keys(boards)[0];
-
-    // If no tasks are filtered or the current board ID doesn't match, fetch tasks
-    if (currentBoardID !== boardID) {
-      setIsLoading(true);
-      try {
-        const data = await getActiveTasks(boardID);
-        sortTasks(data);
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        setIsLoading(false);
-        setAlertConf({
-          display: true,
-          title: "Error 💀",
-          textValue: error.message || "Failed to fetch tasks.",
-        });
-      }
-    } else {
+    setIsLoading(true);
+    try {
+      const data = await getActiveTasks(boardID);
+      sortTasks(data);
       setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      setAlertConf({
+        display: true,
+        title: "Error 💀",
+        textValue: error.message || "Failed to fetch tasks.",
+      }).finally(() => {
+        setIsLoading(false);
+      });
     }
   };
 
@@ -279,9 +271,14 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}
+              localDB={localDB}
+              setLocalSyncRequired={setLocalSyncRequired}
             />
           </div>
         }
+      </div>
+      <div className="board-local-sync-indicator-wrapper">
+        <img className={`sync-status-icon ${localSyncRequired ? "spin" : ""}`} src={!localSyncRequired ? tickIcon : syncIcon} alt="sync status icon" />
       </div>
     </div >
   );

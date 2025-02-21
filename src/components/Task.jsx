@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { updateBoardScoresAPI, updateTaskDescription, updateTaskImportance, newTask, updateTaskChecked } from '../utils/apiGatewayClient';
+import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, readDataFromLocalDB } from '../utils/localDBHelpers';
 import { v4 as uuidv4 } from 'uuid';
 import { useOnClickOutside } from 'usehooks-ts'
 import linkIcon from '../assets/icons8-link-64.png';
@@ -9,12 +10,10 @@ import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
-const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
-  const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
-  const [timer, setTimer] = useState(null);
 
   // Update description when task.Description changes
   useEffect(() => {
@@ -22,15 +21,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       setDescription(task.Description);
     }
   }, [task.Description]);
-
-  // Cleanup on unmount or when the component re-renders
-  useEffect(() => {
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [timer]);
 
   // Toggle checkbox state
   const handleCheckBox = () => {
@@ -43,16 +33,17 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
   const handleTextUpdate = e => {
     const newDescription = e.target.value;
     if (newDescription !== description) {
-      setDescriptionHasChanged(true);
       setDescription(newDescription);
-      if (timer) {
-        clearTimeout(timer);
-      }
-      // Start a new timer to save data after a delay. Save after 10 seconds of inactivity
-      const newTimer = setTimeout(() => {
-        saveAndUpdate(newDescription);
-      }, 10000);
-      setTimer(newTimer);
+      updateActiveTaskDescription(newDescription)
+
+      // Check if the task has been created since the last sync and update accordingly
+      let isCreate = false
+      readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
+        isCreate = t.Action == "create"
+      }).catch(() => { }).finally(() => {
+        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: newDescription });
+        setLocalSyncRequired(true);
+      })
     }
   }
 
@@ -82,7 +73,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
             b.YScore = Math.max(0, b.YScore + increment);
             b.MScore = Math.max(0, b.MScore + increment);
             b.WScore = Math.max(0, b.WScore + increment);
-            updateBoardScoresAPI(b.SK, { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore });
+            updateBoardScoresAPI(
+              b.SK,
+              { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore },
+              { taskID: task.SK, description: task.Description, category: task.Category, emoji: task.Emoji, checked: isChecked }
+            );
           }
           return b;
         });
@@ -109,7 +104,14 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
           updateBoardScores(-1); // Decrement board scores
         }
 
-        updateTaskChecked(t.SK, t.CompletedDate, t.ExpiryDate, t["GSI1-SK"], t.ExpiryDateTTL, "", isChecked, description, title, cardEmoji);
+        // Check if the task has been created since the last sync and update accordingly
+        let isCreate = false
+        readDataFromLocalDB(localDB, 'tasks', task.SK).then(localTask => {
+          isCreate = localTask.Action == "create"
+        }).catch(() => { }).finally(() => {
+          writeDataToLocalDB(localDB, "tasks", { ...t, Action: isCreate ? "create" : "update" });
+          setLocalSyncRequired(true);
+        })
       }
       return t;
     });
@@ -119,6 +121,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       const newCardDefaultTask = {
         "CreatedDate": String(Date.now()),
         "SK": "t#" + uuidv4(),
+        "PK": "",
         "GSI1-SK": "nil",
         "GSI1-PK": activeBoard.SK,
         "ExpiryDate": "nil",
@@ -127,10 +130,15 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
         "Category": title,
         "EntityType": "Task",
         "Emoji": cardEmoji,
+        "Link": "",
+        "Important": "false",
+        "ExpiryDateTTL": 0
       };
 
       tmpSortedTasks[title].push(newCardDefaultTask);
-      newTask(newCardDefaultTask.SK, newCardDefaultTask.CreatedDate, newCardDefaultTask.CompletedDate, newCardDefaultTask.ExpiryDate, newCardDefaultTask['GSI1-PK'], newCardDefaultTask.Description, newCardDefaultTask.Category, "", newCardDefaultTask.Emoji);
+      writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
+        setLocalSyncRequired(true)
+      })
     }
 
     setSortedTasks(tmpSortedTasks);
@@ -149,9 +157,16 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     if (task) {
       const newImportantStatus = task.Important === "true" ? "false" : "true";
       task.Important = newImportantStatus;
-      updateTaskImportance(taskID, newImportantStatus).then(() => {
+
+      // Check if the task has been created since the last sync and update accordingly
+      let isCreate = false
+      readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
+        isCreate = t.Action == "create"
+      }).catch(() => { }).finally(() => {
+        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Important: newImportantStatus });
+        setLocalSyncRequired(true);
         setSortedTasks(updatedTasks);
-      });
+      })
     }
     setTaskMenuVisible(false);
   };
@@ -165,7 +180,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     }
     if (key === "Enter") {
       e.preventDefault();
-      saveAndUpdate(description)
       // Pass the latest sortedTasks to the handleNewTask to prevent it being overwritten (bug)
       let tmpSortedTasks = { ...sortedTasks };
       tmpSortedTasks[title] = sortedTasks[title].map(t =>
@@ -183,30 +197,14 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
     if (diffDays >= 2) return "0.4";
     if (diffDays === 1) return "0.3";
-    if (diffDays === 0) return "0.2";
+    if (diffDays < 1) return "0.2";
 
     return "1";
   };
 
-  // Save update task description to the DB and persist to app state
-  const saveAndUpdate = (newDescription) => {
-    if (descriptionHasChanged) {
-      if (timer) {
-        clearTimeout(timer);
-      }
-      updateActiveTaskDescription(newDescription)
-      updateTaskDescription(task.SK, newDescription)
-        .finally(() => setDescriptionHasChanged(false)); // Reset after update
-    }
-  }
-
   // Handle click outside task menu
   const taskMenuRef = useRef(null);
   useOnClickOutside(taskMenuRef, () => taskMenuVisible && setTaskMenuVisible(false));
-
-  // Handle click outside description field, update description if changed
-  const descriptionRef = useRef(null);
-  useOnClickOutside(descriptionRef, () => saveAndUpdate(description));
 
   // Extract repeated logic
   const isImportant = task.Important === "true";
@@ -233,7 +231,6 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
         autoFocus={taskAutoFocus}
         onKeyDown={(e) => onKeyDown(e, task.SK, title)}
         style={taskTextDecorationStyle}
-        ref={descriptionRef}
       />
 
       {/* Link Icon */}
@@ -250,6 +247,8 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
         <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
+            localDB={localDB}
+            setLocalSyncRequired={setLocalSyncRequired}
             markAsImportant={() => handleMarkAsImportant(task.SK)}
             deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
             isImportant={isImportant}

@@ -1,11 +1,11 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, getSortArray, updateCategoryOrder } from '../utils/utils';
-import { newTask, deleteTask, updateTaskDescription } from '../utils/apiGatewayClient';
+import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper, readDataFromLocalDB } from '../utils/localDBHelpers';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -22,6 +22,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     const uncheckedTasks = tasks.filter(t => t.CompletedDate === "nil");
     const isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK === taskID;
 
+    // Perform validation against the last task being deleted in a category
     if (isLastUncheckedTask) {
       const task = tasks.find(t => t.SK === taskID);
       if (!task.Description) {
@@ -29,7 +30,15 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
         return;
       }
 
-      updateTaskDescription(taskID, "");
+      // Check if the task has been created since the last sync and update accordingly
+      let isCreate = false
+      readDataFromLocalDB(localDB, 'tasks', taskID).then(t => {
+        isCreate = t.Action == "create"
+      }).catch(() => { }).finally(() => {
+        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: "" });
+        setLocalSyncRequired(true);
+      })
+      
       setSortedTasks({
         ...sortedTasks,
         [title]: tasks.map(t => t.SK === taskID ? { ...t, Description: "" } : t)
@@ -37,7 +46,9 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
       return;
     }
 
-    deleteTask(taskID);
+    // Check if the task has been created since the last sync and update accordingly
+    deleteTaskFromLocalDBWrapper(localDB, taskID)
+
     setSortedTasks({
       ...sortedTasks,
       [title]: tasks.filter(t => t.SK !== taskID)
@@ -54,6 +65,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     const newCardDefaultTask = {
       CreatedDate: String(Date.now()),
       SK: "t#" + uuidv4(),
+      PK: "",
       "GSI1-SK": "nil",
       "GSI1-PK": boardID,
       ExpiryDate: "nil",
@@ -62,20 +74,18 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
       Category: name,
       EntityType: "Task",
       Emoji: "✅",
+      Link: "",
+      Important: "false",
+      ExpiryDateTTL: 0
     };
+    // newTask
 
     const sortArr = [name, ...getSortArray(boards)];
-    newTask(
-      newCardDefaultTask.SK,
-      newCardDefaultTask.CreatedDate,
-      newCardDefaultTask.CompletedDate,
-      newCardDefaultTask.ExpiryDate,
-      newCardDefaultTask["GSI1-PK"],
-      newCardDefaultTask.Description,
-      newCardDefaultTask.Category,
-      "",
-      newCardDefaultTask.Emoji
-    ).then(() => updateCategoryOrder(sortArr, boards, setBoards));
+    updateCategoryOrder(sortArr, boards, setBoards)
+
+    writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
+      setLocalSyncRequired(true)
+    })
 
     setSortedTasks({
       ...sortedTasks,
@@ -99,6 +109,8 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
+          localDB={localDB}
+          setLocalSyncRequired={setLocalSyncRequired}
         />
       ))}
       {sortedTasks && (
