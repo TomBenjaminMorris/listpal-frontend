@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, memo } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts';
-import ConfettiExplosion from 'react-confetti-explosion';
+// import ConfettiExplosion from 'react-confetti-explosion';
 import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css';
@@ -21,15 +21,15 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
   const scoreRef = useRef(null);
 
-  const handleConfettiCompleted = () => {
-    setAlertConf({
-      display: true,
-      title: "Great News! 🎉",
-      animate: true,
-      textValue: `You've hit your ${TYPE_MAPPINGS[type].label} target... Keep going!`,
-    });
-    setIsTargetMet(true);
-  };
+  // const handleConfettiCompleted = () => {
+  //   setAlertConf({
+  //     display: true,
+  //     title: "Great News! 🎉",
+  //     animate: true,
+  //     textValue: `You've hit your ${TYPE_MAPPINGS[type].label} target... Keep going!`,
+  //   });
+  //   setIsTargetMet(true);
+  // };
 
   const validateAndUpdateScore = async () => {
     if (scoreValue < 0) {
@@ -103,7 +103,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
 
   return (
     <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)} ref={scoreRef}>
-      {isExploding && !isTargetMet && (
+      {/* {isExploding && !isTargetMet && (
         <ConfettiExplosion
           zIndex={1000}
           duration={3000}
@@ -112,7 +112,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
           particleCount={80}
           onComplete={handleConfettiCompleted}
         />
-      )}
+      )} */}
       <div style={{ width: 45, height: 45 }}>
         {(percent || percent >= 0) && (
           <CircularProgressbarWithChildren value={percent} styles={progressBarStyles}>

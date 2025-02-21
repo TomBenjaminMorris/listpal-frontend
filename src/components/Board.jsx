@@ -4,6 +4,7 @@ import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from
 import { deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
+import ConfettiExplosion from 'react-confetti-explosion';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
@@ -23,12 +24,76 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
   const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isExploding, setIsExploding] = useState(false);
+  const [hasExploded, setHasExploded] = useState(false);
+  const [board, setBoard] = useState(null);
   const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
   const boardName = ls_currentBoard && ls_currentBoard.Board
   const maxLength = 20;
   const navigate = useNavigate();
   const boardID = getBoardIdFromUrl()
   const emojiMenuRef = useRef(null)
+
+  useEffect(() => {
+    loadEmoji();
+    const board = boards.filter(b => b.SK === boardID)[0];
+    setBoard(board)
+  }, [boards]);
+
+  // Handle confetti explosion when weekly target is met
+  useEffect(() => {
+    if (board && !hasExploded) {
+      const weeklyPercent = (board.WScore / board.WTarget) * 100;
+      if (weeklyPercent >= 100) {
+        setIsExploding(true);
+        setHasExploded(true);
+      }
+    }
+  }, [board, hasExploded]);
+
+  // Reset explosion state when board or target changes
+  useEffect(() => {
+    if (board) {
+      const weeklyPercent = (board.WScore / board.WTarget) * 100;
+      if (weeklyPercent < 100) {
+        setHasExploded(false);
+        setIsExploding(false);
+      }
+    }
+  }, [board?.WScore, board?.WTarget]);
+
+  const handleConfettiComplete = () => {
+    setIsExploding(false);
+  };
+
+  
+
+
+
+
+
+
+  useEffect(() => {
+    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
+    if (ls_currentBoard) {
+      document.title = `ListPal | ${ls_currentBoard.Board} ${ls_currentBoard.Emoji}`;
+      setDeleteMessage(`Delete Board - "${ls_currentBoard.Board}" ?`);
+    } else {
+      document.title = "ListPal";
+      setDeleteMessage("Delete Board?");
+    }
+    loadEmoji();
+    getTasks();
+  }, [boardID]);
+
+  // Function to update the cursor position on mouse move
+  const handleMouseMove = (e) => {
+    setCursorPosition({
+      x: e.clientX + window.scrollX,
+      y: e.clientY + window.scrollY,
+    });
+  };
 
   const handleEditBoard = async (name) => {
     if (!name) {
@@ -165,23 +230,6 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     }
   };
 
-  useEffect(() => {
-    loadEmoji();
-  }, [boards]);
-
-  useEffect(() => {
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    if (ls_currentBoard) {
-      document.title = `ListPal | ${ls_currentBoard.Board} ${ls_currentBoard.Emoji}`;
-      setDeleteMessage(`Delete Board - "${ls_currentBoard.Board}" ?`);
-    } else {
-      document.title = "ListPal";
-      setDeleteMessage("Delete Board?");
-    }
-    loadEmoji();
-    getTasks();
-  }, [boardID]);
-
   useOnClickOutside(emojiMenuRef, () => {
     if (displayEmojiPicker) {
       setDisplayEmojiPicker(false)
@@ -189,7 +237,24 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   })
 
   return (
-    <div className="wrapper">
+    <div className="wrapper" onMouseMove={handleMouseMove} >
+
+      <div style={{
+        position: 'absolute',
+        top: cursorPosition.y - 25,
+        left: cursorPosition.x - 25,
+      }} >
+        {isExploding && (
+          <ConfettiExplosion
+            zIndex={1000}
+            duration={3000}
+            width={window.innerWidth}
+            particleSize={15}
+            particleCount={80}
+            onComplete={handleConfettiComplete}
+          />
+        )}
+      </div>
 
       <TargetSetterModal
         display={displayTargetSetter}

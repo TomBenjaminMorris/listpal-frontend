@@ -240,7 +240,7 @@ const App = () => {
           hideMobileSidebar={hideMobileSidebar}
         />) : null}
 
-        <div className={`${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`}>
+        <div className={`${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`} >
 
           <Routes>
             <Route path="/" element={<Navigate replace to="/home" />} />
