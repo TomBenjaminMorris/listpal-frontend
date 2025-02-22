@@ -3,7 +3,7 @@ import { calcPercents } from '../utils/utils';
 import ScoreCounter from './ScoreCounter';
 import './ScoreBoard.css';
 
-const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf }) => {
+const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const [percentValues, setPercentValues] = useState({ W: 0, M: 0, Y: 0 });
   const [currentBoardScores, setCurrentBoardScores] = useState({
     WScore: 0,
@@ -30,32 +30,24 @@ const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf }) => {
     }
   }, [boards, boardID]);
 
+  // Define the score counters for weekly/monthly/yearly
+  const renderScoreCounter = (type, score, percent) => (
+    <ScoreCounter
+      score={score}
+      percent={percent}
+      type={type}
+      currentBoardScores={currentBoardScores}
+      setBoards={setBoards}
+      setAlertConf={setAlertConf}
+      setIsExploding={setIsExploding}
+      setIsTargetMet={setIsTargetMet}
+      isExploding={isExploding}
+    />
+  );
+
   return (
     <div className="score-counter-wrapper">
-      <ScoreCounter
-        score={currentBoardScores?.WScore}
-        percent={percentValues.W}
-        type="W"
-        currentBoardScores={currentBoardScores}
-        setBoards={setBoards}
-        setAlertConf={setAlertConf}
-      />
-      <ScoreCounter
-        score={currentBoardScores?.MScore}
-        percent={percentValues.M}
-        type="M"
-        currentBoardScores={currentBoardScores}
-        setBoards={setBoards}
-        setAlertConf={setAlertConf}
-      />
-      <ScoreCounter
-        score={currentBoardScores?.YScore}
-        percent={percentValues.Y}
-        type="Y"
-        currentBoardScores={currentBoardScores}
-        setBoards={setBoards}
-        setAlertConf={setAlertConf}
-      />
+      {['W', 'M', 'Y'].map((type) => renderScoreCounter(type, currentBoardScores?.[`${type}Score`], percentValues[type]))}
     </div>
   );
 });

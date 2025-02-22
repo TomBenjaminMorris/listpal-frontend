@@ -25,9 +25,8 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const [boardEmoji, setBoardEmoji] = useState("");
   const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [isExploding, setIsExploding] = useState(false);
-  const [hasExploded, setHasExploded] = useState(false);
-  const [board, setBoard] = useState(null);
+  const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
+  const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
   const boardName = ls_currentBoard && ls_currentBoard.Board
   const maxLength = 20;
@@ -37,42 +36,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
 
   useEffect(() => {
     loadEmoji();
-    const board = boards.filter(b => b.SK === boardID)[0];
-    setBoard(board)
   }, [boards]);
-
-  // Handle confetti explosion when weekly target is met
-  useEffect(() => {
-    if (board && !hasExploded) {
-      const weeklyPercent = (board.WScore / board.WTarget) * 100;
-      if (weeklyPercent >= 100) {
-        setIsExploding(true);
-        setHasExploded(true);
-      }
-    }
-  }, [board, hasExploded]);
-
-  // Reset explosion state when board or target changes
-  useEffect(() => {
-    if (board) {
-      const weeklyPercent = (board.WScore / board.WTarget) * 100;
-      if (weeklyPercent < 100) {
-        setHasExploded(false);
-        setIsExploding(false);
-      }
-    }
-  }, [board?.WScore, board?.WTarget]);
-
-  const handleConfettiComplete = () => {
-    setIsExploding(false);
-  };
-
-  
-
-
-
-
-
 
   useEffect(() => {
     const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
@@ -85,6 +49,8 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     }
     loadEmoji();
     getTasks();
+    // Reset this to the original state to stop confetti explosion on board switch
+    setIsTargetMet({ weekly: true, monthly: true, yearly: true })
   }, [boardID]);
 
   // Function to update the cursor position on mouse move
@@ -236,24 +202,37 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     }
   })
 
+  const handleConfettiComplete = (type) => {
+    // setAlertConf({
+    //   display: true,
+    //   title: "Great News! 🎉",
+    //   animate: true,
+    //   textValue: `You've hit your ${type} target... Keep going!`,
+    // });
+    setIsTargetMet(current => ({
+      ...current,
+      [type]: true,
+    }));
+  };
+
+  const renderConfetti = (type) => (
+    isExploding[type] && !isTargetMet[type] && (
+      <ConfettiExplosion
+        zIndex={10000}
+        duration={2500}
+        width={window.innerWidth}
+        particleSize={12}
+        particleCount={60}
+        onComplete={() => handleConfettiComplete(type)}
+      />
+    )
+  );
+
   return (
     <div className="wrapper" onMouseMove={handleMouseMove} >
 
-      <div style={{
-        position: 'absolute',
-        top: cursorPosition.y - 25,
-        left: cursorPosition.x - 25,
-      }} >
-        {isExploding && (
-          <ConfettiExplosion
-            zIndex={1000}
-            duration={3000}
-            width={window.innerWidth}
-            particleSize={15}
-            particleCount={80}
-            onComplete={handleConfettiComplete}
-          />
-        )}
+      <div style={{ position: 'absolute', top: cursorPosition.y - 25, left: cursorPosition.x - 25 }}>
+        {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
       </div>
 
       <TargetSetterModal
@@ -318,7 +297,15 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
                 <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
               </div>
 
-              <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} setAlertConf={setAlertConf} />
+              <ScoreBoard
+                boards={boards}
+                setBoards={setBoards}
+                boardID={boardID}
+                setAlertConf={setAlertConf}
+                setIsExploding={setIsExploding}
+                setIsTargetMet={setIsTargetMet}
+                isExploding={isExploding}
+              />
 
             </div>
             {
