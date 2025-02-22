@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, memo } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import { useOnClickOutside } from 'usehooks-ts';
-import ConfettiExplosion from 'react-confetti-explosion';
 import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css';
@@ -13,23 +12,11 @@ const TYPE_MAPPINGS = {
   Y: { detail: 'YScore', label: 'yearly' }
 };
 
-const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards, setAlertConf }) => {
+const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const [scoreValue, setScoreValue] = useState(score);
   const [animate, setAnimate] = useState(true);
-  const [isExploding, setIsExploding] = useState(false);
-  const [isTargetMet, setIsTargetMet] = useState(true);
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
   const scoreRef = useRef(null);
-
-  const handleConfettiCompleted = () => {
-    setAlertConf({
-      display: true,
-      title: "Great News! 🎉",
-      animate: true,
-      textValue: `You've hit your ${TYPE_MAPPINGS[type].label} target... Keep going!`,
-    });
-    setIsTargetMet(true);
-  };
 
   const validateAndUpdateScore = async () => {
     if (scoreValue < 0) {
@@ -84,10 +71,19 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
     setAnimate(true);
     if (score && percent) {
       if (percent >= 100) {
-        setIsExploding(true)
+        setIsExploding(current => ({
+          ...current,
+          [TYPE_MAPPINGS[type].label]: true,
+        }));
       } else {
-        setIsExploding(false);
-        setIsTargetMet(false);
+        setIsExploding(current => ({
+          ...current,
+          [TYPE_MAPPINGS[type].label]: false,
+        }));
+        setIsTargetMet(current => ({
+          ...current,
+          [TYPE_MAPPINGS[type].label]: false,
+        }));
       }
     }
   }, [percent, score])
@@ -97,22 +93,12 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   const progressBarStyles = buildStyles({
     trailColor: 'var(--text-colour)',
     textColor: 'var(--text-colour)',
-    pathColor: isExploding ? 'var(--accent-2)' : 'var(--accent)',
+    pathColor: isExploding[TYPE_MAPPINGS[type].label] ? 'var(--accent-2)' : 'var(--accent)',
     pathTransitionDuration: 1,
   });
 
   return (
     <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)} ref={scoreRef}>
-      {isExploding && !isTargetMet && (
-        <ConfettiExplosion
-          zIndex={1000}
-          duration={3000}
-          width={window.innerWidth}
-          particleSize={15}
-          particleCount={80}
-          onComplete={handleConfettiCompleted}
-        />
-      )}
       <div style={{ width: 45, height: 45 }}>
         {(percent || percent >= 0) && (
           <CircularProgressbarWithChildren value={percent} styles={progressBarStyles}>
@@ -121,7 +107,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
                 setScoreValue(e.target.value);
                 setScoreHasChanged(true);
               }} />
-              {isExploding && <img className="star-icon" src={starIcon} alt="star icon" />}
+              {isExploding[TYPE_MAPPINGS[type].label] && <img className="star-icon" src={starIcon} alt="star icon" />}
             </div>
           </CircularProgressbarWithChildren>
         )}

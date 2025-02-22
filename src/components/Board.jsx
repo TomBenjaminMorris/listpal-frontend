@@ -4,6 +4,7 @@ import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from
 import { deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
+import ConfettiExplosion from 'react-confetti-explosion';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
@@ -23,12 +24,42 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
   const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
+  const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
   const boardName = ls_currentBoard && ls_currentBoard.Board
   const maxLength = 20;
   const navigate = useNavigate();
   const boardID = getBoardIdFromUrl()
   const emojiMenuRef = useRef(null)
+
+  useEffect(() => {
+    loadEmoji();
+  }, [boards]);
+
+  useEffect(() => {
+    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
+    if (ls_currentBoard) {
+      document.title = `ListPal | ${ls_currentBoard.Board} ${ls_currentBoard.Emoji}`;
+      setDeleteMessage(`Delete Board - "${ls_currentBoard.Board}" ?`);
+    } else {
+      document.title = "ListPal";
+      setDeleteMessage("Delete Board?");
+    }
+    loadEmoji();
+    getTasks();
+    // Reset this to the original state to stop confetti explosion on board switch
+    setIsTargetMet({ weekly: true, monthly: true, yearly: true })
+  }, [boardID]);
+
+  // Function to update the cursor position on mouse move
+  const handleMouseMove = (e) => {
+    setCursorPosition({
+      x: e.clientX + window.scrollX,
+      y: e.clientY + window.scrollY,
+    });
+  };
 
   const handleEditBoard = async (name) => {
     if (!name) {
@@ -165,31 +196,44 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     }
   };
 
-  useEffect(() => {
-    loadEmoji();
-  }, [boards]);
-
-  useEffect(() => {
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    if (ls_currentBoard) {
-      document.title = `ListPal | ${ls_currentBoard.Board} ${ls_currentBoard.Emoji}`;
-      setDeleteMessage(`Delete Board - "${ls_currentBoard.Board}" ?`);
-    } else {
-      document.title = "ListPal";
-      setDeleteMessage("Delete Board?");
-    }
-    loadEmoji();
-    getTasks();
-  }, [boardID]);
-
   useOnClickOutside(emojiMenuRef, () => {
     if (displayEmojiPicker) {
       setDisplayEmojiPicker(false)
     }
   })
 
+  const handleConfettiComplete = (type) => {
+    // setAlertConf({
+    //   display: true,
+    //   title: "Great News! 🎉",
+    //   animate: true,
+    //   textValue: `You've hit your ${type} target... Keep going!`,
+    // });
+    setIsTargetMet(current => ({
+      ...current,
+      [type]: true,
+    }));
+  };
+
+  const renderConfetti = (type) => (
+    isExploding[type] && !isTargetMet[type] && (
+      <ConfettiExplosion
+        zIndex={10000}
+        duration={2500}
+        width={window.innerWidth}
+        particleSize={12}
+        particleCount={60}
+        onComplete={() => handleConfettiComplete(type)}
+      />
+    )
+  );
+
   return (
-    <div className="wrapper">
+    <div className="wrapper" onMouseMove={handleMouseMove} >
+
+      <div style={{ position: 'absolute', top: cursorPosition.y - 25, left: cursorPosition.x - 25 }}>
+        {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
+      </div>
 
       <TargetSetterModal
         display={displayTargetSetter}
@@ -253,7 +297,15 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
                 <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
               </div>
 
-              <ScoreBoard boards={boards} setBoards={setBoards} boardID={boardID} setAlertConf={setAlertConf} />
+              <ScoreBoard
+                boards={boards}
+                setBoards={setBoards}
+                boardID={boardID}
+                setAlertConf={setAlertConf}
+                setIsExploding={setIsExploding}
+                setIsTargetMet={setIsTargetMet}
+                isExploding={isExploding}
+              />
 
             </div>
             {

@@ -76,6 +76,10 @@ button {
 @media screen and (max-width: 650px) {
 
   /* MISC STYLES */
+  .without-sidebar {
+    padding-left: 0px;
+  }
+
   .sidebar-wrapper {
     /* display: none; */
   }
