@@ -9,6 +9,7 @@ import arrowIcon from "../assets/icons8-line-50.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
+import { getNextMondayAt5AM } from '../utils/utils';
 
 const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
   const [description, setDescription] = useState(task.Description);
@@ -87,8 +88,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
       if (t.SK === task.SK) {
         if (isChecked) {
           // Mark task as completed
-          const today = new Date();
-          const expiryDate = String(new Date(today.setDate(today.getDate() + 2)).valueOf());
+          const expiryDate = getNextMondayAt5AM();
           t.CompletedDate = String(Date.now());
           t["GSI1-SK"] = expiryDate;
           t.ExpiryDate = expiryDate;
@@ -193,11 +193,11 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
     const now = Date.now();
     const expiryDate = parseInt(task.ExpiryDate);
     const diffDays = Math.floor((expiryDate - now) / (1000 * 60 * 60 * 24));
-
+    if (diffDays >= 4) return "0.6";
+    if (diffDays >= 3) return "0.5";
     if (diffDays >= 2) return "0.4";
     if (diffDays === 1) return "0.3";
     if (diffDays < 1) return "0.2";
-
     return "1";
   };
 
