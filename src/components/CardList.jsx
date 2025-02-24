@@ -1,11 +1,11 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { getBoardIdFromUrl, getSortArray, updateCategoryOrder } from '../utils/utils';
+import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
 import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper, readDataFromLocalDB } from '../utils/localDBHelpers';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
+const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired, board }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -80,7 +80,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     };
     // newTask
 
-    const sortArr = [name, ...getSortArray(boards)];
+    const sortArr = [name, ...board?.CategoryOrder];
     updateCategoryOrder(sortArr, boards, setBoards)
 
     writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
@@ -111,6 +111,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
           setAlertConf={setAlertConf}
           localDB={localDB}
           setLocalSyncRequired={setLocalSyncRequired}
+          board={board}
         />
       ))}
       {sortedTasks && (

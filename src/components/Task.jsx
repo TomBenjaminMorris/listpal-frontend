@@ -59,7 +59,6 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
   // Perform update actions to the DB and app state on checkbox toggle
   const updateActiveTaskChecked = (isChecked) => {
     let tmpSortedTasks = { ...sortedTasks };
-    const activeBoard = JSON.parse(localStorage.getItem('activeBoard'));
     let isLastUncheckedTask = false;
     if (isChecked) {
       const tmpTaskList = tmpSortedTasks[title]?.filter((t) => t.CompletedDate == "nil");
@@ -69,7 +68,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
     const updateBoardScores = (increment) => {
       setBoards((current) => {
         return current.map(b => {
-          if (b.SK === activeBoard?.SK) {
+          if (b.SK === task["GSI1-PK"]) {
             b.YScore = Math.max(0, b.YScore + increment);
             b.MScore = Math.max(0, b.MScore + increment);
             b.WScore = Math.max(0, b.WScore + increment);
@@ -123,7 +122,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         "SK": "t#" + uuidv4(),
         "PK": "",
         "GSI1-SK": "nil",
-        "GSI1-PK": activeBoard.SK,
+        "GSI1-PK": task["GSI1-PK"],
         "ExpiryDate": "nil",
         "Description": "",
         "CompletedDate": "nil",

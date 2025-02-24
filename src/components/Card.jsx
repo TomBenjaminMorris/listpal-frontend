@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { renameCategoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
 import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
 import { useOnClickOutside } from 'usehooks-ts'
-import { getSortArray, updateCategoryOrder } from '../utils/utils';
+import { updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
@@ -20,7 +20,7 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
-const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
+const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired, board }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
@@ -69,7 +69,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     const newSortedTasks = { ...sortedTasks };
     delete newSortedTasks[title];
     setSortedTasks(newSortedTasks);
-    const sortArr = getSortArray(boards);
+    const sortArr = board?.CategoryOrder;
     const index = sortArr.indexOf(title);
     if (index !== -1) {
       sortArr.splice(index, 1);
@@ -115,7 +115,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
       setSortedTasks(tmpSortedTasks);
     });
 
-    let sortArr = getSortArray(boards)
+    const sortArr = board?.CategoryOrder;
     var index = sortArr.indexOf(title);
     if (index !== -1) {
       sortArr[index] = newTitle

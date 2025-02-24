@@ -44,22 +44,11 @@ export function isUrlValid(userInput) {
     return urlPattern.test(userInput);
 }
 
-export function getSortArray(boards) {
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    const boardID = getBoardIdFromUrl();
-    if (ls_currentBoard?.CategoryOrder) {
-        return ls_currentBoard.CategoryOrder;
-    }
-    const board = boards.find(b => b.SK === boardID);
-    return board ? board.CategoryOrder : [];
-}
-
 export function updateCategoryOrder(sortArr, boards, setBoards) {
     const boardID = getBoardIdFromUrl();
     const updatedBoards = boards.map(b => {
         if (b.SK === boardID) {
             const updatedBoard = { ...b, CategoryOrder: sortArr };
-            localStorage.setItem('activeBoard', JSON.stringify(updatedBoard));
             updateBoardCategoryOrder(boardID, JSON.stringify(sortArr));
             return updatedBoard;
         }
