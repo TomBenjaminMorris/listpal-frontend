@@ -1,5 +1,4 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo, useCallback, memo } from 'react';
 import menuIcon from '../assets/icons8-menu-50.png';
 import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
@@ -11,28 +10,36 @@ import logoutIcon from '../assets/icons8-logout-48.png';
 import statsIcon from '../assets/icons8-graph-48.png';
 import './SideNavBar.css';
 
-const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSidebarBoardsMenuIsOpen, sidebarBoardsMenuIsOpen, isMobile, hideMobileSidebar, setIsLoading }) => {
+const SideNavBar = ({ 
+  sidebarIsOpen, 
+  handleSidebarCollapse, 
+  boards, 
+  setSidebarBoardsMenuIsOpen, 
+  sidebarBoardsMenuIsOpen, 
+  isMobile, 
+  hideMobileSidebar, 
+  setIsLoading, 
+  setActiveBoard, 
+  activeBoard 
+}) => {
   const navigate = useNavigate();
-  const activeBoard = JSON.parse(localStorage.getItem('activeBoard'));
 
-  const handleBoardClick = useCallback((board) => {
-    localStorage.setItem('activeBoard', JSON.stringify(board));
-    if (activeBoard?.SK && board.SK && activeBoard.SK !== board.SK) {
-      setIsLoading(true);
-    }
-  }, [activeBoard, setIsLoading]);
+  const handleBoardClick = (board) => {
+    setActiveBoard(board)
+    setIsLoading(true);
+  };
 
-  const handleBoardsMenuClick = useCallback(() => {
+  const handleBoardsMenuClick = () => {
     if (!sidebarIsOpen && activeBoard) {
       navigate(`/board/${activeBoard.SK}`);
       return;
     }
     setSidebarBoardsMenuIsOpen(current => !current);
-  }, [sidebarIsOpen, activeBoard, navigate, setSidebarBoardsMenuIsOpen]);
+  };
 
   const maxLength = 14;
 
-  const boardsRendered = useMemo(() => boards.map(board => (
+  const boardsRendered = boards.map(board => (
     <div key={board.SK} className={activeBoard?.SK === board.SK ? "highlight-board-link" : ""}>
       <Link
         to={`/board/${board.SK}`}
@@ -40,11 +47,10 @@ const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSide
         onClick={() => handleBoardClick(board)}
       >
         <div>{board.Emoji}</div>
-        {/* <div>{board.Board}</div> */}
         <div>{board.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board.Board}</div>
       </Link>
     </div>
-  )), [boards, activeBoard, handleBoardClick]);
+  ));
 
   const navLinkClass = `sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`;
   const textClass = sidebarIsOpen ? "sidenav-link-text" : "hidden";
@@ -105,6 +111,6 @@ const SideNavBar = memo(({ sidebarIsOpen, handleSidebarCollapse, boards, setSide
       </Link>
     </div>
   );
-});
+};
 
 export default SideNavBar;

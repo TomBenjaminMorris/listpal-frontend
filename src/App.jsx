@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getBoards, getUser, syncTasks } from './utils/apiGatewayClient';
-import { getSortArray, isAuthenticated } from './utils/utils';
+import { isAuthenticated } from './utils/utils';
 import { openDB, createObjectStore, clearLocalDB, readAllFromLocalDB } from './utils/localDBHelpers';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
@@ -51,6 +51,7 @@ const App = () => {
   const [localSyncRequired, setLocalSyncRequired] = useState(false);
   const [localSyncFlipper, setLocalSyncFlipper] = useState(false);
   const [localDB, setLocalDB] = useState(null);
+  const [activeBoard, setActiveBoard] = useState(null);
 
   // Wrapper to handle task updates and sync behaviour
   const setLocalSyncRequiredWrapper = (flag) => {
@@ -185,8 +186,8 @@ const App = () => {
   }, [userDetails]);
 
   // Order the tasks and update the state
-  const setOrderedSortedTasks = useCallback((tasks) => {
-    const sortArr = getSortArray(boards);
+  const setOrderedSortedTasks = (tasks, incomingSortArr) => {
+    const sortArr = incomingSortArr ? incomingSortArr : activeBoard ? activeBoard.CategoryOrder : [];
     if (!sortArr?.length) {
       setSortedTasks(tasks);
       return;
@@ -195,9 +196,8 @@ const App = () => {
     const orderedTasks = Object.keys(tasks)
       .sort(sortFunc)
       .reduce((obj, key) => ({ ...obj, [key]: tasks[key] }), {});
-
     setSortedTasks(orderedTasks);
-  }, [boards]);
+  };
 
   // Set state for sidebar collapse action
   const handleSidebarCollapse = useCallback(() => {
@@ -238,6 +238,8 @@ const App = () => {
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           isMobile={isMobile}
           hideMobileSidebar={hideMobileSidebar}
+          setActiveBoard={setActiveBoard}
+          activeBoard={activeBoard}
         />) : null}
 
         <div className={`${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`} >
@@ -255,6 +257,7 @@ const App = () => {
                 isLoading={isLoading}
                 setPromptConf={modalSetters.setPromptConf}
                 setAlertConf={modalSetters.setAlertConf}
+                setActiveBoard={setActiveBoard}
               />) : (<Navigate replace to="/logout" />)}
             />
 
@@ -292,6 +295,7 @@ const App = () => {
                 localDB={localDB}
                 localSyncRequired={localSyncRequired}
                 setLocalSyncRequired={setLocalSyncRequiredWrapper}
+                setActiveBoard={setActiveBoard}
               />) : (<Navigate replace to="/logout" />)}
             />
 

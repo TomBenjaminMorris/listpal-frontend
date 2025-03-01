@@ -62,11 +62,6 @@ const quote = quotes[getRandomInt(quotes.length)]
 
 // Component to display total scores or initial message
 const ScoreContent = ({ totalYScore, totalMScore, totalWScore }) => {
-  // Show prompt if no scores exist
-  if (!totalYScore) {
-    return <div style={{ fontSize: "22px" }}>Create your first board to see your score...</div>;
-  }
-
   // Map for displaying weekly/monthly/yearly scores
   const SCORE_MAP = [
     { name: "Weekly", score: totalWScore },
@@ -91,7 +86,7 @@ const ScoreContent = ({ totalYScore, totalMScore, totalWScore }) => {
 };
 
 // Main HomePage component for displaying boards and user information
-const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf }) => {
+const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf, setActiveBoard }) => {
   // Calculate total scores by reducing board data
   const { totalYScore, totalMScore, totalWScore } = boards.reduce((acc, board) => ({
     totalWScore: acc.totalWScore + Number(board.WScore),
@@ -138,6 +133,7 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
                 setBoards={setBoards}
                 setPromptConf={setPromptConf}
                 setAlertConf={setAlertConf}
+                setActiveBoard={setActiveBoard}
               />
             </div>
 

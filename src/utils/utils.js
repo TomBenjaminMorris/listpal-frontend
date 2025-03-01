@@ -44,22 +44,11 @@ export function isUrlValid(userInput) {
     return urlPattern.test(userInput);
 }
 
-export function getSortArray(boards) {
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    const boardID = getBoardIdFromUrl();
-    if (ls_currentBoard?.CategoryOrder) {
-        return ls_currentBoard.CategoryOrder;
-    }
-    const board = boards.find(b => b.SK === boardID);
-    return board ? board.CategoryOrder : [];
-}
-
 export function updateCategoryOrder(sortArr, boards, setBoards) {
     const boardID = getBoardIdFromUrl();
     const updatedBoards = boards.map(b => {
         if (b.SK === boardID) {
             const updatedBoard = { ...b, CategoryOrder: sortArr };
-            localStorage.setItem('activeBoard', JSON.stringify(updatedBoard));
             updateBoardCategoryOrder(boardID, JSON.stringify(sortArr));
             return updatedBoard;
         }
@@ -72,4 +61,18 @@ export function getBoardIdFromUrl() {
     const url = window.location.href;
     const boardID = url.split('/').pop();
     return boardID || null;
+}
+
+export function getNextMondayAt5AM() {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const currentTime = today.getHours() * 100 + today.getMinutes(); // Time in HHMM format
+    let daysUntilMonday = (1 - currentDay + 7) % 7; // Calculate days until next Monday
+    if (currentDay === 1 && currentTime >= 500) {
+        // If today is Monday and after 5 AM, skip to next Monday
+        daysUntilMonday = 7;
+    }
+    today.setDate(today.getDate() + daysUntilMonday); // Set to next Monday
+    today.setHours(5, 0, 0, 0); // Set time to 5 AM (hours, minutes, seconds, milliseconds)
+    return String(today.valueOf()); // Return the value as a string
 }

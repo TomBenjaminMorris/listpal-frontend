@@ -19,7 +19,7 @@ import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
-const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, localSyncRequired, setLocalSyncRequired }) => {
+const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, localSyncRequired, setLocalSyncRequired, setActiveBoard }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
@@ -27,31 +27,37 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
-  const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'))
-  const boardName = ls_currentBoard && ls_currentBoard.Board
+  const [remoteData, setRemoteData] = useState(null);
+  const boardID = getBoardIdFromUrl();
+  const board = boards.find(b => b.SK === boardID)
   const maxLength = 20;
   const navigate = useNavigate();
-  const boardID = getBoardIdFromUrl()
   const emojiMenuRef = useRef(null)
 
   useEffect(() => {
+    calculatePageTitle()
     loadEmoji();
   }, [boards]);
 
   useEffect(() => {
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    if (ls_currentBoard) {
-      document.title = `ListPal | ${ls_currentBoard.Board} ${ls_currentBoard.Emoji}`;
-      setDeleteMessage(`Delete Board - "${ls_currentBoard.Board}" ?`);
-    } else {
-      document.title = "ListPal";
-      setDeleteMessage("Delete Board?");
+    if (remoteData && board) {
+      sortTasks(remoteData);
     }
+  }, [remoteData, board]);
+
+  useEffect(() => {
+    calculatePageTitle()
     loadEmoji();
     getTasks();
-    // Reset this to the original state to stop confetti explosion on board switch
-    setIsTargetMet({ weekly: true, monthly: true, yearly: true })
+    setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
   }, [boardID]);
+
+  // Calculate and set the page title and active board from the URL ID
+  const calculatePageTitle = () => {
+    document.title = `ListPal | ${board?.Board} ${board?.Emoji}`;
+    setDeleteMessage(`Delete Board - "${board?.Board}" ?`);
+    setActiveBoard(board);
+  }
 
   // Function to update the cursor position on mouse move
   const handleMouseMove = (e) => {
@@ -74,10 +80,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
 
     try {
       await renameBoardAPI(boardID, name);
-      let ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard')) || {};
-      ls_currentBoard['Board'] = name;
-      localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
-      document.title = `ListPal${ls_currentBoard.Board ? ' | ' + ls_currentBoard.Board + ' ' + ls_currentBoard.Emoji : ''}`;
+      document.title = `ListPal$ | ${name + ' ' + board.Emoji}`;
       setBoards(current => {
         return current.map(b => b.SK === boardID ? { ...b, Board: name } : b);
       });
@@ -97,7 +100,6 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     setIsLoading(true);
     try {
       await deleteBoard(boardID);
-      localStorage.removeItem('activeBoard');
       setBoards((boards) => boards.filter(b => b.SK !== boardID));
       navigate('/home');
     } catch (error) {
@@ -149,7 +151,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
       }
       return acc;
     }, {});
-    setSortedTasks(sortedData);
+    setSortedTasks(sortedData, board.CategoryOrder);
     setIsLoading(false);
   };
 
@@ -157,7 +159,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     setIsLoading(true);
     try {
       const data = await getActiveTasks(boardID);
-      sortTasks(data);
+      setRemoteData(data)
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -175,10 +177,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     const selectedEmoji = e.native;
     setBoardEmoji(selectedEmoji);
     updateBoardEmojiAPI(boardID, selectedEmoji);
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    ls_currentBoard['Emoji'] = selectedEmoji;
-    localStorage.setItem('activeBoard', JSON.stringify(ls_currentBoard));
-    document.title = `ListPal${ls_currentBoard ? ' | ' + ls_currentBoard.Board + ' ' + ls_currentBoard.Emoji : ''}`;
+    document.title = `ListPal | ${board?.Board} ${selectedEmoji}`;
     setBoards(current =>
       current.map(b =>
         b.SK === boardID ? { ...b, Emoji: selectedEmoji } : b
@@ -187,13 +186,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   };
 
   const loadEmoji = () => {
-    const ls_currentBoard = JSON.parse(localStorage.getItem('activeBoard'));
-    if (ls_currentBoard?.Emoji) {
-      setBoardEmoji(ls_currentBoard.Emoji);
-    } else {
-      const board = boards.find(b => b.SK === boardID);
-      board && setBoardEmoji(board.Emoji);
-    }
+    setBoardEmoji(board?.Emoji);
   };
 
   useOnClickOutside(emojiMenuRef, () => {
@@ -218,10 +211,11 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const renderConfetti = (type) => (
     isExploding[type] && !isTargetMet[type] && (
       <ConfettiExplosion
+        key={type}
         zIndex={10000}
-        duration={2500}
+        duration={3000}
         width={window.innerWidth}
-        particleSize={12}
+        particleSize={15}
         particleCount={60}
         onComplete={() => handleConfettiComplete(type)}
       />
@@ -268,11 +262,11 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
                       </div> : null
                     }
                   </div>
-                  {boardName.length > maxLength ? `${boardName.substring(0, maxLength)}...` : boardName}
+                  {board?.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board?.Board}
                   <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
                     display: true,
                     isEdit: true,
-                    defaultText: boardName,
+                    defaultText: board.Board,
                     title: "Enter New Board Name...",
                     callbackFunc: handleEditBoard,
                   })} />
@@ -319,6 +313,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
               sortedTasks={sortedTasks}
               setSortedTasks={setSortedTasks}
               setBoards={setBoards}
+              board={board}
               boards={boards}
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
