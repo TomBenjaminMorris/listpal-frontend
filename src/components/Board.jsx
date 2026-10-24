@@ -43,7 +43,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     if (remoteData && board) {
       sortTasks(remoteData);
     }
-  }, [remoteData, board]);
+  }, [remoteData, board?.SK]); // Depend on the ID, not the object, so local category edits aren't overwritten by stale remote data
 
   useEffect(() => {
     calculatePageTitle()
