@@ -20,9 +20,9 @@ The site is a static Vite build served from S3 through CloudFront. There is no p
 | --- | --- |
 | Live site | `https://www.listpal.dev.vinsp.in` |
 | S3 bucket | `www.listpal.dev.vinsp.in`, region `eu-west-2` |
-| App distribution | `E1AKHSV400BS9K`, alias `www.listpal.dev.vinsp.in` |
-| Redirect distribution | `EDUADQYS21979`, alias `listpal.dev.vinsp.in`. Only redirects to `www`. Never invalidate it. |
-| AWS account | `905016994436`, IAM user `terraform_user`, default profile, access keys |
+| App distribution | The CloudFront distribution with alias `www.listpal.dev.vinsp.in`. Look up its ID in step 6. |
+| Redirect distribution | The one with alias `listpal.dev.vinsp.in`. Only redirects to `www`. Never invalidate it. |
+| AWS access | The default profile, with access keys held locally. Not recorded here. |
 | Cache TTL | One year (`min_ttl`, `default_ttl` and `max_ttl` are all 31536000), so the invalidation is required |
 | Infra | `terraform/main.tf` uses the private `static-website` module from `tf-modules`. The module has no outputs, so the IDs cannot come from `terraform output`. Look them up by alias. |
 
@@ -51,13 +51,13 @@ The site is a static Vite build served from S3 through CloudFront. There is no p
    ```
    `npm run build` runs `tsc` then `vite build`. Stop on any error. If the release removed a feature, grep `dist/assets/*.js` to confirm its strings are gone.
 
-5. **Check AWS access** (read-only): `aws sts get-caller-identity`. If it fails or shows an unexpected account, ask the user to run `! aws configure` (access keys, default profile). Do not ask for or print keys. CloudFront is global. S3 commands need `--region eu-west-2` because the default profile region is `eu-west-1`.
+5. **Check AWS access** (read-only): `aws sts get-caller-identity`. If it fails or shows an account the user does not expect, ask the user to run `! aws configure` (access keys, default profile). Do not ask for or print keys. CloudFront is global. S3 commands need `--region eu-west-2` because the default profile region is `eu-west-1`.
 
 6. **Look up the distribution** (read-only):
    ```sh
    aws cloudfront list-distributions --query "DistributionList.Items[?Aliases.Items && contains(Aliases.Items,'www.listpal.dev.vinsp.in')].{Id:Id,Origin:Origins.Items[0].DomainName,Status:Status}" --output table
    ```
-   The ID must match `E1AKHSV400BS9K` and the origin must be the `www.listpal.dev.vinsp.in` bucket. If not, stop and tell the user.
+   Exactly one distribution must match, and its origin must be the `www.listpal.dev.vinsp.in` bucket. Note its ID as `$DIST_ID` for the next steps. If there is not exactly one match, stop and tell the user.
 
 7. **Dry run the upload** (changes nothing). Write the output to a file and report counts:
    ```sh
@@ -69,11 +69,11 @@ The site is a static Vite build served from S3 through CloudFront. There is no p
 8. **Upload, then invalidate straight away.** Do not add `--delete` here.
    ```sh
    aws s3 sync dist/ s3://www.listpal.dev.vinsp.in --region eu-west-2
-   aws cloudfront create-invalidation --distribution-id E1AKHSV400BS9K --paths "/*"
+   aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
    ```
    Poll until the status is `Completed` (usually under a minute):
    ```sh
-   aws cloudfront get-invalidation --distribution-id E1AKHSV400BS9K --id <InvalidationId> --query Invalidation.Status --output text
+   aws cloudfront get-invalidation --distribution-id "$DIST_ID" --id <InvalidationId> --query Invalidation.Status --output text
    ```
    Old bundles stay in the bucket on purpose. A visitor holding a stale cached `index.html` still needs them until the invalidation finishes.
 
@@ -99,7 +99,7 @@ Only when the user asks, and only after the release is confirmed healthy. Old ha
 
 ## Gotchas
 
-- Do not invalidate `EDUADQYS21979`. It serves only the redirect to `www`.
+- Do not invalidate the redirect distribution (alias `listpal.dev.vinsp.in`). It serves only the redirect to `www`.
 - The Cognito login domain `auth.listpal.dev.vinsp.in` sits behind an AWS-managed distribution. It is not part of this deploy.
-- The `terraform_user` keys are broad. If the user mentions a narrower deploy user, switch to that profile with `--profile`.
+- The default profile's keys may be broad. If the user mentions a narrower deploy profile, switch to it with `--profile`.
 - If a command is denied, stop and explain what you were trying to do. Do not retry it another way.
