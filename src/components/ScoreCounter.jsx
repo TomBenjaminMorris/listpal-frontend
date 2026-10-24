@@ -69,7 +69,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   useEffect(() => {
     setScoreValue(score)
     setAnimate(true);
-    if (score && percent) {
+    if (percent !== undefined && percent !== null) {
       if (percent >= 100) {
         setIsExploding(current => ({
           ...current,
