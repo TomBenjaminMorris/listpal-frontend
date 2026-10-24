@@ -5,7 +5,6 @@ import { isAuthenticated } from './utils/utils';
 import { openDB, createObjectStore, clearLocalDB, readAllFromLocalDB } from './utils/localDBHelpers';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
-import WeeklyRoundups from './components/WeeklyRoundups';
 import Board from './components/Board';
 import Settings from './components/Settings';
 import Prompt from './components/Prompt';
@@ -259,15 +258,6 @@ const App = () => {
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoard={setActiveBoard}
               />) : (<Navigate replace to="/logout" />)}
-            />
-
-            <Route
-              path="/weekly-roundups"
-              element={isAuthenticated() ? (<WeeklyRoundups
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-              />
-              ) : (<Navigate replace to="/logout" />)}
             />
 
             <Route

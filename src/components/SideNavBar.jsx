@@ -2,7 +2,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import menuIcon from '../assets/icons8-menu-50.png';
 import sidebarIcon from '../assets/icons8-sidebar-96.png';
 import homeIcon from '../assets/icons8-home-48.png';
-import aiIcon from '../assets/icons8-ai-96.png';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
@@ -73,11 +72,6 @@ const SideNavBar = ({
         <Link className={navLinkClass} to="/home">
           <img src={homeIcon} alt="home" />
           <div className={textClass}>Home</div>
-        </Link>
-
-        <Link className={navLinkClass} to="/weekly-roundups">
-          <img src={aiIcon} alt="ai" />
-          <div className={textClass}>Weekly Roundups</div>
         </Link>
 
         <Link className={navLinkClass} to="/stats">

@@ -3,6 +3,7 @@ import { parseJwt } from '../utils/utils';
 import BoardList from './BoardList';
 import Loader from './Loader';
 import './HomePage.css';
+import './PageLayout.css';
 
 // Determine greeting based on current time of day
 const getGreeting = () => {
@@ -109,8 +110,8 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
           <div className="home-page-content-sub-wrapper fadeUp-animation">
 
             {/* Personalized greeting with optional username */}
-            <div className="weekly-report-title-wrapper fadeUp-animation">
-              <h2 className="weekly-report-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
+            <div className="page-title-wrapper fadeUp-animation">
+              <h2 className="page-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
             </div>
 
             <div className="home-page-week">
@@ -150,9 +151,6 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
                 </div>
               </div>
             </div> */}
-
-            {/* <h2 className="settings-headers">Latest Roundup</h2>
-              <hr className="settings-line" /> */}
           </div>
         )
       }
