@@ -4,6 +4,7 @@ import graphIcon from '../assets/icons8-graph-48.png';
 import ChartList from './ChartList';
 import Loader from './Loader';
 import './Stats.css';
+import './PageLayout.css';
 
 const Stats = memo(({ isLoading, setIsLoading, boards }) => {
   const [stats, setStats] = useState([]);
@@ -35,10 +36,10 @@ const Stats = memo(({ isLoading, setIsLoading, boards }) => {
   }, [boards]);
 
   const content = (
-    <div className="weekly-reports-content-wrapper">
-      <div className="weekly-reports-content-sub-wrapper">
-        <div className="weekly-report-title-wrapper fadeUp-animation">
-          <h2 className="weekly-report-title">Your Stats</h2>
+    <div className="page-content-wrapper">
+      <div className="page-content-sub-wrapper">
+        <div className="page-title-wrapper fadeUp-animation">
+          <h2 className="page-title">Your Stats</h2>
           <img className="heading-icon" src={graphIcon} alt="Graph Icon" />
         </div>
         {stats.length > 0 ? <ChartList stats={stats} totalTargets={totalTargets} /> : "No stats found... Check back here at the end of the week."}
