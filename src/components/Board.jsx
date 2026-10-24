@@ -50,6 +50,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     loadEmoji();
     getTasks();
     setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
+    setIsExploding({ weekly: false, monthly: false, yearly: false }) // Stale state from the previous board must not leak into the new one
   }, [boardID]);
 
   // Calculate and set the page title and active board from the URL ID
@@ -292,6 +293,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
               </div>
 
               <ScoreBoard
+                key={boardID}
                 boards={boards}
                 setBoards={setBoards}
                 boardID={boardID}

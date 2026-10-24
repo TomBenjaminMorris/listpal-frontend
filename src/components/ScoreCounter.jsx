@@ -69,21 +69,15 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   useEffect(() => {
     setScoreValue(score)
     setAnimate(true);
-    if (percent !== undefined && percent !== null) {
-      if (percent >= 100) {
-        setIsExploding(current => ({
-          ...current,
-          [TYPE_MAPPINGS[type].label]: true,
-        }));
-      } else {
-        setIsExploding(current => ({
-          ...current,
-          [TYPE_MAPPINGS[type].label]: false,
-        }));
-        setIsTargetMet(current => ({
-          ...current,
-          [TYPE_MAPPINGS[type].label]: false,
-        }));
+    const label = TYPE_MAPPINGS[type].label;
+    if (percent >= 100) {
+      setIsExploding(current => ({ ...current, [label]: true }));
+    } else if (percent !== undefined && percent !== null) {
+      setIsExploding(current => ({ ...current, [label]: false }));
+      // Only re-arm the confetti if the target was previously met. The initial
+      // 0% before a board's scores load must not re-arm it (it fires on page load).
+      if (isExploding[label]) {
+        setIsTargetMet(current => ({ ...current, [label]: false }));
       }
     }
   }, [percent, score])
