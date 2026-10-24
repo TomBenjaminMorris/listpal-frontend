@@ -20,16 +20,18 @@ const DropdownMenu = memo(({ handleDeleteCategory, boards, title, setSortedTasks
   };
 
   const updateCategoryOrder = (direction) => {
+    // Move within the categories actually on screen, as the saved order can hold stale or missing names
+    const newCategoryOrder = moveArrayElement(Object.keys(sortedTasks), title, direction);
     const updatedBoards = boards.map(board => {
       if (board.SK !== boardID) return board;
-      const newCategoryOrder = moveArrayElement(board.CategoryOrder, title, direction);
       const updatedBoard = { ...board, CategoryOrder: newCategoryOrder };
       updateBoardCategoryOrder(boardID, JSON.stringify(newCategoryOrder));
       return updatedBoard;
     });
 
     setBoards(updatedBoards);
-    setSortedTasks(sortedTasks);
+    // Pass the new order explicitly: the active board in App is only updated after this render
+    setSortedTasks(sortedTasks, newCategoryOrder);
   };
 
   return (
