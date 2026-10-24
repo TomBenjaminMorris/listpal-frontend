@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { parseJwt } from '../utils/utils';
 import BoardList from './BoardList';
+import DatePills from './DatePills';
 import Loader from './Loader';
 import './HomePage.css';
 import './PageLayout.css';
@@ -16,20 +17,6 @@ const getGreetingEmoji = () => {
   const hour = new Date().getHours();
   return hour < 18 ? "☀️" : "🌙";
 }
-
-// Determine the current week of the year
-Date.prototype.getWeek = function () {
-  var target = new Date(this.valueOf());
-  var dayNr = (this.getDay() + 6) % 7;
-  target.setDate(target.getDate() - dayNr + 3);
-  var firstThursday = target.valueOf();
-  target.setMonth(0, 1);
-  if (target.getDay() != 4) {
-    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-  }
-  return 1 + Math.ceil((firstThursday - target) / 604800000);
-}
-var d = new Date();
 
 // Array of quotes and attributes to be used later
 const quotes = [
@@ -114,8 +101,8 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
               <h2 className="page-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
             </div>
 
-            <div className="home-page-week">
-              {"Week of the Year: " + d.getWeek()}
+            <div className="home-page-pills">
+              <DatePills />
             </div>
 
             {/* Display total scores */}

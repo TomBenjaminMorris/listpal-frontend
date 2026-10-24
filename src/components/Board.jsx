@@ -12,6 +12,7 @@ import clearIcon from '../assets/icons8-clear-60.png';
 import syncIcon from '../assets/icons8-sync-64.png';
 import tickIcon from '../assets/icons8-tick-64.png';
 import CardList from './CardList';
+import DatePills from './DatePills';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
 import Loader from './Loader';
@@ -273,6 +274,8 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
                   })} />
                 </div>
               </div>
+
+              <DatePills />
 
               <div className="board-actions-wrapper">
                 <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
