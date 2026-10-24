@@ -1,10 +1,9 @@
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useMemo, useState, memo } from 'react';
 import { calcPercents } from '../utils/utils';
 import ScoreCounter from './ScoreCounter';
 import './ScoreBoard.css';
 
 const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
-  const [percentValues, setPercentValues] = useState({ W: 0, M: 0, Y: 0 });
   const [currentBoardScores, setCurrentBoardScores] = useState({
     WScore: 0,
     MScore: 0,
@@ -14,13 +13,12 @@ const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExplod
     YTarget: 0,
   });
 
-  // Recalculate percentages when currentBoard changes
-  useEffect(() => {
-    if (currentBoardScores) {
-      const percents = calcPercents(currentBoardScores);
-      setPercentValues(percents);
-    }
-  }, [currentBoardScores, boards])
+  // Derived in the same render as the scores (not in an effect), so a score and its percent never
+  // disagree. Scores are mutated in place in Task.jsx, so recompute whenever boards changes.
+  const percentValues = useMemo(
+    () => currentBoardScores.SK ? calcPercents(currentBoardScores) : { W: 0, M: 0, Y: 0 },
+    [currentBoardScores, boards]
+  );
 
   // Update current board based on boardID, only when boards or boardID changes
   useEffect(() => {

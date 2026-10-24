@@ -115,6 +115,7 @@ flowchart TB
     Settings --> TS["ThemeSetter"] --> TC["ThemeCard"]
     Board --> SB["ScoreBoard"] --> SC["ScoreCounter"]
     Board --> TSM["TargetSetterModal"]
+    Board --> TB["TargetBanner"]
     Board --> CardList["CardList"]
     CardList --> Card["Card"]
     Card --> Task["Task"]

@@ -15,6 +15,7 @@ import CardList from './CardList';
 import DatePills from './DatePills';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
+import TargetBanner from './TargetBanner';
 import Loader from './Loader';
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
@@ -28,6 +29,8 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
+  const [bannerQueue, setBannerQueue] = useState([]);
+  const announced = useRef(new Set()); // Targets already queued for a banner, cleared when the score drops below target
   const [remoteData, setRemoteData] = useState(null);
   const boardID = getBoardIdFromUrl();
   const board = boards.find(b => b.SK === boardID)
@@ -52,7 +55,26 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     getTasks();
     setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
     setIsExploding({ weekly: false, monthly: false, yearly: false }) // Stale state from the previous board must not leak into the new one
+    announced.current.clear()
+    setBannerQueue([])
   }, [boardID]);
+
+  // Queue a banner whenever confetti starts for a target, mirroring the confetti re-arm rules
+  useEffect(() => {
+    const newlyHit = [];
+    ['weekly', 'monthly', 'yearly'].forEach((type) => {
+      if (isExploding[type] && !isTargetMet[type] && !announced.current.has(type)) {
+        announced.current.add(type);
+        newlyHit.push(type);
+      } else if (!isExploding[type]) {
+        announced.current.delete(type);
+      }
+    });
+    if (newlyHit.length) {
+      // One banner per type: skip any type already queued or on screen (e.g. complete, undo, complete again)
+      setBannerQueue(current => [...current, ...newlyHit.filter(type => !current.includes(type))]);
+    }
+  }, [isExploding, isTargetMet]);
 
   // Calculate and set the page title and active board from the URL ID
   const calculatePageTitle = () => {
@@ -230,6 +252,8 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
       <div style={{ position: 'absolute', top: cursorPosition.y - 25, left: cursorPosition.x - 25 }}>
         {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
       </div>
+
+      <TargetBanner queue={bannerQueue} onShown={() => setBannerQueue(current => current.slice(1))} />
 
       <TargetSetterModal
         display={displayTargetSetter}
