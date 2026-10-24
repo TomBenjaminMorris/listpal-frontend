@@ -89,13 +89,13 @@ The backend is described in `listpal-backend/ARCHITECTURE.md`. The frontend depe
 
 ### 4.1 Routes
 
-Routes are declared in `App.jsx`. Every route except `/redirect` and `/logout` checks `isAuthenticated()` (which only tests that an access token is present in `sessionStorage`) and redirects to `/logout` when it is missing.
+Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and `getBoardIdFromUrl` in `utils.js` takes the board ID from the last URL segment. Every route except `/redirect` and `/logout` checks `isAuthenticated()` (which only tests that an access token is present in `sessionStorage`) and redirects to `/logout` when it is missing.
 
 | Path | Component | Purpose | Backend calls |
 | --- | --- | --- | --- |
 | `/` | none | Redirects to `/home` | none |
 | `/home` | `HomePage` | Greeting (from the ID token's `given_name`), week number, a random quote, the board list, and board creation | `POST /new-board` (via `BoardList`) |
-| `/board/:boardID` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed | `GET /active-tasks`, `POST /board-emoji`, `POST /rename-board`, `POST /delete-board`, `POST /board-targets` (via `TargetSetter`) |
+| `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed | `GET /active-tasks`, `POST /board-emoji`, `POST /rename-board`, `POST /delete-board`, `POST /board-targets` (via `TargetSetter`) |
 | `/settings` | `Settings` | Theme choice | `POST /user-theme` (via `ThemeCard`) |
 | `/redirect` | `RedirectPage` | Receives the Cognito `code`, exchanges it for tokens, then goes to `/home` | Cognito token endpoint |
 | `/logout` | `Logout` | Clears storage and sends the user to the managed login | none |
@@ -192,7 +192,7 @@ Edits that bypass the queue and call the API straight away:
 | Tick or untick a task, update board scores | `Task.jsx` (`updateActiveTaskChecked`) | `POST /board-scores` |
 | Rename a category | `Card.jsx` | `POST /rename-category` |
 | Change a task's emoji for a whole category | `Card.jsx` | `POST /card-emoji` |
-| Save category order | `DropdownMenu.jsx`, `utils.js` (`updateCategoryOrder`) | `POST /board-category-order` |
+| Save category order | `DropdownMenu.jsx` (move up or down), `utils.js` (`updateCategoryOrder`, called from `Card.jsx` and `CardList.jsx`) | `POST /board-category-order` |
 | Create, rename, change emoji, delete a board | `BoardList.jsx`, `Board.jsx` | `POST /new-board`, `/rename-board`, `/board-emoji`, `/delete-board` |
 | Save targets | `TargetSetter.jsx` | `POST /board-targets` |
 | Save theme | `ThemeCard.jsx` | `POST /user-theme` |
