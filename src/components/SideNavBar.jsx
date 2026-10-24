@@ -6,7 +6,6 @@ import settingsIcon from '../assets/icons8-settings-50-white.png';
 import listsIcon from '../assets/icons8-todo-list-50.png';
 import rightIcon from '../assets/icons8-right-arrow-64.png';
 import logoutIcon from '../assets/icons8-logout-48.png';
-import statsIcon from '../assets/icons8-graph-48.png';
 import './SideNavBar.css';
 
 const SideNavBar = ({ 
@@ -72,11 +71,6 @@ const SideNavBar = ({
         <Link className={navLinkClass} to="/home">
           <img src={homeIcon} alt="home" />
           <div className={textClass}>Home</div>
-        </Link>
-
-        <Link className={navLinkClass} to="/stats">
-          <img src={statsIcon} alt="stats" />
-          <div className={textClass}>Stats</div>
         </Link>
 
         <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={handleBoardsMenuClick}>

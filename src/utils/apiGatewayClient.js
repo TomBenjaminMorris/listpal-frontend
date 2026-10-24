@@ -57,7 +57,6 @@ const apiPost = async (url, body) => {
 export const getActiveTasks = (boardID) => apiGet('/active-tasks', { boardID });
 export const getBoards = () => apiGet('/boards');
 export const getUser = () => apiGet('/user');
-export const getStats = () => apiGet('/stats');
 
 // POST API methods
 export const syncTasks = (task_actions) =>
