@@ -3,14 +3,7 @@
     justify-content: space-evenly;
 }
 
-.home-page-week {
-    font-size: 17px;
-    background-color: var(--accent);
-    width: 190px;
-    margin: auto;
-    border-radius: 20px;
-    padding: 1px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+.home-page-pills {
     margin-bottom: 23px;
 }
 
