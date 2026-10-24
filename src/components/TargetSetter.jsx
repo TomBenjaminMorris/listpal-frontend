@@ -30,8 +30,15 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
     }
   }, [boardID, boards]);
 
+  // Inputs hold raw strings so they can be blank while typing
+  const toNumber = (value) => parseInt(value, 10) || 0;
+
   const validateTargets = () => {
-    if (formData.weekly < 1 || formData.monthly < 1 || formData.yearly < 1) {
+    const weekly = toNumber(formData.weekly);
+    const monthly = toNumber(formData.monthly);
+    const yearly = toNumber(formData.yearly);
+
+    if (weekly < 1 || monthly < 1 || yearly < 1) {
       handleClose()
       setAlertConf({
         display: true,
@@ -41,7 +48,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       });
       return false;
     }
-    if (formData.weekly > formData.monthly) {
+    if (weekly > monthly) {
       handleClose()
       setAlertConf({
         display: true,
@@ -51,7 +58,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       });
       return false;
     }
-    if (formData.monthly > formData.yearly) {
+    if (monthly > yearly) {
       handleClose()
       setAlertConf({
         display: true,
@@ -68,18 +75,18 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
     event.preventDefault();
     if (!validateTargets()) return;
 
+    const targets = {
+      YTarget: toNumber(formData.yearly),
+      MTarget: toNumber(formData.monthly),
+      WTarget: toNumber(formData.weekly)
+    };
+
     setLoadingTargets(true);
     try {
-      await updateBoardTargetsAPI(boardID, {
-        YTarget: formData.yearly,
-        MTarget: formData.monthly,
-        WTarget: formData.weekly
-      });
+      await updateBoardTargetsAPI(boardID, targets);
 
       setBoards(boards.map(board =>
-        board.SK === boardID
-          ? { ...board, YTarget: formData.yearly, MTarget: formData.monthly, WTarget: formData.weekly }
-          : board
+        board.SK === boardID ? { ...board, ...targets } : board
       ));
 
       handleClose();
@@ -112,7 +119,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
                 value={formData[name]}
                 onChange={e => setFormData(prev => ({
                   ...prev,
-                  [name]: e.target.value ? parseInt(e.target.value) : 0
+                  [name]: e.target.value
                 }))}
                 min={0}
                 max={1000}
