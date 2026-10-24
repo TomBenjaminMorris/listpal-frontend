@@ -13,7 +13,6 @@ import Alert from './components/Alert';
 import SideNavBar from './components/SideNavBar';
 import RedirectPage from './components/RedirectPage';
 import Logout from './components/Logout';
-import Stats from './components/Stats';
 import config from "./config.json";
 import './App.css';
 
@@ -258,16 +257,6 @@ const App = () => {
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoard={setActiveBoard}
               />) : (<Navigate replace to="/logout" />)}
-            />
-
-            <Route
-              path="/stats"
-              element={isAuthenticated() ? (<Stats
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-                boards={boards}
-              />
-              ) : (<Navigate replace to="/logout" />)}
             />
 
             <Route
