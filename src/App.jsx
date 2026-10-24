@@ -19,7 +19,7 @@ import './App.css';
 // Define constants
 const DEFAULT_THEME = 'purple-haze';
 const MOBILE_BREAKPOINT = 650;
-const SYNC_TIMEOUT = 3000; // 3 seconds
+const SYNC_TIMEOUT = 2000; // 2 seconds
 
 // Determine if the app is running id dev or prod
 let isDev = true;
