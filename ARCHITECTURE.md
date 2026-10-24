@@ -170,8 +170,8 @@ Most task edits do not call the API directly. They are written to IndexedDB firs
 ```mermaid
 flowchart LR
     E["Edit a task<br/>(description, tick, important, link, create, delete, clear)"] --> W["writeDataToLocalDB 'tasks'<br/>Action: create, update or delete"]
-    W --> F["setLocalSyncRequired(true)<br/>restarts the 10 s timer"]
-    F --> T{"No further edits<br/>for 10 s?"}
+    W --> F["setLocalSyncRequired(true)<br/>restarts the 2 s timer"]
+    F --> T{"No further edits<br/>for 2 s?"}
     T -->|yes| R["Read every record in 'tasks'"]
     R --> P["POST /task-sync<br/>{ task_actions: [...] }"]
     P -->|success| C["Clear 'tasks' store<br/>localSyncRequired = false"]
@@ -180,7 +180,7 @@ flowchart LR
 
 How the queue works:
 
-- `setLocalSyncRequiredWrapper` in `App.jsx` flips a counter each time it is called. The timer effect depends on that counter, so every edit restarts the 10-second wait (`SYNC_TIMEOUT`).
+- `setLocalSyncRequiredWrapper` in `App.jsx` flips a counter each time it is called. The timer effect depends on that counter, so every edit restarts the 2-second wait (`SYNC_TIMEOUT`).
 - When an existing task is edited, `Task.jsx`, `TaskMenu.jsx` and `CardList.jsx` read the record first. If it is already `create`, the action stays `create`. Otherwise it becomes `update`. This means a task created and edited before a sync is only ever sent as a create.
 - Deleting a task that was never synced removes its record. Deleting a synced task writes `{ Action: "delete", SK }`.
 - `beforeunload` shows a warning while `localSyncRequired` is true.
