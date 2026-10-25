@@ -354,6 +354,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
               ) : null
             }
             <CardList
+              key={boardID}
               sortedTasks={sortedTasks}
               setSortedTasks={setSortedTasks}
               setBoards={setBoards}
