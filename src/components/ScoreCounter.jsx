@@ -17,6 +17,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   const [animate, setAnimate] = useState(true);
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
   const scoreRef = useRef(null);
+  const prevRef = useRef({ boardSK: undefined, percent: undefined });
 
   const validateAndUpdateScore = async () => {
     if (scoreValue < 0) {
@@ -70,17 +71,19 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
     setScoreValue(score)
     setAnimate(true);
     const label = TYPE_MAPPINGS[type].label;
+    const boardSK = currentBoardScores?.SK;
+    // A celebration needs a real crossing: same board, previous percent known and below 100.
+    // Loading a board that is already at or above target (or switching to one) must stay silent.
+    const prev = prevRef.current;
+    const crossedTarget = !!boardSK && prev.boardSK === boardSK && prev.percent < 100 && percent >= 100;
+    prevRef.current = { boardSK, percent };
     if (percent >= 100) {
+      if (crossedTarget) setIsTargetMet(current => ({ ...current, [label]: false }));
       setIsExploding(current => ({ ...current, [label]: true }));
     } else if (percent !== undefined && percent !== null) {
       setIsExploding(current => ({ ...current, [label]: false }));
-      // Only re-arm the confetti if the target was previously met. The initial
-      // 0% before a board's scores load must not re-arm it (it fires on page load).
-      if (isExploding[label]) {
-        setIsTargetMet(current => ({ ...current, [label]: false }));
-      }
     }
-  }, [percent, score])
+  }, [percent, score, currentBoardScores?.SK])
 
   useOnClickOutside(scoreRef, handleScoreUpdate);
 
