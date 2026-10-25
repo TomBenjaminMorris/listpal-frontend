@@ -19,6 +19,10 @@ import './App.css';
 // Define constants
 const DEFAULT_THEME = 'purple-haze';
 const MOBILE_BREAKPOINT = 650;
+const SIDEBAR_OPEN_KEY = 'sidebarIsOpen';
+const SIDEBAR_BOARDS_MENU_OPEN_KEY = 'sidebarBoardsMenuIsOpen';
+
+const readStoredFlag = (key) => localStorage.getItem(key) === 'true';
 
 // Determine if the app is running id dev or prod
 let isDev = true;
@@ -33,9 +37,10 @@ if (process.env.NODE_ENV === 'development') {
 const App = () => {
   const [boards, setBoards] = useState([]);
   const [sortedTasks, setSortedTasks] = useState({});
-  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
-  const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(false);
-  const [hideMobileSidebar, setHideMobileSidebar] = useState(true);
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(() => readStoredFlag(SIDEBAR_OPEN_KEY));
+  const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(() => readStoredFlag(SIDEBAR_BOARDS_MENU_OPEN_KEY));
+  // Toggled in step with sidebarIsOpen, so it starts as its inverse
+  const [hideMobileSidebar, setHideMobileSidebar] = useState(() => !readStoredFlag(SIDEBAR_OPEN_KEY));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
   const [isLoading, setIsLoading] = useState(true);
   const [modalStates, setModalStates] = useState({ prompt: { callbackFunc: () => { } }, confirm: { callbackFunc: () => { } }, alert: {} });
@@ -132,6 +137,14 @@ const App = () => {
   useEffect(() => {
     applyTheme(userDetails.Theme);
   }, [userDetails]);
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_OPEN_KEY, sidebarIsOpen);
+  }, [sidebarIsOpen]);
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_BOARDS_MENU_OPEN_KEY, sidebarBoardsMenuIsOpen);
+  }, [sidebarBoardsMenuIsOpen]);
 
   // Order the tasks and update the state
   const setOrderedSortedTasks = (tasks, incomingSortArr) => {
