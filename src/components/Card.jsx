@@ -8,8 +8,7 @@ import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
 import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
-import emojiData from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Card.css';
 
 const loaderStyle = {
@@ -188,12 +187,12 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     >
       <div className="headingWrapper">
         <div className={`card-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : ""}`} ref={emojiMenuRef}>
-          <div className="card-emoji-icon" onClick={() => setDisplayEmojiPicker(prev => !prev)}>
+          <div className="card-emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(prev => !prev)}>
             {cardEmoji}
           </div>
           {displayEmojiPicker && (
             <div className="board-emoji-wrapper">
-              <Picker data={emojiData} onEmojiSelect={handleEmojiSelect} theme="light" autoFocus navPosition="none" previewPosition="none" perLine={8} />
+              <EmojiPicker onEmojiSelect={handleEmojiSelect} />
             </div>
           )}
         </div>

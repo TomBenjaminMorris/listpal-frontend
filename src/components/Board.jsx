@@ -17,8 +17,7 @@ import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
 import TargetBanner from './TargetBanner';
 import Loader from './Loader';
-import emojiData from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Board.css';
 
 const BACK_ONLINE_DURATION = 3000;
@@ -318,18 +317,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
                 <div className="board-name">
                   <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
-                    <div className="emoji-icon" onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
+                    <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
                     {
                       displayEmojiPicker ? <div className="board-emoji-wrapper">
-                        <Picker
-                          data={emojiData}
-                          onEmojiSelect={handleEmojiSelect}
-                          theme="light"
-                          autoFocus
-                          navPosition="none"
-                          previewPosition="none"
-                          perLine={8}
-                        />
+                        <EmojiPicker onEmojiSelect={handleEmojiSelect} />
                       </div> : null
                     }
                   </div>
