@@ -4,7 +4,7 @@ import closeIcon from '../assets/icons8-close-50-white.png';
 import './TargetBanner.css';
 
 const SLIDE_MS = 400;
-const AUTO_DISMISS_MS = 10000;
+const AUTO_DISMISS_MS = 7000;
 
 const BANNER_COPY = {
   weekly: { emoji: '🎉', title: 'Weekly Target Hit', body: 'Congratulations, you have hit your weekly target!' },
