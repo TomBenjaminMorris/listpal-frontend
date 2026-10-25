@@ -23,7 +23,23 @@
     /* opacity: 1; */
 }
 
+.task-textarea-wrapper {
+    position: relative;
+    /* 88px rather than 92px because the textarea's 2px padding now sits inside the wrapper */
+    width: -webkit-calc(100% - 88px);
+    width: -moz-calc(100% - 88px);
+    width: calc(100% - 88px);
+    margin-left: 12px;
+    margin-top: -5px;
+}
+
 .task-textarea-box {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 2px;
     font-size: 18px;
     line-height: 25px;
     letter-spacing: 0.1px;
@@ -31,19 +47,39 @@
     background-color: transparent;
     border: none;
     border-radius: 5px;
-    width: -webkit-calc(100% - 92px);
-    width: -moz-calc(100% - 92px);
-    width: calc(100% - 92px);
     resize: none;
-    margin-left: 12px;
-    margin-top: -5px;
-    font-family: CircularMedium;    
+    font-family: CircularMedium;
 }
 
-.highlight {
+/* Must wrap exactly like the textarea above it, so it shares .task-textarea-box for typography and padding.
+   A div inherits text styles from the card that the textarea's UA stylesheet resets, so reset them here too. */
+.task-highlight-mirror {
+    position: absolute;
+    inset: 0;
+    text-align: start;
+    text-indent: 0;
+    text-transform: none;
+    word-spacing: normal;
+    font-weight: normal;
+    font-style: normal;
+    color: transparent;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    pointer-events: none;
+    user-select: none;
+}
+
+.task-highlight-mirror span {
     background-color: var(--accent-2);
-    /* transition-duration: 500ms; */
-    /* color: var(--accent); */
+    /* No vertical padding, so the background stays shorter than the 25px line-height and wrapped lines show as
+       separate pills; if they touch, their rounded corners leave notches */
+    border-radius: 4px;
+    /* The negative margin cancels the padding so the highlight overhangs the text without changing where lines wrap */
+    padding: 0 4px;
+    margin: 0 -4px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
 }
 
 .highlight-2 {
