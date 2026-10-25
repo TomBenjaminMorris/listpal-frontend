@@ -31,7 +31,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
   const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
+  const [confettiOrigin, setConfettiOrigin] = useState(null);
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const [bannerQueue, setBannerQueue] = useState([]);
@@ -104,13 +105,19 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     setActiveBoard(board);
   }
 
-  // Function to update the cursor position on mouse move
-  const handleMouseMove = (e) => {
-    setCursorPosition({
+  // Also on pointer down, so a tap on a touch screen (which sends no mousemove) still places the confetti
+  const trackPointer = (e) => {
+    cursorPosition.current = {
       x: e.clientX + window.scrollX,
       y: e.clientY + window.scrollY,
-    });
+    };
   };
+
+  // Pinned where the pointer was when it started, so the burst stays put while it plays
+  const confettiActive = ['weekly', 'monthly', 'yearly'].some(type => isExploding[type] && !isTargetMet[type]);
+  useEffect(() => {
+    setConfettiOrigin(confettiActive ? { ...cursorPosition.current } : null);
+  }, [confettiActive]);
 
   const handleEditBoard = async (name) => {
     if (!name) {
@@ -283,11 +290,13 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   );
 
   return (
-    <div className="wrapper" onMouseMove={handleMouseMove} >
+    <div className="wrapper" onMouseMove={trackPointer} onPointerDown={trackPointer} >
 
-      <div style={{ position: 'absolute', top: cursorPosition.y - 25, left: cursorPosition.x - 25 }}>
-        {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
-      </div>
+      {confettiOrigin && (
+        <div style={{ position: 'absolute', top: confettiOrigin.y - 25, left: confettiOrigin.x - 25 }}>
+          {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
+        </div>
+      )}
 
       <TargetBanner queue={bannerQueue} onShown={() => setBannerQueue(current => current.slice(1))} />
 
