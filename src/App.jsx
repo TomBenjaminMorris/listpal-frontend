@@ -180,7 +180,6 @@ const App = () => {
         {isAuthenticated() ? (<SideNavBar
           handleSidebarCollapse={handleSidebarCollapse}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          setIsLoading={setIsLoading}
           sidebarIsOpen={sidebarIsOpen}
           boards={boards}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
