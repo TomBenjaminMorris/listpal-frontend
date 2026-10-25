@@ -352,7 +352,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
         className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
         title={syncStatus.lastError ? `${syncStatus.lastError}, will retry...` : syncStatus.pending ? "Saving..." : "Saved"}
       >
-        <img className={`sync-status-icon ${syncStatus.pending ? "spin" : ""}`} src={syncStatus.pending ? syncIcon : tickIcon} alt="sync status icon" />
+        {/* Both icons stay mounted so they load up front; swapping src would fetch the sync icon only once offline */}
+        <img className="sync-status-icon spin" src={syncIcon} alt="" hidden={!syncStatus.pending} />
+        <img className="sync-status-icon" src={tickIcon} alt="" hidden={!!syncStatus.pending} />
       </div>
     </div >
   );
