@@ -105,14 +105,11 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     tmpSortedTasks[newTitle] = updatedTasks
     delete tmpSortedTasks[title];
     queueUpdateAll(renamedTasks, { Category: newTitle });
-    setSortedTasks(tmpSortedTasks);
 
-    const sortArr = board?.CategoryOrder;
-    var index = sortArr.indexOf(title);
-    if (index !== -1) {
-      sortArr[index] = newTitle
-    }
+    // The new name must be in the order before sorting, or it isn't found and jumps to the top
+    const sortArr = (board?.CategoryOrder ?? []).map(category => category === title ? newTitle : category);
     updateCategoryOrder(sortArr, boards, setBoards)
+    setSortedTasks(tmpSortedTasks, sortArr);
   };
 
   const handleNewTask = async (incomingTasks) => {
