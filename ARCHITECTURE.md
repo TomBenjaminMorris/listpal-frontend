@@ -4,7 +4,7 @@ This document is a condensed map of the `listpal-frontend` repository. It is wri
 
 ## 1. Summary
 
-ListPal's frontend is a single-page React app. It shows a user's boards, lets them add and tick off tasks grouped by category, and displays scores against targets. The backend API is the source of truth. The app keeps a local queue of task edits in IndexedDB and pushes them to the backend about ten seconds after the last edit. It does not work offline.
+ListPal's frontend is a single-page React app. It shows a user's boards, lets them add and tick off tasks grouped by category, and displays scores against targets. The backend API is the source of truth. Task edits go into an outbox in IndexedDB and are pushed to the backend in batches, between half a second and ten seconds after an edit. Queued edits survive a reload and are retried with backoff until the server confirms them. The app needs the network to load a board, but edits made while offline are kept and sent later.
 
 | Concern | Choice |
 | --- | --- |
@@ -14,13 +14,13 @@ ListPal's frontend is a single-page React app. It shows a user's boards, lets th
 | Routing | `react-router-dom` 6, `BrowserRouter`, all routes declared in `App.jsx` |
 | HTTP | `axios` against `https://api.vinsp.in` (hard-coded in `apiGatewayClient.js`) |
 | Auth | Cognito managed login (OAuth code flow), token refresh through `@aws-sdk/client-cognito-identity-provider` |
-| Local queue | IndexedDB database `listpal-local`, object store `tasks` |
+| Local queue | IndexedDB database `listpal-local` (version 2), object store `outbox`, managed by `syncEngine.js` |
 | Styling | Plain CSS, one file per component, theme colours as CSS custom properties |
 | Charts | Victory (`victory`) |
 | Hosting | S3 bucket `www.listpal.dev.vinsp.in` behind CloudFront, provisioned by Terraform |
 | Environments | Effectively one. Local dev (`npm run dev`) talks to the same production API as the deployed site |
 
-There is no test suite. `vitest` is listed in `devDependencies` but no test files exist and there is no test script.
+Tests run with `npm test` (Vitest). They cover the sync engine only (`src/utils/syncEngine.test.js`), using `fake-indexeddb` in place of the browser database.
 
 ## 2. Repository layout
 
@@ -29,14 +29,14 @@ listpal-frontend/
 ├── README.md                   Links only (Cognito, React libraries, CSS)
 ├── ARCHITECTURE.md             This file
 ├── index.html                  Vite entry; mounts #root and loads src/main.tsx
-├── package.json                Scripts: dev, build, preview, deploy
+├── package.json                Scripts: dev, build, preview, deploy, test
 ├── vite.config.ts              React plugin only
 ├── tsconfig.json               Type-checks src/ (only .ts and .tsx files, no allowJs)
 ├── tsconfig.node.json          Covers vite.config.ts
 ├── public/                     Static files served as-is (favicon, icons)
 ├── src/
 │   ├── main.tsx                ReactDOM.createRoot; StrictMode is commented out
-│   ├── App.jsx                 Shell: routes, boards state, sync queue, modals, theme
+│   ├── App.jsx                 Shell: routes, boards state, starts the sync engine, modals, theme
 │   ├── App.css                 Theme variables (:root) for four themes
 │   ├── index.css               Global base styles and fonts (Circular)
 │   ├── config.json             Region, Cognito pool and client IDs, login URLs
@@ -45,8 +45,10 @@ listpal-frontend/
 │   ├── utils/
 │   │   ├── apiGatewayClient.js API wrapper: one function per backend route
 │   │   ├── authService.js      Token exchange, refresh, storage of tokens
-│   │   ├── localDBHelpers.js   IndexedDB helpers for the 'tasks' store
-│   │   └── utils.js            JWT parsing, expiry check, percentages, dates, URL helpers
+│   │   ├── localDBHelpers.js   openDB, a promise wrapper for indexedDB.open
+│   │   ├── syncEngine.js       Task outbox: queueing, merging, batching, retries, sync status hook
+│   │   ├── syncEngine.test.js  Vitest tests for the outbox
+│   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
 │   └── components/             Pages and widgets (one .jsx and usually one .css each)
 ├── terraform/
 │   ├── main.tf                 The whole stack: one static-website module call
@@ -105,7 +107,7 @@ Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and 
 
 ```mermaid
 flowchart TB
-    App["App.jsx<br/>boards, sortedTasks, localDB, modals"]
+    App["App.jsx<br/>boards, sortedTasks, modals"]
     App --> SNB["SideNavBar"]
     App --> Modals["Prompt, Confirm, Alert"]
     App --> Home["HomePage"]
@@ -122,7 +124,7 @@ flowchart TB
     Task --> TaskMenu["TaskMenu"]
 ```
 
-`Board` and `CardList` receive `localDB`, `sortedTasks`, `setSortedTasks`, `setBoards` and the modal setters as props. Nothing uses React context.
+`Board` and `CardList` receive `sortedTasks`, `setSortedTasks`, `setBoards` and the modal setters as props. Components that write tasks import the queue functions from `syncEngine.js` directly. Nothing uses React context.
 
 ## 5. Authentication and session
 
@@ -157,48 +159,53 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 
 | Store | Key or shape | Written by | Lifetime |
 | --- | --- | --- | --- |
-| React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `localSyncRequired`, `localDB`, `activeBoard`, modal config | Pages through props | Until a reload |
-| IndexedDB `listpal-local` / `tasks` | Task records with an `Action` field (`create`, `update` or `delete`), keyed on `SK` | `writeDataToLocalDB` in `localDBHelpers.js` | Until the next sync, but **cleared on every page load** (see section 13) |
+| React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoard`, modal config | Pages through props | Until a reload |
+| IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `patchPending` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
 
-`App.jsx` loads the user and the boards on start-up with `Promise.all([getUser(), getBoards()])`. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately with `getActiveTasks(boardID)`.
+`App.jsx` loads the user and the boards on start-up with `Promise.all([getUser(), getBoards()])`. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately. `getTasks` in `Board.jsx` first flushes the outbox (waiting at most 3 s), then calls `getActiveTasks(boardID)`, then lays any still-queued changes over the result with `overlayPending`.
 
 ## 7. Task writes and sync
 
-Most task edits do not call the API directly. They are written to IndexedDB first and then pushed in one batch to `POST /task-sync`.
+Task edits do not call the API directly. Components call the queue functions in `src/utils/syncEngine.js` with only the fields that changed. The engine stores them in the IndexedDB outbox and sends them in batches to `POST /sync`. The engine is a module singleton, not React state. `App.jsx` calls `startSync` once.
 
 ```mermaid
 flowchart LR
-    E["Edit a task<br/>(description, tick, important, link, create, delete, clear)"] --> W["writeDataToLocalDB 'tasks'<br/>Action: create, update or delete"]
-    W --> F["setLocalSyncRequired(true)<br/>restarts the 2 s timer"]
-    F --> T{"No further edits<br/>for 2 s?"}
-    T -->|yes| R["Read every record in 'tasks'"]
-    R --> P["POST /task-sync<br/>{ task_actions: [...] }"]
-    P -->|success| C["Clear 'tasks' store<br/>localSyncRequired = false"]
-    P -->|failure| X["Alert shown, store kept,<br/>no retry scheduled"]
+    E["Edit a task<br/>(description, tick, important, link, create, delete, clear)"] --> Q["queueCreate / queueUpdate / queueDelete<br/>merge into the task's outbox record<br/>in one IndexedDB transaction, rev + 1"]
+    Q --> S["Schedule a flush<br/>500 ms (typing: 2 s, at most 10 s)"]
+    S --> F["flushNow<br/>one at a time, Web Lock across tabs"]
+    F --> P["POST /sync<br/>{ ops: [...] } up to 50"]
+    P -->|"applied, rev unchanged<br/>gone, rejected"| D["Delete the record"]
+    P -->|"applied, edited since sent"| K["Keep it for the next flush<br/>(create becomes update)"]
+    P -->|"retry, conflict, network error"| B["Keep it, back off<br/>2 s, 4 s ... 60 s"]
+    B --> F
 ```
 
-How the queue works:
+How the outbox works:
 
-- `setLocalSyncRequiredWrapper` in `App.jsx` flips a counter each time it is called. The timer effect depends on that counter, so every edit restarts the 2-second wait (`SYNC_TIMEOUT`).
-- When an existing task is edited, `Task.jsx`, `TaskMenu.jsx` and `CardList.jsx` read the record first. If it is already `create`, the action stays `create`. Otherwise it becomes `update`. This means a task created and edited before a sync is only ever sent as a create.
-- Deleting a task that was never synced removes its record. Deleting a synced task writes `{ Action: "delete", SK }`.
-- `beforeunload` shows a warning while `localSyncRequired` is true.
+- **One record per task.** `mergeRecord` combines changes:
+  - create + update stays a create
+  - update + update merges the fields
+  - anything + delete becomes a delete
+  - a delete ignores later edits, so the task cannot come back
+- **Create then delete.** A create that was never sent and is then deleted is dropped without a request. If the create may already have been sent (`maybeOnServer`), it becomes a delete instead.
+- **Acks are matched by `rev`.** A record edited while its request was in flight is kept, so nothing typed during a sync is lost.
+- **When flushes happen:** after the scheduled delay, when the browser comes back `online`, when the tab is hidden, and at start-up if anything is queued. On `pagehide`, `syncOpsKeepalive` sends the in-memory copy of the queue with `fetch(..., { keepalive: true })`. The records stay queued either way. The server treats a resend as a no-op.
+- **Scores come from the server.** Ticking applies an optimistic change to `boards`, using `periodsContaining` from `utils.js` (the same UTC reset boundaries as the backend). The server changes the scores in the same transaction as the tick and returns them. `onBoardScores` writes those values into `boards`, but only once nothing else is queued for that board, so a stale value can't briefly reach the screen and re-trigger confetti.
+- **Status indicator.** `useSyncStatus` exposes `{ pending, syncing, lastError }`. The bottom-right indicator in `Board.jsx` spins while changes are pending and gets a red ring while retrying. `beforeunload` warns while `pending > 0`.
 
 Edits that bypass the queue and call the API straight away:
 
 | Action | Where | Endpoint |
 | --- | --- | --- |
-| Tick or untick a task, update board scores | `Task.jsx` (`updateActiveTaskChecked`) | `POST /board-scores` |
-| Rename a category | `Card.jsx` | `POST /rename-category` |
-| Change a task's emoji for a whole category | `Card.jsx` | `POST /card-emoji` |
+| Manually edit a score | `ScoreCounter.jsx` | `POST /board-scores` |
+| Rename a category | `Card.jsx` (also `patchPending` so queued records carry the new name) | `POST /rename-category` |
+| Change a task's emoji for a whole category | `Card.jsx` (also `patchPending`) | `POST /card-emoji` |
 | Save category order | `DropdownMenu.jsx` (move up or down), `utils.js` (`updateCategoryOrder`, called from `Card.jsx` and `CardList.jsx`) | `POST /board-category-order` |
 | Create, rename, change emoji, delete a board | `BoardList.jsx`, `Board.jsx` | `POST /new-board`, `/rename-board`, `/board-emoji`, `/delete-board` |
 | Save targets | `TargetSetter.jsx` | `POST /board-targets` |
 | Save theme | `ThemeCard.jsx` | `POST /user-theme` |
-
-Board score changes are applied to React state and sent straight away, so they are not covered by the sync queue.
 
 ## 8. API client
 
@@ -209,7 +216,8 @@ Board score changes are applied to React state and sent straight away, so they a
 | `getBoards` | `GET /boards` | Present |
 | `getUser` | `GET /user` | Present |
 | `getActiveTasks` | `GET /active-tasks` | Present |
-| `syncTasks` | `POST /task-sync` | Present |
+| `syncOps` | `POST /sync` (silent, the sync engine reports failures) | Present |
+| `syncOpsKeepalive` | `POST /sync` with `fetch` keepalive, used on `pagehide` | Present |
 | `updateTaskEmojiAPI` | `POST /card-emoji` | Present |
 | `updateThemeAPI` | `POST /user-theme` | Present |
 | `newBoardAPI` | `POST /new-board` | Present |
@@ -221,7 +229,7 @@ Board score changes are applied to React state and sent straight away, so they a
 | `updateBoardScoresAPI` | `POST /board-scores` | Present |
 | `updateBoardTargetsAPI` | `POST /board-targets` | Present |
 
-Failures are handled the same way for every call. `apiGet` and `apiPost` log the error, call `window.alert(...)` and rethrow. A failed token refresh returns `undefined` without throwing, so callers receive an empty value.
+Failures are handled the same way for every call. `apiGet` and `apiPost` log the error, call `window.alert(...)` (unless the call passes `silent`) and rethrow. A failed token refresh throws "Session expired" rather than returning an empty value. The backend returns real HTTP status codes (400, 403, 500) for errors, so axios rejects on them.
 
 ## 9. Styling and theming
 
@@ -270,26 +278,27 @@ Key points:
 
 ## 11. Deployment and local development
 
-There is no pipeline. Deployment is run by hand.
+There is no pipeline. Releases are run by hand with the `/deploy` skill in `.claude/skills/deploy/SKILL.md`. It builds a clean worktree of `origin/main`, syncs `dist/` to the bucket and invalidates CloudFront. It asks before each step that changes something.
 
 ```mermaid
 flowchart LR
-    A["Edit src/"] --> B["npm run build<br/>tsc, then vite build"]
-    B --> C["dist/"]
-    C --> D["npm run deploy<br/>aws s3 sync dist/ s3://www.listpal.dev.vinsp.in"]
-    D --> E["CloudFront serves new files<br/>once its cache expires"]
+    A["PR merged to main"] --> B["Clean worktree of origin/main<br/>+ copy src/config.json"]
+    B --> C["npm ci && npm run build"]
+    C --> D["aws s3 sync --dryrun<br/>then the real sync"]
+    D --> E["CloudFront invalidation /*<br/>on the www distribution"]
+    E --> F["Check the live index.html<br/>references the new bundle"]
 ```
 
 ```sh
 npm install
 npm run dev        # Vite on 0.0.0.0:5173, uses localhost redirect URI
 npm run build      # type-checks src/*.ts(x), then bundles to dist/
-npm run deploy     # build, then sync dist/ to the www bucket
+npm test           # Vitest
 ```
 
 Things to know:
 
-- `npm run deploy` does not invalidate CloudFront. Users may see the old `index.html` until the cache expires.
+- `npm run deploy` still exists, but it builds the working tree and does not invalidate CloudFront. The cache TTL is one year, so use the deploy skill instead.
 - Local dev signs in through the same Cognito pool and calls the same production API. Changes that write data affect the live Dev data.
 - Terraform changes are applied from `terraform/` with `terraform plan` and `terraform apply`, using AWS credentials for the target account.
 
@@ -297,26 +306,22 @@ Things to know:
 
 The frontend has no backups of its own. Everything users care about is in the backend, so the backup and restore procedure is documented in `listpal-backend/ARCHITECTURE.md` (section 9).
 
-Two client-side losses are possible:
+Unsynced task edits are kept in the IndexedDB outbox across reloads, logouts and network failures, and are sent once the app is open and signed in again. They are lost only if the browser's site data is cleared, or if the server rejects them (for example, edits to a board that has since been deleted).
 
-- Task edits that have not synced yet are lost if the page is reloaded. The load code clears the `tasks` store (section 13).
-- `localStorage` and `sessionStorage` are cleared on logout, so the user has to sign in again.
+`localStorage` and `sessionStorage` are cleared on logout, so the user has to sign in again.
 
 ## 13. Quality and security observations
 
 These are things a reader should know before changing the app. They are not fixed in the code.
 
-- **Unsynced task edits are discarded on reload.** `App.jsx` clears the IndexedDB `tasks` store every time the page loads (`initDB`). The `beforeunload` warning only asks the user to confirm.
-- **A failed sync is not retried.** `syncInterval` shows "will retry..." but schedules nothing. The timer only restarts when another edit happens, and the pending records stay in IndexedDB until then.
-- **Board score changes are not queued.** `Task.jsx` updates the score in React state and calls `updateBoardScoresAPI` without awaiting it, from inside a `setBoards` updater. A failed call leaves the screen and the server out of step, and the error becomes an unhandled promise rejection.
-- **Broken error handler in `Board.jsx`.** In `getTasks`, the `catch` calls `setAlertConf({...}).finally(...)`. `setAlertConf` returns `undefined`, so the `.finally` call throws.
-- **Silent failure on token refresh.** `tokenCheck` returns `false`, and `apiGet` and `apiPost` then return `undefined`. `loadInitialData` and the board pages then fail later on `undefined.map` or similar.
 - **The API address is hard-coded.** `apiGatewayClient.js` sets `https://api.vinsp.in`. There is no way to point the app at a different API without editing source.
 - **Tokens sit in `sessionStorage`.** Any script on the page can read them. The managed login URLs in `config.json` carry no `code_challenge`, so the code exchange is not PKCE-protected.
-- **Dialogs for errors.** `apiGet` and `apiPost` call `window.alert`, which blocks the page.
+- **Dialogs for errors.** `apiGet` and `apiPost` call `window.alert`, which blocks the page. Task sync is the exception: it is silent and shows its state on the sync indicator.
+- **Keepalive and CORS.** The `pagehide` flush is best effort. Browsers may refuse a keepalive request that needs a CORS preflight. Nothing is lost if it fails, because the outbox is flushed on the next load.
+- **Old tabs block the database upgrade.** A tab still running a build from before the outbox (IndexedDB version 1) does not close its connection, so a new tab's upgrade waits until that tab is closed or reloaded.
 - **Only `main.tsx` is type-checked.** The rest is JavaScript and `tsc` does not look at it, so `npm run build` gives little assurance about most of the code.
 - **StrictMode is off.** `main.tsx` has `<React.StrictMode>` commented out, so React's development double-render checks do not run.
-- **Unused dependencies.** `react-select`, `react-dropdown` and `@emotion/react` are not imported anywhere. `vitest` has no tests.
+- **Unused dependencies.** `react-select`, `react-dropdown` and `@emotion/react` are not imported anywhere.
 - **Category sort.** `setOrderedSortedTasks` sorts by `indexOf` in `CategoryOrder`. A category missing from that array gets index -1 and sorts to the top.
 - **Unused component and assets.** `Header.jsx` is not rendered. Several files in `public/` are not referenced.
 
@@ -326,10 +331,10 @@ These are things a reader should know before changing the app. They are not fixe
 | --- | --- |
 | Add a page or change routing | `src/App.jsx` (routes), `src/components/` |
 | Add or change a backend call | `src/utils/apiGatewayClient.js`, then the caller in `src/components/` |
-| Change how edits are queued or synced | `src/App.jsx` (`syncInterval`, `setLocalSyncRequiredWrapper`), `src/utils/localDBHelpers.js`, and the write points in `Task.jsx`, `TaskMenu.jsx`, `CardList.jsx`, `Card.jsx`, `Board.jsx` |
-| Change scoring or completion dates | `src/components/Task.jsx` (`updateActiveTaskChecked`), `src/utils/utils.js` (`getNextMondayAt5AM`, `calcPercents`) |
+| Change how edits are queued or synced | `src/utils/syncEngine.js` (and its tests), and the write points in `Task.jsx`, `TaskMenu.jsx`, `CardList.jsx`, `Card.jsx`, `Board.jsx` |
+| Change scoring or completion dates | `src/components/Task.jsx` (`updateActiveTaskChecked`), `src/utils/utils.js` (`getNextMondayAt5AM`, `periodsContaining`, `calcPercents`). Server-side score rules are in `listpal-backend/src/task_sync.js` and `score_periods.js` |
 | Change sign-in, tokens or logout | `src/utils/authService.js`, `src/utils/utils.js` (`isTokenExpired`), `src/components/RedirectPage.jsx`, `src/config.json` |
 | Add a theme | `src/App.css` (new `:root` block), `src/components/ThemeSetter.jsx`, `src/components/ThemeCard.jsx` (`THEME_NAMES`) |
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |
-| Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json` |
+| Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.claude/skills/deploy/SKILL.md` |
 | Change the API address or Cognito pool | `src/utils/apiGatewayClient.js`, `src/config.json` |

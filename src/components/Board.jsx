@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
+import { flushNow, overlayPending, queueDelete, useSyncStatus } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import ConfettiExplosion from 'react-confetti-explosion';
@@ -21,7 +21,11 @@ import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
-const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, localSyncRequired, setLocalSyncRequired, setActiveBoard }) => {
+// Long enough for a normal sync to finish before loading, short enough not to stall the board when offline
+const LOAD_FLUSH_TIMEOUT = 3000;
+
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoard }) => {
+  const syncStatus = useSyncStatus();
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
@@ -155,11 +159,7 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
     // Update the state with the modified tasks
     setSortedTasks({ ...sortedTasks });
 
-    // Add the tasks to delete to the local DB
-    tasksToDelete.forEach(t => {
-      // Check if the task has been created since the last sync and update accordingly
-      deleteTaskFromLocalDBWrapper(localDB, t.SK, setLocalSyncRequired)
-    })
+    tasksToDelete.forEach(t => queueDelete(t.SK, t["GSI1-PK"]));
   };
 
   const sortTasks = (data) => {
@@ -182,18 +182,18 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
   const getTasks = async () => {
     setIsLoading(true);
     try {
+      // Push queued edits first so the fetch reflects them, then overlay anything that didn't make it
+      await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
       const data = await getActiveTasks(boardID);
-      setRemoteData(data)
-      setIsLoading(false);
+      setRemoteData(await overlayPending(data ?? [], boardID));
     } catch (error) {
-      setIsLoading(false);
       setAlertConf({
         display: true,
         title: "Error 💀",
         textValue: error.message || "Failed to fetch tasks.",
-      }).finally(() => {
-        setIsLoading(false);
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -347,14 +347,15 @@ const Board = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, isLoad
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}
-              localDB={localDB}
-              setLocalSyncRequired={setLocalSyncRequired}
             />
           </div>
         }
       </div>
-      <div className="board-local-sync-indicator-wrapper">
-        <img className={`sync-status-icon ${localSyncRequired ? "spin" : ""}`} src={!localSyncRequired ? tickIcon : syncIcon} alt="sync status icon" />
+      <div
+        className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
+        title={syncStatus.lastError ? `${syncStatus.lastError}, will retry...` : syncStatus.pending ? "Saving..." : "Saved"}
+      >
+        <img className={`sync-status-icon ${syncStatus.pending ? "spin" : ""}`} src={syncStatus.pending ? syncIcon : tickIcon} alt="sync status icon" />
       </div>
     </div >
   );

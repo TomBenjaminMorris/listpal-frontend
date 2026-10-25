@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
-import { writeDataToLocalDB, readDataFromLocalDB } from '../utils/localDBHelpers';
+import { queueCreate, queueUpdate } from '../utils/syncEngine';
 import { v4 as uuidv4 } from 'uuid';
 import { useOnClickOutside } from 'usehooks-ts'
 import linkIcon from '../assets/icons8-link-64.png';
@@ -9,9 +8,9 @@ import arrowIcon from "../assets/icons8-line-50.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
-import { getNextMondayAt5AM } from '../utils/utils';
+import { getNextMondayAt5AM, periodsContaining } from '../utils/utils';
 
-const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired }) => {
+const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
@@ -36,15 +35,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
     if (newDescription !== description) {
       setDescription(newDescription);
       updateActiveTaskDescription(newDescription)
-
-      // Check if the task has been created since the last sync and update accordingly
-      let isCreate = false
-      readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
-        isCreate = t.Action == "create"
-      }).catch(() => { }).finally(() => {
-        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: newDescription });
-        setLocalSyncRequired(true);
-      })
+      queueUpdate(task.SK, task["GSI1-PK"], { Description: newDescription }, { typing: true });
     }
   }
 
@@ -66,22 +57,15 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
       isLastUncheckedTask = tmpTaskList.length === 1 && tmpTaskList[0].SK == task.SK;
     }
 
-    const updateBoardScores = (increment) => {
-      setBoards((current) => {
-        return current.map(b => {
-          if (b.SK === task["GSI1-PK"]) {
-            b.YScore = Math.max(0, b.YScore + increment);
-            b.MScore = Math.max(0, b.MScore + increment);
-            b.WScore = Math.max(0, b.WScore + increment);
-            updateBoardScoresAPI(
-              b.SK,
-              { YScore: b.YScore, MScore: b.MScore, WScore: b.WScore },
-              { taskID: task.SK, description: task.Description, category: task.Category, emoji: task.Emoji, checked: isChecked }
-            );
-          }
-          return b;
-        });
-      });
+    // Optimistic only: the server changes the scores in the same write as the tick and sends back the real values
+    const updateBoardScores = (fields, increment) => {
+      if (!fields.length) return;
+      setBoards((current) => current.map(b => {
+        if (b.SK !== task["GSI1-PK"]) return b;
+        const updated = { ...b };
+        fields.forEach(field => { updated[field] = Math.max(0, Number(updated[field]) + increment); });
+        return updated;
+      }));
     };
 
     tmpSortedTasks[title] = sortedTasks[title]?.map(t => {
@@ -93,24 +77,23 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
           t["GSI1-SK"] = expiryDate;
           t.ExpiryDate = expiryDate;
           t.ExpiryDateTTL = Math.trunc(parseInt(expiryDate) / 1000);
-          updateBoardScores(1); // Increment board scores
+          updateBoardScores(periodsContaining(Number(t.CompletedDate), Date.now()), 1);
         } else {
-          // Mark task as not completed
+          // Only periods the completion counted in, so last week's untick can't eat this week's score
+          const previousCompletedDate = t.CompletedDate;
           t.CompletedDate = "nil";
           t["GSI1-SK"] = "nil";
           t.ExpiryDate = "nil";
           t.ExpiryDateTTL = 0;
-          updateBoardScores(-1); // Decrement board scores
+          updateBoardScores(periodsContaining(Number(previousCompletedDate), Date.now()), -1);
         }
 
-        // Check if the task has been created since the last sync and update accordingly
-        let isCreate = false
-        readDataFromLocalDB(localDB, 'tasks', task.SK).then(localTask => {
-          isCreate = localTask.Action == "create"
-        }).catch(() => { }).finally(() => {
-          writeDataToLocalDB(localDB, "tasks", { ...t, Action: isCreate ? "create" : "update" });
-          setLocalSyncRequired(true);
-        })
+        queueUpdate(t.SK, t["GSI1-PK"], {
+          CompletedDate: t.CompletedDate,
+          ExpiryDate: t.ExpiryDate,
+          "GSI1-SK": t["GSI1-SK"],
+          ExpiryDateTTL: t.ExpiryDateTTL
+        });
       }
       return t;
     });
@@ -135,9 +118,7 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
       };
 
       tmpSortedTasks[title].push(newCardDefaultTask);
-      writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
-        setLocalSyncRequired(true)
-      })
+      queueCreate(newCardDefaultTask);
     }
 
     setSortedTasks(tmpSortedTasks);
@@ -156,16 +137,8 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
     if (task) {
       const newImportantStatus = task.Important === "true" ? "false" : "true";
       task.Important = newImportantStatus;
-
-      // Check if the task has been created since the last sync and update accordingly
-      let isCreate = false
-      readDataFromLocalDB(localDB, 'tasks', task.SK).then(t => {
-        isCreate = t.Action == "create"
-      }).catch(() => { }).finally(() => {
-        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Important: newImportantStatus });
-        setLocalSyncRequired(true);
-        setSortedTasks(updatedTasks);
-      })
+      queueUpdate(task.SK, task["GSI1-PK"], { Important: newImportantStatus });
+      setSortedTasks(updatedTasks);
     }
     setTaskMenuVisible(false);
   };
@@ -246,8 +219,6 @@ const Task = memo(({ localDB, title, task, sortedTasks, setSortedTasks, handleDe
         <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
-            localDB={localDB}
-            setLocalSyncRequired={setLocalSyncRequired}
             markAsImportant={() => handleMarkAsImportant(task.SK)}
             deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
             isImportant={isImportant}

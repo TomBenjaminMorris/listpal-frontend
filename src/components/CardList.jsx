@@ -1,11 +1,11 @@
 import { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
-import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper, readDataFromLocalDB } from '../utils/localDBHelpers';
+import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired, board }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, board }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -21,24 +21,17 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     const tasks = sortedTasks[title];
     const uncheckedTasks = tasks.filter(t => t.CompletedDate === "nil");
     const isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK === taskID;
+    const task = tasks.find(t => t.SK === taskID);
 
     // Perform validation against the last task being deleted in a category
     if (isLastUncheckedTask) {
-      const task = tasks.find(t => t.SK === taskID);
       if (!task.Description) {
         showAlert("The last task cannot be removed...");
         return;
       }
 
-      // Check if the task has been created since the last sync and update accordingly
-      let isCreate = false
-      readDataFromLocalDB(localDB, 'tasks', taskID).then(t => {
-        isCreate = t.Action == "create"
-      }).catch(() => { }).finally(() => {
-        writeDataToLocalDB(localDB, "tasks", { ...task, Action: isCreate ? "create" : "update", Description: "" });
-        setLocalSyncRequired(true);
-      })
-      
+      queueUpdate(taskID, task["GSI1-PK"], { Description: "" });
+
       setSortedTasks({
         ...sortedTasks,
         [title]: tasks.map(t => t.SK === taskID ? { ...t, Description: "" } : t)
@@ -46,8 +39,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
       return;
     }
 
-    // Check if the task has been created since the last sync and update accordingly
-    deleteTaskFromLocalDBWrapper(localDB, taskID, setLocalSyncRequired)
+    queueDelete(taskID, task["GSI1-PK"]);
 
     setSortedTasks({
       ...sortedTasks,
@@ -83,9 +75,7 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
     const sortArr = [name, ...board?.CategoryOrder];
     updateCategoryOrder(sortArr, boards, setBoards)
 
-    writeDataToLocalDB(localDB, "tasks", { ...newCardDefaultTask, Action: "create" }).then(() => {
-      setLocalSyncRequired(true)
-    })
+    queueCreate(newCardDefaultTask);
 
     setSortedTasks({
       ...sortedTasks,
@@ -109,8 +99,6 @@ const CardList = ({ localDB, sortedTasks, setSortedTasks, setBoards, boards, set
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
-          localDB={localDB}
-          setLocalSyncRequired={setLocalSyncRequired}
           board={board}
         />
       ))}

@@ -76,3 +76,18 @@ export function getNextMondayAt5AM() {
     today.setHours(5, 0, 0, 0); // Set time to 5 AM (hours, minutes, seconds, milliseconds)
     return String(today.valueOf()); // Return the value as a string
 }
+
+// Mirrors listpal-backend/src/score_periods.js so the optimistic score matches what the server will apply
+export function periodsContaining(completedMs, nowMs) {
+    if (!Number.isFinite(completedMs)) return [];
+    const now = new Date(nowMs);
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth();
+    const daysSinceMonday = (now.getUTCDay() + 6) % 7;
+    const starts = {
+        WScore: Date.UTC(year, month, now.getUTCDate() - daysSinceMonday),
+        MScore: Date.UTC(year, month, 1),
+        YScore: Date.UTC(year, 0, 1)
+    };
+    return Object.keys(starts).filter(field => completedMs >= starts[field]);
+}
