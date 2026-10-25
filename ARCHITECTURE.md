@@ -319,7 +319,7 @@ These are things a reader should know before changing the app. They are not fixe
 - **Only `main.tsx` is type-checked.** The rest is JavaScript and `tsc` does not look at it, so `npm run build` gives little assurance about most of the code.
 - **StrictMode is off.** `main.tsx` has `<React.StrictMode>` commented out, so React's development double-render checks do not run.
 - **Unused dependencies.** `react-select`, `react-dropdown` and `@emotion/react` are not imported anywhere.
-- **Category sort.** `setOrderedSortedTasks` sorts by `indexOf` in `CategoryOrder`. A category missing from that array gets index -1 and sorts to the top.
+- **Category sort.** `setOrderedSortedTasks` sorts by `indexOf` in `CategoryOrder`. A category missing from that array gets index -1 and sorts to the top. The saved order can hold stale or missing names. So every category action (new, rename, delete, move) builds the new order from the categories on screen, passes it to `setSortedTasks` and saves it, which also repairs the saved order. A board whose saved order is stale can still load with the missing categories at the top, until one of those actions runs.
 - **Unused component and assets.** `Header.jsx` is not rendered. Several files in `public/` are not referenced.
 
 ## 14. Where to look

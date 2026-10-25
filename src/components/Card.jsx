@@ -19,7 +19,7 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, board }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
@@ -62,13 +62,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     // Update the state to reflect the deleted category
     const newSortedTasks = { ...sortedTasks };
     delete newSortedTasks[title];
-    setSortedTasks(newSortedTasks);
-    const sortArr = board?.CategoryOrder;
-    const index = sortArr.indexOf(title);
-    if (index !== -1) {
-      sortArr.splice(index, 1);
-      updateCategoryOrder(sortArr, boards, setBoards);
-    }
+    // From what's on screen, for the same reason as renameCategory
+    const sortArr = Object.keys(sortedTasks).filter(category => category !== title);
+    updateCategoryOrder(sortArr, boards, setBoards);
+    setSortedTasks(newSortedTasks, sortArr);
   }
 
   const renameCategory = newTitle => {
@@ -106,8 +103,9 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     delete tmpSortedTasks[title];
     queueUpdateAll(renamedTasks, { Category: newTitle });
 
-    // The new name must be in the order before sorting, or it isn't found and jumps to the top
-    const sortArr = (board?.CategoryOrder ?? []).map(category => category === title ? newTitle : category);
+    // Build the order from what's on screen, as the saved order can hold stale or missing names and
+    // anything missing from it sorts to the top
+    const sortArr = Object.keys(sortedTasks).map(category => category === title ? newTitle : category);
     updateCategoryOrder(sortArr, boards, setBoards)
     setSortedTasks(tmpSortedTasks, sortArr);
   };

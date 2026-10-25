@@ -357,7 +357,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
               sortedTasks={sortedTasks}
               setSortedTasks={setSortedTasks}
               setBoards={setBoards}
-              board={board}
               boards={boards}
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
