@@ -112,6 +112,22 @@ a {
   animation: 600ms fadeDown;
 }
 
+@keyframes fadeOutDown {
+  0% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(10%);
+    opacity: 0;
+  }
+}
+
+/* forwards stops the element snapping back into view before it is removed */
+.fadeOutDown-animation {
+  animation: 400ms fadeOutDown forwards;
+}
+
 @keyframes fadeInPure {
   0% {
     opacity: 0;
