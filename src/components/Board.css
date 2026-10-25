@@ -113,6 +113,47 @@
     margin-left: -2px;
 }
 
+.board-action {
+    position: relative;
+    display: flex;
+}
+
+.board-action:hover .board-action-tooltip {
+    display: block;
+}
+
+/* Matches .score-type-tooltip in ScoreCounter.css, but sized to its text */
+.board-action-tooltip {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 25px;
+    font-size: 16px;
+    white-space: nowrap;
+    height: 30px;
+    background-color: var(--accent);
+    line-height: 30px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+.board-action-tooltip:before {
+    content: "";
+    position: absolute;
+    height: 0px;
+    width: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -19px;
+    border-width: 10px;
+    border-color: transparent transparent var(--accent) transparent;
+    border-style: solid;
+}
+
 .board-emoji-picker-wrapper {
     display: flex;
     justify-content: center;

@@ -338,16 +338,25 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
               <DatePills />
 
               <div className="board-actions-wrapper">
-                <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
-                  display: true,
-                  title: deleteMessage,
-                  textValue: "🚨 This action can't be undone 🚨",
-                  callbackFunc: handleDeleteBoard,
-                })} />
+                <div className="board-action">
+                  <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
+                    display: true,
+                    title: deleteMessage,
+                    textValue: "🚨 This action can't be undone 🚨",
+                    callbackFunc: handleDeleteBoard,
+                  })} />
+                  <div className="board-action-tooltip">Delete Board</div>
+                </div>
 
-                <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearClick} />
+                <div className="board-action">
+                  <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearClick} />
+                  <div className="board-action-tooltip">Clear Tasks</div>
+                </div>
 
-                <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
+                <div className="board-action">
+                  <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
+                  <div className="board-action-tooltip">Set Targets</div>
+                </div>
               </div>
 
               <ScoreBoard
