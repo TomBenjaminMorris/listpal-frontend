@@ -5,7 +5,7 @@ import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, board }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   const showAlert = (textValue) => {
@@ -72,7 +72,8 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     };
     // newTask
 
-    const sortArr = [name, ...board?.CategoryOrder];
+    // From what's on screen, as the saved order can hold stale or missing names
+    const sortArr = [name, ...Object.keys(sortedTasks)];
     updateCategoryOrder(sortArr, boards, setBoards)
 
     queueCreate(newCardDefaultTask);
@@ -80,7 +81,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     setSortedTasks({
       ...sortedTasks,
       [name]: [newCardDefaultTask]
-    });
+    }, sortArr);
     forceUpdate();
   };
 
@@ -99,7 +100,6 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
-          board={board}
         />
       ))}
       {sortedTasks && (

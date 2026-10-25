@@ -75,9 +75,6 @@ export const syncOpsKeepalive = (ops) => {
   }).catch(() => { });
 };
 
-export const updateTaskEmojiAPI = (taskIDs, emoji) =>
-  apiPost('/card-emoji', { taskIDs, emoji });
-
 export const updateThemeAPI = (theme) =>
   apiPost('/user-theme', { theme });
 
@@ -96,8 +93,6 @@ export const updateBoardCategoryOrder = (boardID, categoryOrder) =>
 export const deleteBoard = (boardID) =>
   apiPost('/delete-board', { boardID });
 
-export const renameCategoryAPI = (taskIDs, category) =>
-  apiPost('/rename-category', { taskIDs, category });
 
 export const updateBoardScoresAPI = (boardID, scores) =>
   apiPost('/board-scores', { boardID, scores });
