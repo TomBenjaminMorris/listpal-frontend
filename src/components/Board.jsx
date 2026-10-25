@@ -179,6 +179,24 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     queueDeleteAll(tasksToDelete);
   };
 
+  const handleClearClick = () => {
+    const hasCompleted = Object.values(sortedTasks ?? {}).some(tasks => tasks.some(t => t.CompletedDate !== 'nil'));
+    if (!hasCompleted) {
+      setAlertConf({
+        display: true,
+        title: "Nothing to Clear ✨",
+        textValue: "There are no completed tasks on this board.",
+      });
+      return;
+    }
+    setConfirmConf({
+      display: true,
+      title: "Clear All Completed Tasks?",
+      textValue: "✨ Time for a spring clean ✨",
+      callbackFunc: handleClearTasks,
+    });
+  };
+
   const sortTasks = (data) => {
     if (!data || data.length === 0) {
       setSortedTasks({});
@@ -327,12 +345,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                   callbackFunc: handleDeleteBoard,
                 })} />
 
-                <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={() => setConfirmConf({
-                  display: true,
-                  title: "Clear All Completed Tasks?",
-                  textValue: "✨ Time for a spring clean ✨",
-                  callbackFunc: handleClearTasks,
-                })} />
+                <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearClick} />
 
                 <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
               </div>
