@@ -23,12 +23,16 @@ const tokenCheck = async () => {
   }
 };
 
+// Callers must see a failure here, otherwise an expired session looks like an empty response
+const ensureToken = async () => {
+  const ok = await tokenCheck();
+  if (!ok) throw new Error("Session expired, please sign in again");
+};
+
 // Generic API request function for GET requests
 const apiGet = async (url, params = {}) => {
   try {
-    const ok = await tokenCheck();
-    if (!ok) return console.log("Request not attempted as token refresh failed");
-
+    await ensureToken();
     const response = await axios.get(url, { headers: getHeaders(), params });
     return response.data?.data;
   } catch (err) {
@@ -38,17 +42,15 @@ const apiGet = async (url, params = {}) => {
   }
 };
 
-// Generic API request function for POST requests
-const apiPost = async (url, body) => {
+// Generic API request function for POST requests. Silent callers report failures themselves.
+const apiPost = async (url, body, { silent = false } = {}) => {
   try {
-    const ok = await tokenCheck();
-    if (!ok) return console.log("Request not attempted as token refresh failed");
-
+    await ensureToken();
     const response = await axios.post(url, body, { headers: getHeaders() });
     return response.data?.data;
   } catch (err) {
     console.error(`Error posting to ${url}:`, err);
-    alert(`Failed to post to ${url}, please try again.`);
+    if (!silent) alert(`Failed to post to ${url}, please try again.`);
     throw err;
   }
 };
@@ -59,8 +61,19 @@ export const getBoards = () => apiGet('/boards');
 export const getUser = () => apiGet('/user');
 
 // POST API methods
-export const syncTasks = (task_actions) =>
-  apiPost('/task-sync', { task_actions });
+export const syncOps = (ops) =>
+  apiPost('/sync', { ops }, { silent: true });
+
+// Used while the page unloads: axios cannot set keepalive, and the token cannot be refreshed in time
+export const syncOpsKeepalive = (ops) => {
+  if (!sessionStorage.accessToken || isTokenExpired()) return;
+  fetch(`${axios.defaults.baseURL}/sync`, {
+    method: 'POST',
+    keepalive: true,
+    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ops })
+  }).catch(() => { });
+};
 
 export const updateTaskEmojiAPI = (taskIDs, emoji) =>
   apiPost('/card-emoji', { taskIDs, emoji });
@@ -86,8 +99,8 @@ export const deleteBoard = (boardID) =>
 export const renameCategoryAPI = (taskIDs, category) =>
   apiPost('/rename-category', { taskIDs, category });
 
-export const updateBoardScoresAPI = (boardID, scores, task) =>
-  apiPost('/board-scores', { boardID, scores, task });
+export const updateBoardScoresAPI = (boardID, scores) =>
+  apiPost('/board-scores', { boardID, scores });
 
 export const updateBoardTargetsAPI = (boardID, targets) =>
   apiPost('/board-targets', { boardID, targets });

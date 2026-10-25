@@ -174,6 +174,34 @@
     height: 30px;
 }
 
+.sync-error {
+    box-shadow: 0 0 0 2px #e5484d, rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+/* Sits just left of the sync indicator, at the same height */
+.sync-pill {
+    position: fixed;
+    bottom: 20px;
+    right: 62px;
+    z-index: 20000;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 14px;
+    border-radius: 20px;
+    font-size: 15px;
+    white-space: nowrap;
+    color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.sync-pill-error {
+    background-color: #e5484d;
+}
+
+.sync-pill-ok {
+    background-color: #30a46c;
+}
+
 .spin {
     -webkit-animation: spin 3s infinite linear;
 }

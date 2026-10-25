@@ -1,7 +1,7 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { renameCategoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
-import { writeDataToLocalDB, deleteTaskFromLocalDBWrapper } from '../utils/localDBHelpers';
+import { patchPending, queueCreate, queueDelete } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -20,7 +20,7 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
-const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, setLocalSyncRequired, board }) => {
+const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, board }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
@@ -59,12 +59,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
   };
 
   const handleDeleteCategory = () => {
-    // Remove from local DB, as appropriate
-    sortedTasks[title]?.forEach(t => {
-      // Check if the task has been created since the last sync and update accordingly
-      deleteTaskFromLocalDBWrapper(localDB, t.SK, setLocalSyncRequired)
-    });
-    setLocalSyncRequired(true);
+    sortedTasks[title]?.forEach(t => queueDelete(t.SK, t["GSI1-PK"]));
     // Update the state to reflect the deleted category
     const newSortedTasks = { ...sortedTasks };
     delete newSortedTasks[title];
@@ -111,6 +106,8 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[newTitle] = updatedTasks
     delete tmpSortedTasks[title];
+    // Tasks not yet on the server are skipped by the API, so their queued records carry the new name instead
+    patchPending(taskIDs, { Category: newTitle });
     renameCategoryAPI(taskIDs, newTitle).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
@@ -128,7 +125,6 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     const boardID = window.location.href.split('/').pop();
 
     const newTaskData = {
-      Action: "create",
       CreatedDate: String(Date.now()),
       SK: "t#" + uuidv4(),
       PK: "",
@@ -145,10 +141,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
       ExpiryDateTTL: 0
     };
 
-    // newTask
-    writeDataToLocalDB(localDB, "tasks", newTaskData).then(() => {
-      setLocalSyncRequired(true)
-    })
+    queueCreate(newTaskData);
 
     const tmpTasks = incomingTasks || { ...sortedTasks };
     tmpTasks[title] = tmpTasks[title] || [];
@@ -164,6 +157,7 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
     const updatedCategoryArray = sortedTasks[title].map(t => ({ ...t, Emoji: newEmoji }));
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[title] = updatedCategoryArray
+    patchPending(tasks.map(t => t.SK), { Emoji: newEmoji });
     updateTaskEmojiAPI(tasks.map(t => t.SK), newEmoji).then(() => {
       setSortedTasks(tmpSortedTasks);
     });
@@ -237,8 +231,6 @@ const Card = ({ localDB, title, tasks, setSortedTasks, sortedTasks, handleDelete
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
-          localDB={localDB}
-          setLocalSyncRequired={setLocalSyncRequired}
         />
       ))}
 

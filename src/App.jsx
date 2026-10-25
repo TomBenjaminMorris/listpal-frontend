@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getBoards, getUser, syncTasks } from './utils/apiGatewayClient';
+import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
-import { openDB, createObjectStore, clearLocalDB, readAllFromLocalDB } from './utils/localDBHelpers';
+import { flushNow, startSync, useSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
@@ -19,7 +19,6 @@ import './App.css';
 // Define constants
 const DEFAULT_THEME = 'purple-haze';
 const MOBILE_BREAKPOINT = 650;
-const SYNC_TIMEOUT = 2000; // 2 seconds
 
 // Determine if the app is running id dev or prod
 let isDev = true;
@@ -46,16 +45,8 @@ const App = () => {
       ? JSON.parse(storedDetails)
       : { Theme: DEFAULT_THEME };
   });
-  const [localSyncRequired, setLocalSyncRequired] = useState(false);
-  const [localSyncFlipper, setLocalSyncFlipper] = useState(false);
-  const [localDB, setLocalDB] = useState(null);
   const [activeBoard, setActiveBoard] = useState(null);
-
-  // Wrapper to handle task updates and sync behaviour
-  const setLocalSyncRequiredWrapper = (flag) => {
-    setLocalSyncFlipper(current => !current);
-    setLocalSyncRequired(flag);
-  };
+  const syncStatus = useSyncStatus();
 
   // Set CSS vars for the user theme
   const applyTheme = useCallback((theme) => {
@@ -72,31 +63,11 @@ const App = () => {
     });
   }, []);
 
-  // Define the sync function to read from the localDB and sync to the backend
-  const syncInterval = async () => {
-    try {
-      const localTasks = await readAllFromLocalDB(localDB, 'tasks');
-      if (localTasks.length > 0) {
-        await syncTasks(localTasks);
-        await clearLocalDB(localDB, 'tasks');
-        setLocalSyncRequired(false);
-      } else {
-        setLocalSyncRequired(false);
-      }
-    } catch (e) {
-      modalSetters.setAlertConf({
-        display: true,
-        title: "Error 💀",
-        textValue: "Something went wrong while syncing the tasks to the backend, will retry...",
-      });
-      console.error(e + " will retry the sync");
-    }
-  };
-
-  // Catch a page reload and handle the unload confirmation based on sync state
+  // Queued edits survive a reload and are resent on the next load, so only warn while syncing is failing:
+  // closing the tab then leaves them stranded on this device. A reload can't be told apart from a close here.
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (localSyncRequired) {
+      if (syncStatus.pending > 0 && syncStatus.lastError) {
         const message = "Are you sure you want to leave? Your changes may not be saved.";
         event.returnValue = message;
         return message;
@@ -108,21 +79,17 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [localSyncRequired]);
+  }, [syncStatus.pending, syncStatus.lastError]);
 
-  // Trigger a sync timeout. Reset the timeout if retriggered before a sync can take place
+  // Server-confirmed scores replace the optimistic ones applied when a task was ticked
   useEffect(() => {
-    let timeoutId;
-    if (localSyncRequired) {
-      timeoutId = setTimeout(syncInterval, SYNC_TIMEOUT);
-    }
-    // Cleanup timeout on effect re-run or unmount
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [localSyncFlipper]); // Re-run effect when localSyncFlipper changes
+    startSync({
+      onBoardScores: (scores) => setBoards(current => current.map(b => {
+        const confirmed = scores.find(s => s.SK === b.SK);
+        return confirmed ? { ...b, ...confirmed } : b;
+      }))
+    });
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -130,7 +97,9 @@ const App = () => {
       if (!isAuthenticated()) return;
 
       try {
-        const [userData, boardsData] = await Promise.all([getUser(), getBoards()]);
+        // A tick queued before a reload must land before the boards are read, or the scores come back stale
+        const boardsAfterSync = flushNow({ timeout: LOAD_FLUSH_TIMEOUT }).then(() => getBoards());
+        const [userData, boardsData] = await Promise.all([getUser(), boardsAfterSync]);
         const user = userData[0];
         const processedBoards = boardsData.map(board => ({
           ...board,
@@ -157,25 +126,6 @@ const App = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Setup the localDB instance
-  useEffect(() => {
-    const initDB = async () => {
-      const db = await openDB('listpal-local', 1, (db) => {
-        createObjectStore(db, 'tasks', 'SK');
-      });
-      setLocalDB(db);
-      // Clear the local DB by default on page refresh or initial load
-      clearLocalDB(db, 'tasks');
-    };
-
-    initDB();
-    return () => {
-      if (localDB) {
-        localDB.close();
-      }
-    };
   }, []);
 
   // Apply themes
@@ -271,9 +221,6 @@ const App = () => {
                 setPromptConf={modalSetters.setPromptConf}
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
-                localDB={localDB}
-                localSyncRequired={localSyncRequired}
-                setLocalSyncRequired={setLocalSyncRequiredWrapper}
                 setActiveBoard={setActiveBoard}
               />) : (<Navigate replace to="/logout" />)}
             />
