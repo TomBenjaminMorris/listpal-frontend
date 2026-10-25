@@ -4,6 +4,7 @@ import closeIcon from '../assets/icons8-close-50-white.png';
 import './TargetBanner.css';
 
 const SLIDE_MS = 400;
+const AUTO_DISMISS_MS = 10000;
 
 const BANNER_COPY = {
   weekly: { emoji: '🎉', title: 'Weekly Target Hit', body: 'Congratulations, you have hit your weekly target!' },
@@ -11,11 +12,18 @@ const BANNER_COPY = {
   yearly: { emoji: '🥇', title: 'Yearly Target Hit', body: 'Congratulations, you have hit your yearly target!' },
 };
 
-// Shows the head of the queue as a macOS-style banner until the user closes it, then calls onShown to drop it
+// Shows the head of the queue as a macOS-style banner until the user closes it or it times out, then calls onShown to drop it
 const TargetBanner = ({ queue, onShown }) => {
   const current = queue[0];
   const [dismissed, setDismissed] = useState(null);
   const phase = dismissed === current ? 'out' : 'in';
+
+  // Depends on dismissed as well as current so the timer restarts when two banners of the same type are queued back to back
+  useEffect(() => {
+    if (!current || dismissed) return;
+    const autoTimer = setTimeout(() => setDismissed(current), AUTO_DISMISS_MS);
+    return () => clearTimeout(autoTimer);
+  }, [current, dismissed]);
 
   useEffect(() => {
     if (!dismissed) return;
