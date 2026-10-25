@@ -66,7 +66,7 @@ flowchart LR
     subgraph Browser
         SPA["React SPA<br/>listpal.dev.vinsp.in"]
         SS[("sessionStorage<br/>tokens")]
-        LS[("localStorage<br/>userDetails")]
+        LS[("localStorage<br/>userDetails, sidebar state")]
         IDB[("IndexedDB<br/>listpal-local / tasks")]
     end
 
@@ -164,6 +164,7 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 | IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
+| `localStorage` | `sidebarIsOpen`, `sidebarBoardsMenuIsOpen` (`"true"` or `"false"`), read once as the initial React state | `App.jsx` whenever either value changes | Until logout |
 
 `App.jsx` loads the user and the boards on start-up. `getBoards()` waits for an outbox flush first (at most `LOAD_FLUSH_TIMEOUT`, 3 s). Otherwise a tick queued just before a reload, or still in flight from the old page's keepalive request, could land after the scores were read. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately. `getTasks` in `Board.jsx` first flushes the outbox (waiting at most 3 s), then calls `getActiveTasks(boardID)`, then lays any still-queued changes over the result with `overlayPending`.
 
@@ -306,7 +307,7 @@ The frontend has no backups of its own. Everything users care about is in the ba
 
 Unsynced task edits are kept in the IndexedDB outbox across reloads, logouts and network failures, and are sent once the app is open and signed in again. They are lost only if the browser's site data is cleared, or if the server rejects them (for example, edits to a board that has since been deleted).
 
-`localStorage` and `sessionStorage` are cleared on logout, so the user has to sign in again.
+`localStorage` and `sessionStorage` are cleared on logout, so the user has to sign in again. This also resets the sidebar and its Boards menu to closed.
 
 ## 13. Quality and security observations
 
