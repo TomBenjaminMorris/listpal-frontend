@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdateAll } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
@@ -18,44 +18,36 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
+// reduce builds new arrays, so sorting them doesn't mutate the tasks prop
+const sortList = list => {
+  if (!list) return [];
+  const [doneList, notDoneList] = list.reduce((acc, el) => {
+    el.CompletedDate === "nil" ? acc[1].push(el) : acc[0].push(el);
+    return acc;
+  }, [[], []]);
+
+  return [
+    ...doneList.sort((a, b) => parseInt(a.ExpiryDate) - parseInt(b.ExpiryDate)),
+    ...notDoneList.sort((a, b) => parseInt(a.CreatedDate) - parseInt(b.CreatedDate))
+  ];
+};
+
 const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [titleEdited, setTitleEdited] = useState(title);
-  const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
-  const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [cardEmoji, setCardEmoji] = useState(tasks?.[0]?.Emoji || "✅");
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const cardMenuRef = useRef(null);
   const cardTitleRef = useRef(null);
   const emojiMenuRef = useRef(null);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsFirstLoad(false)
-    }, 1000);
-  }, []);
-
-  useEffect(() => {
-    setOrderedTasks(sortList(tasks));
-  }, [sortedTasks]);
-
-  const sortList = list => {
-    if (!list) return [];
-    const [doneList, notDoneList] = list.reduce((acc, el) => {
-      el.CompletedDate === "nil" ? acc[1].push(el) : acc[0].push(el);
-      return acc;
-    }, [[], []]);
-
-    return [
-      ...doneList.sort((a, b) => parseInt(a.ExpiryDate) - parseInt(b.ExpiryDate)),
-      ...notDoneList.sort((a, b) => parseInt(a.CreatedDate) - parseInt(b.CreatedDate))
-    ];
-  };
+  // Keyed on this category's array rather than sortedTasks, so edits elsewhere on the board don't re-sort it.
+  // Relies on every change to this category replacing the array, not mutating it
+  const orderedTasks = useMemo(() => sortList(tasks), [tasks]);
 
   const handleDeleteCategory = () => {
     queueDeleteAll(sortedTasks[title] ?? []);
@@ -141,11 +133,9 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
 
     queueCreate(newTaskData);
 
-    const tmpTasks = incomingTasks || { ...sortedTasks };
-    tmpTasks[title] = tmpTasks[title] || [];
-    tmpTasks[title].unshift(newTaskData);
-    setSortedTasks(tmpTasks);
-    setOrderedTasks(prev => [...prev, newTaskData]);
+    // A new array, as unshifting onto the existing one would leave orderedTasks stale
+    const base = incomingTasks || sortedTasks;
+    setSortedTasks({ ...base, [title]: [newTaskData, ...(base[title] || [])] });
     setLoadingTask(false);
   };
 
@@ -165,11 +155,6 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     setTitleEdited(newTitle);
   }
 
-  const measuredRef = useCallback(node => {
-    if (!node) return;
-    new ResizeObserver(() => forceUpdate()).observe(node);
-  }, []);
-
   useOnClickOutside(cardMenuRef, () => isDropdownVisible && setDropdownVisible(false));
   useOnClickOutside(cardTitleRef, () => {
     if (titleHasChanged) {
@@ -179,10 +164,10 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   });
   useOnClickOutside(emojiMenuRef, () => displayEmojiPicker && setDisplayEmojiPicker(false));
 
+  // fadeUp stays on: a CSS animation only plays when its class is first applied, so re-renders don't replay it
   return (
     <div
-      ref={measuredRef}
-      className={`card-container ${isDeleting ? "fadeOutDown-animation" : isFirstLoad ? "fadeUp-animation" : ""}`}
+      className={`card-container ${isDeleting ? "fadeOutDown-animation" : "fadeUp-animation"}`}
       onAnimationEnd={handleCardAnimationEnd}
     >
       <div className="headingWrapper">
