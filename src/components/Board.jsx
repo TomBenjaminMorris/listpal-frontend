@@ -36,7 +36,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const [bannerQueue, setBannerQueue] = useState([]);
   const announced = useRef(new Set()); // Targets already queued for a banner, cleared when the score drops below target
-  const [remoteData, setRemoteData] = useState(null);
+  const [remoteData, setRemoteData] = useState(null); // { boardID, tasks } so a late response can't land on another board
+  const [loadedBoardID, setLoadedBoardID] = useState(null); // Board whose tasks are in sortedTasks; the loader shows until it matches
   const boardID = getBoardIdFromUrl();
   const board = boards.find(b => b.SK === boardID)
   const maxLength = 20;
@@ -49,8 +50,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   }, [boards]);
 
   useEffect(() => {
-    if (remoteData && board) {
-      sortTasks(remoteData);
+    if (remoteData && board && remoteData.boardID === board.SK) {
+      sortTasks(remoteData.tasks);
+      setLoadedBoardID(board.SK);
     }
   }, [remoteData, board?.SK]); // Depend on the ID, not the object, so local category edits aren't overwritten by stale remote data
 
@@ -200,8 +202,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
       // Push queued edits first so the fetch reflects them, then overlay anything that didn't make it
       await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
       const data = await getActiveTasks(boardID);
-      setRemoteData(await overlayPending(data ?? [], boardID));
+      setRemoteData({ boardID, tasks: await overlayPending(data ?? [], boardID) });
     } catch (error) {
+      setRemoteData({ boardID, tasks: [] }); // Show the empty board behind the alert rather than spinning forever
       setAlertConf({
         display: true,
         title: "Error 💀",
@@ -281,7 +284,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
       <div className="board-content-wrapper">
         {
-          isLoading ? <Loader /> : <div className="flex-container">
+          isLoading || loadedBoardID !== boardID ? <Loader /> : <div className="flex-container">
             <div className="board-filter-actions-wrapper fadeUp-animation">
 
               <div className="board-name-wrapper">
