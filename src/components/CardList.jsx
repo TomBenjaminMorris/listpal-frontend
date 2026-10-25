@@ -1,4 +1,4 @@
-import { useReducer, useRef } from 'react';
+import { useLayoutEffect, useReducer, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
 import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
@@ -15,6 +15,41 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     if (!cardKeys.current[title]) cardKeys.current[title] = uuidv4();
     return cardKeys.current[title];
   };
+
+  const containerRef = useRef(null);
+  const categoryOrder = Object.keys(sortedTasks).join('\u0000');
+  const lastCategoryOrder = useRef(categoryOrder);
+  const positionsBeforeChange = useRef(null);
+
+  // offsetLeft/Top ignore transforms, so the cards' own fade animations don't skew the measurement
+  const measurePositions = () => new Map(
+    [...containerRef.current.children].map(el => [el, { left: el.offsetLeft, top: el.offsetTop }])
+  );
+
+  // Measured during render, while the DOM still shows the old layout. Only done when categories are
+  // added, removed or reordered: other re-renders would capture positions already stale from task edits
+  if (categoryOrder !== lastCategoryOrder.current && containerRef.current) {
+    positionsBeforeChange.current = measurePositions();
+    lastCategoryOrder.current = categoryOrder;
+  }
+
+  useLayoutEffect(() => {
+    const before = positionsBeforeChange.current;
+    if (!before) return;
+    positionsBeforeChange.current = null;
+
+    measurePositions().forEach((after, el) => {
+      const prev = before.get(el);
+      if (!prev) return;
+      const dx = prev.left - after.left;
+      const dy = prev.top - after.top;
+      if (!dx && !dy) return;
+      el.animate(
+        [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }],
+        { duration: 400, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+      );
+    });
+  }, [categoryOrder]);
 
   const handleRenameCard = (oldTitle, newTitle) => {
     cardKeys.current[newTitle] = cardKeys.current[oldTitle];
@@ -99,7 +134,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
   };
 
   return (
-    <div className="card-list-container">
+    <div className="card-list-container" ref={containerRef}>
       {Object.entries(sortedTasks).map(([key]) => (
         <Card
           key={getCardKey(key)}

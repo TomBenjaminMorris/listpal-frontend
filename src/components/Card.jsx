@@ -29,6 +29,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [cardEmoji, setCardEmoji] = useState(tasks?.[0]?.Emoji || "✅");
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const cardMenuRef = useRef(null);
   const cardTitleRef = useRef(null);
@@ -67,6 +68,13 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     updateCategoryOrder(sortArr, boards, setBoards);
     setSortedTasks(newSortedTasks, sortArr);
   }
+
+  // Animation events bubble up from tasks and menus, so only react to the card's own exit animation
+  const handleCardAnimationEnd = e => {
+    if (e.target === e.currentTarget && e.animationName === "fadeOutDown") {
+      handleDeleteCategory();
+    }
+  };
 
   const renameCategory = newTitle => {
     // Perform validations on the new title name
@@ -173,7 +181,11 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   useOnClickOutside(emojiMenuRef, () => displayEmojiPicker && setDisplayEmojiPicker(false));
 
   return (
-    <div ref={measuredRef} className={`card-container ${isFirstLoad ? "fadeUp-animation" : ""}`}>
+    <div
+      ref={measuredRef}
+      className={`card-container ${isDeleting ? "fadeOutDown-animation" : isFirstLoad ? "fadeUp-animation" : ""}`}
+      onAnimationEnd={handleCardAnimationEnd}
+    >
       <div className="headingWrapper">
         <div className={`card-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : ""}`} ref={emojiMenuRef}>
           <div className="card-emoji-icon" onClick={() => setDisplayEmojiPicker(prev => !prev)}>
@@ -192,7 +204,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} src={dotsIcon} alt="menu icon" />
           {isDropdownVisible && (
             <DropdownMenu
-              handleDeleteCategory={handleDeleteCategory}
+              handleDeleteCategory={() => setIsDeleting(true)}
               boards={boards}
               title={title}
               sortedTasks={sortedTasks}
