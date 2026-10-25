@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { flushNow, overlayPending, queueDeleteAll, useSyncStatus, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
-import ConfettiExplosion from 'react-confetti-explosion';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
@@ -20,6 +19,8 @@ import Loader from './Loader';
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
+
+const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
 
 const BACK_ONLINE_DURATION = 3000;
 
@@ -66,6 +67,13 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     announced.current.clear()
     setBannerQueue([])
   }, [boardID]);
+
+  // Fetched while idle so the first celebration doesn't wait on the network
+  useEffect(() => {
+    if (loadedBoardID !== boardID) return;
+    const idle = window.requestIdleCallback ?? (cb => setTimeout(cb, 2000));
+    idle(() => import('react-confetti-explosion'));
+  }, [loadedBoardID, boardID]);
 
   // Confirm recovery once queued edits from an offline spell have actually reached the server
   useEffect(() => {
@@ -294,7 +302,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
       {confettiOrigin && (
         <div style={{ position: 'absolute', top: confettiOrigin.y - 25, left: confettiOrigin.x - 25 }}>
-          {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
+          <Suspense fallback={null}>
+            {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
+          </Suspense>
         </div>
       )}
 
