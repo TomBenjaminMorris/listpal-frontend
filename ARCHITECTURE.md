@@ -119,8 +119,10 @@ flowchart TB
     Board --> SB["ScoreBoard"] --> SC["ScoreCounter"]
     Board --> TSM["TargetSetterModal"]
     Board --> TB["TargetBanner"]
+    Board --> EP["EmojiPicker<br/>(lazy-loaded)"]
     Board --> CardList["CardList"]
     CardList --> Card["Card"]
+    Card --> EP
     Card --> Task["Task"]
     Task --> TaskMenu["TaskMenu"]
 ```
