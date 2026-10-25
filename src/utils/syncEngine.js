@@ -111,46 +111,43 @@ function pickFields(task) {
   return Object.fromEntries(TASK_FIELDS.filter(f => task[f] !== undefined).map(f => [f, task[f]]));
 }
 
-async function queue(change, delay) {
+// Category actions queue a change per task; doing them in one transaction keeps the outbox consistent
+// if the page closes part way through
+async function queue(changes, delay) {
+  if (!changes.length) return;
   await withStore('readwrite', store => {
-    const request = store.get(change.SK);
-    request.onsuccess = () => {
-      const next = mergeRecord(request.result, change);
-      if (next) store.put(next);
-      else store.delete(change.SK);
-    };
+    changes.forEach(change => {
+      const request = store.get(change.SK);
+      request.onsuccess = () => {
+        const next = mergeRecord(request.result, change);
+        if (next) store.put(next);
+        else store.delete(change.SK);
+      };
+    });
   });
   await refreshPending();
   schedule(delay);
 }
 
 export function queueCreate(task) {
-  return queue({ SK: task.SK, boardID: task['GSI1-PK'], kind: 'create', fields: pickFields(task) }, ACTION_DELAY);
+  return queue([{ SK: task.SK, boardID: task['GSI1-PK'], kind: 'create', fields: pickFields(task) }], ACTION_DELAY);
 }
 
 export function queueUpdate(SK, boardID, fields, { typing = false } = {}) {
-  return queue({ SK, boardID, kind: 'update', fields }, typing ? TYPING_DELAY : ACTION_DELAY);
+  return queue([{ SK, boardID, kind: 'update', fields }], typing ? TYPING_DELAY : ACTION_DELAY);
 }
 
 export function queueDelete(SK, boardID) {
-  return queue({ SK, boardID, kind: 'delete' }, ACTION_DELAY);
+  return queue([{ SK, boardID, kind: 'delete' }], ACTION_DELAY);
 }
 
-// Applies fields to tasks that already have queued changes, without queuing anything for the rest.
-// Used alongside direct API calls (category rename, card emoji) so a later sync cannot undo them.
-export async function patchPending(SKs, fields) {
-  await withStore('readwrite', store => {
-    SKs.forEach(SK => {
-      const request = store.get(SK);
-      request.onsuccess = () => {
-        const existing = request.result;
-        if (existing && existing.kind !== 'delete') {
-          store.put({ ...existing, fields: { ...existing.fields, ...fields }, rev: existing.rev + 1 });
-        }
-      };
-    });
-  });
-  await refreshPending();
+// Same fields on every task, e.g. a category rename or card emoji
+export function queueUpdateAll(tasks, fields) {
+  return queue(tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind: 'update', fields })), ACTION_DELAY);
+}
+
+export function queueDeleteAll(tasks) {
+  return queue(tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind: 'delete' })), ACTION_DELAY);
 }
 
 function schedule(delay) {

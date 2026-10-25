@@ -1,7 +1,6 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { renameCategoryAPI, updateTaskEmojiAPI } from '../utils/apiGatewayClient';
-import { patchPending, queueCreate, queueDelete } from '../utils/syncEngine';
+import { queueCreate, queueDeleteAll, queueUpdateAll } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -59,7 +58,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
   };
 
   const handleDeleteCategory = () => {
-    sortedTasks[title]?.forEach(t => queueDelete(t.SK, t["GSI1-PK"]));
+    queueDeleteAll(sortedTasks[title] ?? []);
     // Update the state to reflect the deleted category
     const newSortedTasks = { ...sortedTasks };
     delete newSortedTasks[title];
@@ -94,11 +93,10 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
       return;
     }
 
-    const taskIDs = [];
+    const renamedTasks = sortedTasks[title].filter(t => t.Category === title);
     const updatedTasks = sortedTasks[title].map(t => {
       if (t.Category === title) {
         t.Category = newTitle;
-        taskIDs.push(t.SK);
       }
       return t;
     });
@@ -106,11 +104,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[newTitle] = updatedTasks
     delete tmpSortedTasks[title];
-    // Tasks not yet on the server are skipped by the API, so their queued records carry the new name instead
-    patchPending(taskIDs, { Category: newTitle });
-    renameCategoryAPI(taskIDs, newTitle).then(() => {
-      setSortedTasks(tmpSortedTasks);
-    });
+    queueUpdateAll(renamedTasks, { Category: newTitle });
+    setSortedTasks(tmpSortedTasks);
 
     const sortArr = board?.CategoryOrder;
     var index = sortArr.indexOf(title);
@@ -157,10 +152,8 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     const updatedCategoryArray = sortedTasks[title].map(t => ({ ...t, Emoji: newEmoji }));
     const tmpSortedTasks = { ...sortedTasks }
     tmpSortedTasks[title] = updatedCategoryArray
-    patchPending(tasks.map(t => t.SK), { Emoji: newEmoji });
-    updateTaskEmojiAPI(tasks.map(t => t.SK), newEmoji).then(() => {
-      setSortedTasks(tmpSortedTasks);
-    });
+    queueUpdateAll(tasks, { Emoji: newEmoji });
+    setSortedTasks(tmpSortedTasks);
   }
 
   const handleCardTitleEdit = (e) => {

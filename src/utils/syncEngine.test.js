@@ -185,12 +185,35 @@ describe('outbox', () => {
     expect(onBoardScores).toHaveBeenCalledWith(scores);
   });
 
-  it('patchPending only touches tasks that already have queued changes', async () => {
+  it('a category rename reaches synced tasks and ones still waiting to be created', async () => {
     await engine.queueCreate(task('t#1', { Category: 'Old' }));
-    await engine.patchPending(['t#1', 't#2'], { Category: 'New' });
+    await engine.queueUpdateAll([task('t#1'), task('t#2')], { Category: 'New' });
 
-    const records = await pending();
-    expect(records).toHaveLength(1);
-    expect(records[0]).toMatchObject({ SK: 't#1', Category: 'New' });
+    expect(pendingCount()).toBe(2);
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+
+    expect(sentOps(0)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ SK: 't#1', kind: 'create', fields: expect.objectContaining({ Category: 'New' }) }),
+      expect.objectContaining({ SK: 't#2', kind: 'update', fields: { Category: 'New' } })
+    ]));
+  });
+
+  it('a later rename is not undone by an earlier queued edit to the same task', async () => {
+    await engine.queueUpdate('t#1', BOARD, { Description: 'typed before the rename' });
+    await engine.queueUpdateAll([task('t#1')], { Category: 'New' });
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+
+    expect(sentOps(0)).toEqual([expect.objectContaining({ fields: { Description: 'typed before the rename', Category: 'New' } })]);
+  });
+
+  it('deleting a category forgets unsent creates and deletes the rest', async () => {
+    await engine.queueCreate(task('t#1'));
+    await engine.queueDeleteAll([task('t#1'), task('t#2')]);
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+
+    expect(sentOps(0)).toEqual([expect.objectContaining({ SK: 't#2', kind: 'delete' })]);
   });
 });

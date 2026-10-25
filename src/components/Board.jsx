@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { flushNow, overlayPending, queueDelete, useSyncStatus, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { flushNow, overlayPending, queueDeleteAll, useSyncStatus, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import ConfettiExplosion from 'react-confetti-explosion';
@@ -174,7 +174,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     // Update the state with the modified tasks
     setSortedTasks({ ...sortedTasks });
 
-    tasksToDelete.forEach(t => queueDelete(t.SK, t["GSI1-PK"]));
+    queueDeleteAll(tasksToDelete);
   };
 
   const sortTasks = (data) => {

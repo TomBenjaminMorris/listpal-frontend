@@ -160,7 +160,7 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 | Store | Key or shape | Written by | Lifetime |
 | --- | --- | --- | --- |
 | React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoard`, modal config | Pages through props | Until a reload |
-| IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `patchPending` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
+| IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
 
@@ -172,7 +172,7 @@ Task edits do not call the API directly. Components call the queue functions in 
 
 ```mermaid
 flowchart LR
-    E["Edit a task<br/>(description, tick, important, link, create, delete, clear)"] --> Q["queueCreate / queueUpdate / queueDelete<br/>merge into the task's outbox record<br/>in one IndexedDB transaction, rev + 1"]
+    E["Edit a task or category<br/>(description, tick, important, link, create, delete, clear,<br/>rename category, card emoji, delete category)"] --> Q["queueCreate / queueUpdate / queueDelete<br/>queueUpdateAll / queueDeleteAll<br/>merge into each task's outbox record<br/>in one IndexedDB transaction, rev + 1"]
     Q --> S["Schedule a flush<br/>500 ms (typing: 2 s, at most 10 s)"]
     S --> F["flushNow<br/>one at a time, Web Lock across tabs"]
     F --> P["POST /sync<br/>{ ops: [...] } up to 50"]
@@ -189,6 +189,7 @@ How the outbox works:
   - update + update merges the fields
   - anything + delete becomes a delete
   - a delete ignores later edits, so the task cannot come back
+- **Category actions are per-task changes.** Renaming a category, changing a card's emoji, deleting a category and clearing completed tasks queue one change per task with `queueUpdateAll` or `queueDeleteAll`, in a single transaction. They merge with any queued edits like any other change, so a pending edit can't undo a rename. They work offline too. A large category is sent over several batches of 50.
 - **Create then delete.** A create that was never sent and is then deleted is dropped without a request. If the create may already have been sent (`maybeOnServer`), it becomes a delete instead.
 - **Acks are matched by `rev`.** A record edited while its request was in flight is kept, so nothing typed during a sync is lost.
 - **When flushes happen:** after the scheduled delay, when the browser comes back `online`, when the tab is hidden, and at start-up if anything is queued. On `pagehide`, `syncOpsKeepalive` sends the in-memory copy of the queue with `fetch(..., { keepalive: true })`. The records stay queued either way. The server treats a resend as a no-op.
@@ -200,8 +201,6 @@ Edits that bypass the queue and call the API straight away:
 | Action | Where | Endpoint |
 | --- | --- | --- |
 | Manually edit a score | `ScoreCounter.jsx` | `POST /board-scores` |
-| Rename a category | `Card.jsx` (also `patchPending` so queued records carry the new name) | `POST /rename-category` |
-| Change a task's emoji for a whole category | `Card.jsx` (also `patchPending`) | `POST /card-emoji` |
 | Save category order | `DropdownMenu.jsx` (move up or down), `utils.js` (`updateCategoryOrder`, called from `Card.jsx` and `CardList.jsx`) | `POST /board-category-order` |
 | Create, rename, change emoji, delete a board | `BoardList.jsx`, `Board.jsx` | `POST /new-board`, `/rename-board`, `/board-emoji`, `/delete-board` |
 | Save targets | `TargetSetter.jsx` | `POST /board-targets` |
@@ -218,14 +217,12 @@ Edits that bypass the queue and call the API straight away:
 | `getActiveTasks` | `GET /active-tasks` | Present |
 | `syncOps` | `POST /sync` (silent, the sync engine reports failures) | Present |
 | `syncOpsKeepalive` | `POST /sync` with `fetch` keepalive, used on `pagehide` | Present |
-| `updateTaskEmojiAPI` | `POST /card-emoji` | Present |
 | `updateThemeAPI` | `POST /user-theme` | Present |
 | `newBoardAPI` | `POST /new-board` | Present |
 | `renameBoardAPI` | `POST /rename-board` | Present |
 | `updateBoardEmojiAPI` | `POST /board-emoji` | Present |
 | `updateBoardCategoryOrder` | `POST /board-category-order` | Present |
 | `deleteBoard` | `POST /delete-board` | Present |
-| `renameCategoryAPI` | `POST /rename-category` | Present |
 | `updateBoardScoresAPI` | `POST /board-scores` | Present |
 | `updateBoardTargetsAPI` | `POST /board-targets` | Present |
 
