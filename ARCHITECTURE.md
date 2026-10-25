@@ -98,7 +98,7 @@ Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and 
 | --- | --- | --- | --- |
 | `/` | none | Redirects to `/home` | none |
 | `/home` | `HomePage` | Greeting (from the ID token's `given_name`), week number, a random quote, the board list, and board creation | `POST /new-board` (via `BoardList`) |
-| `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed | `GET /active-tasks`, `POST /board-emoji`, `POST /rename-board`, `POST /delete-board`, `POST /board-targets` (via `TargetSetter`) |
+| `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed (an alert says so if there are none) | `GET /active-tasks`, `POST /board-emoji`, `POST /rename-board`, `POST /delete-board`, `POST /board-targets` (via `TargetSetter`) |
 | `/settings` | `Settings` | Theme choice | `POST /user-theme` (via `ThemeCard`) |
 | `/redirect` | `RedirectPage` | Receives the Cognito `code`, exchanges it for tokens, then goes to `/home` | Cognito token endpoint |
 | `/logout` | `Logout` | Clears storage and sends the user to the managed login | none |
