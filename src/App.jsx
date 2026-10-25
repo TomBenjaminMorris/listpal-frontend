@@ -63,10 +63,11 @@ const App = () => {
     });
   }, []);
 
-  // Unsynced edits survive a reload in the outbox, but warn anyway so they aren't stranded on a closed tab
+  // Queued edits survive a reload and are resent on the next load, so only warn while syncing is failing:
+  // closing the tab then leaves them stranded on this device. A reload can't be told apart from a close here.
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (syncStatus.pending > 0) {
+      if (syncStatus.pending > 0 && syncStatus.lastError) {
         const message = "Are you sure you want to leave? Your changes may not be saved.";
         event.returnValue = message;
         return message;
@@ -78,7 +79,7 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [syncStatus.pending]);
+  }, [syncStatus.pending, syncStatus.lastError]);
 
   // Server-confirmed scores replace the optimistic ones applied when a task was ticked
   useEffect(() => {
