@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
 import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
@@ -7,6 +7,19 @@ import './CardList.css'
 
 const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+  // Stable React keys per category, so a rename doesn't remount the card and replay its entry animation
+  const cardKeys = useRef({});
+
+  const getCardKey = (title) => {
+    if (!cardKeys.current[title]) cardKeys.current[title] = uuidv4();
+    return cardKeys.current[title];
+  };
+
+  const handleRenameCard = (oldTitle, newTitle) => {
+    cardKeys.current[newTitle] = cardKeys.current[oldTitle];
+    delete cardKeys.current[oldTitle];
+  };
 
   const showAlert = (textValue) => {
     setAlertConf({
@@ -73,7 +86,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     // newTask
 
     // From what's on screen, as the saved order can hold stale or missing names
-    const sortArr = [name, ...Object.keys(sortedTasks)];
+    const sortArr = [...Object.keys(sortedTasks), name];
     updateCategoryOrder(sortArr, boards, setBoards)
 
     queueCreate(newCardDefaultTask);
@@ -89,8 +102,9 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     <div className="card-list-container">
       {Object.entries(sortedTasks).map(([key]) => (
         <Card
-          key={key}
+          key={getCardKey(key)}
           title={key}
+          onRename={handleRenameCard}
           tasks={sortedTasks[key]}
           setSortedTasks={setSortedTasks}
           sortedTasks={sortedTasks}

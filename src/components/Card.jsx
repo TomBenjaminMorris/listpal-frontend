@@ -19,7 +19,7 @@ const loaderStyle = {
   opacity: "0.8",
 };
 
-const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [orderedTasks, setOrderedTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
@@ -107,6 +107,7 @@ const Card = ({ title, tasks, setSortedTasks, sortedTasks, handleDeleteTask, set
     // anything missing from it sorts to the top
     const sortArr = Object.keys(sortedTasks).map(category => category === title ? newTitle : category);
     updateCategoryOrder(sortArr, boards, setBoards)
+    onRename(title, newTitle);
     setSortedTasks(tmpSortedTasks, sortArr);
   };
 
