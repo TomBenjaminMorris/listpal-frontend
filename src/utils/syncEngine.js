@@ -101,7 +101,7 @@ async function refreshPending() {
 }
 
 function setStatus(patch) {
-  // Every keystroke refreshes the count, and App re-renders the whole tree on each notification
+  // Every keystroke refreshes the count, and each notification re-renders the status indicator
   if (Object.keys(patch).every(key => status[key] === patch[key])) return;
   status = { ...status, ...patch };
   listeners.forEach(fn => fn(status));
@@ -297,6 +297,9 @@ export function subscribe(fn) {
   fn(status);
   return () => listeners.delete(fn);
 }
+
+// For one-off reads outside React, such as the beforeunload check, which must not re-render on every change
+export const getSyncStatus = () => status;
 
 export function useSyncStatus() {
   const [current, setCurrent] = useState(status);

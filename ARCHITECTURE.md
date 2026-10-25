@@ -47,7 +47,7 @@ listpal-frontend/
 │   │   ├── apiGatewayClient.js API wrapper: one function per backend route
 │   │   ├── authService.js      Token exchange, refresh, storage of tokens
 │   │   ├── localDBHelpers.js   openDB, a promise wrapper for indexedDB.open
-│   │   ├── syncEngine.js       Task outbox: queueing, merging, batching, retries, sync status hook
+│   │   ├── syncEngine.js       Task outbox: queueing, merging, batching, retries, sync status hook and getter
 │   │   ├── syncEngine.test.js  Vitest tests for the outbox
 │   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
 │   └── components/             Pages and widgets (one .jsx and usually one .css each)
@@ -120,6 +120,7 @@ flowchart TB
     Board --> TSM["TargetSetterModal"]
     Board --> TB["TargetBanner"]
     Board --> EP["EmojiPicker<br/>(lazy-loaded)"]
+    Board --> SI["SyncIndicator"]
     Board --> CardList["CardList"]
     CardList --> Card["Card"]
     Card --> EP
@@ -198,7 +199,7 @@ How the outbox works:
 - **Acks are matched by `rev`.** A record edited while its request was in flight is kept, so nothing typed during a sync is lost.
 - **When flushes happen:** after the scheduled delay, when the browser comes back `online`, when the tab is hidden, and at start-up if anything is queued. On `pagehide`, `syncOpsKeepalive` sends the in-memory copy of the queue with `fetch(..., { keepalive: true })`. The records stay queued either way. The server treats a resend as a no-op.
 - **Scores come from the server.** Ticking applies an optimistic change to `boards`, using `periodsContaining` from `utils.js` (the same UTC reset boundaries as the backend). The server changes the scores in the same transaction as the tick and returns them. `onBoardScores` writes those values into `boards`, but only once nothing else is queued for that board, so a stale value can't briefly reach the screen and re-trigger confetti.
-- **Status indicator.** `useSyncStatus` exposes `{ pending, syncing, lastError }`. The bottom-right indicator in `Board.jsx` spins while changes are pending. While retrying, it gets a red ring and a red pill to its left ("Offline, retrying..." or "Couldn't save, retrying..."). The full error is in the indicator's tooltip. When queued edits reach the server after a spell offline, a green "Back online" pill shows for 3 s. `beforeunload` warns only while changes are pending and syncing is failing (`lastError` set). A healthy queue needs no warning, because reloads resend it. The browser can't tell a reload from a close, so a reload while offline still shows the prompt.
+- **Status indicator.** `useSyncStatus` exposes `{ pending, syncing, lastError }`. Only `SyncIndicator.jsx` subscribes to it, so a status change re-renders the indicator and nothing else. Its bottom-right indicator, rendered by `Board`, spins while changes are pending. While retrying, it gets a red ring and a red pill to its left ("Offline, retrying..." or "Couldn't save, retrying..."). The full error is in the indicator's tooltip. When queued edits reach the server after a spell offline, a green "Back online" pill shows for 3 s. `beforeunload` warns only while changes are pending and syncing is failing (`lastError` set). `App.jsx` registers that listener once and reads the status with `getSyncStatus()` when the page unloads, rather than subscribing. A healthy queue needs no warning, because reloads resend it. The browser can't tell a reload from a close, so a reload while offline still shows the prompt.
 
 Edits that bypass the queue and call the API straight away:
 

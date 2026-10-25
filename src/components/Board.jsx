@@ -1,32 +1,26 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { flushNow, overlayPending, queueDeleteAll, useSyncStatus, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { flushNow, overlayPending, queueDeleteAll, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
 import clearIcon from '../assets/icons8-clear-60.png';
-import syncIcon from '../assets/icons8-sync-64.png';
-import tickIcon from '../assets/icons8-tick-64.png';
 import CardList from './CardList';
 import DatePills from './DatePills';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
 import TargetBanner from './TargetBanner';
 import Loader from './Loader';
+import SyncIndicator from './SyncIndicator';
 import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Board.css';
 
 const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
 
-const BACK_ONLINE_DURATION = 3000;
-
 const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoard }) => {
-  const syncStatus = useSyncStatus();
-  const [showBackOnline, setShowBackOnline] = useState(false);
-  const offlineSinceLastSave = useRef(false); // Survives a "Couldn't save" in between, e.g. a flaky reconnect
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
@@ -73,20 +67,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     const idle = window.requestIdleCallback ?? (cb => setTimeout(cb, 2000));
     idle(() => import('react-confetti-explosion'));
   }, [loadedBoardID, boardID]);
-
-  // Confirm recovery once queued edits from an offline spell have actually reached the server
-  useEffect(() => {
-    if (syncStatus.lastError) {
-      if (syncStatus.lastError === "Offline") offlineSinceLastSave.current = true;
-      setShowBackOnline(false);
-      return;
-    }
-    if (!offlineSinceLastSave.current) return;
-    offlineSinceLastSave.current = false;
-    setShowBackOnline(true);
-    const timer = setTimeout(() => setShowBackOnline(false), BACK_ONLINE_DURATION);
-    return () => clearTimeout(timer);
-  }, [syncStatus.lastError]);
 
   // Queue a banner whenever confetti starts for a target, mirroring the confetti re-arm rules
   useEffect(() => {
@@ -401,24 +381,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
           </div>
         }
       </div>
-      {syncStatus.lastError && syncStatus.pending > 0 && (
-        <div className="sync-pill sync-pill-error fadeIn-animation" role="status">
-          {syncStatus.lastError === "Offline" ? "Offline" : "Couldn't save"}, retrying...
-        </div>
-      )}
-      {showBackOnline && !syncStatus.lastError && (
-        <div className="sync-pill sync-pill-ok fadeIn-animation" role="status">
-          Back online
-        </div>
-      )}
-      <div
-        className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
-        title={syncStatus.lastError ? `${syncStatus.lastError}, will retry...` : syncStatus.pending ? "Saving..." : "Saved"}
-      >
-        {/* Both icons stay mounted so they load up front; swapping src would fetch the sync icon only once offline */}
-        <img className="sync-status-icon spin" src={syncIcon} alt="" hidden={!syncStatus.pending} />
-        <img className="sync-status-icon" src={tickIcon} alt="" hidden={!!syncStatus.pending} />
-      </div>
+      <SyncIndicator />
     </div >
   );
 };

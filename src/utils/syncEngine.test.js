@@ -95,6 +95,12 @@ describe('outbox', () => {
     expect(pendingCount()).toBe(0);
   });
 
+  it('getSyncStatus reads the current pending count without subscribing', async () => {
+    await engine.queueUpdate('t#1', BOARD, { Description: 'typed' });
+
+    expect(engine.getSyncStatus()).toMatchObject({ pending: 1 });
+  });
+
   it('keeps an edit made while a sync is in flight', async () => {
     await engine.queueCreate(task('t#1', { Description: 'first' }));
     api.syncOps.mockImplementationOnce(async ops => {
