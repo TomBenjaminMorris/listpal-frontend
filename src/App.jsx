@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
-import { startSync, useSyncStatus } from './utils/syncEngine';
+import { flushNow, startSync, useSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
@@ -97,7 +97,9 @@ const App = () => {
       if (!isAuthenticated()) return;
 
       try {
-        const [userData, boardsData] = await Promise.all([getUser(), getBoards()]);
+        // A tick queued before a reload must land before the boards are read, or the scores come back stale
+        const boardsAfterSync = flushNow({ timeout: LOAD_FLUSH_TIMEOUT }).then(() => getBoards());
+        const [userData, boardsData] = await Promise.all([getUser(), boardsAfterSync]);
         const user = userData[0];
         const processedBoards = boardsData.map(board => ({
           ...board,

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { flushNow, overlayPending, queueDelete, useSyncStatus } from '../utils/syncEngine';
+import { flushNow, overlayPending, queueDelete, useSyncStatus, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import ConfettiExplosion from 'react-confetti-explosion';
@@ -20,9 +20,6 @@ import Loader from './Loader';
 import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
-
-// Long enough for a normal sync to finish before loading, short enough not to stall the board when offline
-const LOAD_FLUSH_TIMEOUT = 3000;
 
 const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoard }) => {
   const syncStatus = useSyncStatus();

@@ -11,6 +11,8 @@ const ACTION_DELAY = 500;
 const MAX_WAIT = 10000;
 const BASE_BACKOFF = 2000;
 const MAX_BACKOFF = 60000;
+// Long enough for a normal sync to finish before a load reads from the server, short enough not to stall when offline
+export const LOAD_FLUSH_TIMEOUT = 3000;
 
 export const TASK_FIELDS = ['Description', 'Category', 'Emoji', 'Important', 'Link', 'CompletedDate', 'ExpiryDate', 'GSI1-SK', 'ExpiryDateTTL', 'CreatedDate'];
 const SETTLED_STATUSES = ['applied', 'gone', 'rejected'];

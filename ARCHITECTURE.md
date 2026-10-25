@@ -164,7 +164,7 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
 
-`App.jsx` loads the user and the boards on start-up with `Promise.all([getUser(), getBoards()])`. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately. `getTasks` in `Board.jsx` first flushes the outbox (waiting at most 3 s), then calls `getActiveTasks(boardID)`, then lays any still-queued changes over the result with `overlayPending`.
+`App.jsx` loads the user and the boards on start-up. `getBoards()` waits for an outbox flush first (at most `LOAD_FLUSH_TIMEOUT`, 3 s). Otherwise a tick queued just before a reload, or still in flight from the old page's keepalive request, could land after the scores were read. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately. `getTasks` in `Board.jsx` first flushes the outbox (waiting at most 3 s), then calls `getActiveTasks(boardID)`, then lays any still-queued changes over the result with `overlayPending`.
 
 ## 7. Task writes and sync
 
