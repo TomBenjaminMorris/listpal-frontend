@@ -28,6 +28,7 @@ Tests run with `npm test` (Vitest). They cover the sync engine only (`src/utils/
 listpal-frontend/
 ├── README.md                   Links only (Cognito, React libraries, CSS)
 ├── ARCHITECTURE.md             This file
+├── CLAUDE.md                   Working rules for AI assistants
 ├── index.html                  Vite entry; mounts #root and loads src/main.tsx
 ├── package.json                Scripts: dev, build, preview, deploy, test
 ├── vite.config.ts              React plugin only
