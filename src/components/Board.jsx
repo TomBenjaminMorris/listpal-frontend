@@ -348,6 +348,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
           </div>
         }
       </div>
+      {syncStatus.lastError && syncStatus.pending > 0 && (
+        <div className="sync-error-pill fadeIn-animation" role="status">
+          {syncStatus.lastError === "Offline" ? "Offline" : "Couldn't save"}, retrying...
+        </div>
+      )}
       <div
         className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
         title={syncStatus.lastError ? `${syncStatus.lastError}, will retry...` : syncStatus.pending ? "Saving..." : "Saved"}
