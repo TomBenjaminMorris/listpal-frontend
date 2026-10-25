@@ -238,6 +238,7 @@ Failures are handled the same way for every call. `apiGet` and `apiPost` log the
 - `App.css` sets `color-scheme: dark`. `index.css` has a light-scheme media query that only changes text colour.
 - Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css`.
 - Layout is responsive. `App.jsx` treats a window narrower than 650 px as mobile (`MOBILE_BREAKPOINT`), and the side bar behaves differently in that mode.
+- The Important highlight on a task covers only the text, line by line. A textarea can't style its own text, so `Task.jsx` renders a hidden copy of the description (`.task-highlight-mirror`) behind the textarea and gives its inline `<span>` the background. The copy shares the `.task-textarea-box` class so it wraps identically. Any change to the textarea's font, padding or width must keep the two in step.
 
 ## 10. Infrastructure
 

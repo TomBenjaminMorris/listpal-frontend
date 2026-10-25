@@ -182,17 +182,17 @@ button {
 
   .task-textarea-box {
     font-size: 15px;
-    width: -webkit-calc(100% - 55px);
-    width: -moz-calc(100% - 55px);
-    width: calc(100% - 55px);
+  }
+
+  .task-textarea-wrapper {
+    width: -webkit-calc(100% - 51px);
+    width: -moz-calc(100% - 51px);
+    width: calc(100% - 51px);
+    margin-left: 6px !important;
   }
 
   .listpal-board-logo {
     display: none !important;
-  }
-
-  .task-textarea-box {
-    margin-left: 6px !important;
   }
 
   .task-container:hover textarea {

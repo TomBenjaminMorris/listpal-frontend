@@ -194,16 +194,24 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       <input style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 
       {/* Description Input */}
-      <TextareaAutosize
-        className={`task-textarea-box ${isImportant ? "highlight" : ""} ${taskMenuVisible ? "highlight-2" : ""}`}
-        value={description}
-        disabled={checked}
-        placeholder="new task..."
-        onChange={handleTextUpdate}
-        autoFocus={taskAutoFocus}
-        onKeyDown={(e) => onKeyDown(e, task.SK, title)}
-        style={taskTextDecorationStyle}
-      />
+      <div className="task-textarea-wrapper">
+        {/* A textarea can't style its own text runs, so the highlight is drawn on a hidden copy of the text behind it */}
+        {isImportant && description && (
+          <div className="task-textarea-box task-highlight-mirror" aria-hidden="true" style={taskExpiryOpacityStyle}>
+            <span>{description}</span>
+          </div>
+        )}
+        <TextareaAutosize
+          className={`task-textarea-box ${taskMenuVisible ? "highlight-2" : ""}`}
+          value={description}
+          disabled={checked}
+          placeholder="new task..."
+          onChange={handleTextUpdate}
+          autoFocus={taskAutoFocus}
+          onKeyDown={(e) => onKeyDown(e, task.SK, title)}
+          style={taskTextDecorationStyle}
+        />
+      </div>
 
       {/* Link Icon */}
       {isLinkAvailable ? (
