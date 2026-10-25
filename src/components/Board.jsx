@@ -21,8 +21,12 @@ import emojiData from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './Board.css';
 
+const BACK_ONLINE_DURATION = 3000;
+
 const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoard }) => {
   const syncStatus = useSyncStatus();
+  const [showBackOnline, setShowBackOnline] = useState(false);
+  const offlineSinceLastSave = useRef(false); // Survives a "Couldn't save" in between, e.g. a flaky reconnect
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [boardEmoji, setBoardEmoji] = useState("");
@@ -59,6 +63,20 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     announced.current.clear()
     setBannerQueue([])
   }, [boardID]);
+
+  // Confirm recovery once queued edits from an offline spell have actually reached the server
+  useEffect(() => {
+    if (syncStatus.lastError) {
+      if (syncStatus.lastError === "Offline") offlineSinceLastSave.current = true;
+      setShowBackOnline(false);
+      return;
+    }
+    if (!offlineSinceLastSave.current) return;
+    offlineSinceLastSave.current = false;
+    setShowBackOnline(true);
+    const timer = setTimeout(() => setShowBackOnline(false), BACK_ONLINE_DURATION);
+    return () => clearTimeout(timer);
+  }, [syncStatus.lastError]);
 
   // Queue a banner whenever confetti starts for a target, mirroring the confetti re-arm rules
   useEffect(() => {
@@ -349,8 +367,13 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
         }
       </div>
       {syncStatus.lastError && syncStatus.pending > 0 && (
-        <div className="sync-error-pill fadeIn-animation" role="status">
+        <div className="sync-pill sync-pill-error fadeIn-animation" role="status">
           {syncStatus.lastError === "Offline" ? "Offline" : "Couldn't save"}, retrying...
+        </div>
+      )}
+      {showBackOnline && !syncStatus.lastError && (
+        <div className="sync-pill sync-pill-ok fadeIn-animation" role="status">
+          Back online
         </div>
       )}
       <div

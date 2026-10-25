@@ -179,7 +179,7 @@
 }
 
 /* Sits just left of the sync indicator, at the same height */
-.sync-error-pill {
+.sync-pill {
     position: fixed;
     bottom: 20px;
     right: 62px;
@@ -191,8 +191,15 @@
     font-size: 15px;
     white-space: nowrap;
     color: #fff;
-    background-color: #e5484d;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.sync-pill-error {
+    background-color: #e5484d;
+}
+
+.sync-pill-ok {
+    background-color: #30a46c;
 }
 
 .spin {
