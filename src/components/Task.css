@@ -82,6 +82,18 @@
     box-decoration-break: clone;
 }
 
+/* Built and removed within one keypress by Task.jsx to find which line the caret is on. It reuses the highlight
+   mirror's wrapping rules, but its spans mark caret positions, so they must take no extra space. */
+.task-caret-mirror {
+    visibility: hidden;
+}
+
+.task-caret-mirror span {
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
 .highlight-2 {
     
 }
