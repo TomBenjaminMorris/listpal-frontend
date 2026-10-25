@@ -239,6 +239,7 @@ Failures are handled the same way for every call. `apiGet` and `apiPost` log the
 - Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css`.
 - Layout is responsive. `App.jsx` treats a window narrower than 650 px as mobile (`MOBILE_BREAKPOINT`), and the side bar behaves differently in that mode.
 - The Important highlight on a task covers only the text, line by line. A textarea can't style its own text, so `Task.jsx` renders a hidden copy of the description (`.task-highlight-mirror`) behind the textarea and gives its inline `<span>` the background. The copy shares the `.task-textarea-box` class so it wraps identically. Any change to the textarea's font, padding or width must keep the two in step.
+- Up and Down move between tasks in a card as in a text editor: Up on a task's first line goes to the last line of the task above, and Down on its last line goes to the first line of the task below, keeping the caret's horizontal position. Ticked tasks are skipped because their textareas are disabled. `moveToAdjacentTask` in `Task.jsx` finds the caret's wrapped line by laying the text out in a short-lived `.task-caret-mirror`, which reuses the highlight mirror's wrapping rules.
 
 ## 10. Infrastructure
 

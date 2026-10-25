@@ -10,6 +10,76 @@ import TaskMenu from './TaskMenu';
 import './Task.css'
 import { getNextMondayAt5AM, periodsContaining } from '../utils/utils';
 
+// Split by grapheme, not code unit, so emoji and accented letters keep their real width in the measuring copy
+const graphemeSegmenter = new Intl.Segmenter();
+
+// A textarea can't say which wrapped line its caret is on, so the text is laid out in a hidden copy that wraps the
+// same way and each caret position is read from there. Keyed by UTF-16 index to match selectionStart.
+const measureCaretPositions = (textarea) => {
+  const mirror = document.createElement('div');
+  mirror.className = 'task-textarea-box task-highlight-mirror task-caret-mirror';
+  const markers = [];
+  for (const { segment, index } of graphemeSegmenter.segment(textarea.value)) {
+    const span = document.createElement('span');
+    span.textContent = segment;
+    mirror.appendChild(span);
+    markers.push([index, span]);
+  }
+  // Zero width, so marking the end of the text can't push the last line over and wrap it
+  const end = document.createElement('span');
+  end.textContent = '​';
+  mirror.appendChild(end);
+  markers.push([textarea.value.length, end]);
+
+  textarea.parentElement.appendChild(mirror);
+  const positions = new Map(markers.map(([index, span]) => [index, { top: span.offsetTop, left: span.offsetLeft }]));
+  mirror.remove();
+  return positions;
+};
+
+// Ticked tasks have disabled textareas, which can't take focus, so they are skipped
+const findAdjacentTaskTextarea = (textarea, up) => {
+  const step = el => up ? el.previousElementSibling : el.nextElementSibling;
+  for (let container = step(textarea.closest('.task-container')); container?.classList.contains('task-container'); container = step(container)) {
+    const candidate = container.querySelector('textarea.task-textarea-box');
+    if (candidate && !candidate.disabled) return candidate;
+  }
+  return null;
+};
+
+// Up on a task's first line or down on its last moves into the neighbouring task, keeping the caret's horizontal
+// position, as in a text editor. Returns false to leave the key to the browser.
+const moveToAdjacentTask = (e) => {
+  const { target: textarea, key } = e;
+  if (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey || e.nativeEvent.isComposing) return false;
+  if (textarea.selectionStart !== textarea.selectionEnd) return false;
+
+  const up = key === "ArrowUp";
+  const positions = measureCaretPositions(textarea);
+  const caret = positions.get(textarea.selectionStart);
+  const edge = positions.get(up ? 0 : textarea.value.length);
+  if (!caret || caret.top !== edge.top) return false;
+
+  const next = findAdjacentTaskTextarea(textarea, up);
+  if (!next) return false;
+  e.preventDefault();
+
+  const nextPositions = measureCaretPositions(next);
+  const lineTop = nextPositions.get(up ? next.value.length : 0).top;
+  let best = up ? next.value.length : 0;
+  let bestDistance = Infinity;
+  nextPositions.forEach(({ top, left }, index) => {
+    const distance = Math.abs(left - caret.left);
+    if (top === lineTop && distance < bestDistance) {
+      best = index;
+      bestDistance = distance;
+    }
+  });
+  next.focus();
+  next.setSelectionRange(best, best);
+  return true;
+};
+
 const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
@@ -143,9 +213,10 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setTaskMenuVisible(false);
   };
 
-  // Keyboard shortcuts for creating and deleting tasks
+  // Keyboard shortcuts for creating, deleting and moving between tasks
   const onKeyDown = (e, taskID, title) => {
     const { key, target } = e;
+    if ((key === "ArrowUp" || key === "ArrowDown") && moveToAdjacentTask(e)) return;
     if (key === "Backspace" && target.value === "") {
       handleDeleteAndHideTask(taskID, title);
       return;
