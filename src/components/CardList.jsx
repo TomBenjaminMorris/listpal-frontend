@@ -73,7 +73,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     // newTask
 
     // From what's on screen, as the saved order can hold stale or missing names
-    const sortArr = [name, ...Object.keys(sortedTasks)];
+    const sortArr = [...Object.keys(sortedTasks), name];
     updateCategoryOrder(sortArr, boards, setBoards)
 
     queueCreate(newCardDefaultTask);
