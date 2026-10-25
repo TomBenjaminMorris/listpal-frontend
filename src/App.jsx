@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
-import { flushNow, startSync, useSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
+import { flushNow, startSync, getSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
@@ -51,7 +51,6 @@ const App = () => {
       : { Theme: DEFAULT_THEME };
   });
   const [activeBoard, setActiveBoard] = useState(null);
-  const syncStatus = useSyncStatus();
 
   // Set CSS vars for the user theme
   const applyTheme = useCallback((theme) => {
@@ -72,7 +71,8 @@ const App = () => {
   // closing the tab then leaves them stranded on this device. A reload can't be told apart from a close here.
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (syncStatus.pending > 0 && syncStatus.lastError) {
+      const { pending, lastError } = getSyncStatus();
+      if (pending > 0 && lastError) {
         const message = "Are you sure you want to leave? Your changes may not be saved.";
         event.returnValue = message;
         return message;
@@ -84,7 +84,7 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [syncStatus.pending, syncStatus.lastError]);
+  }, []);
 
   // Server-confirmed scores replace the optimistic ones applied when a task was ticked
   useEffect(() => {
