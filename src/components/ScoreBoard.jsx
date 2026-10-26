@@ -1,32 +1,19 @@
-import { useEffect, useMemo, useState, memo } from 'react';
+import { useMemo, memo } from 'react';
 import { calcPercents } from '../utils/utils';
 import ScoreCounter from './ScoreCounter';
 import './ScoreBoard.css';
 
-const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
-  const [currentBoardScores, setCurrentBoardScores] = useState({
-    WScore: 0,
-    MScore: 0,
-    YScore: 0,
-    WTarget: 0,
-    MTarget: 0,
-    YTarget: 0,
-  });
+// Module level so the fallback keeps its identity and doesn't re-run the counters' effects
+const EMPTY_SCORES = { WScore: 0, MScore: 0, YScore: 0, WTarget: 0, MTarget: 0, YTarget: 0 };
 
-  // Derived in the same render as the scores (not in an effect), so a score and its percent never
-  // disagree. Scores are mutated in place in Task.jsx, so recompute whenever boards changes.
+const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
+  const currentBoardScores = useMemo(() => boards.find(b => b.SK === boardID) ?? EMPTY_SCORES, [boards, boardID]);
+
+  // Derived in the same render as the scores (not in an effect), so a score and its percent never disagree
   const percentValues = useMemo(
     () => currentBoardScores.SK ? calcPercents(currentBoardScores) : { W: 0, M: 0, Y: 0 },
-    [currentBoardScores, boards]
+    [currentBoardScores]
   );
-
-  // Update current board based on boardID, only when boards or boardID changes
-  useEffect(() => {
-    const board = boards.find((b) => b.SK === boardID);
-    if (board) {
-      setCurrentBoardScores(board);
-    }
-  }, [boards, boardID]);
 
   // Define the score counters for weekly/monthly/yearly
   const renderScoreCounter = (type, score, percent) => (

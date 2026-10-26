@@ -12,6 +12,9 @@ const TYPE_MAPPINGS = {
   Y: { detail: 'YScore', label: 'yearly' }
 };
 
+// Returning the same object when nothing changes lets React skip re-rendering the whole board
+const setFlag = (setter, label, value) => setter(current => current[label] === value ? current : { ...current, [label]: value });
+
 const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const [scoreValue, setScoreValue] = useState(score);
   const [animate, setAnimate] = useState(true);
@@ -78,10 +81,10 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
     const crossedTarget = !!boardSK && prev.boardSK === boardSK && prev.percent < 100 && percent >= 100;
     prevRef.current = { boardSK, percent };
     if (percent >= 100) {
-      if (crossedTarget) setIsTargetMet(current => ({ ...current, [label]: false }));
-      setIsExploding(current => ({ ...current, [label]: true }));
+      if (crossedTarget) setFlag(setIsTargetMet, label, false);
+      setFlag(setIsExploding, label, true);
     } else if (percent !== undefined && percent !== null) {
-      setIsExploding(current => ({ ...current, [label]: false }));
+      setFlag(setIsExploding, label, false);
     }
   }, [percent, score, currentBoardScores?.SK])
 
