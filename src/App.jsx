@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
 import { flushNow, startSync, getSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
@@ -148,19 +148,26 @@ const App = () => {
     localStorage.setItem(SIDEBAR_BOARDS_MENU_OPEN_KEY, sidebarBoardsMenuIsOpen);
   }, [sidebarBoardsMenuIsOpen]);
 
-  // Order the tasks and update the state
-  const setOrderedSortedTasks = (tasks, incomingSortArr) => {
-    const sortArr = incomingSortArr ? incomingSortArr : activeBoard ? activeBoard.CategoryOrder : [];
-    if (!sortArr?.length) {
-      setSortedTasks(tasks);
-      return;
-    }
-    const sortFunc = (a, b) => sortArr.indexOf(a) - sortArr.indexOf(b);
-    const orderedTasks = Object.keys(tasks)
-      .sort(sortFunc)
-      .reduce((obj, key) => ({ ...obj, [key]: tasks[key] }), {});
-    setSortedTasks(orderedTasks);
-  };
+  // Read at call time, so the setter below can keep one identity for memoised children
+  const categoryOrderRef = useRef([]);
+  categoryOrderRef.current = activeBoard?.CategoryOrder ?? [];
+
+  // Takes a value or an updater, like a state setter. A category missing from the order ranks -1 and
+  // sorts first, and a repeated one ranks by its first place, both as indexOf did
+  const setOrderedSortedTasks = useCallback((next, incomingSortArr) => {
+    const sortArr = incomingSortArr ?? categoryOrderRef.current;
+    const rank = new Map();
+    sortArr?.forEach((category, i) => { if (!rank.has(category)) rank.set(category, i); });
+    const position = category => rank.get(category) ?? -1;
+
+    setSortedTasks(prev => {
+      const tasks = typeof next === 'function' ? next(prev) : next;
+      if (!rank.size) return tasks;
+      return Object.fromEntries(
+        Object.keys(tasks).sort((a, b) => position(a) - position(b)).map(key => [key, tasks[key]])
+      );
+    });
+  }, []);
 
   // Set state for sidebar collapse action
   const handleSidebarCollapse = useCallback(() => {
