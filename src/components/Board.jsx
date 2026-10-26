@@ -20,11 +20,9 @@ import './Board.css';
 
 const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
 
-const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoard }) => {
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
-  const [boardEmoji, setBoardEmoji] = useState("");
-  const [deleteMessage, setDeleteMessage] = useState("Delete Board?");
   const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
   const [confettiOrigin, setConfettiOrigin] = useState(null);
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
@@ -38,11 +36,12 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const maxLength = 20;
   const navigate = useNavigate();
   const emojiMenuRef = useRef(null)
+  const deleteMessage = `Delete Board - "${board?.Board}" ?`;
 
+  // Keyed on the fields shown, so a rename or emoji change updates the title but a score change doesn't
   useEffect(() => {
-    calculatePageTitle()
-    loadEmoji();
-  }, [boards]);
+    if (board) document.title = `ListPal | ${board.Board} ${board.Emoji}`;
+  }, [board?.Board, board?.Emoji]);
 
   useEffect(() => {
     if (remoteData && board && remoteData.boardID === board.SK) {
@@ -52,8 +51,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   }, [remoteData, board?.SK]); // Depend on the ID, not the object, so local category edits aren't overwritten by stale remote data
 
   useEffect(() => {
-    calculatePageTitle()
-    loadEmoji();
+    setActiveBoardID(boardID);
     getTasks();
     setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
     setIsExploding({ weekly: false, monthly: false, yearly: false }) // Stale state from the previous board must not leak into the new one
@@ -85,13 +83,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     }
   }, [isExploding, isTargetMet]);
 
-  // Calculate and set the page title and active board from the URL ID
-  const calculatePageTitle = () => {
-    document.title = `ListPal | ${board?.Board} ${board?.Emoji}`;
-    setDeleteMessage(`Delete Board - "${board?.Board}" ?`);
-    setActiveBoard(board);
-  }
-
   // Also on pointer down, so a tap on a touch screen (which sends no mousemove) still places the confetti
   const trackPointer = (e) => {
     cursorPosition.current = {
@@ -119,7 +110,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
     try {
       await renameBoardAPI(boardID, name);
-      document.title = `ListPal$ | ${name + ' ' + board.Emoji}`;
       setBoards(current => {
         return current.map(b => b.SK === boardID ? { ...b, Board: name } : b);
       });
@@ -229,18 +219,12 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
   const handleEmojiSelect = (e) => {
     const selectedEmoji = e.native;
-    setBoardEmoji(selectedEmoji);
     updateBoardEmojiAPI(boardID, selectedEmoji);
-    document.title = `ListPal | ${board?.Board} ${selectedEmoji}`;
     setBoards(current =>
       current.map(b =>
         b.SK === boardID ? { ...b, Emoji: selectedEmoji } : b
       )
     );
-  };
-
-  const loadEmoji = () => {
-    setBoardEmoji(board?.Emoji);
   };
 
   useOnClickOutside(emojiMenuRef, () => {
@@ -307,7 +291,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
                 <div className="board-name">
                   <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
-                    <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{boardEmoji}</div>
+                    <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{board?.Emoji}</div>
                     {
                       displayEmojiPicker ? <div className="board-emoji-wrapper">
                         <EmojiPicker onEmojiSelect={handleEmojiSelect} />

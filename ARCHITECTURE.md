@@ -108,7 +108,7 @@ Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and 
 
 ```mermaid
 flowchart TB
-    App["App.jsx<br/>boards, sortedTasks, modals"]
+    App["App.jsx<br/>boards, sortedTasks, activeBoardID, modals"]
     App --> SNB["SideNavBar"]
     App --> Modals["Prompt, Confirm, Alert"]
     App --> Home["HomePage"]
@@ -128,7 +128,7 @@ flowchart TB
     Task --> TaskMenu["TaskMenu"]
 ```
 
-`Board` and `CardList` receive `sortedTasks`, `setSortedTasks`, `setBoards` and the modal setters as props. Components that write tasks import the queue functions from `syncEngine.js` directly. Nothing uses React context.
+`Board` and `CardList` receive `sortedTasks`, `setSortedTasks`, `setBoards` and the modal setters as props. `App` holds the active board as an ID, which `Board`, `SideNavBar` and `BoardList` set, and derives the board object from `boards` for the side bar's highlight and its collapsed "Boards" link. `Board` shows its name, emoji, page title and delete confirmation straight from its entry in `boards`, without copying them into state, so a rename or emoji change shows through `setBoards` alone. Components that write tasks import the queue functions from `syncEngine.js` directly. Nothing uses React context.
 
 ## 5. Authentication and session
 
@@ -163,7 +163,7 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 
 | Store | Key or shape | Written by | Lifetime |
 | --- | --- | --- | --- |
-| React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoard`, modal config | Pages through props | Until a reload |
+| React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoardID` (the board object is derived from `boards`), modal config | Pages through props | Until a reload |
 | IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |

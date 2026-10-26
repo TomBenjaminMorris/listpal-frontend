@@ -26,7 +26,7 @@ const AddBoardButton = ({ onClick }) => (
   </div>
 );
 
-const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setActiveBoard }) => {
+const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
   const handleNewBoard = async (name) => {
     if (!name?.trim()) {
       setAlertConf({
@@ -70,7 +70,7 @@ const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setAct
         <BoardCard
           key={board.SK}
           board={board}
-          onClick={() => setActiveBoard(board)}
+          onClick={() => setActiveBoardID(board.SK)}
         />
       ))}
       <AddBoardButton onClick={handleAddBoardClick} />
