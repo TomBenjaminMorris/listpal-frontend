@@ -144,21 +144,15 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
 
   const handleClearTasks = async () => {
     const tasksToDelete = [];
-    // Loop through categories and filter tasks
-    for (const category in sortedTasks) {
-      const incompleteTasks = [];
-      for (const task of sortedTasks[category]) {
-        if (task.CompletedDate !== 'nil') {
-          tasksToDelete.push(task); // Collect tasks to delete
-        } else {
-          incompleteTasks.push(task); // Keep incomplete tasks
-        }
-      }
-      // Update category with only incomplete tasks
-      sortedTasks[category] = incompleteTasks;
+    const remaining = {};
+    for (const [category, tasks] of Object.entries(sortedTasks)) {
+      remaining[category] = tasks.filter(task => {
+        if (task.CompletedDate === 'nil') return true;
+        tasksToDelete.push(task);
+        return false;
+      });
     }
-    // Update the state with the modified tasks
-    setSortedTasks({ ...sortedTasks });
+    setSortedTasks(remaining);
 
     queueDeleteAll(tasksToDelete);
   };

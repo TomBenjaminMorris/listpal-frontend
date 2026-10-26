@@ -120,10 +120,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
   // Perform update actions to the DB and app state on checkbox toggle
   const updateActiveTaskChecked = (isChecked) => {
-    let tmpSortedTasks = { ...sortedTasks };
+    const latest = sortedTasks[title]?.find(t => t.SK === task.SK);
+    if (!latest) return;
     let isLastUncheckedTask = false;
     if (isChecked) {
-      const tmpTaskList = tmpSortedTasks[title]?.filter((t) => t.CompletedDate == "nil");
+      const tmpTaskList = sortedTasks[title].filter((t) => t.CompletedDate == "nil");
       isLastUncheckedTask = tmpTaskList.length === 1 && tmpTaskList[0].SK == task.SK;
     }
 
@@ -138,37 +139,25 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
       }));
     };
 
-    tmpSortedTasks[title] = sortedTasks[title]?.map(t => {
-      if (t.SK === task.SK) {
-        if (isChecked) {
-          // Mark task as completed
-          const expiryDate = getNextMondayAt5AM();
-          t.CompletedDate = String(Date.now());
-          t["GSI1-SK"] = expiryDate;
-          t.ExpiryDate = expiryDate;
-          t.ExpiryDateTTL = Math.trunc(parseInt(expiryDate) / 1000);
-          updateBoardScores(periodsContaining(Number(t.CompletedDate), Date.now()), 1);
-        } else {
-          // Only periods the completion counted in, so last week's untick can't eat this week's score
-          const previousCompletedDate = t.CompletedDate;
-          t.CompletedDate = "nil";
-          t["GSI1-SK"] = "nil";
-          t.ExpiryDate = "nil";
-          t.ExpiryDateTTL = 0;
-          updateBoardScores(periodsContaining(Number(previousCompletedDate), Date.now()), -1);
-        }
+    let completion;
+    if (isChecked) {
+      const expiryDate = getNextMondayAt5AM();
+      completion = {
+        CompletedDate: String(Date.now()),
+        ExpiryDate: expiryDate,
+        "GSI1-SK": expiryDate,
+        ExpiryDateTTL: Math.trunc(parseInt(expiryDate) / 1000)
+      };
+      updateBoardScores(periodsContaining(Number(completion.CompletedDate), Date.now()), 1);
+    } else {
+      completion = { CompletedDate: "nil", ExpiryDate: "nil", "GSI1-SK": "nil", ExpiryDateTTL: 0 };
+      // Only periods the completion counted in, so last week's untick can't eat this week's score
+      updateBoardScores(periodsContaining(Number(latest.CompletedDate), Date.now()), -1);
+    }
+    queueUpdate(latest.SK, latest["GSI1-PK"], completion);
 
-        queueUpdate(t.SK, t["GSI1-PK"], {
-          CompletedDate: t.CompletedDate,
-          ExpiryDate: t.ExpiryDate,
-          "GSI1-SK": t["GSI1-SK"],
-          ExpiryDateTTL: t.ExpiryDateTTL
-        });
-      }
-      return t;
-    });
+    const updatedList = sortedTasks[title].map(t => t.SK === task.SK ? { ...t, ...completion } : t);
 
-    // Create a new task if this is the last unchecked task
     if (isLastUncheckedTask) {
       const newCardDefaultTask = {
         "CreatedDate": String(Date.now()),
@@ -187,11 +176,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
         "ExpiryDateTTL": 0
       };
 
-      tmpSortedTasks[title].push(newCardDefaultTask);
+      updatedList.push(newCardDefaultTask);
       queueCreate(newCardDefaultTask);
     }
 
-    setSortedTasks(tmpSortedTasks);
+    setSortedTasks({ ...sortedTasks, [title]: updatedList });
   };
 
   // Delete the task and remove from the view
@@ -202,13 +191,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
 
   // Perform update actions to the DB and app state on importance toggle
   const handleMarkAsImportant = (taskID) => {
-    const updatedTasks = { ...sortedTasks };
-    const task = updatedTasks[title]?.find(t => t.SK === taskID);
-    if (task) {
-      const newImportantStatus = task.Important === "true" ? "false" : "true";
-      task.Important = newImportantStatus;
-      queueUpdate(task.SK, task["GSI1-PK"], { Important: newImportantStatus });
-      setSortedTasks(updatedTasks);
+    const current = sortedTasks[title]?.find(t => t.SK === taskID);
+    if (current) {
+      const Important = current.Important === "true" ? "false" : "true";
+      queueUpdate(current.SK, current["GSI1-PK"], { Important });
+      setSortedTasks({ ...sortedTasks, [title]: sortedTasks[title].map(t => t.SK === taskID ? { ...t, Important } : t) });
     }
     setTaskMenuVisible(false);
   };

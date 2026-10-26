@@ -27,15 +27,10 @@ const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, 
     }
 
     queueUpdate(task.SK, task["GSI1-PK"], { Link: enteredLink });
-    // Update task details
-    const tmpSortedTasks = { ...sortedTasks };
-    tmpSortedTasks[task.Category] = tmpSortedTasks[task.Category].map(t => {
-      if (t.SK === task.SK) {
-        t.Link = enteredLink;
-      }
-      return t;
+    setSortedTasks({
+      ...sortedTasks,
+      [task.Category]: sortedTasks[task.Category].map(t => t.SK === task.SK ? { ...t, Link: enteredLink } : t)
     });
-    setSortedTasks(tmpSortedTasks);
   };
 
   const handleEditLink = () => {
