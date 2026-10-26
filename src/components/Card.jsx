@@ -1,22 +1,14 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { queueCreate, queueDeleteAll, queueUpdateAll } from '../utils/syncEngine';
+import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
-import { updateCategoryOrder } from '../utils/utils';
+import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
-import PulseLoader from "react-spinners/PulseLoader";
 import Task from './Task';
 import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Card.css';
-
-const loaderStyle = {
-  marginLeft: "30px",
-  marginTop: "6px",
-  marginBottom: "19px",
-  opacity: "0.8",
-};
 
 // reduce builds new arrays, so sorting them doesn't mutate the tasks prop
 const sortList = list => {
@@ -34,7 +26,6 @@ const sortList = list => {
 
 const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [titleEdited, setTitleEdited] = useState(title);
-  const [loadingTask, setLoadingTask] = useState(false);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
@@ -104,16 +95,25 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     setSortedTasks(tmpSortedTasks, sortArr);
   };
 
-  const handleNewTask = async (incomingTasks) => {
-    setLoadingTask(true);
-    const boardID = window.location.href.split('/').pop();
+  // The callbacks below are passed to every memoised Task, so they keep one identity while tasks change. They
+  // write through updaters, and read this ref only to decide which side effects to run
+  const tasksRef = useRef(tasks);
+  tasksRef.current = tasks;
 
+  // Local state only: callers queue the sync themselves
+  const setTaskFields = useCallback((SK, fields) => {
+    setSortedTasks(prev => prev[title]
+      ? { ...prev, [title]: prev[title].map(t => t.SK === SK ? { ...t, ...fields } : t) }
+      : prev);
+  }, [title, setSortedTasks]);
+
+  const addTask = useCallback(() => {
     const newTaskData = {
       CreatedDate: String(Date.now()),
       SK: "t#" + uuidv4(),
       PK: "",
       "GSI1-SK": "nil",
-      "GSI1-PK": boardID,
+      "GSI1-PK": getBoardIdFromUrl(),
       ExpiryDate: "nil",
       Description: "",
       CompletedDate: "nil",
@@ -126,12 +126,74 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     };
 
     queueCreate(newTaskData);
+    setSortedTasks(prev => ({ ...prev, [title]: [newTaskData, ...(prev[title] || [])] }));
+  }, [title, cardEmoji, setSortedTasks]);
 
-    // A new array, as unshifting onto the existing one would leave orderedTasks stale
-    const base = incomingTasks || sortedTasks;
-    setSortedTasks({ ...base, [title]: [newTaskData, ...(base[title] || [])] });
-    setLoadingTask(false);
-  };
+  const toggleTaskChecked = useCallback((SK, isChecked) => {
+    const list = tasksRef.current ?? [];
+    const task = list.find(t => t.SK === SK);
+    if (!task) return;
+    let isLastUncheckedTask = false;
+    if (isChecked) {
+      const uncheckedTasks = list.filter(t => t.CompletedDate == "nil");
+      isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK == SK;
+    }
+
+    // Optimistic only: the server changes the scores in the same write as the tick and sends back the real values
+    const updateBoardScores = (fields, increment) => {
+      if (!fields.length) return;
+      setBoards(current => current.map(b => {
+        if (b.SK !== task["GSI1-PK"]) return b;
+        const updated = { ...b };
+        fields.forEach(field => { updated[field] = Math.max(0, Number(updated[field]) + increment); });
+        return updated;
+      }));
+    };
+
+    let completion;
+    if (isChecked) {
+      const expiryDate = getNextMondayAt5AM();
+      completion = {
+        CompletedDate: String(Date.now()),
+        ExpiryDate: expiryDate,
+        "GSI1-SK": expiryDate,
+        ExpiryDateTTL: Math.trunc(parseInt(expiryDate) / 1000)
+      };
+      updateBoardScores(periodsContaining(Number(completion.CompletedDate), Date.now()), 1);
+    } else {
+      completion = { CompletedDate: "nil", ExpiryDate: "nil", "GSI1-SK": "nil", ExpiryDateTTL: 0 };
+      // Only periods the completion counted in, so last week's untick can't eat this week's score
+      updateBoardScores(periodsContaining(Number(task.CompletedDate), Date.now()), -1);
+    }
+    queueUpdate(task.SK, task["GSI1-PK"], completion);
+
+    let newCardDefaultTask = null;
+    if (isLastUncheckedTask) {
+      newCardDefaultTask = {
+        "CreatedDate": String(Date.now()),
+        "SK": "t#" + uuidv4(),
+        "PK": "",
+        "GSI1-SK": "nil",
+        "GSI1-PK": task["GSI1-PK"],
+        "ExpiryDate": "nil",
+        "Description": "",
+        "CompletedDate": "nil",
+        "Category": title,
+        "EntityType": "Task",
+        "Emoji": cardEmoji,
+        "Link": "",
+        "Important": "false",
+        "ExpiryDateTTL": 0
+      };
+      queueCreate(newCardDefaultTask);
+    }
+
+    setSortedTasks(prev => {
+      if (!prev[title]) return prev;
+      const updatedList = prev[title].map(t => t.SK === SK ? { ...t, ...completion } : t);
+      return { ...prev, [title]: newCardDefaultTask ? [...updatedList, newCardDefaultTask] : updatedList };
+    });
+  }, [title, cardEmoji, setSortedTasks, setBoards]);
 
   const handleEmojiSelect = (e) => {
     const newEmoji = e.native;
@@ -201,12 +263,10 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           key={task.SK}
           title={title}
           task={task}
-          sortedTasks={sortedTasks}
-          setSortedTasks={setSortedTasks}
+          setTaskFields={setTaskFields}
+          toggleTaskChecked={toggleTaskChecked}
+          addTask={addTask}
           handleDeleteTask={handleDeleteTask}
-          handleNewTask={handleNewTask}
-          setBoards={setBoards}
-          cardEmoji={cardEmoji}
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
@@ -214,17 +274,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       ))}
 
       <div className="new-task-container">
-        {loadingTask && (
-          <PulseLoader
-            cssOverride={loaderStyle}
-            size={5}
-            color="var(--text-colour)"
-            speedMultiplier={1}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-          />
-        )}
-        <div className="addTaskWrapper" onClick={() => handleNewTask(null)}>
+        <div className="addTaskWrapper" onClick={addTask}>
           <img className="addTask" src={addIcon} alt="add icon" />
           <div className="addTaskText">new task...</div>
         </div>

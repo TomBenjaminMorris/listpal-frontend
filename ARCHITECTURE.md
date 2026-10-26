@@ -130,6 +130,24 @@ flowchart TB
 
 `Board` and `CardList` receive `sortedTasks`, `setSortedTasks`, `setBoards` and the modal setters as props. `setSortedTasks` is App's `setOrderedSortedTasks`: it keeps one identity across renders, takes a value or an updater function, and orders the categories by the active board's `CategoryOrder` unless the caller passes an order. `App` holds the active board as an ID, which `Board`, `SideNavBar` and `BoardList` set, and derives the board object from `boards` for the side bar's highlight and its collapsed "Boards" link. `Board` shows its name, emoji, page title and delete confirmation straight from its entry in `boards`, without copying them into state, so a rename or emoji change shows through `setBoards` alone. Every change to `sortedTasks` builds a new object, a new array for each category it touches and a new object for each task it changes. Nothing is changed in place, because `Card`'s ordered list and memoised children compare by reference and would miss an in-place change. Components that write tasks import the queue functions from `syncEngine.js` directly. Nothing uses React context.
 
+`Task` is wrapped in `memo`, and each Task receives only its own `task` object plus props that keep one identity, so an edit re-renders the edited Task and no other. Every Task renders a `TextareaAutosize`, which forces a layout on each render, so this matters on a large board. `Card` owns the task-level callbacks and passes them down:
+
+- `setTaskFields(SK, fields)` merges fields into one task in local state. The caller queues the sync.
+- `addTask()` creates an empty task (the "new task..." button and Enter in a task).
+- `toggleTaskChecked(SK, isChecked)` ticks or unticks, applies the optimistic score change, and adds an empty task when the last unticked one is ticked.
+
+They write through `setSortedTasks` updaters, so they always start from the latest state. Where a decision drives a side effect (whether to create the empty task, which score periods to reduce), `Card` reads its latest tasks from a ref. `CardList.handleDeleteTask` works the same way, reading `sortedTasks` from a ref to enforce "the last task cannot be removed". `Card` itself still re-renders on every edit, because `sortedTasks` is one object. The category-level handlers (rename, emoji, delete, move) are not passed to Tasks, so they read `sortedTasks` from props.
+
+```mermaid
+flowchart TB
+    K["Keystroke in one Task"] --> D["Task: setDescription"]
+    K --> F["Card.setTaskFields(SK, fields)<br/>updater on App's setSortedTasks"]
+    F --> A["App, Board, CardList and every Card re-render"]
+    A --> M{"memo(Task): props equal?"}
+    M -->|"edited Task: new task object"| R["Re-renders, one forced layout"]
+    M -->|"every other Task: same task,<br/>stable callbacks"| S["Skipped"]
+```
+
 ## 5. Authentication and session
 
 ```mermaid
@@ -336,7 +354,7 @@ These are things a reader should know before changing the app. They are not fixe
 | Add a page or change routing | `src/App.jsx` (routes), `src/components/` |
 | Add or change a backend call | `src/utils/apiGatewayClient.js`, then the caller in `src/components/` |
 | Change how edits are queued or synced | `src/utils/syncEngine.js` (and its tests), and the write points in `Task.jsx`, `TaskMenu.jsx`, `CardList.jsx`, `Card.jsx`, `Board.jsx` |
-| Change scoring or completion dates | `src/components/Task.jsx` (`updateActiveTaskChecked`), `src/utils/utils.js` (`getNextMondayAt5AM`, `periodsContaining`, `calcPercents`). Server-side score rules are in `listpal-backend/src/task_sync.js` and `score_periods.js` |
+| Change scoring or completion dates | `src/components/Card.jsx` (`toggleTaskChecked`), `src/utils/utils.js` (`getNextMondayAt5AM`, `periodsContaining`, `calcPercents`). Server-side score rules are in `listpal-backend/src/task_sync.js` and `score_periods.js` |
 | Change sign-in, tokens or logout | `src/utils/authService.js`, `src/utils/utils.js` (`isTokenExpired`), `src/components/RedirectPage.jsx`, `src/config.json` |
 | Add a theme | `src/App.css` (new `:root` block), `src/components/ThemeSetter.jsx`, `src/components/ThemeCard.jsx` (`THEME_NAMES`) |
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |

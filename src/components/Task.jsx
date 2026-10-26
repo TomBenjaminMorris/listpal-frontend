@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { queueCreate, queueUpdate } from '../utils/syncEngine';
-import { v4 as uuidv4 } from 'uuid';
+import { queueUpdate } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
 import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
@@ -8,7 +7,6 @@ import arrowIcon from "../assets/icons8-line-50.png"
 import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
-import { getNextMondayAt5AM, periodsContaining } from '../utils/utils';
 
 // Split by grapheme, not code unit, so emoji and accented letters keep their real width in the measuring copy
 const graphemeSegmenter = new Intl.Segmenter();
@@ -80,7 +78,8 @@ const moveToAdjacentTask = (e) => {
   return true;
 };
 
-const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask, handleNewTask, setBoards, cardEmoji, setPromptConf, setConfirmConf, setAlertConf }) => {
+// Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
+const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, handleDeleteTask, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   const [checked, setChecked] = useState(task.CompletedDate != "nil");
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
@@ -96,7 +95,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
   const handleCheckBox = () => {
     const newChecked = !checked;
     setChecked(newChecked);
-    updateActiveTaskChecked(newChecked);
+    toggleTaskChecked(task.SK, newChecked);
   }
 
   // Handle text update (only set state if the value has changed)
@@ -104,84 +103,10 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     const newDescription = e.target.value;
     if (newDescription !== description) {
       setDescription(newDescription);
-      updateActiveTaskDescription(newDescription)
+      setTaskFields(task.SK, { Description: newDescription });
       queueUpdate(task.SK, task["GSI1-PK"], { Description: newDescription }, { typing: true });
     }
   }
-
-  // Persist changes to app state
-  const updateActiveTaskDescription = (value) => {
-    let tmpSortedTasks = { ...sortedTasks };
-    tmpSortedTasks[title] = sortedTasks[title].map(t =>
-      t.SK === task.SK ? { ...t, Description: value } : t
-    );
-    setSortedTasks(tmpSortedTasks);
-  }
-
-  // Perform update actions to the DB and app state on checkbox toggle
-  const updateActiveTaskChecked = (isChecked) => {
-    const latest = sortedTasks[title]?.find(t => t.SK === task.SK);
-    if (!latest) return;
-    let isLastUncheckedTask = false;
-    if (isChecked) {
-      const tmpTaskList = sortedTasks[title].filter((t) => t.CompletedDate == "nil");
-      isLastUncheckedTask = tmpTaskList.length === 1 && tmpTaskList[0].SK == task.SK;
-    }
-
-    // Optimistic only: the server changes the scores in the same write as the tick and sends back the real values
-    const updateBoardScores = (fields, increment) => {
-      if (!fields.length) return;
-      setBoards((current) => current.map(b => {
-        if (b.SK !== task["GSI1-PK"]) return b;
-        const updated = { ...b };
-        fields.forEach(field => { updated[field] = Math.max(0, Number(updated[field]) + increment); });
-        return updated;
-      }));
-    };
-
-    let completion;
-    if (isChecked) {
-      const expiryDate = getNextMondayAt5AM();
-      completion = {
-        CompletedDate: String(Date.now()),
-        ExpiryDate: expiryDate,
-        "GSI1-SK": expiryDate,
-        ExpiryDateTTL: Math.trunc(parseInt(expiryDate) / 1000)
-      };
-      updateBoardScores(periodsContaining(Number(completion.CompletedDate), Date.now()), 1);
-    } else {
-      completion = { CompletedDate: "nil", ExpiryDate: "nil", "GSI1-SK": "nil", ExpiryDateTTL: 0 };
-      // Only periods the completion counted in, so last week's untick can't eat this week's score
-      updateBoardScores(periodsContaining(Number(latest.CompletedDate), Date.now()), -1);
-    }
-    queueUpdate(latest.SK, latest["GSI1-PK"], completion);
-
-    const updatedList = sortedTasks[title].map(t => t.SK === task.SK ? { ...t, ...completion } : t);
-
-    if (isLastUncheckedTask) {
-      const newCardDefaultTask = {
-        "CreatedDate": String(Date.now()),
-        "SK": "t#" + uuidv4(),
-        "PK": "",
-        "GSI1-SK": "nil",
-        "GSI1-PK": task["GSI1-PK"],
-        "ExpiryDate": "nil",
-        "Description": "",
-        "CompletedDate": "nil",
-        "Category": title,
-        "EntityType": "Task",
-        "Emoji": cardEmoji,
-        "Link": "",
-        "Important": "false",
-        "ExpiryDateTTL": 0
-      };
-
-      updatedList.push(newCardDefaultTask);
-      queueCreate(newCardDefaultTask);
-    }
-
-    setSortedTasks({ ...sortedTasks, [title]: updatedList });
-  };
 
   // Delete the task and remove from the view
   const handleDeleteAndHideTask = (taskID, title) => {
@@ -189,14 +114,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     setTaskMenuVisible(false);
   };
 
-  // Perform update actions to the DB and app state on importance toggle
-  const handleMarkAsImportant = (taskID) => {
-    const current = sortedTasks[title]?.find(t => t.SK === taskID);
-    if (current) {
-      const Important = current.Important === "true" ? "false" : "true";
-      queueUpdate(current.SK, current["GSI1-PK"], { Important });
-      setSortedTasks({ ...sortedTasks, [title]: sortedTasks[title].map(t => t.SK === taskID ? { ...t, Important } : t) });
-    }
+  // Reads task from props, which is current: memo re-renders this Task whenever its own task object is replaced
+  const handleMarkAsImportant = () => {
+    const Important = task.Important === "true" ? "false" : "true";
+    queueUpdate(task.SK, task["GSI1-PK"], { Important });
+    setTaskFields(task.SK, { Important });
     setTaskMenuVisible(false);
   };
 
@@ -210,12 +132,7 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
     }
     if (key === "Enter") {
       e.preventDefault();
-      // Pass the latest sortedTasks to the handleNewTask to prevent it being overwritten (bug)
-      let tmpSortedTasks = { ...sortedTasks };
-      tmpSortedTasks[title] = sortedTasks[title].map(t =>
-        t.SK === taskID ? { ...t, Description: description } : t
-      );
-      handleNewTask(tmpSortedTasks);
+      addTask();
     }
   };
 
@@ -285,12 +202,11 @@ const Task = memo(({ title, task, sortedTasks, setSortedTasks, handleDeleteTask,
         <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
-            markAsImportant={() => handleMarkAsImportant(task.SK)}
+            markAsImportant={handleMarkAsImportant}
             deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
             isImportant={isImportant}
             task={task}
-            setSortedTasks={setSortedTasks}
-            sortedTasks={sortedTasks}
+            setTaskFields={setTaskFields}
             setPromptConf={setPromptConf}
             setConfirmConf={setConfirmConf}
             setAlertConf={setAlertConf}
