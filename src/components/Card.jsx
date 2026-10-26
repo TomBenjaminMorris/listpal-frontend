@@ -89,18 +89,12 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       return;
     }
 
-    const renamedTasks = sortedTasks[title].filter(t => t.Category === title);
-    const updatedTasks = sortedTasks[title].map(t => {
-      if (t.Category === title) {
-        t.Category = newTitle;
-      }
-      return t;
-    });
+    const renamedTasks = sortedTasks[title].map(t => t.Category === title ? { ...t, Category: newTitle } : t);
 
     const tmpSortedTasks = { ...sortedTasks }
-    tmpSortedTasks[newTitle] = updatedTasks
+    tmpSortedTasks[newTitle] = renamedTasks
     delete tmpSortedTasks[title];
-    queueUpdateAll(renamedTasks, { Category: newTitle });
+    queueUpdateAll(sortedTasks[title].filter(t => t.Category === title), { Category: newTitle });
 
     // Build the order from what's on screen, as the saved order can hold stale or missing names and
     // anything missing from it sorts to the top
