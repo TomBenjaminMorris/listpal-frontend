@@ -7,7 +7,7 @@ import plusIcon from '../assets/icons8-plus-30.png';
 import editIcon from '../assets/icons8-edit-48.png';
 import "./TaskMenu.css";
 
-const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, setSortedTasks, sortedTasks, setPromptConf, setConfirmConf, setAlertConf }) => {
+const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setConfirmConf, setAlertConf }) => {
 
   const handleAddLink = (enteredLink) => {
     if (enteredLink === null) return;
@@ -27,10 +27,7 @@ const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, 
     }
 
     queueUpdate(task.SK, task["GSI1-PK"], { Link: enteredLink });
-    setSortedTasks({
-      ...sortedTasks,
-      [task.Category]: sortedTasks[task.Category].map(t => t.SK === task.SK ? { ...t, Link: enteredLink } : t)
-    });
+    setTaskFields(task.SK, { Link: enteredLink });
   };
 
   const handleEditLink = () => {

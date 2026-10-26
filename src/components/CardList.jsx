@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer, useRef } from 'react';
+import { useCallback, useLayoutEffect, useReducer, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
 import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
@@ -56,20 +56,25 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     delete cardKeys.current[oldTitle];
   };
 
-  const showAlert = (textValue) => {
+  const showAlert = useCallback((textValue) => {
     setAlertConf({
       display: true,
       title: "Notice ⚠️",
       textValue,
       animate: false
     });
-  };
+  }, [setAlertConf]);
 
-  const handleDeleteTask = (taskID, title) => {
-    const tasks = sortedTasks[title];
+  // Passed to every memoised Task, so it keeps one identity and reads the latest tasks from a ref to validate
+  const sortedTasksRef = useRef(sortedTasks);
+  sortedTasksRef.current = sortedTasks;
+
+  const handleDeleteTask = useCallback((taskID, title) => {
+    const tasks = sortedTasksRef.current[title];
+    const task = tasks?.find(t => t.SK === taskID);
+    if (!task) return;
     const uncheckedTasks = tasks.filter(t => t.CompletedDate === "nil");
     const isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK === taskID;
-    const task = tasks.find(t => t.SK === taskID);
 
     // Perform validation against the last task being deleted in a category
     if (isLastUncheckedTask) {
@@ -80,20 +85,20 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
 
       queueUpdate(taskID, task["GSI1-PK"], { Description: "" });
 
-      setSortedTasks({
-        ...sortedTasks,
-        [title]: tasks.map(t => t.SK === taskID ? { ...t, Description: "" } : t)
-      });
+      setSortedTasks(prev => prev[title] ? {
+        ...prev,
+        [title]: prev[title].map(t => t.SK === taskID ? { ...t, Description: "" } : t)
+      } : prev);
       return;
     }
 
     queueDelete(taskID, task["GSI1-PK"]);
 
-    setSortedTasks({
-      ...sortedTasks,
-      [title]: tasks.filter(t => t.SK !== taskID)
-    });
-  };
+    setSortedTasks(prev => prev[title] ? {
+      ...prev,
+      [title]: prev[title].filter(t => t.SK !== taskID)
+    } : prev);
+  }, [setSortedTasks, showAlert]);
 
   const handleNewCard = (name) => {
     if (!name || Object.keys(sortedTasks).includes(name)) {
