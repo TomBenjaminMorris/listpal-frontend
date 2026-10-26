@@ -5,12 +5,6 @@ import settingsIcon from '../assets/icons8-settings-50-white.png';
 import './Settings.css';
 import './PageLayout.css';
 
-const SettingsContent = memo(({ userDetails, setUserDetails }) => (
-  <div className="settings-content-sub-wrapper fadeUp-animation">
-    <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
-  </div>
-));
-
 const Settings = ({
   userDetails,
   setUserDetails,

@@ -2,7 +2,7 @@
   background-color: var(--background);
   border: solid 2px var(--accent-2);
   box-shadow: rgba(54, 54, 54, 0.35) 0px 0px 15px;
-  transition: all linear 0.3s;
+  transition: opacity 150ms, transform 150ms;
   position: absolute;
   z-index: 100;
   border-radius: 10px;
@@ -67,65 +67,52 @@ a {
   margin-left: -220px;
 }
 
+/* Fixed pixel offsets and short durations: content should settle quickly after it appears, and a percentage
+   offset slid tall wrappers a long way */
 @keyframes fadeIn {
   0% {
-    transform: translateX(10%);
+    transform: translateX(8px);
     opacity: 0;
   }
   100% {
-    transform: translateX(0%);
+    transform: none;
     opacity: 1;
   }
 }
 
 .fadeIn-animation {
-  animation: 300ms fadeIn;
+  animation: 150ms ease-out fadeIn;
 }
 
 @keyframes fadeUp {
   0% {
-    transform: translateY(10%);
+    transform: translateY(12px);
     opacity: 0;
   }
   100% {
-    transform: translateX(0%);
+    transform: none;
     opacity: 1;
   }
 }
 
 .fadeUp-animation {
-  animation: 600ms fadeUp;
-}
-
-@keyframes fadeDown {
-  0% {
-    transform: translateY(-10%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0%);
-    opacity: 1;
-  }
-}
-
-.fadeDown-animation {
-  animation: 600ms fadeDown;
+  animation: 250ms ease-out fadeUp;
 }
 
 @keyframes fadeOutDown {
   0% {
-    transform: translateY(0%);
+    transform: none;
     opacity: 1;
   }
   100% {
-    transform: translateY(10%);
+    transform: translateY(12px);
     opacity: 0;
   }
 }
 
 /* forwards stops the element snapping back into view before it is removed */
 .fadeOutDown-animation {
-  animation: 400ms fadeOutDown forwards;
+  animation: 200ms ease-in fadeOutDown forwards;
 }
 
 @keyframes fadeInPure {
@@ -138,5 +125,5 @@ a {
 }
 
 .fadeInPure-animation {
-  animation: 500ms fadeInPure;
+  animation: 200ms ease-out fadeInPure;
 }

@@ -34,7 +34,7 @@ li:hover {
   border: solid 2px var(--accent-2);
 
   /* box-shadow: rgba(33, 33, 33, 0.35) 0px 0px 15px; */
-  transition: all linear 0.3s;
+  transition: opacity 150ms, transform 150ms;
   position: absolute;
   margin-left: -235px;
   z-index: 100;

@@ -94,7 +94,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
     trailColor: 'var(--text-colour)',
     textColor: 'var(--text-colour)',
     pathColor: isExploding[TYPE_MAPPINGS[type].label] ? 'var(--accent-2)' : 'var(--accent)',
-    pathTransitionDuration: 1,
+    pathTransitionDuration: 0.5,
   });
 
   return (

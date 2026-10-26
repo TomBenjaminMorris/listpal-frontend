@@ -22,7 +22,7 @@
     /* flex-basis: 48%; */
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     position: relative;
-    transition-duration: 400ms;
+    transition: transform 150ms;
 }
 
 .theme-card-wrapper:hover, .selected-wrapper:hover {

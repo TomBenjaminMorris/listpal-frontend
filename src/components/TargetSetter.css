@@ -69,7 +69,7 @@ input[type=number]::-webkit-outer-spin-button {
     font-family: CircularBold;
     background-color: var(--accent);
     color: var(--text-colour);
-    transition-duration: 400ms;
+    transition: background-color 150ms;
 }
 
 .set-targets-submit:hover {
