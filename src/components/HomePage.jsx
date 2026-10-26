@@ -74,7 +74,7 @@ const ScoreContent = ({ totalYScore, totalMScore, totalWScore }) => {
 };
 
 // Main HomePage component for displaying boards and user information
-const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf, setActiveBoard }) => {
+const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertConf, setActiveBoardID }) => {
   // Calculate total scores by reducing board data
   const { totalYScore, totalMScore, totalWScore } = boards.reduce((acc, board) => ({
     totalWScore: acc.totalWScore + Number(board.WScore),
@@ -121,7 +121,7 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
                 setBoards={setBoards}
                 setPromptConf={setPromptConf}
                 setAlertConf={setAlertConf}
-                setActiveBoard={setActiveBoard}
+                setActiveBoardID={setActiveBoardID}
               />
             </div>
 

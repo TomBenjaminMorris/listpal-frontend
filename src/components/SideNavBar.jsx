@@ -16,14 +16,14 @@ const SideNavBar = ({
   sidebarBoardsMenuIsOpen, 
   isMobile, 
   hideMobileSidebar,
-  setActiveBoard,
+  setActiveBoardID,
   activeBoard 
 }) => {
   const navigate = useNavigate();
 
   // Board shows its own loader on a board change; setting it here would never clear when re-clicking the current board
   const handleBoardClick = (board) => {
-    setActiveBoard(board)
+    setActiveBoardID(board.SK)
   };
 
   const handleBoardsMenuClick = () => {

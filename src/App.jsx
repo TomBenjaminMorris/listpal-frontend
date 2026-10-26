@@ -50,7 +50,9 @@ const App = () => {
       ? JSON.parse(storedDetails)
       : { Theme: DEFAULT_THEME };
   });
-  const [activeBoard, setActiveBoard] = useState(null);
+  // An ID, not a copy of the board: a copy goes stale on every boards change, and refreshing it re-rendered the whole app
+  const [activeBoardID, setActiveBoardID] = useState(null);
+  const activeBoard = useMemo(() => boards.find(b => b.SK === activeBoardID) ?? null, [boards, activeBoardID]);
 
   // Set CSS vars for the user theme
   const applyTheme = useCallback((theme) => {
@@ -198,7 +200,7 @@ const App = () => {
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           isMobile={isMobile}
           hideMobileSidebar={hideMobileSidebar}
-          setActiveBoard={setActiveBoard}
+          setActiveBoardID={setActiveBoardID}
           activeBoard={activeBoard}
         />) : null}
 
@@ -217,7 +219,7 @@ const App = () => {
                 isLoading={isLoading}
                 setPromptConf={modalSetters.setPromptConf}
                 setAlertConf={modalSetters.setAlertConf}
-                setActiveBoard={setActiveBoard}
+                setActiveBoardID={setActiveBoardID}
               />) : (<Navigate replace to="/logout" />)}
             />
 
@@ -233,7 +235,7 @@ const App = () => {
                 setPromptConf={modalSetters.setPromptConf}
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
-                setActiveBoard={setActiveBoard}
+                setActiveBoardID={setActiveBoardID}
               />) : (<Navigate replace to="/logout" />)}
             />
 
