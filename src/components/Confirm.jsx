@@ -20,7 +20,11 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
   // Handle keyboard events for modal interaction
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') closeConfirm();
-    if (e.key === 'Enter') handleConfirm();
+    if (e.key === 'Enter') {
+      // As in Prompt: keep the keystroke from reaching whatever has focus once the modal closes
+      e.preventDefault();
+      handleConfirm();
+    }
   };
 
   // Add and remove keyboard event listener

@@ -11,7 +11,11 @@ const Prompt = ({ promptConf, setPromptConf }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') handleClose();
-      if (e.key === 'Enter') handleConfirm();
+      if (e.key === 'Enter') {
+        // Otherwise the same keystroke types a newline into whatever the confirm focuses, such as a new category's first task
+        e.preventDefault();
+        handleConfirm();
+      }
     };
 
     // Add/remove keyboard event listener when prompt is displayed
