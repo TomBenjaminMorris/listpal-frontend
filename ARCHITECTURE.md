@@ -13,7 +13,7 @@ ListPal's frontend is a single-page React app. It shows a user's boards, lets th
 | Build | Vite 5, `@vitejs/plugin-react` |
 | Routing | `react-router-dom` 6, `BrowserRouter`, all routes declared in `App.jsx` |
 | HTTP | `axios` against `https://api.vinsp.in` (hard-coded in `apiGatewayClient.js`) |
-| Auth | Cognito managed login (OAuth code flow), token refresh through `@aws-sdk/client-cognito-identity-provider` |
+| Auth | Cognito managed login (OAuth code flow), token refresh through the same OAuth token endpoint |
 | Local queue | IndexedDB database `listpal-local` (version 2), object store `outbox`, managed by `syncEngine.js` |
 | Styling | Plain CSS, one file per component, theme colours as CSS custom properties |
 | Charts | Victory (`victory`) |
@@ -170,7 +170,7 @@ sequenceDiagram
 Points to know:
 
 - The redirect URI is chosen by `isDev`, which App.jsx derives from `process.env.NODE_ENV`. Local dev returns to `http://localhost:5173/redirect`. Production returns to `https://listpal.dev.vinsp.in/redirect`. Both must be registered as Cognito callback URLs.
-- Before every API call, `apiGatewayClient.js` checks the access token's `exp` claim. If it has passed, `authService.refreshTokens` calls `InitiateAuth` with `REFRESH_TOKEN_AUTH` directly from the browser. There are no AWS credentials involved.
+- Before every API call, `apiGatewayClient.js` checks the access token's `exp` claim. If it has passed, `authService.refreshTokens` POSTs `grant_type=refresh_token` to the token endpoint, as a form body like the code exchange. Calls that find the token expired at the same moment share one refresh. The response has no refresh token (rotation is off), so the stored one is kept. There is no AWS SDK in the bundle and no AWS credentials involved.
 - If the refresh fails, `sessionStorage` is cleared. The next render sees no token and routes to `/logout`.
 - Logout clears both `localStorage` and `sessionStorage` and then replaces the location with the managed login URL.
 - The `Authorization` header is `Bearer <accessToken>`. The ID token is only read locally, to show the user's first name.
