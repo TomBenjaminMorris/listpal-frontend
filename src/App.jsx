@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
 import { flushNow, startSync, getSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
+import { setAlertListener } from './utils/alertBus';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
@@ -53,6 +54,16 @@ const App = () => {
   // An ID, not a copy of the board: a copy goes stale on every boards change, and refreshing it re-rendered the whole app
   const [activeBoardID, setActiveBoardID] = useState(null);
   const activeBoard = useMemo(() => boards.find(b => b.SK === activeBoardID) ?? null, [boards, activeBoardID]);
+
+  // Setup the alert/promot/confirm modals
+  const modalSetters = useMemo(() => ({
+    setPromptConf: (conf) => setModalStates(prev => ({ ...prev, prompt: conf })),
+    setConfirmConf: (conf) => setModalStates(prev => ({ ...prev, confirm: conf })),
+    setAlertConf: (conf) => setModalStates(prev => ({ ...prev, alert: conf }))
+  }), []);
+
+  // Declared before the data load so API failures from it have somewhere to go
+  useEffect(() => setAlertListener(modalSetters.setAlertConf), [modalSetters]);
 
   // Set CSS vars for the user theme
   const applyTheme = useCallback((theme) => {
@@ -183,13 +194,6 @@ const App = () => {
       isDev ? config.managedLoginLocal : config.managedLoginRemote
     );
   }, []);
-
-  // Setup the alert/promot/confirm modals
-  const modalSetters = useMemo(() => ({
-    setPromptConf: (conf) => setModalStates(prev => ({ ...prev, prompt: conf })),
-    setConfirmConf: (conf) => setModalStates(prev => ({ ...prev, confirm: conf })),
-    setAlertConf: (conf) => setModalStates(prev => ({ ...prev, alert: conf }))
-  }), []);
 
   return (
     <>

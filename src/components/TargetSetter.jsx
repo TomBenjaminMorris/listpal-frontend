@@ -90,13 +90,9 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       ));
 
       handleClose();
-    } catch (error) {
-      setAlertConf({
-        display: true,
-        animate: true,
-        title: "Error ❌",
-        textValue: "Failed to update targets."
-      });
+    } catch {
+      // apiPost has already raised the alert. Close, as validation does, so clicking it doesn't dismiss the form too
+      handleClose();
     } finally {
       setLoadingTargets(false);
     }

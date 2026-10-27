@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { isTokenExpired } from './utils';
 import { refreshTokens } from './authService';
+import { showAlert } from './alertBus';
+import { apiErrorAlert, SESSION_EXPIRED } from './apiErrors';
 
 axios.defaults.baseURL = 'https://api.vinsp.in';
 
@@ -26,39 +28,41 @@ const tokenCheck = async () => {
 // Callers must see a failure here, otherwise an expired session looks like an empty response
 const ensureToken = async () => {
   const ok = await tokenCheck();
-  if (!ok) throw new Error("Session expired, please sign in again");
+  if (!ok) throw Object.assign(new Error("Session expired, please sign in again"), { code: SESSION_EXPIRED });
 };
 
 // Generic API request function for GET requests. Silent callers report failures themselves.
-const apiGet = async (url, params = {}, { silent = false } = {}) => {
+// `action` finishes the sentence "we couldn't ..." in the alert, so the user knows what failed.
+const apiGet = async (url, params = {}, { silent = false, action } = {}) => {
   try {
     await ensureToken();
     const response = await axios.get(url, { headers: getHeaders(), params });
     return response.data?.data;
   } catch (err) {
     console.error(`Error getting ${url}:`, err);
-    if (!silent) alert(`Failed to fetch data from ${url}, please try again.`);
+    if (!silent) showAlert(apiErrorAlert(err, action));
     throw err;
   }
 };
 
 // Generic API request function for POST requests. Silent callers report failures themselves.
-const apiPost = async (url, body, { silent = false } = {}) => {
+const apiPost = async (url, body, { silent = false, action } = {}) => {
   try {
     await ensureToken();
     const response = await axios.post(url, body, { headers: getHeaders() });
     return response.data?.data;
   } catch (err) {
     console.error(`Error posting to ${url}:`, err);
-    if (!silent) alert(`Failed to post to ${url}, please try again.`);
+    if (!silent) showAlert(apiErrorAlert(err, action));
     throw err;
   }
 };
 
 // GET API methods
-export const getActiveTasks = (boardID, { silent = false } = {}) => apiGet('/active-tasks', { boardID }, { silent });
-export const getBoards = () => apiGet('/boards');
-export const getUser = () => apiGet('/user');
+export const getActiveTasks = (boardID, { silent = false } = {}) =>
+  apiGet('/active-tasks', { boardID }, { silent, action: "load this board's tasks" });
+export const getBoards = () => apiGet('/boards', {}, { action: 'load your boards' });
+export const getUser = () => apiGet('/user', {}, { action: 'load your account details' });
 
 // POST API methods
 export const syncOps = (ops) =>
@@ -76,26 +80,26 @@ export const syncOpsKeepalive = (ops) => {
 };
 
 export const updateThemeAPI = (theme) =>
-  apiPost('/user-theme', { theme });
+  apiPost('/user-theme', { theme }, { action: 'save your theme' });
 
 export const newBoardAPI = (boardID, boardName) =>
-  apiPost('/new-board', { boardID, boardName });
+  apiPost('/new-board', { boardID, boardName }, { action: 'create the board' });
 
 export const renameBoardAPI = (boardID, name) =>
-  apiPost('/rename-board', { boardID, name });
+  apiPost('/rename-board', { boardID, name }, { action: 'rename the board' });
 
 export const updateBoardEmojiAPI = (boardID, emoji) =>
-  apiPost('/board-emoji', { boardID, emoji });
+  apiPost('/board-emoji', { boardID, emoji }, { action: "save the board's emoji" });
 
 export const updateBoardCategoryOrder = (boardID, categoryOrder) =>
-  apiPost('/board-category-order', { boardID, categoryOrder });
+  apiPost('/board-category-order', { boardID, categoryOrder }, { action: 'save the new category order' });
 
 export const deleteBoard = (boardID) =>
-  apiPost('/delete-board', { boardID });
+  apiPost('/delete-board', { boardID }, { action: 'delete the board' });
 
 
 export const updateBoardScoresAPI = (boardID, scores) =>
-  apiPost('/board-scores', { boardID, scores });
+  apiPost('/board-scores', { boardID, scores }, { action: 'save the score' });
 
 export const updateBoardTargetsAPI = (boardID, targets) =>
-  apiPost('/board-targets', { boardID, targets });
+  apiPost('/board-targets', { boardID, targets }, { action: 'save the targets' });

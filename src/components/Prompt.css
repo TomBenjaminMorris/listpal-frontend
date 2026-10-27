@@ -10,6 +10,11 @@
   display: flex;
 }
 
+.alert-outer-wrapper {
+  /* Above the targets modal, which also sits at 3000 but comes later in the page, so its errors stay visible */
+  z-index: 3100;
+}
+
 .prompt-inner-wrapper {
   background-color: var(--foreground);
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;

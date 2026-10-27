@@ -30,15 +30,26 @@ const Alert = ({ alertConf, setAlertConf }) => {
 
   return (
     // Conditionally apply animation based on alert configuration
-    <div className={`prompt-outer-wrapper ${alertConf.animate ? "fadeInPure-animation" : ""}`}>
+    <div className={`prompt-outer-wrapper alert-outer-wrapper ${alertConf.animate ? "fadeInPure-animation" : ""}`}>
       <div className="prompt-inner-wrapper" ref={ref}>
         <h1>{alertConf.title}</h1>
         <p>{alertConf.textValue}</p>
         <div className="prompt-button-container">
           <div className="prompt-button-wrapper">
-            <button className="prompt-button" onClick={closeAlert}>
-              Close
-            </button>
+            {alertConf.actionLabel ? (
+              <>
+                <button className="prompt-button" onClick={() => { closeAlert(); alertConf.onAction(); }}>
+                  {alertConf.actionLabel}
+                </button>
+                <button className="prompt-button-cancel" onClick={closeAlert}>
+                  Close
+                </button>
+              </>
+            ) : (
+              <button className="prompt-button" onClick={closeAlert}>
+                Close
+              </button>
+            )}
           </div>
         </div>
       </div>
