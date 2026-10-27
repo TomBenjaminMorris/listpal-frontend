@@ -31,8 +31,8 @@ const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setAct
     if (!name?.trim()) {
       setAlertConf({
         display: true,
-        title: "Notice ⚠️",
-        textValue: "Board name can't be empty...",
+        title: "Name, please! ✏️",
+        textValue: "Every board needs a name, even a short one.",
       });
       return;
     }
@@ -59,7 +59,7 @@ const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setAct
       display: true,
       isEdit: false,
       defaultText: "",
-      title: "Enter New Board Name...",
+      title: "Name your new board ✏️",
       callbackFunc: handleNewBoard,
     });
   };

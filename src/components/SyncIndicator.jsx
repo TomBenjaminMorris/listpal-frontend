@@ -29,17 +29,17 @@ const SyncIndicator = memo(() => {
     <>
       {syncStatus.lastError && syncStatus.pending > 0 && (
         <div className="sync-pill sync-pill-error fadeIn-animation" role="status">
-          {syncStatus.lastError === "Offline" ? "Offline" : "Couldn't save"}, retrying...
+          {syncStatus.lastError === "Offline" ? "Offline, will sync later" : "Save hiccup, retrying..."}
         </div>
       )}
       {showBackOnline && !syncStatus.lastError && (
         <div className="sync-pill sync-pill-ok fadeIn-animation" role="status">
-          Back online
+          Back online, all caught up
         </div>
       )}
       <div
         className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
-        title={syncStatus.lastError ? `${syncStatus.lastError}, will retry...` : syncStatus.pending ? "Saving..." : "Saved"}
+        title={syncStatus.lastError === "Offline" ? "Offline: changes are kept on this device until you're back" : syncStatus.lastError ? "Couldn't save just now, will retry..." : syncStatus.pending ? "Saving..." : "All saved"}
       >
         {/* Both icons stay mounted so they load up front; swapping src would fetch the sync icon only once offline */}
         <img className="sync-status-icon spin" src={syncIcon} alt="" hidden={!syncStatus.pending} />

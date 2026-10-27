@@ -19,8 +19,8 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
     if (enteredLink !== "" && !isUrlValid(enteredLink)) {
       setAlertConf({
         display: true,
-        title: "Notice ⚠️",
-        textValue: "URL is not valid.",
+        title: "That link looks a bit off 🔗",
+        textValue: "We couldn't make sense of that web address. Check for typos and try again.",
       });
       return;
     }
@@ -38,7 +38,7 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
       display: true,
       isEdit: true,
       defaultText: task.Link,
-      title: "Enter Link...",
+      title: "Update this task's link 🔗",
       callbackFunc: handleAddLink,
     });
   };
@@ -48,7 +48,7 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
       display: true,
       isEdit: false,
       defaultText: "",
-      title: "Enter Link...",
+      title: "Paste a link for this task 🔗",
       callbackFunc: handleAddLink,
     });
   };
@@ -56,8 +56,8 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
   const handleDeleteTask = () => {
     setConfirmConf({
       display: true,
-      title: "Delete Task?",
-      textValue: "🚨 This action can't be undone 🚨",
+      title: "Delete this task?",
+      textValue: "🚨 No take-backs: this can't be undone 🚨",
       callbackFunc: deleteAndHideTask,
     });
   };

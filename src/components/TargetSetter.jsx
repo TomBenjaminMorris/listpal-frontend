@@ -43,8 +43,8 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       setAlertConf({
         display: true,
         animate: true,
-        title: "Notice ⚠️",
-        textValue: "Targets must be greater than 0."
+        title: "Aim a little higher 🎯",
+        textValue: "Targets need to be bigger than zero."
       });
       return false;
     }
@@ -53,8 +53,8 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       setAlertConf({
         display: true,
         animate: true,
-        title: "Notice ⚠️",
-        textValue: "Weekly target can't be more than monthly."
+        title: "That doesn't add up 🧮",
+        textValue: "Your weekly target can't be bigger than your monthly one."
       });
       return false;
     }
@@ -63,8 +63,8 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       setAlertConf({
         display: true,
         animate: true,
-        title: "Notice ⚠️",
-        textValue: "Monthly target can't be more than yearly."
+        title: "That doesn't add up 🧮",
+        textValue: "Your monthly target can't be bigger than your yearly one."
       });
       return false;
     }

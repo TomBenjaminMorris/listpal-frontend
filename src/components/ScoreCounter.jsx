@@ -25,8 +25,8 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
       setAlertConf({
         display: true,
         animate: true,
-        title: "Error 💀",
-        textValue: "Score can't be less than 0.",
+        title: "Nice try 😏",
+        textValue: "Scores can't dip below zero.",
       });
       return false;
     }
@@ -34,8 +34,8 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
       setAlertConf({
         display: true,
         animate: true,
-        title: "Error 💀",
-        textValue: "Score can't be empty.",
+        title: "Missing a number 🔢",
+        textValue: "The score can't be empty. Pop a number in and try again.",
       });
       return false;
     }

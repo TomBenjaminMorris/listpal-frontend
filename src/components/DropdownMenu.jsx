@@ -50,8 +50,8 @@ const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, boards
         </li>
         <li onClick={() => setConfirmConf({
           display: true,
-          title: "Delete Category?",
-          textValue: "🚨 This action can't be undone 🚨",
+          title: "Delete this category?",
+          textValue: "🚨 No take-backs: this can't be undone 🚨",
           callbackFunc: handleDeleteCategory,
         })}>
           <img className="dropdown-icons" src={closeIcon} alt="delete icon" />
