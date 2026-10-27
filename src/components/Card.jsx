@@ -19,7 +19,7 @@ const sortList = list => {
 
   // Not by ExpiryDate: every task ticked this week shares next Monday's expiry, and the server returns ties in no set order
   return [
-    ...doneList.sort((a, b) => parseInt(b.CompletedDate) - parseInt(a.CompletedDate) || parseInt(a.CreatedDate) - parseInt(b.CreatedDate)),
+    ...doneList.sort((a, b) => parseInt(a.CompletedDate) - parseInt(b.CompletedDate) || parseInt(a.CreatedDate) - parseInt(b.CreatedDate)),
     ...notDoneList.sort((a, b) => parseInt(a.CreatedDate) - parseInt(b.CreatedDate))
   ];
 };
