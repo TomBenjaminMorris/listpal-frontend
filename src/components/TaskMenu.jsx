@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useOnClickOutside } from 'usehooks-ts';
 import { isUrlValid } from '../utils/utils';
 import { queueUpdate } from '../utils/syncEngine';
 import importantIcon from '../assets/icons8-important-30-white.png';
@@ -7,7 +8,9 @@ import plusIcon from '../assets/icons8-plus-30.png';
 import editIcon from '../assets/icons8-edit-48.png';
 import "./TaskMenu.css";
 
-const TaskMenu = memo(({ markAsImportant, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setConfirmConf, setAlertConf }) => {
+const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setConfirmConf, setAlertConf }) => {
+  // Here rather than in Task, so only an open menu listens for outside clicks, not every task on the board
+  useOnClickOutside(containerRef, onClose);
 
   const handleAddLink = (enteredLink) => {
     if (enteredLink === null) return;

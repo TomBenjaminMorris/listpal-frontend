@@ -3,7 +3,6 @@ import { useEffect, useLayoutEffect, useState, useRef, lazy, Suspense } from 're
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { applyPending, flushNow, mergePending, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
-import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
@@ -258,12 +257,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     );
   };
 
-  useOnClickOutside(emojiMenuRef, () => {
-    if (displayEmojiPicker) {
-      setDisplayEmojiPicker(false)
-    }
-  })
-
   const handleConfettiComplete = (type) => {
     // setAlertConf({
     //   display: true,
@@ -325,7 +318,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                     <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{board?.Emoji}</div>
                     {
                       displayEmojiPicker ? <div className="board-emoji-wrapper">
-                        <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+                        <EmojiPicker onEmojiSelect={handleEmojiSelect} containerRef={emojiMenuRef} onClose={() => setDisplayEmojiPicker(false)} />
                       </div> : null
                     }
                   </div>

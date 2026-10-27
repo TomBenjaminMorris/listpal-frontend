@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
-import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
@@ -38,7 +37,6 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   const [isDeleting, setIsDeleting] = useState(false);
 
   const cardMenuRef = useRef(null);
-  const cardTitleRef = useRef(null);
   const emojiMenuRef = useRef(null);
 
   // Keyed on this category's array rather than sortedTasks, so edits elsewhere on the board don't re-sort it.
@@ -216,14 +214,13 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     setTitleEdited(newTitle);
   }
 
-  useOnClickOutside(cardMenuRef, () => isDropdownVisible && setDropdownVisible(false));
-  useOnClickOutside(cardTitleRef, () => {
+  // Blur covers every way of leaving the field: a click elsewhere, Tab or switching window
+  const handleCardTitleBlur = () => {
     if (titleHasChanged) {
       renameCategory(titleEdited);
       setTitleHasChanged(false);
     }
-  });
-  useOnClickOutside(emojiMenuRef, () => displayEmojiPicker && setDisplayEmojiPicker(false));
+  };
 
   // fadeUp stays on: a CSS animation only plays when its class is first applied, so re-renders don't replay it
   return (
@@ -238,17 +235,19 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           </div>
           {displayEmojiPicker && (
             <div className="board-emoji-wrapper">
-              <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+              <EmojiPicker onEmojiSelect={handleEmojiSelect} containerRef={emojiMenuRef} onClose={() => setDisplayEmojiPicker(false)} />
             </div>
           )}
         </div>
 
-        <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} ref={cardTitleRef} />
+        <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} onBlur={handleCardTitleBlur} />
 
         <div className="menu" onClick={() => setDropdownVisible(prev => !prev)} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} src={dotsIcon} alt="menu icon" />
           {isDropdownVisible && (
             <DropdownMenu
+              containerRef={cardMenuRef}
+              onClose={() => setDropdownVisible(false)}
               handleDeleteCategory={() => setIsDeleting(true)}
               boards={boards}
               title={title}
