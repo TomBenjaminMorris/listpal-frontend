@@ -4,6 +4,7 @@ import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from
 import { applyPending, flushNow, mergePending, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
 import { getBoardIdFromUrl } from '../utils/utils';
+import { apiErrorAlert } from '../utils/apiErrors';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import editIcon from '../assets/icons8-edit-64.png';
 import targetIcon from '../assets/icons8-bullseye-50.png';
@@ -142,12 +143,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
         return current.map(b => b.SK === boardID ? { ...b, Board: name } : b);
       });
 
-    } catch (error) {
-      setAlertConf({
-        display: true,
-        title: "Error 💀",
-        textValue: error.message || "Something went wrong.",
-      });
+    } catch {
+      // apiPost has already shown the user what went wrong
     } finally {
       setIsLoading(false);
     }
@@ -160,12 +157,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
       dropCachedTasks(boardID);
       setBoards((boards) => boards.filter(b => b.SK !== boardID));
       navigate('/home');
-    } catch (error) {
-      setAlertConf({
-        display: true,
-        title: "Error 💀",
-        textValue: error.message || "Something went wrong while deleting the board.",
-      });
+    } catch {
+      // apiPost has already shown the user what went wrong
     } finally {
       setIsLoading(false);
     }
@@ -228,7 +221,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
       // Records queued now are overlaid even if the flush settles them before the fetch reads, and queued
       // changes hold whole field values, so applying one the server already has changes nothing
       const before = await readPending();
-      const [data] = await Promise.all([getActiveTasks(boardID, { silent: background }), flushNow({ timeout: LOAD_FLUSH_TIMEOUT })]);
+      const [data] = await Promise.all([getActiveTasks(boardID, { silent: true }), flushNow({ timeout: LOAD_FLUSH_TIMEOUT })]);
       const after = await readPending();
       setRemoteData({ boardID, load, tasks: applyPending(data ?? [], mergePending(before, after), boardID) });
     } catch (error) {
@@ -237,11 +230,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
         return;
       }
       setRemoteData({ boardID, load, tasks: [], failed: true }); // Show the empty board behind the alert rather than spinning forever
-      setAlertConf({
-        display: true,
-        title: "Error 💀",
-        textValue: error.message || "Failed to fetch tasks.",
-      });
+      // Reported here rather than by apiGet, because the local outbox reads can fail too
+      setAlertConf({ display: true, ...apiErrorAlert(error, "load this board's tasks") });
     } finally {
       setIsLoading(false);
     }

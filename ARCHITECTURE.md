@@ -20,7 +20,7 @@ ListPal's frontend is a single-page React app. It shows a user's boards, lets th
 | Hosting | S3 bucket `www.listpal.dev.vinsp.in` behind CloudFront, provisioned by Terraform |
 | Environments | Effectively one. Local dev (`npm run dev`) talks to the same production API as the deployed site |
 
-Tests run with `npm test` (Vitest). They cover the sync engine only (`src/utils/syncEngine.test.js`), using `fake-indexeddb` in place of the browser database.
+Tests run with `npm test` (Vitest). They cover the sync engine (`src/utils/syncEngine.test.js`), using `fake-indexeddb` in place of the browser database, and the API error messages (`src/utils/apiErrors.test.js`).
 
 ## 2. Repository layout
 
@@ -44,6 +44,9 @@ listpal-frontend/
 │   ├── fonts/                  Circular .woff2 files
 │   ├── assets/                 PNG icons (icons8)
 │   ├── utils/
+│   │   ├── alertBus.js         Lets non-React code raise the in-app Alert that App owns
+│   │   ├── apiErrors.js        Turns a failed API call into a plain-language alert
+│   │   ├── apiErrors.test.js   Vitest tests for those messages
 │   │   ├── apiGatewayClient.js API wrapper: one function per backend route
 │   │   ├── authService.js      Token exchange, refresh, storage of tokens
 │   │   ├── localDBHelpers.js   openDB, a promise wrapper for indexedDB.open
@@ -258,7 +261,21 @@ Edits that bypass the queue and call the API straight away:
 | `updateBoardScoresAPI` | `POST /board-scores` | Present |
 | `updateBoardTargetsAPI` | `POST /board-targets` | Present |
 
-Failures are handled the same way for every call. `apiGet` and `apiPost` log the error, call `window.alert(...)` (unless the call passes `silent`) and rethrow. A failed token refresh throws "Session expired" rather than returning an empty value. The backend returns real HTTP status codes (400, 403, 500) for errors, so axios rejects on them.
+Failures are handled the same way for every call. `apiGet` and `apiPost` log the error, show the in-app `Alert` modal (unless the call passes `silent`) and rethrow. The app never uses `window.alert`, which would block the page. A failed token refresh throws an error with code `SESSION_EXPIRED` rather than returning an empty value. The backend returns real HTTP status codes (400, 403, 500) for errors, so axios rejects on them.
+
+Each exported function passes an `action` such as "load your boards" or "save the targets". `apiErrorAlert` in `apiErrors.js` combines it with the kind of failure, so the user reads "We couldn't save the targets because you appear to be offline" rather than "Request failed with status code 500". An expired session (or a 401) adds a "Sign in" button that goes to `/logout`, which clears the old tokens and opens the sign-in page. Queued task edits sit in IndexedDB, which logout leaves alone, so they are sent after signing in. Errors that are not from axios, such as a failed outbox read, get a general message rather than blaming the network.
+
+The client is not a React component, so it reaches the modal through `alertBus.js`. `App` registers its `setAlertConf` as the one listener when it mounts.
+
+```mermaid
+flowchart LR
+    Call["apiGet / apiPost"] -->|"fails, not silent"| Msg["apiErrorAlert(err, action)"]
+    Msg --> Bus["alertBus.showAlert"]
+    Bus --> App["App setAlertConf"]
+    App --> Alert["Alert modal"]
+```
+
+Callers that already handle the failure (rename and delete in `Board`, `TargetSetter`) no longer show a second alert of their own. `Board`'s task load passes `silent` and reports the failure itself, because the outbox reads in the same `try` can fail too. The `Alert` sits at `z-index: 3100`, above the targets modal at 3000.
 
 ## 9. Styling and theming
 
@@ -350,7 +367,7 @@ These are things a reader should know before changing the app. They are not fixe
 
 - **The API address is hard-coded.** `apiGatewayClient.js` sets `https://api.vinsp.in`. There is no way to point the app at a different API without editing source.
 - **Tokens sit in `sessionStorage`.** Any script on the page can read them. The managed login URLs in `config.json` carry no `code_challenge`, so the code exchange is not PKCE-protected.
-- **Dialogs for errors.** `apiGet` and `apiPost` call `window.alert`, which blocks the page. Task sync is the exception: it is silent and shows its state on the sync indicator. The background refresh of a cached board is silent too, and keeps the cached copy.
+- **Failed saves aren't rolled back.** Creating a board, its emoji, the category order and the theme are applied on screen before the API call. If the call fails, the alert says so, but the change stays on screen until a reload. Task sync is different: it retries and shows its state on the sync indicator, with no alert. The background refresh of a cached board is silent too, and keeps the cached copy.
 - **Keepalive and CORS.** The `pagehide` flush is best effort. Browsers may refuse a keepalive request that needs a CORS preflight. Nothing is lost if it fails, because the outbox is flushed on the next load.
 - **Old tabs block the database upgrade.** A tab still running a build from before the outbox (IndexedDB version 1) does not close its connection, so a new tab's upgrade waits until that tab is closed or reloaded.
 - **Only `main.tsx` is type-checked.** The rest is JavaScript and `tsc` does not look at it, so `npm run build` gives little assurance about most of the code.
