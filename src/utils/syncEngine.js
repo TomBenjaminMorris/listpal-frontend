@@ -61,6 +61,14 @@ export function applyPending(tasks, records, boardID) {
   return [...bySK.values()];
 }
 
+// Pure union of two outbox reads taken either side of a flush. A record settled in between is still in
+// the first read, so it covers a fetch that ran before the server applied it; the later read wins per task.
+export function mergePending(before, after) {
+  const bySK = new Map(before.map(r => [r.SK, r]));
+  after.forEach(r => bySK.set(r.SK, r));
+  return [...bySK.values()];
+}
+
 function getDB() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, (db) => {
@@ -274,9 +282,7 @@ function flushOnExit() {
   syncOpsKeepalive(pendingRecords.slice(0, MAX_BATCH).map(toOp));
 }
 
-export async function overlayPending(tasks, boardID) {
-  return applyPending(tasks, await readAll(), boardID);
-}
+export const readPending = () => readAll();
 
 export function startSync(options = {}) {
   if (options.onBoardScores) onBoardScores = options.onBoardScores;

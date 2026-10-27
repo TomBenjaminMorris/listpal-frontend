@@ -81,7 +81,8 @@ const moveToAdjacentTask = (e) => {
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
 const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, handleDeleteTask, setPromptConf, setConfirmConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
-  const [checked, setChecked] = useState(task.CompletedDate != "nil");
+  // Derived, not copied into state: a fresh copy of the board can replace a cached one in place, ticks included
+  const checked = task.CompletedDate !== "nil";
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
 
   // Update description when task.Description changes
@@ -93,9 +94,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, han
 
   // Toggle checkbox state
   const handleCheckBox = () => {
-    const newChecked = !checked;
-    setChecked(newChecked);
-    toggleTaskChecked(task.SK, newChecked);
+    toggleTaskChecked(task.SK, !checked);
   }
 
   // Handle text update (only set state if the value has changed)

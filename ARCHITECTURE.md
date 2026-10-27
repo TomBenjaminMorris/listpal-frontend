@@ -177,17 +177,26 @@ Points to know:
 
 ## 6. Data and state
 
-The frontend owns no durable data. Everything persistent lives in the backend. The browser holds four kinds of state.
+The frontend owns no durable data. Everything persistent lives in the backend. The browser holds five kinds of state.
 
 | Store | Key or shape | Written by | Lifetime |
 | --- | --- | --- | --- |
 | React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoardID` (the board object is derived from `boards`), modal config | Pages through props | Until a reload |
+| Module state in `boardCache.js` | The last `sortedTasks` shown for each board, keyed on board ID | `Board.jsx` whenever the shown board's `sortedTasks` changes, except the empty board shown behind a load error; dropped when the board is deleted | Until a reload or logout (which reloads). Survives Board unmounting |
 | IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
 | `localStorage` | `sidebarIsOpen`, `sidebarBoardsMenuIsOpen` (`"true"` or `"false"`), read once as the initial React state | `App.jsx` whenever either value changes | Until logout |
 
-`App.jsx` loads the user and the boards on start-up. `getBoards()` waits for an outbox flush first (at most `LOAD_FLUSH_TIMEOUT`, 3 s). Otherwise a tick queued just before a reload, or still in flight from the old page's keepalive request, could land after the scores were read. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately. `getTasks` in `Board.jsx` first flushes the outbox (waiting at most 3 s), then calls `getActiveTasks(boardID)`, then lays any still-queued changes over the result with `overlayPending`.
+`App.jsx` loads the user and the boards on start-up. `getBoards()` waits for an outbox flush first (at most `LOAD_FLUSH_TIMEOUT`, 3 s). Otherwise a tick queued just before a reload, or still in flight from the old page's keepalive request, could land after the scores were read. It parses `CategoryOrder` from a JSON string into an array for each board. Board pages then load their tasks separately, in `getTasks` in `Board.jsx`:
+
+1. It reads the outbox (`readPending`).
+2. It calls `getActiveTasks(boardID)` and `flushNow` (waiting at most 3 s) in parallel.
+3. It reads the outbox again, merges the two reads with `mergePending`, and lays them over the fetched tasks with `applyPending`. A change settled by that flush is still in the first read, so it shows even if the fetch read the server before the flush landed. Queued changes hold whole field values, so applying one the server already has changes nothing.
+
+Each board switch is numbered (`loadCount`), and only the latest load's response is applied.
+
+Switching to a board shown before in this session is instant. A layout effect puts the cached copy from `boardCache.js` on screen before the browser paints, with no loader, and `getTasks` then runs in the background: no loader, no alert on failure, and the cached copy stays if it fails. When the fresh copy arrives it replaces the cached one, unless the user edited the board in the meantime. Edits always produce a new `sortedTasks` object, so Board compares against the value the cached copy landed as; those edits are queued, so nothing is lost by keeping them. Because a fresh copy can replace tasks in place, `Task` derives its tick from `task.CompletedDate` rather than keeping its own state, and `Card` follows its first task's `Emoji`.
 
 ## 7. Task writes and sync
 
@@ -237,7 +246,7 @@ Edits that bypass the queue and call the API straight away:
 | --- | --- | --- |
 | `getBoards` | `GET /boards` | Present |
 | `getUser` | `GET /user` | Present |
-| `getActiveTasks` | `GET /active-tasks` | Present |
+| `getActiveTasks` | `GET /active-tasks` (silent for a background refresh of a cached board) | Present |
 | `syncOps` | `POST /sync` (silent, the sync engine reports failures) | Present |
 | `syncOpsKeepalive` | `POST /sync` with `fetch` keepalive, used on `pagehide` | Present |
 | `updateThemeAPI` | `POST /user-theme` | Present |
@@ -340,7 +349,7 @@ These are things a reader should know before changing the app. They are not fixe
 
 - **The API address is hard-coded.** `apiGatewayClient.js` sets `https://api.vinsp.in`. There is no way to point the app at a different API without editing source.
 - **Tokens sit in `sessionStorage`.** Any script on the page can read them. The managed login URLs in `config.json` carry no `code_challenge`, so the code exchange is not PKCE-protected.
-- **Dialogs for errors.** `apiGet` and `apiPost` call `window.alert`, which blocks the page. Task sync is the exception: it is silent and shows its state on the sync indicator.
+- **Dialogs for errors.** `apiGet` and `apiPost` call `window.alert`, which blocks the page. Task sync is the exception: it is silent and shows its state on the sync indicator. The background refresh of a cached board is silent too, and keeps the cached copy.
 - **Keepalive and CORS.** The `pagehide` flush is best effort. Browsers may refuse a keepalive request that needs a CORS preflight. Nothing is lost if it fails, because the outbox is flushed on the next load.
 - **Old tabs block the database upgrade.** A tab still running a build from before the outbox (IndexedDB version 1) does not close its connection, so a new tab's upgrade waits until that tab is closed or reloaded.
 - **Only `main.tsx` is type-checked.** The rest is JavaScript and `tsc` does not look at it, so `npm run build` gives little assurance about most of the code.
