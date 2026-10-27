@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { useOnClickOutside } from 'usehooks-ts'
@@ -30,6 +30,11 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   const [titleHasChanged, setTitleHasChanged] = useState(false);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [cardEmoji, setCardEmoji] = useState(tasks?.[0]?.Emoji || "✅");
+  // A fresh copy of the board can replace a cached one in place, so follow an emoji changed elsewhere
+  const firstTaskEmoji = tasks?.[0]?.Emoji;
+  useEffect(() => {
+    if (firstTaskEmoji) setCardEmoji(firstTaskEmoji);
+  }, [firstTaskEmoji]);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const cardMenuRef = useRef(null);

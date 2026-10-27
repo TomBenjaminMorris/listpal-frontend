@@ -29,8 +29,6 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-// overlayPending only surfaces creates without a fetched task, so count records through the status instead
-const pending = () => engine.overlayPending([], BOARD);
 const pendingCount = () => {
   let current;
   engine.subscribe(s => { current = s; })();
@@ -80,6 +78,28 @@ describe('applyPending', () => {
     ];
     const result = engine.applyPending(fetched, records, BOARD);
     expect(result.map(t => [t.SK, t.Description])).toEqual([['t#1', 'local'], ['t#3', 'new']]);
+  });
+});
+
+describe('mergePending', () => {
+  const record = (SK, rev, Description) => ({ SK, boardID: BOARD, kind: 'update', fields: { Description }, rev });
+
+  it('keeps records settled between the two reads, and the later read wins for a task in both', () => {
+    const before = [record('t#1', 1, 'settled'), record('t#2', 1, 'old')];
+    const after = [record('t#2', 2, 'new'), record('t#3', 1, 'queued since')];
+    const merged = engine.mergePending(before, after);
+    expect(merged.map(r => [r.SK, r.fields.Description])).toEqual([['t#1', 'settled'], ['t#2', 'new'], ['t#3', 'queued since']]);
+  });
+
+  it('shows a create the fetch missed because the flush applied it after the fetch read', async () => {
+    await engine.queueCreate(task('t#1', { Description: 'new' }));
+    const before = await engine.readPending();
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+    const after = await engine.readPending();
+    expect(after).toEqual([]);
+    const shown = engine.applyPending([], engine.mergePending(before, after), BOARD);
+    expect(shown.map(t => [t.SK, t.Description])).toEqual([['t#1', 'new']]);
   });
 });
 

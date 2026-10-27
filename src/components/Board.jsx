@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef, lazy, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { flushNow, overlayPending, queueDeleteAll, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { applyPending, flushNow, mergePending, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
 import { useOnClickOutside } from 'usehooks-ts'
 import { getBoardIdFromUrl } from '../utils/utils';
 import deleteIcon from '../assets/icons8-delete-48.png';
@@ -19,6 +20,7 @@ import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Board.css';
 
 const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
+const SHOWING_CACHE = Symbol('showing cache');
 
 const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
@@ -29,8 +31,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const [bannerQueue, setBannerQueue] = useState([]);
   const announced = useRef(new Set()); // Targets already queued for a banner, cleared when the score drops below target
-  const [remoteData, setRemoteData] = useState(null); // { boardID, tasks } so a late response can't land on another board
+  const [remoteData, setRemoteData] = useState(null); // { boardID, load, tasks, failed } so a late response can't land on another board or visit
   const [loadedBoardID, setLoadedBoardID] = useState(null); // Board whose tasks are in sortedTasks; the loader shows until it matches
+  const loadCount = useRef(0); // Numbers each board switch, so only the latest load's response is applied
+  // While a cached copy is on screen and the fresh one loads: SHOWING_CACHE until the cached copy lands, then the sortedTasks it landed as
+  const shownFromCache = useRef(null);
   const boardID = getBoardIdFromUrl();
   const board = boards.find(b => b.SK === boardID)
   const maxLength = 20;
@@ -44,15 +49,39 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   }, [board?.Board, board?.Emoji]);
 
   useEffect(() => {
-    if (remoteData && board && remoteData.boardID === board.SK) {
+    if (remoteData && board && remoteData.boardID === board.SK && remoteData.load === loadCount.current) {
+      const baseline = shownFromCache.current;
+      shownFromCache.current = null;
+      // The user may have edited the cached copy while the fresh one loaded; those edits are queued, so keep them
+      if (baseline && sortedTasks !== baseline) return;
       sortTasks(remoteData.tasks);
       setLoadedBoardID(board.SK);
     }
   }, [remoteData, board?.SK]); // Depend on the ID, not the object, so local category edits aren't overwritten by stale remote data
 
   useEffect(() => {
+    if (loadedBoardID !== boardID) return;
+    // The empty board shown behind a load error isn't the board's tasks, so it mustn't be shown instantly next time
+    if (remoteData?.failed && remoteData.boardID === boardID) return;
+    setCachedTasks(boardID, sortedTasks);
+    // Every edit replaces the sortedTasks object, so this first value after the cached copy lands is the baseline for spotting them
+    if (shownFromCache.current === SHOWING_CACHE) shownFromCache.current = sortedTasks;
+  }, [sortedTasks, loadedBoardID, boardID]);
+
+  // A layout effect, so a cached copy replaces the loader before the browser paints it
+  useLayoutEffect(() => {
     setActiveBoardID(boardID);
-    getTasks();
+    const load = ++loadCount.current;
+    // board is undefined on a direct page load until boards arrive, and the cache is empty then anyway
+    const cached = getCachedTasks(boardID);
+    if (cached && board) {
+      setSortedTasks(cached, board.CategoryOrder);
+      setLoadedBoardID(boardID);
+      shownFromCache.current = SHOWING_CACHE;
+    } else {
+      shownFromCache.current = null;
+    }
+    getTasks({ load, background: !!(cached && board) });
     setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
     setIsExploding({ weekly: false, monthly: false, yearly: false }) // Stale state from the previous board must not leak into the new one
     announced.current.clear()
@@ -129,6 +158,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     setIsLoading(true);
     try {
       await deleteBoard(boardID);
+      dropCachedTasks(boardID);
       setBoards((boards) => boards.filter(b => b.SK !== boardID));
       navigate('/home');
     } catch (error) {
@@ -192,15 +222,22 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     setIsLoading(false);
   };
 
-  const getTasks = async () => {
-    setIsLoading(true);
+  // In the background a cached copy is already on screen, so there is no loader, and a failure leaves that copy in place
+  const getTasks = async ({ load, background = false }) => {
+    if (!background) setIsLoading(true);
     try {
-      // Push queued edits first so the fetch reflects them, then overlay anything that didn't make it
-      await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
-      const data = await getActiveTasks(boardID);
-      setRemoteData({ boardID, tasks: await overlayPending(data ?? [], boardID) });
+      // Records queued now are overlaid even if the flush settles them before the fetch reads, and queued
+      // changes hold whole field values, so applying one the server already has changes nothing
+      const before = await readPending();
+      const [data] = await Promise.all([getActiveTasks(boardID, { silent: background }), flushNow({ timeout: LOAD_FLUSH_TIMEOUT })]);
+      const after = await readPending();
+      setRemoteData({ boardID, load, tasks: applyPending(data ?? [], mergePending(before, after), boardID) });
     } catch (error) {
-      setRemoteData({ boardID, tasks: [] }); // Show the empty board behind the alert rather than spinning forever
+      if (background) {
+        console.error('Background refresh failed, keeping the cached tasks:', error);
+        return;
+      }
+      setRemoteData({ boardID, load, tasks: [], failed: true }); // Show the empty board behind the alert rather than spinning forever
       setAlertConf({
         display: true,
         title: "Error 💀",

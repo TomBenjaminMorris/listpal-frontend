@@ -29,15 +29,15 @@ const ensureToken = async () => {
   if (!ok) throw new Error("Session expired, please sign in again");
 };
 
-// Generic API request function for GET requests
-const apiGet = async (url, params = {}) => {
+// Generic API request function for GET requests. Silent callers report failures themselves.
+const apiGet = async (url, params = {}, { silent = false } = {}) => {
   try {
     await ensureToken();
     const response = await axios.get(url, { headers: getHeaders(), params });
     return response.data?.data;
   } catch (err) {
     console.error(`Error getting ${url}:`, err);
-    alert(`Failed to fetch data from ${url}, please try again.`);
+    if (!silent) alert(`Failed to fetch data from ${url}, please try again.`);
     throw err;
   }
 };
@@ -56,7 +56,7 @@ const apiPost = async (url, body, { silent = false } = {}) => {
 };
 
 // GET API methods
-export const getActiveTasks = (boardID) => apiGet('/active-tasks', { boardID });
+export const getActiveTasks = (boardID, { silent = false } = {}) => apiGet('/active-tasks', { boardID }, { silent });
 export const getBoards = () => apiGet('/boards');
 export const getUser = () => apiGet('/user');
 
