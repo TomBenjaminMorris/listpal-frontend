@@ -97,7 +97,7 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
           <div className="home-page-content-sub-wrapper fadeUp-animation">
 
             {/* Personalized greeting with optional username */}
-            <div className="page-title-wrapper fadeUp-animation">
+            <div className="page-title-wrapper">
               <h2 className="page-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
             </div>
 

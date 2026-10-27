@@ -37,6 +37,8 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     const before = positionsBeforeChange.current;
     if (!before) return;
     positionsBeforeChange.current = null;
+    // Web Animations ignore the CSS reduced-motion rule, so check it here
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     measurePositions().forEach((after, el) => {
       const prev = before.get(el);
@@ -46,7 +48,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
       if (!dx && !dy) return;
       el.animate(
         [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }],
-        { duration: 400, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        { duration: 250, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
       );
     });
   }, [categoryOrder]);
