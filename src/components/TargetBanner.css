@@ -1,13 +1,38 @@
-.target-banner {
+.target-banner-stack {
   position: fixed;
   right: 20px;
   bottom: 70px; /* clears the sync indicator in Board.css (bottom 20px, 30px tall) */
   z-index: 5000;
   display: flex;
+  flex-direction: column-reverse; /* new banners appear above, so those already showing stay put */
+  width: min(480px, calc(100vw - 40px));
+  pointer-events: none; /* the gaps between banners must not block clicks on the board */
+}
+
+/* Animating grid rows from 1fr to 0fr collapses the slot to zero without knowing the banner's height */
+.target-banner-slot {
+  display: grid;
+  grid-template-rows: 1fr;
+  margin-top: 12px;
+  transition: grid-template-rows 200ms ease, margin-top 200ms ease;
+}
+
+.target-banner-slot-collapse {
+  grid-template-rows: 0fr;
+  margin-top: 0;
+}
+
+.target-banner-slot-inner {
+  min-height: 0;
+}
+
+.target-banner {
+  position: relative;
+  display: flex;
   align-items: center;
   gap: 22px;
-  width: min(480px, calc(100vw - 40px));
   box-sizing: border-box;
+  pointer-events: auto;
   padding: 20px 22px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.18);

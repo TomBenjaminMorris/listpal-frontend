@@ -29,8 +29,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const [confettiOrigin, setConfettiOrigin] = useState(null);
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
-  const [bannerQueue, setBannerQueue] = useState([]);
-  const announced = useRef(new Set()); // Targets already queued for a banner, cleared when the score drops below target
+  const [banners, setBanners] = useState([]);
+  const announced = useRef(new Set()); // Targets already given a banner, cleared when the score drops below target
   const [remoteData, setRemoteData] = useState(null); // { boardID, load, tasks, failed } so a late response can't land on another board or visit
   const [loadedBoardID, setLoadedBoardID] = useState(null); // Board whose tasks are in sortedTasks; the loader shows until it matches
   const loadCount = useRef(0); // Numbers each board switch, so only the latest load's response is applied
@@ -85,7 +85,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
     setIsExploding({ weekly: false, monthly: false, yearly: false }) // Stale state from the previous board must not leak into the new one
     announced.current.clear()
-    setBannerQueue([])
+    setBanners([])
   }, [boardID]);
 
   // Fetched while idle so the first celebration doesn't wait on the network
@@ -95,7 +95,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     idle(() => import('react-confetti-explosion'));
   }, [loadedBoardID, boardID]);
 
-  // Queue a banner whenever confetti starts for a target, mirroring the confetti re-arm rules
+  // Show a banner whenever confetti starts for a target, mirroring the confetti re-arm rules
   useEffect(() => {
     const newlyHit = [];
     ['weekly', 'monthly', 'yearly'].forEach((type) => {
@@ -107,8 +107,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
       }
     });
     if (newlyHit.length) {
-      // One banner per type: skip any type already queued or on screen (e.g. complete, undo, complete again)
-      setBannerQueue(current => [...current, ...newlyHit.filter(type => !current.includes(type))]);
+      // One banner per type: skip any type already on screen (e.g. complete, undo, complete again)
+      setBanners(current => [...current, ...newlyHit.filter(type => !current.includes(type))]);
     }
   }, [isExploding, isTargetMet]);
 
@@ -285,7 +285,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
         </div>
       )}
 
-      <TargetBanner queue={bannerQueue} onShown={() => setBannerQueue(current => current.slice(1))} />
+      <TargetBanner banners={banners} onDone={type => setBanners(current => current.filter(t => t !== type))} />
 
       <TargetSetterModal
         display={displayTargetSetter}
