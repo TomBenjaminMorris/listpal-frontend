@@ -41,7 +41,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const maxLength = 20;
   const navigate = useNavigate();
   const emojiMenuRef = useRef(null)
-  const deleteMessage = `Delete Board - "${board?.Board}" ?`;
+  const deleteMessage = `Delete "${board?.Board}" for good?`;
 
   // Keyed on the fields shown, so a rename or emoji change updates the title but a score change doesn't
   useEffect(() => {
@@ -130,8 +130,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     if (!name) {
       setAlertConf({
         display: true,
-        title: "Notice ⚠️",
-        textValue: "Board name can't be empty...",
+        title: "Name, please! ✏️",
+        textValue: "Every board needs a name, even a short one.",
       });
       return;
     }
@@ -184,14 +184,14 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     if (!hasCompleted) {
       setAlertConf({
         display: true,
-        title: "Nothing to Clear ✨",
-        textValue: "There are no completed tasks on this board.",
+        title: "Already spotless ✨",
+        textValue: "There are no completed tasks on this board yet. Go tick a few off!",
       });
       return;
     }
     setConfirmConf({
       display: true,
-      title: "Clear All Completed Tasks?",
+      title: "Clear all completed tasks?",
       textValue: "✨ Time for a spring clean ✨",
       callbackFunc: handleClearTasks,
     });
@@ -317,7 +317,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                     display: true,
                     isEdit: true,
                     defaultText: board.Board,
-                    title: "Enter New Board Name...",
+                    title: "Give this board a new name ✏️",
                     callbackFunc: handleEditBoard,
                   })} />
                 </div>
@@ -330,7 +330,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                   <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
                     display: true,
                     title: deleteMessage,
-                    textValue: "🚨 This action can't be undone 🚨",
+                    textValue: "🚨 No take-backs: this can't be undone 🚨",
                     callbackFunc: handleDeleteBoard,
                   })} />
                   <div className="board-action-tooltip">Delete Board</div>

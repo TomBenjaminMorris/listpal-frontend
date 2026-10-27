@@ -7,9 +7,9 @@ const SLIDE_MS = 400;
 const AUTO_DISMISS_MS = 7000;
 
 const BANNER_COPY = {
-  weekly: { emoji: '🎉', title: 'Weekly Target Hit', body: 'Congratulations, you have hit your weekly target!' },
-  monthly: { emoji: '🏆', title: 'Monthly Target Hit', body: 'Congratulations, you have hit your monthly target!' },
-  yearly: { emoji: '🥇', title: 'Yearly Target Hit', body: 'Congratulations, you have hit your yearly target!' },
+  weekly: { emoji: '🎉', title: 'Weekly target smashed', body: "You've hit your weekly target. Take a bow!" },
+  monthly: { emoji: '🏆', title: 'Monthly target conquered', body: 'A whole month of getting things done. Brilliant work!' },
+  yearly: { emoji: '🥇', title: 'Yearly target achieved', body: "You've hit your yearly target. What a year!" },
 };
 
 // Shows the head of the queue as a macOS-style banner until the user closes it or it times out, then calls onShown to drop it

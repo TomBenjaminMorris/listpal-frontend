@@ -31,7 +31,7 @@ describe('describeApiError', () => {
 
   it('does not blame the network for an error that is not from axios', () => {
     vi.stubGlobal('navigator', { onLine: false });
-    expect(describeApiError(new Error('IDB closed'), 'x').title).toBe('Something went wrong 💀');
+    expect(describeApiError(new Error('IDB closed'), 'x').title).toBe('Well, that was odd 🤔');
   });
 
   it.each([
@@ -40,7 +40,7 @@ describe('describeApiError', () => {
     [429, /Too many requests/],
     [500, /on our side/],
     [503, /on our side/],
-    [400, /^We couldn't save the targets\. Please try again\.$/],
+    [400, /^We couldn't save the targets\. Give it another go\.$/],
   ])('describes a %i in plain language', (status, pattern) => {
     expect(describeApiError(httpError(status), 'save the targets').textValue).toMatch(pattern);
   });

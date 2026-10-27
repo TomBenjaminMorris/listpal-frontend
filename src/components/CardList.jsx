@@ -58,10 +58,10 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     delete cardKeys.current[oldTitle];
   };
 
-  const showAlert = useCallback((textValue) => {
+  const showAlert = useCallback((title, textValue) => {
     setAlertConf({
       display: true,
-      title: "Notice ⚠️",
+      title,
       textValue,
       animate: false
     });
@@ -81,7 +81,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     // Perform validation against the last task being deleted in a category
     if (isLastUncheckedTask) {
       if (!task.Description) {
-        showAlert("The last task cannot be removed...");
+        showAlert("This one has to stay 📌", "Every category needs at least one task. If you're done with the category, delete it from its menu instead.");
         return;
       }
 
@@ -104,7 +104,8 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
 
   const handleNewCard = (name) => {
     if (!name || Object.keys(sortedTasks).includes(name)) {
-      showAlert(name ? "That category already exists on this board, chose another..." : "Category name can't be empty...");
+      if (name) showAlert("Already taken 👯", "This board already has a category with that name. Try another one.");
+      else showAlert("Name, please! ✏️", "Every category needs a name, even a short one.");
       return;
     }
 
@@ -166,7 +167,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
             display: true,
             isEdit: false,
             defaultText: "",
-            title: "Enter New Category Name...",
+            title: "Name your new category ✏️",
             callbackFunc: handleNewCard,
           })}
         >

@@ -7,8 +7,8 @@ export const describeApiError = (err, action = 'complete that') => {
 
   if (err?.code === SESSION_EXPIRED || status === 401) {
     return {
-      title: 'Session expired 🔒',
-      textValue: `You've been signed out, so we couldn't ${action}. Sign in again to carry on.`,
+      title: 'Session nodded off 😴',
+      textValue: `You've been signed out, so we couldn't ${action}. Sign back in to carry on.`,
       signIn: true,
     };
   }
@@ -16,52 +16,52 @@ export const describeApiError = (err, action = 'complete that') => {
   // Anything else, such as a failed IndexedDB read, says nothing about the network
   if (!err?.isAxiosError) {
     return {
-      title: 'Something went wrong 💀',
-      textValue: `We couldn't ${action}. Please try again.`,
+      title: 'Well, that was odd 🤔',
+      textValue: `Something hiccuped and we couldn't ${action}. Give it another go.`,
     };
   }
 
   if (!err.response) {
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     return {
-      title: offline ? "You're offline 📡" : 'Connection problem 📡',
+      title: offline ? "You're offline 📡" : 'Connection hiccup 📡',
       textValue: offline
-        ? `We couldn't ${action} because you appear to be offline. Check your connection and try again.`
-        : `We couldn't reach ListPal to ${action}. Check your connection and try again.`,
+        ? `The internet seems to have wandered off, so we couldn't ${action}. Check your connection and give it another go.`
+        : `We couldn't reach ListPal to ${action}. Check your connection and give it another go.`,
     };
   }
 
   if (status === 403) {
     return {
-      title: 'Not allowed 🚫',
-      textValue: `You don't have permission to ${action}. Try refreshing the page, or sign in again.`,
+      title: 'Hold your horses 🚫',
+      textValue: `You don't have permission to ${action}. Try refreshing the page, or signing in again.`,
     };
   }
 
   if (status === 404) {
     return {
-      title: 'Not found 🔍',
-      textValue: `We couldn't ${action} because it no longer exists. It may have been deleted on another device. Try refreshing the page.`,
+      title: 'Vanished into thin air 🔍',
+      textValue: `We couldn't ${action} because it no longer exists. It may have been deleted on another device, so try refreshing the page.`,
     };
   }
 
   if (status === 429) {
     return {
-      title: 'Slow down ⏳',
-      textValue: `Too many requests at once, so we couldn't ${action}. Wait a moment and try again.`,
+      title: 'Whoa, easy there ⏳',
+      textValue: `Too many requests at once, so we couldn't ${action}. Take a breather and try again in a moment.`,
     };
   }
 
   if (status >= 500) {
     return {
-      title: 'Something went wrong 💀',
-      textValue: `Something went wrong on our side and we couldn't ${action}. Please try again in a moment.`,
+      title: "Oops, that's on us 🛠️",
+      textValue: `Something went wrong on our side and we couldn't ${action}. Give it another go in a moment.`,
     };
   }
 
   return {
-    title: 'Something went wrong 💀',
-    textValue: `We couldn't ${action}. Please try again.`,
+    title: "Well, that didn't work 🙃",
+    textValue: `We couldn't ${action}. Give it another go.`,
   };
 };
 

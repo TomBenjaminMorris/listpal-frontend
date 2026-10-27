@@ -101,8 +101,8 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     if (!newTitle) {
       setAlertConf({
         display: true,
-        title: "Notice ⚠️",
-        textValue: "Category name can't be empty...",
+        title: "Name, please! ✏️",
+        textValue: "Every category needs a name, even a short one.",
       });
       setTitleEdited(title);
       return;
@@ -111,8 +111,8 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     if (sortedTasks[newTitle]) {
       setAlertConf({
         display: true,
-        title: "Notice ⚠️",
-        textValue: "That category already exists on this board, chose another...",
+        title: "Already taken 👯",
+        textValue: "This board already has a category with that name. Try another one.",
       });
       setTitleEdited(title);
       return;

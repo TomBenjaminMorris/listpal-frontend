@@ -42,12 +42,12 @@ const Alert = ({ alertConf, setAlertConf }) => {
                   {alertConf.actionLabel}
                 </button>
                 <button className="prompt-button-cancel" onClick={closeAlert}>
-                  Close
+                  Not now
                 </button>
               </>
             ) : (
               <button className="prompt-button" onClick={closeAlert}>
-                Close
+                Got it
               </button>
             )}
           </div>
