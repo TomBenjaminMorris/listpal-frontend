@@ -53,54 +53,45 @@ button:focus-visible {
   }
 }
 
+/* swap: text shows straight away in a fallback font rather than staying invisible while a font downloads */
 @font-face {
   font-family: "CircularBook";
   src: local("CircularBook"),
-    url("./fonts/circular-book.otf") format("opentype");
+    url("./fonts/circular-book.woff2") format("woff2");
   font-weight: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "CircularBold";
   src: local("CircularBold"),
-    url("./fonts/circular-bold.otf") format("opentype");
+    url("./fonts/circular-bold.woff2") format("woff2");
   font-weight: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "CircularBlack";
   src: local("CircularBlack"),
-    url("./fonts/circular-black.otf") format("opentype");
+    url("./fonts/circular-black.woff2") format("woff2");
   font-weight: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "CircularMedium";
   src: local("CircularMedium"),
-    url("./fonts/circular-medium.otf") format("opentype");
+    url("./fonts/circular-medium.woff2") format("woff2");
   font-weight: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "CircularMediumItalic";
   src: local("CircularMediumItalic"),
-    url("./fonts/circular-medium-italic.otf") format("opentype");
+    url("./fonts/circular-medium-italic.woff2") format("woff2");
   font-weight: normal;
-}
-
-
-@font-face {
-  font-family: "CircularBookItalic";
-  src: local("CircularBookItalic"),
-    url("./fonts/circular-bold-italic.otf") format("opentype");
-  font-weight: normal;
-}
-
-@font-face {
-  font-family: "Circular";
-  src: local("Circular"),
-    url("./fonts/circular-black.otf") format("opentype");
-  font-weight: bolder;
+  font-display: swap;
 }
 
 /* 1ms rather than none so animationend still fires; Card removes a deleted category on it */
