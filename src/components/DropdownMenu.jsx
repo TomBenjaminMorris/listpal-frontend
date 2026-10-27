@@ -1,11 +1,14 @@
 import { memo } from 'react';
+import { useOnClickOutside } from 'usehooks-ts';
 import { updateBoardCategoryOrder } from '../utils/apiGatewayClient';
 import { getBoardIdFromUrl } from '../utils/utils';
 import closeIcon from '../assets/icons8-delete-48.png';
 import moveIcon from '../assets/icons8-arrow-50.png';
 import "./DropdownMenu.css";
 
-const DropdownMenu = memo(({ handleDeleteCategory, boards, title, setSortedTasks, sortedTasks, setBoards, setConfirmConf }) => {
+const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, boards, title, setSortedTasks, sortedTasks, setBoards, setConfirmConf }) => {
+  // Here rather than in Card, so only an open menu listens for outside clicks
+  useOnClickOutside(containerRef, onClose);
 
   const boardID = getBoardIdFromUrl();
 

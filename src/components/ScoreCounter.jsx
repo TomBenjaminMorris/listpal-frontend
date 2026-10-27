@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
-import { useOnClickOutside } from 'usehooks-ts';
 import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css';
@@ -19,7 +18,6 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   const [scoreValue, setScoreValue] = useState(score);
   const [animate, setAnimate] = useState(true);
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
-  const scoreRef = useRef(null);
   const prevRef = useRef({ boardSK: undefined, percent: undefined });
 
   const validateAndUpdateScore = async () => {
@@ -88,8 +86,6 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
     }
   }, [percent, score, currentBoardScores?.SK])
 
-  useOnClickOutside(scoreRef, handleScoreUpdate);
-
   const progressBarStyles = buildStyles({
     trailColor: 'var(--text-colour)',
     textColor: 'var(--text-colour)',
@@ -98,7 +94,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
   });
 
   return (
-    <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)} ref={scoreRef}>
+    <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)}>
       <div style={{ width: 45, height: 45 }}>
         {(percent || percent >= 0) && (
           <CircularProgressbarWithChildren value={percent} styles={progressBarStyles}>
@@ -106,7 +102,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
               <input className="score-input" type="text" value={scoreValue} onChange={e => {
                 setScoreValue(e.target.value);
                 setScoreHasChanged(true);
-              }} />
+              }} onBlur={handleScoreUpdate} />
               {isExploding[TYPE_MAPPINGS[type].label] && <img className="star-icon" src={starIcon} alt="star icon" />}
             </div>
           </CircularProgressbarWithChildren>

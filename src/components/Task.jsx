@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { queueUpdate } from '../utils/syncEngine';
-import { useOnClickOutside } from 'usehooks-ts'
 import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
 import arrowIcon from "../assets/icons8-line-50.png"
@@ -148,9 +147,8 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, han
     return "1";
   };
 
-  // Handle click outside task menu
+  // Wraps the menu icon and the menu, which closes itself on a click outside it
   const taskMenuRef = useRef(null);
-  useOnClickOutside(taskMenuRef, () => taskMenuVisible && setTaskMenuVisible(false));
 
   // Extract repeated logic
   const isImportant = task.Important === "true";
@@ -201,6 +199,8 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, han
         <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
+            containerRef={taskMenuRef}
+            onClose={() => setTaskMenuVisible(false)}
             markAsImportant={handleMarkAsImportant}
             deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
             isImportant={isImportant}
