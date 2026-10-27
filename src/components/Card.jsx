@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
@@ -17,8 +17,9 @@ const sortList = list => {
     return acc;
   }, [[], []]);
 
+  // Not by ExpiryDate: every task ticked this week shares next Monday's expiry, and the server returns ties in no set order
   return [
-    ...doneList.sort((a, b) => parseInt(a.ExpiryDate) - parseInt(b.ExpiryDate)),
+    ...doneList.sort((a, b) => parseInt(b.CompletedDate) - parseInt(a.CompletedDate) || parseInt(a.CreatedDate) - parseInt(b.CreatedDate)),
     ...notDoneList.sort((a, b) => parseInt(a.CreatedDate) - parseInt(b.CreatedDate))
   ];
 };
@@ -42,6 +43,40 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   // Keyed on this category's array rather than sortedTasks, so edits elsewhere on the board don't re-sort it.
   // Relies on every change to this category replacing the array, not mutating it
   const orderedTasks = useMemo(() => sortList(tasks), [tasks]);
+
+  // Same approach as CardList's card slide: a ticked task moves up to the done tasks and the tasks it passes move down
+  const containerRef = useRef(null);
+  const taskOrder = orderedTasks.map(t => t.SK).join('\u0000');
+  const lastTaskOrder = useRef(taskOrder);
+  const positionsBeforeChange = useRef(null);
+
+  const measurePositions = () => new Map(
+    [...containerRef.current.children].map(el => [el, el.offsetTop])
+  );
+
+  // Measured during render, while the DOM still shows the old order. Only on a reorder, add or delete: a textarea
+  // growing as the user types would otherwise slide every task below it
+  if (taskOrder !== lastTaskOrder.current && containerRef.current) {
+    positionsBeforeChange.current = measurePositions();
+    lastTaskOrder.current = taskOrder;
+  }
+
+  useLayoutEffect(() => {
+    const before = positionsBeforeChange.current;
+    if (!before) return;
+    positionsBeforeChange.current = null;
+    // Web Animations ignore the CSS reduced-motion rule, so check it here
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    measurePositions().forEach((top, el) => {
+      const prev = before.get(el);
+      if (prev === undefined || prev === top) return;
+      el.animate(
+        [{ transform: `translateY(${prev - top}px)` }, { transform: 'none' }],
+        { duration: 300, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+      );
+    });
+  }, [taskOrder]);
 
   const handleDeleteCategory = () => {
     queueDeleteAll(sortedTasks[title] ?? []);
@@ -227,6 +262,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     <div
       className={`card-container ${isDeleting ? "fadeOutDown-animation" : "fadeUp-animation"}`}
       onAnimationEnd={handleCardAnimationEnd}
+      ref={containerRef}
     >
       <div className="headingWrapper">
         <div className={`card-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : ""}`} ref={emojiMenuRef}>
