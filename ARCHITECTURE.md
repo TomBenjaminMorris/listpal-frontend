@@ -41,7 +41,7 @@ listpal-frontend/
 │   ├── App.css                 Theme variables (:root) for four themes
 │   ├── index.css               Global base styles and fonts (Circular)
 │   ├── config.json             Region, Cognito pool and client IDs, login URLs
-│   ├── fonts/                  Circular .otf files
+│   ├── fonts/                  Circular .woff2 files
 │   ├── assets/                 PNG icons (icons8)
 │   ├── utils/
 │   │   ├── apiGatewayClient.js API wrapper: one function per backend route
@@ -266,7 +266,7 @@ Failures are handled the same way for every call. `apiGet` and `apiPost` log the
 - `App.css` defines four themes on `:root`: `purple-haze` (the default), `granite`, `aqua-mentos` and `cherry-violet`. Each sets `-bg`, `-fg`, `-text-colour`, `-accent` and `-accent-2`.
 - `applyTheme` in `App.jsx` copies the user's theme into the generic variables `--background`, `--foreground`, `--text-colour`, `--accent` and `--accent-2` on `document.documentElement`. Components read the generic names.
 - `App.css` sets `color-scheme: dark`. `index.css` has a light-scheme media query that only changes text colour.
-- Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css`.
+- Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css` as WOFF2 with `font-display: swap`, so text shows at once in a fallback font while they download. Five faces are used: Book, Medium, Medium Italic, Bold and Black. The original `.otf` files were converted with fontTools and deleted; they remain in git history.
 - Shared entrance and exit animations (`fadeIn`, `fadeUp`, `fadeOutDown`, `fadeInPure`) live in `TaskMenu.css` and last 150 to 250 ms. Animations honour `prefers-reduced-motion`: a rule at the end of `index.css` cuts every CSS animation and transition to 1 ms (not zero, so `animationend` still fires for category deletion), and `CardList.jsx` skips its card slide.
 - Layout is responsive. `App.jsx` treats a window narrower than 650 px as mobile (`MOBILE_BREAKPOINT`), and the side bar behaves differently in that mode.
 - The Important highlight on a task covers only the text, line by line. A textarea can't style its own text, so `Task.jsx` renders a hidden copy of the description (`.task-highlight-mirror`) behind the textarea and gives its inline `<span>` the background. The copy shares the `.task-textarea-box` class so it wraps identically. Any change to the textarea's font, padding or width must keep the two in step.
