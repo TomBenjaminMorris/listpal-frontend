@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import closeIcon from '../assets/icons8-close-50-white.png';
+// Imported rather than served from public/ so Vite inlines it, because the banner can first appear while offline
+import tickIcon from '../assets/listpal-icon.png';
 import './TargetBanner.css';
 
 const SLIDE_MS = 400;
@@ -30,7 +32,7 @@ const Banner = ({ type, onDone }) => {
     <div className={`target-banner-slot${phase === 'collapse' ? ' target-banner-slot-collapse' : ''}`}>
       <div className="target-banner-slot-inner">
         <div className={`target-banner target-banner-${phase === 'in' ? 'in' : 'out'}`}>
-          <img className="target-banner-icon" src="/listpal-icon.png" alt="" />
+          <img className="target-banner-icon" src={tickIcon} alt="" />
           <div className="target-banner-text">
             <div className="target-banner-title">{copy.title} {copy.emoji}</div>
             <div className="target-banner-body">{copy.body}</div>
