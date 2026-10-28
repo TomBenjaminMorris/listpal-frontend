@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } fr
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
+import { moveCaretBetweenFields } from '../utils/caretNavigation';
 import addIcon from "../assets/icons8-plus-30.png";
 import dotsIcon from "../assets/icons8-dots-50.png";
 import DropdownMenu from "./DropdownMenu";
@@ -17,11 +18,28 @@ const sortList = list => {
     return acc;
   }, [[], []]);
 
-  // Not by ExpiryDate: every task ticked this week shares next Monday's expiry, and the server returns ties in no set order
+  // Not by ExpiryDate: every task ticked this week shares next Monday's expiry, and the server returns ties in no set order.
+  // Number, not parseInt: a task inserted between two others has a fractional CreatedDate
   return [
-    ...doneList.sort((a, b) => parseInt(a.CompletedDate) - parseInt(b.CompletedDate) || parseInt(a.CreatedDate) - parseInt(b.CreatedDate)),
-    ...notDoneList.sort((a, b) => parseInt(a.CreatedDate) - parseInt(b.CreatedDate))
+    ...doneList.sort((a, b) => parseInt(a.CompletedDate) - parseInt(b.CompletedDate) || Number(a.CreatedDate) - Number(b.CreatedDate)),
+    ...notDoneList.sort((a, b) => Number(a.CreatedDate) - Number(b.CreatedDate))
   ];
+};
+
+const sortedUnticked = list => sortList(list).filter(t => t.CompletedDate === "nil");
+
+// The server ignores CreatedDate on update, so the tasks around a new one can't be renumbered. It takes the midpoint
+// of its neighbours instead, and goes to the bottom once repeated inserts in one gap run out of precision. Above the
+// first unticked task, anything earlier will do, as ticked tasks are sorted apart
+const createdDateBeside = (list, SK, above) => {
+  const unticked = sortedUnticked(list);
+  const index = unticked.findIndex(t => t.SK === SK);
+  if (index === -1) return String(Date.now());
+  if (above && index === 0) return String(Number(unticked[0].CreatedDate) - 1);
+  const prev = Number(unticked[above ? index - 1 : index].CreatedDate);
+  const next = Number(unticked[above ? index : index + 1]?.CreatedDate);
+  const midpoint = (prev + next) / 2;
+  return midpoint > prev && midpoint < next ? String(midpoint) : String(Date.now());
 };
 
 const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
@@ -68,7 +86,11 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     // Web Animations ignore the CSS reduced-motion rule, so check it here
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    measurePositions().forEach((top, el) => {
+    // Only reorders slide. An added task appears at once in its place and a deleted one vanishes at once, so sliding
+    // the tasks below would draw them over the new task or leave a gap where the old one was
+    const after = measurePositions();
+    if (after.size !== before.size) return;
+    after.forEach((top, el) => {
       const prev = before.get(el);
       if (prev === undefined || prev === top) return;
       el.animate(
@@ -145,15 +167,21 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       : prev);
   }, [title, setSortedTasks]);
 
-  const addTask = useCallback(() => {
+  // Where the caret goes once a task shows a given text: { SK, caret, description }, or caret null to keep a new
+  // empty task from taking focus. Task reads it, as React moves the caret to the end whenever it changes a value
+  const focusRequestRef = useRef(null);
+
+  // With besideSK, the new task goes directly below that task (or above it) rather than at the bottom. A split
+  // passes the text after the caret, and the caret follows it to the start of the new task
+  const addTask = useCallback((besideSK, { above = false, description = "" } = {}) => {
     const newTaskData = {
-      CreatedDate: String(Date.now()),
+      CreatedDate: besideSK ? createdDateBeside(tasksRef.current, besideSK, above) : String(Date.now()),
       SK: "t#" + uuidv4(),
       PK: "",
       "GSI1-SK": "nil",
       "GSI1-PK": getBoardIdFromUrl(),
       ExpiryDate: "nil",
-      Description: "",
+      Description: description,
       CompletedDate: "nil",
       Category: title,
       EntityType: "Task",
@@ -163,9 +191,33 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       ExpiryDateTTL: 0
     };
 
+    // An empty task above the caret's task is pushed in by Enter at its start, so the caret stays where it is
+    if (above) focusRequestRef.current = { SK: newTaskData.SK, caret: null, description };
+    else if (description) focusRequestRef.current = { SK: newTaskData.SK, caret: 0, description };
     queueCreate(newTaskData);
     setSortedTasks(prev => ({ ...prev, [title]: [newTaskData, ...(prev[title] || [])] }));
   }, [title, cardEmoji, setSortedTasks]);
+
+  // Joins a task to the unticked task above or below it, as deleting the break between two lines in an editor: the
+  // lower one's text goes onto the end of the upper one, the lower one is deleted, and the caret sits at the join.
+  // The upper one keeps its importance and link. A link on the lower one moves up if the upper one has
+  // none; with a link on each the join is refused rather than lose one. Returns whether it joined
+  const joinTask = useCallback((SK, withAbove) => {
+    const unticked = sortedUnticked(tasksRef.current);
+    const index = unticked.findIndex(t => t.SK === SK);
+    if (index === -1) return false;
+    const [upper, lower] = withAbove ? [unticked[index - 1], unticked[index]] : [unticked[index], unticked[index + 1]];
+    if (!upper || !lower) return false;
+    if (upper.Link && lower.Link) return false;
+
+    const fields = { Description: upper.Description + lower.Description };
+    if (lower.Link) fields.Link = lower.Link;
+    focusRequestRef.current = { SK: upper.SK, caret: upper.Description.length, description: fields.Description };
+    queueUpdate(upper.SK, upper["GSI1-PK"], fields);
+    setTaskFields(upper.SK, fields);
+    handleDeleteTask(lower.SK, title);
+    return true;
+  }, [title, setTaskFields, handleDeleteTask]);
 
   const toggleTaskChecked = useCallback((SK, isChecked) => {
     const list = tasksRef.current ?? [];
@@ -249,6 +301,20 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     setTitleEdited(newTitle);
   }
 
+  // Enter and Escape both leave the title, so both save a rename through blur. Enter carries on into the first task
+  const handleCardTitleKeyDown = e => {
+    if (moveCaretBetweenFields(e) || e.nativeEvent.isComposing) return;
+    if (e.key === "Escape") {
+      e.target.blur();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const firstTask = containerRef.current.querySelector('textarea.task-textarea-box:not(:disabled)');
+      if (!firstTask) return e.target.blur();
+      firstTask.focus();
+      firstTask.setSelectionRange(0, 0);
+    }
+  };
+
   // Blur covers every way of leaving the field: a click elsewhere, Tab or switching window
   const handleCardTitleBlur = () => {
     if (titleHasChanged) {
@@ -276,7 +342,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           )}
         </div>
 
-        <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} onBlur={handleCardTitleBlur} />
+        <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} onBlur={handleCardTitleBlur} onKeyDown={handleCardTitleKeyDown} />
 
         <div className="menu" onClick={() => setDropdownVisible(prev => !prev)} ref={cardMenuRef}>
           <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} src={dotsIcon} alt="menu icon" />
@@ -306,6 +372,8 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           setTaskFields={setTaskFields}
           toggleTaskChecked={toggleTaskChecked}
           addTask={addTask}
+          joinTask={joinTask}
+          focusRequestRef={focusRequestRef}
           handleDeleteTask={handleDeleteTask}
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
@@ -314,7 +382,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       ))}
 
       <div className="new-task-container">
-        <div className="addTaskWrapper" onClick={addTask}>
+        <div className="addTaskWrapper" onClick={() => addTask()}>
           <img className="addTask" src={addIcon} alt="add icon" />
           <div className="addTaskText">new task...</div>
         </div>
