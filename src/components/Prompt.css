@@ -30,6 +30,8 @@
   font-size: 30px;
   font-family: "CircularMedium";
   margin-top: 0;
+  /* A title that must wrap, such as a long board name, splits into even lines instead of stranding its emoji */
+  text-wrap: balance;
 }
 
 .prompt-input {
@@ -91,4 +93,18 @@
   display: flex;
   flex-direction: row-reverse;
   margin-bottom: -10px;
+}
+
+@media screen and (max-width: 650px) {
+  /* The fixed 400px width plus padding is wider than a phone, which pushed the modal off the right edge */
+  .prompt-inner-wrapper {
+    width: auto;
+    flex: 1;
+    padding: 24px;
+    margin: 20vh 16px auto;
+  }
+
+  .prompt-inner-wrapper>h1 {
+    font-size: 24px;
+  }
 }
