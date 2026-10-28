@@ -78,10 +78,10 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
     const uncheckedTasks = tasks.filter(t => t.CompletedDate === "nil");
     const isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK === taskID;
 
-    // Perform validation against the last task being deleted in a category
+    // Card handles a category's only task. Beside ticked tasks, the last unticked one stays, so there's a task to type into
     if (isLastUncheckedTask) {
       if (!task.Description) {
-        showAlert("This one has to stay 📌", "Every category needs at least one task. If you're done with the category, delete it from its menu instead.");
+        showAlert("This one has to stay 📌", "Every category needs one unticked task. If you're done with the category, delete it from its menu instead.");
         return;
       }
 

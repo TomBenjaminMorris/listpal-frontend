@@ -8,7 +8,7 @@ import TaskMenu from './TaskMenu';
 import './Task.css'
 
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
-const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, focusRequestRef, handleDeleteTask, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, focusRequestRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   // Derived, not copied into state: a fresh copy of the board can replace a cached one in place, ticks included
   const checked = task.CompletedDate !== "nil";
@@ -72,8 +72,8 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
     if ((key === "Backspace" || key === "Delete") && value === "") {
       // Found before the delete, while this task is still in the DOM. Backspace prefers the task above and Delete the
-      // one below, falling back to the other. Neither means this is the last unticked task, which can't be deleted,
-      // so focus stays put
+      // one below, falling back to the other. Neither means this is the last unticked task, which isn't simply
+      // deleted, so focus stays put
       const above = findAdjacentTaskTextarea(target, true);
       const below = findAdjacentTaskTextarea(target, false);
       const neighbour = key === "Backspace" ? above ?? below : below ?? above;
@@ -204,7 +204,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             task={task}
             setTaskFields={setTaskFields}
             setPromptConf={setPromptConf}
-            setConfirmConf={setConfirmConf}
             setAlertConf={setAlertConf}
           />
         )}
