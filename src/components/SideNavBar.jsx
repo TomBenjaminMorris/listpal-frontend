@@ -53,7 +53,7 @@ const SideNavBar = ({
   const textClass = sidebarIsOpen ? "sidenav-link-text" : "hidden";
 
   return (
-    <div className={`sidebar-wrapper ${!isMobile ? "fadeInPure-animation" : ""}`} style={{
+    <div className={`sidebar-wrapper ${!isMobile ? "sidebar-fade-in" : ""}`} style={{
       width: sidebarIsOpen ? "250px" : "80px", display: isMobile && hideMobileSidebar ? "none" : "flex"
     }} >
 
