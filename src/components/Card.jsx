@@ -42,7 +42,7 @@ const createdDateBeside = (list, SK, above) => {
   return midpoint > prev && midpoint < next ? String(midpoint) : String(Date.now());
 };
 
-const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf }) => {
+const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
@@ -392,6 +392,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           addTask={addTask}
           joinTask={joinTask}
           focusRequestRef={focusRequestRef}
+          tickedCheckboxRef={tickedCheckboxRef}
           handleDeleteTask={deleteTask}
           setPromptConf={setPromptConf}
           setAlertConf={setAlertConf}

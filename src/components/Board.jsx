@@ -27,7 +27,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
-  const [confettiOrigins, setConfettiOrigins] = useState({}); // Per target, so each burst starts where the pointer was when that target was hit
+  const [confettiOrigins, setConfettiOrigins] = useState({}); // Per target, so each burst stays where it started while later ones start elsewhere
+  // Set by a tick and cleared by a press, so a burst the tick causes starts at the task and any other starts at the pointer
+  const tickedCheckbox = useRef(null);
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const [banners, setBanners] = useState([]);
@@ -130,13 +132,32 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
     };
   };
 
-  // Each burst is pinned where the pointer was when it started, so it stays put while it plays. A target hit while
-  // another burst is still playing gets its own origin rather than reusing the earlier one.
+  const handlePointerDown = (e) => {
+    tickedCheckbox.current = null;
+    trackPointer(e);
+  };
+
+  // A ticked task moves up to the done tasks, and the page can scroll to follow it, so where the pointer was may now
+  // be off screen. The task has only just started sliding, and getBoundingClientRect includes the slide, so take that
+  // off to find where it ends up.
+  const confettiOrigin = () => {
+    const checkbox = tickedCheckbox.current;
+    if (!checkbox?.isConnected) return { ...cursorPosition.current };
+    const rect = checkbox.getBoundingClientRect();
+    const slide = new DOMMatrixReadOnly(getComputedStyle(checkbox.closest('.task-container')).transform);
+    return {
+      x: rect.left + rect.width / 2 - slide.m41 + window.scrollX,
+      y: rect.top + rect.height / 2 - slide.m42 + window.scrollY,
+    };
+  };
+
+  // Each burst is pinned where it started, so it stays put while it plays. A target hit while another burst is still
+  // playing gets its own origin rather than reusing the earlier one.
   const activeConfetti = TARGET_TYPES.filter(type => isExploding[type] && !isTargetMet[type]);
   const activeConfettiKey = activeConfetti.join();
   useEffect(() => {
     setConfettiOrigins(current => Object.fromEntries(
-      activeConfetti.map(type => [type, current[type] ?? { ...cursorPosition.current }])
+      activeConfetti.map(type => [type, current[type] ?? confettiOrigin()])
     ));
   }, [activeConfettiKey]);
 
@@ -298,7 +319,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   };
 
   return (
-    <div className="wrapper" onMouseMove={trackPointer} onPointerDown={trackPointer} >
+    <div className="wrapper" onMouseMove={trackPointer} onPointerDown={handlePointerDown} >
 
       <Suspense fallback={null}>
         {TARGET_TYPES.map((type) => renderConfetti(type))}
@@ -395,6 +416,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}
+              tickedCheckboxRef={tickedCheckbox}
             />
           </div>
         }

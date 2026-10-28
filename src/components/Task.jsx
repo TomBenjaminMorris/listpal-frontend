@@ -8,7 +8,7 @@ import TaskMenu from './TaskMenu';
 import './Task.css'
 
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
-const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, focusRequestRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
+const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   // Derived, not copied into state: a fresh copy of the board can replace a cached one in place, ticks included
   const checked = task.CompletedDate !== "nil";
@@ -21,8 +21,10 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     }
   }, [task.Description]);
 
-  // Toggle checkbox state
+  // Toggle checkbox state. A target this tick meets bursts its confetti from here, wherever the task ends up
+  const checkboxRef = useRef(null);
   const handleCheckBox = () => {
+    tickedCheckboxRef.current = checked ? null : checkboxRef.current;
     toggleTaskChecked(task.SK, !checked);
   }
 
@@ -155,7 +157,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       <img className="task-hover-indicator" src={arrowIcon} alt="follow link icon" />
 
       {/* Checkbox */}
-      <input style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
+      <input ref={checkboxRef} style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 
       {/* Description Input */}
       <div className="task-textarea-wrapper">
