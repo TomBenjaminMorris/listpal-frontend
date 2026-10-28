@@ -31,6 +31,11 @@
     width: calc(100% - 88px);
     margin-left: 12px;
     margin-top: -5px;
+    display: grid;
+}
+
+.task-textarea-wrapper > .task-textarea-box {
+    grid-area: 1 / 1;
 }
 
 .task-textarea-box {
@@ -48,14 +53,15 @@
     border: none;
     border-radius: 5px;
     resize: none;
+    /* The sizer copy sets the height, so the textarea never needs to scroll */
+    overflow: hidden;
     font-family: CircularMedium;
 }
 
 /* Must wrap exactly like the textarea above it, so it shares .task-textarea-box for typography and padding.
    A div inherits text styles from the card that the textarea's UA stylesheet resets, so reset them here too. */
-.task-highlight-mirror {
-    position: absolute;
-    inset: 0;
+.task-highlight-mirror,
+.task-textarea-sizer {
     text-align: start;
     text-indent: 0;
     text-transform: none;
@@ -68,6 +74,15 @@
     word-wrap: break-word;
     pointer-events: none;
     user-select: none;
+}
+
+.task-highlight-mirror {
+    position: absolute;
+    inset: 0;
+}
+
+.task-textarea-sizer {
+    visibility: hidden;
 }
 
 .task-highlight-mirror span {

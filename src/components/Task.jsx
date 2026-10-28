@@ -4,7 +4,6 @@ import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caret
 import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
 import arrowIcon from "../assets/icons8-line-50.png"
-import TextareaAutosize from 'react-textarea-autosize';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
@@ -166,9 +165,13 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             <span>{description}</span>
           </div>
         )}
-        <TextareaAutosize
+        {/* Shares the textarea's grid cell, so the browser sizes the textarea to the wrapped text even when the card's
+            width changes without a resize event. The trailing space keeps a final line break from collapsing. */}
+        <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{description}{' '}</div>
+        <textarea
           ref={textareaRef}
           className={`task-textarea-box ${taskMenuVisible ? "highlight-2" : ""}`}
+          rows={1}
           value={description}
           disabled={checked}
           placeholder="new task..."
