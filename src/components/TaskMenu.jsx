@@ -8,7 +8,7 @@ import plusIcon from '../assets/icons8-plus-30.png';
 import editIcon from '../assets/icons8-edit-48.png';
 import "./TaskMenu.css";
 
-const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setConfirmConf, setAlertConf }) => {
+const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setAlertConf }) => {
   // Here rather than in Task, so only an open menu listens for outside clicks, not every task on the board
   useOnClickOutside(containerRef, onClose);
 
@@ -53,15 +53,6 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
     });
   };
 
-  const handleDeleteTask = () => {
-    setConfirmConf({
-      display: true,
-      title: "Delete this task?",
-      textValue: "🚨 No take-backs: this can't be undone 🚨",
-      callbackFunc: deleteAndHideTask,
-    });
-  };
-
   const linkAction = task.Link ? (
     <li className="task-dropdown-li" onClick={handleEditLink}>
       <img className="task-dropdown-icons" src={editIcon} alt="Edit Link" />
@@ -82,7 +73,7 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
           {`${isImportant ? "Unmark" : "Mark"} as Important`}
         </li>
         {linkAction}
-        <li className="task-dropdown-li" onClick={handleDeleteTask}>
+        <li className="task-dropdown-li" onClick={deleteAndHideTask}>
           <img className="task-dropdown-icons" src={deleteIcon} alt="Delete Icon" />
           Delete Task
         </li>

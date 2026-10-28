@@ -219,6 +219,24 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     return true;
   }, [title, setTaskFields, handleDeleteTask]);
 
+  // A category can't be left with no tasks, so deleting its only task offers to delete the category instead. A join
+  // never gets here, as it needs two tasks
+  const deleteTask = useCallback((SK, taskTitle) => {
+    const list = tasksRef.current ?? [];
+    if (list.length !== 1 || list[0].SK !== SK) {
+      handleDeleteTask(SK, taskTitle);
+      return;
+    }
+    // Keys typed behind the modal would still reach the task, and Enter there would add a task before Confirm sees it
+    document.activeElement?.blur();
+    setConfirmConf({
+      display: true,
+      title: "Delete this category?",
+      textValue: "That's its last task, so the whole category goes with it. 🚨 No take-backs: this can't be undone 🚨",
+      callbackFunc: () => setIsDeleting(true),
+    });
+  }, [handleDeleteTask, setConfirmConf]);
+
   const toggleTaskChecked = useCallback((SK, isChecked) => {
     const list = tasksRef.current ?? [];
     const task = list.find(t => t.SK === SK);
@@ -374,9 +392,8 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           addTask={addTask}
           joinTask={joinTask}
           focusRequestRef={focusRequestRef}
-          handleDeleteTask={handleDeleteTask}
+          handleDeleteTask={deleteTask}
           setPromptConf={setPromptConf}
-          setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
         />
       ))}
