@@ -42,7 +42,7 @@ listpal-frontend/
 │   ├── index.css               Global base styles and fonts (Circular)
 │   ├── config.json             Region, Cognito pool and client IDs, login URLs
 │   ├── fonts/                  Circular .woff2 files
-│   ├── assets/                 PNG icons (icons8)
+│   ├── assets/                 PNG icons (icons8), plus a copy of the app icon for the target banner
 │   ├── utils/
 │   │   ├── alertBus.js         Lets non-React code raise the in-app Alert that App owns
 │   │   ├── apiErrors.js        Turns a failed API call into a plain-language alert
