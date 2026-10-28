@@ -4,7 +4,7 @@ This document is a condensed map of the `listpal-frontend` repository. It is wri
 
 ## 1. Summary
 
-ListPal's frontend is a single-page React app. It shows a user's boards, lets them add and tick off tasks grouped by category, and displays scores against targets. The backend API is the source of truth. Task edits go into an outbox in IndexedDB and are pushed to the backend in batches, between half a second and ten seconds after an edit. Queued edits survive a reload and are retried with backoff until the server confirms them. The app needs the network to load a board, but edits made while offline are kept and sent later.
+ListPal's frontend is a single-page React app. It shows a user's boards, lets them add and tick off tasks grouped by category, and displays scores against targets. The backend API is the source of truth. Task edits go into an outbox in IndexedDB and are pushed to the backend in batches, between half a second and ten seconds after an edit. Queued edits survive a reload and are retried with backoff until the server confirms them. The app needs the network to load a board, but edits made while offline are kept and sent later. When the user comes back to a page left open, it fetches the boards and the shown board's tasks again, so changes made on another device show up without a reload.
 
 | Concern | Choice |
 | --- | --- |
@@ -20,7 +20,7 @@ ListPal's frontend is a single-page React app. It shows a user's boards, lets th
 | Hosting | S3 bucket `www.listpal.dev.vinsp.in` behind CloudFront, provisioned by Terraform |
 | Environments | Effectively one. Local dev (`npm run dev`) talks to the same production API as the deployed site |
 
-Tests run with `npm test` (Vitest). They cover the sync engine (`src/utils/syncEngine.test.js`), using `fake-indexeddb` in place of the browser database, and the API error messages (`src/utils/apiErrors.test.js`).
+Tests run with `npm test` (Vitest). They cover the sync engine (`src/utils/syncEngine.test.js`), using `fake-indexeddb` in place of the browser database, the API error messages (`src/utils/apiErrors.test.js`) and the refresh-on-return triggers (`src/utils/refreshOnReturn.test.js`).
 
 ## 2. Repository layout
 
@@ -50,6 +50,8 @@ listpal-frontend/
 │   │   ├── apiGatewayClient.js API wrapper: one function per backend route
 │   │   ├── authService.js      Token exchange, refresh, storage of tokens
 │   │   ├── localDBHelpers.js   openDB, a promise wrapper for indexedDB.open
+│   │   ├── refreshOnReturn.js  Decides when a page left open is worth refetching (tab shown, focus, online, wake, idle)
+│   │   ├── refreshOnReturn.test.js  Vitest tests for those triggers
 │   │   ├── syncEngine.js       Task outbox: queueing, merging, batching, retries, sync status hook and getter
 │   │   ├── syncEngine.test.js  Vitest tests for the outbox
 │   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
@@ -204,6 +206,46 @@ Each board switch is numbered (`loadCount`), and only the latest load's response
 
 Switching to a board shown before in this session is instant. A layout effect puts the cached copy from `boardCache.js` on screen before the browser paints, with no loader, and `getTasks` then runs in the background: no loader, no alert on failure, and the cached copy stays if it fails. When the fresh copy arrives it replaces the cached one, unless the user edited the board in the meantime. Edits always produce a new `sortedTasks` object, so Board compares against the value the cached copy landed as; those edits are queued, so nothing is lost by keeping them. Because a fresh copy can replace tasks in place, `Task` derives its tick from `task.CompletedDate` rather than keeping its own state, and `Card` follows its first task's `Emoji`.
 
+### 6.1 Refresh on return
+
+A page left open on one device goes stale when the user edits the same boards on another. `watchForReturn` in `refreshOnReturn.js`, started once by `App`, calls back when the user is likely to be looking at the page again:
+
+- the tab becomes visible (`visibilitychange`)
+- the window regains focus
+- the browser comes back `online`
+- the computer wakes from sleep: a 15 s interval notices when far more than 15 s has passed between ticks, because a laptop can wake with the tab visible and focused and fire no event
+- the first pointer or key input after 5 minutes without any, for a laptop left open on the board, which may never hide the tab or lose focus
+
+Each trigger is ignored while the tab is hidden, and only one refresh runs per 30 s (`STALE_AFTER`), so flicking between tabs doesn't refetch every time. Nothing polls, so a tab nobody is looking at makes no requests. A refresh costs one `GET /boards` and, on a board page, one `GET /active-tasks`.
+
+```mermaid
+sequenceDiagram
+    participant W as watchForReturn
+    participant A as App
+    participant B as Board
+    participant S as API
+
+    W->>A: user is back, last refresh 30 s or more ago
+    A->>A: flushNow (at most 3 s)
+    A->>S: GET /boards (silent)
+    S-->>A: boards
+    A->>A: setBoards (boards with queued ticks keep their local scores), refreshCount + 1
+    A->>B: refreshCount prop
+    B->>B: skip if the board is still loading
+    B->>S: getTasks in the background, as for a cached board
+    S-->>B: tasks
+    B->>B: replace sortedTasks unless the user edited since the refresh began
+```
+
+Points to know:
+
+- Boards land before `refreshCount` moves, so the tasks are sorted by the latest `CategoryOrder`.
+- The task refetch reuses the background load of a cached board: the board as it stood when the refresh began is the baseline, and an edit made while the request is in flight keeps the local copy. That edit is queued, so nothing is lost, but the remote changes then wait for the next refresh.
+- A board with task changes still queued on this device keeps its own `WScore`, `MScore` and `YScore`, because the server's scores don't include them yet.
+- A target met on another device shows its star but no confetti or banner, the same as loading a board that is already over target. `ScoreCounter` treats a score change that arrives with a new `refreshCount` as a load rather than a crossing. It updates its copy of `refreshCount` in a separate effect, so a refresh that changes nothing doesn't bulge the counters.
+- Failures are logged and ignored: what is on screen stays, and the next trigger after 30 s tries again.
+- The user's theme and name are not refetched.
+
 ## 7. Task writes and sync
 
 Task edits do not call the API directly. Components call the queue functions in `src/utils/syncEngine.js` with only the fields that changed. The engine stores them in the IndexedDB outbox and sends them in batches to `POST /sync`. The engine is a module singleton, not React state. `App.jsx` calls `startSync` once.
@@ -250,7 +292,7 @@ Edits that bypass the queue and call the API straight away:
 
 | Function | Method and path | Backend status |
 | --- | --- | --- |
-| `getBoards` | `GET /boards` | Present |
+| `getBoards` | `GET /boards` (silent for a refresh on return) | Present |
 | `getUser` | `GET /user` | Present |
 | `getActiveTasks` | `GET /active-tasks` (silent for a background refresh of a cached board) | Present |
 | `syncOps` | `POST /sync` (silent, the sync engine reports failures) | Present |
@@ -392,4 +434,5 @@ These are things a reader should know before changing the app. They are not fixe
 | Add a theme | `src/App.css` (new `:root` block), `src/components/ThemeSetter.jsx`, `src/components/ThemeCard.jsx` (`THEME_NAMES`) |
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |
 | Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.claude/skills/deploy/SKILL.md` |
+| Change when or how a page left open picks up changes from other devices | `src/utils/refreshOnReturn.js` (triggers and timings), `App.jsx` (boards), `Board.jsx` (tasks), `ScoreCounter.jsx` (no confetti for a refresh) |
 | Change the API address or Cognito pool | `src/utils/apiGatewayClient.js`, `src/config.json` |
