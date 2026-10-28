@@ -323,6 +323,8 @@ flowchart LR
 
 Callers that already handle the failure (rename and delete in `Board`, `TargetSetter`) no longer show a second alert of their own. `Board`'s task load passes `silent` and reports the failure itself, because the outbox reads in the same `try` can fail too. The `Alert` sits at `z-index: 3100`, above the targets modal at 3000.
 
+`Prompt`, `Confirm` and `Alert` share `Prompt.css`. The box is 400px wide with a 30px title. Under 650px it fills the screen less a 16px gutter each side, and the title drops to 24px. Titles use `text-wrap: balance`, so one that must wrap splits into even lines rather than leaving its emoji alone on the second. Keep fixed titles short enough for one line on desktop (about 25 characters with an emoji).
+
 ## 9. Styling and theming
 
 - Each component imports its own CSS file. There is no CSS-in-JS, although `@emotion/react` is installed.

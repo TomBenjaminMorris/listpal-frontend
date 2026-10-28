@@ -326,7 +326,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
                     display: true,
                     isEdit: true,
                     defaultText: board.Board,
-                    title: "Give this board a new name ✏️",
+                    title: "Rename this board ✏️",
                     callbackFunc: handleEditBoard,
                   })} />
                 </div>
