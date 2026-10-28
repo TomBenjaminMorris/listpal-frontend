@@ -22,7 +22,7 @@ import './Board.css';
 const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
 const SHOWING_CACHE = Symbol('showing cache');
 
-const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
@@ -34,7 +34,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
   const [remoteData, setRemoteData] = useState(null); // { boardID, load, tasks, failed } so a late response can't land on another board or visit
   const [loadedBoardID, setLoadedBoardID] = useState(null); // Board whose tasks are in sortedTasks; the loader shows until it matches
   const loadCount = useRef(0); // Numbers each board switch, so only the latest load's response is applied
-  // While a cached copy is on screen and the fresh one loads: SHOWING_CACHE until the cached copy lands, then the sortedTasks it landed as
+  // While a background load runs: SHOWING_CACHE until a cached copy lands, then the sortedTasks on screen when it
+  // started (the cached copy, or the board as it was when a refresh on return began)
   const shownFromCache = useRef(null);
   const boardID = getBoardIdFromUrl();
   const board = boards.find(b => b.SK === boardID)
@@ -87,6 +88,14 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
     announced.current.clear()
     setBanners([])
   }, [boardID]);
+
+  // Picks up tasks changed on another device, the same way as a background refresh of a cached board. A board still
+  // loading is skipped, as that load is fetching fresh tasks anyway.
+  useEffect(() => {
+    if (!refreshCount || loadedBoardID !== boardID) return;
+    shownFromCache.current = sortedTasks;
+    getTasks({ load: ++loadCount.current, background: true });
+  }, [refreshCount]);
 
   // Fetched while idle so the first celebration doesn't wait on the network
   useEffect(() => {
@@ -352,6 +361,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, isLoading, setI
                 boards={boards}
                 setBoards={setBoards}
                 boardID={boardID}
+                refreshCount={refreshCount}
                 setAlertConf={setAlertConf}
                 setIsExploding={setIsExploding}
                 setIsTargetMet={setIsTargetMet}

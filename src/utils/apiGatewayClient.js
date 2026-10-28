@@ -61,7 +61,7 @@ const apiPost = async (url, body, { silent = false, action } = {}) => {
 // GET API methods
 export const getActiveTasks = (boardID, { silent = false } = {}) =>
   apiGet('/active-tasks', { boardID }, { silent, action: "load this board's tasks" });
-export const getBoards = () => apiGet('/boards', {}, { action: 'load your boards' });
+export const getBoards = ({ silent = false } = {}) => apiGet('/boards', {}, { silent, action: 'load your boards' });
 export const getUser = () => apiGet('/user', {}, { action: 'load your account details' });
 
 // POST API methods

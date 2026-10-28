@@ -6,7 +6,7 @@ import './ScoreBoard.css';
 // Module level so the fallback keeps its identity and doesn't re-run the counters' effects
 const EMPTY_SCORES = { WScore: 0, MScore: 0, YScore: 0, WTarget: 0, MTarget: 0, YTarget: 0 };
 
-const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
+const ScoreBoard = memo(({ boards, setBoards, boardID, refreshCount, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const currentBoardScores = useMemo(() => boards.find(b => b.SK === boardID) ?? EMPTY_SCORES, [boards, boardID]);
 
   // Derived in the same render as the scores (not in an effect), so a score and its percent never disagree
@@ -23,6 +23,7 @@ const ScoreBoard = memo(({ boards, setBoards, boardID, setAlertConf, setIsExplod
       percent={percent}
       type={type}
       currentBoardScores={currentBoardScores}
+      refreshCount={refreshCount}
       setBoards={setBoards}
       setAlertConf={setAlertConf}
       setIsExploding={setIsExploding}

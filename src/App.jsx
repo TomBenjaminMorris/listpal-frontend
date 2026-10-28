@@ -2,8 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
-import { flushNow, startSync, getSyncStatus, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
+import { flushNow, startSync, getSyncStatus, readPending, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import { setAlertListener } from './utils/alertBus';
+import { watchForReturn } from './utils/refreshOnReturn';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
@@ -25,6 +26,11 @@ const SIDEBAR_BOARDS_MENU_OPEN_KEY = 'sidebarBoardsMenuIsOpen';
 
 const readStoredFlag = (key) => localStorage.getItem(key) === 'true';
 
+const parseBoards = (boardsData) => boardsData.map(board => ({
+  ...board,
+  CategoryOrder: board.CategoryOrder ? JSON.parse(board.CategoryOrder) : []
+}));
+
 // Determine if the app is running id dev or prod
 let isDev = true;
 if (process.env.NODE_ENV === 'development') {
@@ -44,6 +50,7 @@ const App = () => {
   const [hideMobileSidebar, setHideMobileSidebar] = useState(() => !readStoredFlag(SIDEBAR_OPEN_KEY));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshCount, setRefreshCount] = useState(0); // Moves on each refresh on return, after the boards have landed
   const [modalStates, setModalStates] = useState({ prompt: { callbackFunc: () => { } }, confirm: { callbackFunc: () => { } }, alert: {} });
   const [userDetails, setUserDetails] = useState(() => {
     const storedDetails = localStorage.getItem('userDetails');
@@ -119,13 +126,9 @@ const App = () => {
         const boardsAfterSync = flushNow({ timeout: LOAD_FLUSH_TIMEOUT }).then(() => getBoards());
         const [userData, boardsData] = await Promise.all([getUser(), boardsAfterSync]);
         const user = userData[0];
-        const processedBoards = boardsData.map(board => ({
-          ...board,
-          CategoryOrder: board.CategoryOrder ? JSON.parse(board.CategoryOrder) : []
-        }));
 
         setUserDetails(user);
-        setBoards(processedBoards);
+        setBoards(parseBoards(boardsData));
         localStorage.setItem('userDetails', JSON.stringify(user));
       } catch (error) {
         console.error('Failed to load initial data:', error);
@@ -145,6 +148,29 @@ const App = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Picks up changes made on another device when the user comes back. Boards (scores, names, category order)
+  // land before refreshCount moves, so Board refetches its tasks knowing the latest category order.
+  useEffect(() => watchForReturn(async () => {
+    if (!isAuthenticated()) return;
+    try {
+      await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
+      const before = await readPending();
+      const fresh = parseBoards(await getBoards({ silent: true }));
+      const after = await readPending();
+      // The server's scores leave out ticks still queued here, so those boards keep their optimistic scores
+      const pendingBoards = new Set([...before, ...after].map(r => r.boardID));
+      setBoards(current => fresh.map(board => {
+        const local = current.find(b => b.SK === board.SK);
+        return local && pendingBoards.has(board.SK)
+          ? { ...board, WScore: local.WScore, MScore: local.MScore, YScore: local.YScore }
+          : board;
+      }));
+      setRefreshCount(count => count + 1);
+    } catch (error) {
+      console.error('Refresh on return failed, keeping what is on screen:', error);
+    }
+  }), []);
 
   // Apply themes
   useEffect(() => {
@@ -241,6 +267,7 @@ const App = () => {
                 setBoards={setBoards}
                 setSortedTasks={setOrderedSortedTasks}
                 boards={boards}
+                refreshCount={refreshCount}
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 setPromptConf={modalSetters.setPromptConf}

@@ -14,11 +14,11 @@ const TYPE_MAPPINGS = {
 // Returning the same object when nothing changes lets React skip re-rendering the whole board
 const setFlag = (setter, label, value) => setter(current => current[label] === value ? current : { ...current, [label]: value });
 
-const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
+const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCount, setBoards, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const [scoreValue, setScoreValue] = useState(score);
   const [animate, setAnimate] = useState(true);
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
-  const prevRef = useRef({ boardSK: undefined, percent: undefined });
+  const prevRef = useRef({ boardSK: undefined, percent: undefined, refreshCount });
 
   const validateAndUpdateScore = async () => {
     if (scoreValue < 0) {
@@ -74,10 +74,11 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
     const label = TYPE_MAPPINGS[type].label;
     const boardSK = currentBoardScores?.SK;
     // A celebration needs a real crossing: same board, previous percent known and below 100.
-    // Loading a board that is already at or above target (or switching to one) must stay silent.
+    // Loading a board that is already at or above target (or switching to one) must stay silent, and so must a
+    // refresh on return bringing in a target met on another device.
     const prev = prevRef.current;
-    const crossedTarget = !!boardSK && prev.boardSK === boardSK && prev.percent < 100 && percent >= 100;
-    prevRef.current = { boardSK, percent };
+    const crossedTarget = !!boardSK && prev.boardSK === boardSK && prev.refreshCount === refreshCount && prev.percent < 100 && percent >= 100;
+    prevRef.current = { ...prev, boardSK, percent };
     if (percent >= 100) {
       if (crossedTarget) setFlag(setIsTargetMet, label, false);
       setFlag(setIsExploding, label, true);
@@ -85,6 +86,12 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, setBoards
       setFlag(setIsExploding, label, false);
     }
   }, [percent, score, currentBoardScores?.SK])
+
+  // After the effect above, so it sees a refresh that arrived with the new score as different. Not one of its
+  // dependencies, because a refresh that changes nothing mustn't bulge the counter.
+  useEffect(() => {
+    prevRef.current.refreshCount = refreshCount;
+  }, [refreshCount]);
 
   const progressBarStyles = buildStyles({
     trailColor: 'var(--text-colour)',
