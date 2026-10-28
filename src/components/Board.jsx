@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useLayoutEffect, useState, useRef, lazy, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
 import { applyPending, flushNow, mergePending, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
@@ -21,12 +21,13 @@ import './Board.css';
 
 const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
 const SHOWING_CACHE = Symbol('showing cache');
+const TARGET_TYPES = ['weekly', 'monthly', 'yearly'];
 
 const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
-  const [confettiOrigin, setConfettiOrigin] = useState(null);
+  const [confettiOrigins, setConfettiOrigins] = useState({}); // Per target, so each burst starts where the pointer was when that target was hit
   const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
   const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
   const [banners, setBanners] = useState([]);
@@ -129,11 +130,15 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
     };
   };
 
-  // Pinned where the pointer was when it started, so the burst stays put while it plays
-  const confettiActive = ['weekly', 'monthly', 'yearly'].some(type => isExploding[type] && !isTargetMet[type]);
+  // Each burst is pinned where the pointer was when it started, so it stays put while it plays. A target hit while
+  // another burst is still playing gets its own origin rather than reusing the earlier one.
+  const activeConfetti = TARGET_TYPES.filter(type => isExploding[type] && !isTargetMet[type]);
+  const activeConfettiKey = activeConfetti.join();
   useEffect(() => {
-    setConfettiOrigin(confettiActive ? { ...cursorPosition.current } : null);
-  }, [confettiActive]);
+    setConfettiOrigins(current => Object.fromEntries(
+      activeConfetti.map(type => [type, current[type] ?? { ...cursorPosition.current }])
+    ));
+  }, [activeConfettiKey]);
 
   const handleEditBoard = async (name) => {
     if (!name) {
@@ -269,30 +274,35 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
     }));
   };
 
-  const renderConfetti = (type) => (
-    isExploding[type] && !isTargetMet[type] && (
-      <ConfettiExplosion
-        key={type}
-        zIndex={10000}
-        duration={3000}
-        width={window.innerWidth}
-        particleSize={15}
-        particleCount={60}
-        onComplete={() => handleConfettiComplete(type)}
-      />
-    )
+  // Stable, because the library restarts its completion timer whenever onComplete changes, and the board re-renders
+  // during a burst. A new handler each render kept a finished burst counted as playing.
+  const confettiCompleteHandlers = useMemo(
+    () => Object.fromEntries(TARGET_TYPES.map(type => [type, () => handleConfettiComplete(type)])),
+    []
   );
+
+  const renderConfetti = (type) => {
+    const origin = confettiOrigins[type];
+    return isExploding[type] && !isTargetMet[type] && origin && (
+      <div key={type} style={{ position: 'absolute', top: origin.y - 25, left: origin.x - 25 }}>
+        <ConfettiExplosion
+          zIndex={10000}
+          duration={3000}
+          width={window.innerWidth}
+          particleSize={15}
+          particleCount={60}
+          onComplete={confettiCompleteHandlers[type]}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="wrapper" onMouseMove={trackPointer} onPointerDown={trackPointer} >
 
-      {confettiOrigin && (
-        <div style={{ position: 'absolute', top: confettiOrigin.y - 25, left: confettiOrigin.x - 25 }}>
-          <Suspense fallback={null}>
-            {['weekly', 'monthly', 'yearly'].map((type) => renderConfetti(type))}
-          </Suspense>
-        </div>
-      )}
+      <Suspense fallback={null}>
+        {TARGET_TYPES.map((type) => renderConfetti(type))}
+      </Suspense>
 
       <TargetBanner banners={banners} onDone={type => setBanners(current => current.filter(t => t !== type))} />
 
