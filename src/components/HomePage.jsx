@@ -93,7 +93,7 @@ const HomePage = ({ boards = [], setBoards, isLoading, setPromptConf, setAlertCo
   return (
     <div className="home-page-content-wrapper">
       {
-        isLoading ? <Loader /> : (
+        isLoading ? <Loader fullScreen /> : (
           <div className="home-page-content-sub-wrapper fadeUp-animation">
 
             {/* Personalized greeting with optional username */}

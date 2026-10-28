@@ -6,10 +6,15 @@ const LOADER_STYLE = {
   opacity: '0.8',
 };
 
-const Loader = memo(() => (
-  <div className="loadingWrapper">
+// No top padding here, or the dots sit below the sign-in logo they replace
+const FULL_SCREEN_LOADER_STYLE = {
+  opacity: '0.8',
+};
+
+const Loader = memo(({ fullScreen = false }) => (
+  <div className={fullScreen ? 'loadingWrapper fullScreen' : 'loadingWrapper'}>
     <PulseLoader
-      cssOverride={LOADER_STYLE}
+      cssOverride={fullScreen ? FULL_SCREEN_LOADER_STYLE : LOADER_STYLE}
       size={12}
       color="var(--text-colour)"
       speedMultiplier={1}

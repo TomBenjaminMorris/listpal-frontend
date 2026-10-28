@@ -20,6 +20,14 @@
     justify-content: center
 }
 
+/* Centred on the viewport rather than the content area, so the sign-in logo and the loader after it share a centre whatever the sidebar's width */
+.loadingWrapper.fullScreen {
+    position: fixed;
+    inset: 0;
+    height: auto;
+    pointer-events: none;
+}
+
 .homePageContent {
     margin-top: 70px;
 }
