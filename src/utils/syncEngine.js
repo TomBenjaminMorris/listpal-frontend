@@ -65,17 +65,29 @@ export function applyPending(tasks, records, boardID) {
   return [...bySK.values()];
 }
 
-// Pure overlay of queued settings onto boards already parsed from the server. A board the server no longer
-// has stays gone, as its queued edit will come back gone too.
+// The defaults the server gives a board it creates, so a board still waiting to be created looks the same as after
+export const NEW_BOARD_DEFAULTS = { WScore: 0, MScore: 0, YScore: 0, WTarget: 7, MTarget: 31, YTarget: 365, Emoji: '🚀', CategoryOrder: [] };
+
+const boardFields = ({ CategoryOrder, ...rest }) =>
+  ({ ...rest, ...(CategoryOrder !== undefined && { CategoryOrder: JSON.parse(CategoryOrder) }) });
+
+// Pure overlay of queued settings onto boards already parsed from the server, plus any board whose create hasn't
+// reached the server yet. A board the server no longer has otherwise stays gone, as its queued edit will come
+// back gone too.
 export function applyPendingBoards(boards, records) {
-  const pending = new Map(records.filter(isBoardRecord).map(r => [r.SK, r.fields]));
-  return boards.map(board => {
-    const fields = pending.get(board.SK);
-    if (!fields) return board;
-    const { CategoryOrder, ...rest } = fields;
-    return { ...board, ...rest, ...(CategoryOrder !== undefined && { CategoryOrder: JSON.parse(CategoryOrder) }) };
-  });
+  const pending = new Map(records.filter(isBoardRecord).map(r => [r.SK, r]));
+  const known = new Set(boards.map(b => b.SK));
+  const unsent = [...pending.values()]
+    .filter(r => r.kind === 'create' && !known.has(r.SK))
+    .map(r => ({ SK: r.SK, ...NEW_BOARD_DEFAULTS, ...boardFields(r.fields) }));
+  return [
+    ...boards.map(board => pending.has(board.SK) ? { ...board, ...boardFields(pending.get(board.SK).fields) } : board),
+    ...unsent
+  ];
 }
+
+// The server has no such board yet, so asking it for the board's tasks would be refused
+export const boardCreateQueued = (records, boardID) => records.some(r => r.SK === boardID && r.kind === 'create');
 
 // Boards whose scores the server can't know yet, because a tick on them is still queued
 export const boardsWithQueuedTasks = records => new Set(records.filter(isTaskRecord).map(r => r.boardID));
@@ -177,9 +189,26 @@ export function queueDeleteAll(tasks) {
   return queue(tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind: 'delete' })), ACTION_DELAY);
 }
 
+// Later settings merge into the create, as task edits merge into a queued task create
+export function queueBoardCreate(board) {
+  return queue([{ SK: board.SK, boardID: board.SK, kind: 'create', fields: { Board: board.Board } }], ACTION_DELAY);
+}
+
 // Board name, emoji, category order or targets. CategoryOrder goes as the JSON string the server stores.
 export function queueBoardUpdate(boardID, fields) {
   return queue([{ SK: boardID, boardID, kind: 'update', fields }], ACTION_DELAY);
+}
+
+// After the server deletes a board. A queued create whose ack was lost would otherwise bring the board back.
+// Runs between syncs, never during one, so no record dropped here can be mid-request.
+export function forgetBoard(boardID) {
+  return exclusive(async () => {
+    await withStore('readwrite', store => {
+      const request = store.getAll();
+      request.onsuccess = () => request.result.filter(r => r.boardID === boardID).forEach(r => store.delete(r.SK));
+    });
+    await refreshPending();
+  });
 }
 
 function schedule(delay) {
@@ -284,17 +313,21 @@ async function sendBatch() {
   }
 }
 
+// One job at a time in this tab, and under the Web Lock across tabs. inFlight never rejects, so waiting on it can't throw.
+function exclusive(work) {
+  return (async () => {
+    while (inFlight) await inFlight;
+    const job = withLock(work);
+    inFlight = job.catch(() => { }).finally(() => { inFlight = null; });
+    return job;
+  })();
+}
+
 // Resolves once everything queued before the call has been attempted. Never rejects.
 export async function flushNow({ timeout } = {}) {
   clearTimeout(flushTimer);
   firstQueuedAt = null;
-  const run = (async () => {
-    while (inFlight) await inFlight;
-    inFlight = withLock(sendBatch)
-      .catch(error => console.error('Sync lock failed:', error))
-      .finally(() => { inFlight = null; });
-    return inFlight;
-  })();
+  const run = exclusive(sendBatch).catch(error => console.error('Sync lock failed:', error));
   if (!timeout) return run;
   return Promise.race([run, new Promise(resolve => setTimeout(resolve, timeout))]);
 }

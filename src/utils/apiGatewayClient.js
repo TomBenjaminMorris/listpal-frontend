@@ -82,9 +82,6 @@ export const syncOpsKeepalive = (ops) => {
 export const updateThemeAPI = (theme) =>
   apiPost('/user-theme', { theme }, { action: 'save your theme' });
 
-export const newBoardAPI = (boardID, boardName) =>
-  apiPost('/new-board', { boardID, boardName }, { action: 'create the board' });
-
 export const deleteBoard = (boardID) =>
   apiPost('/delete-board', { boardID }, { action: 'delete the board' });
 
