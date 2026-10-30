@@ -102,7 +102,6 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
 
   const handleDeleteCategory = () => {
     queueDeleteAll(sortedTasks[title] ?? []);
-    // Update the state to reflect the deleted category
     const newSortedTasks = { ...sortedTasks };
     delete newSortedTasks[title];
     // From what's on screen, for the same reason as renameCategory
@@ -119,7 +118,6 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   };
 
   const renameCategory = newTitle => {
-    // Perform validations on the new title name
     if (!newTitle) {
       setAlertConf({
         display: true,

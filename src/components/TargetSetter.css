@@ -47,7 +47,7 @@
     color: var(--text-colour);
 }
 
-.set-targets-input:focus, .set-targets-submit:focus, .set-targets-board-select:focus {
+.set-targets-input:focus, .set-targets-submit:focus {
     outline-color: var(--accent);
     outline-style:solid;
     box-shadow: 0 0 0 1px var(--accent);

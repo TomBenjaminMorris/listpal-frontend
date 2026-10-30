@@ -126,7 +126,6 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
       Important: "false",
       ExpiryDateTTL: 0
     };
-    // newTask
 
     // From what's on screen, as the saved order can hold stale or missing names
     const sortArr = [...Object.keys(sortedTasks), name];

@@ -284,12 +284,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   };
 
   const handleConfettiComplete = (type) => {
-    // setAlertConf({
-    //   display: true,
-    //   title: "Great News! 🎉",
-    //   animate: true,
-    //   textValue: `You've hit your ${type} target... Keep going!`,
-    // });
     setIsTargetMet(current => ({
       ...current,
       [type]: true,
