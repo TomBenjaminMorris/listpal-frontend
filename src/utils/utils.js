@@ -1,4 +1,4 @@
-import { updateBoardCategoryOrder } from "./apiGatewayClient";
+import { queueBoardUpdate } from "./syncEngine";
 
 export function parseJwt(token) {
     try {
@@ -44,17 +44,10 @@ export function isUrlValid(userInput) {
     return urlPattern.test(userInput);
 }
 
-export function updateCategoryOrder(sortArr, boards, setBoards) {
+export function updateCategoryOrder(sortArr, setBoards) {
     const boardID = getBoardIdFromUrl();
-    const updatedBoards = boards.map(b => {
-        if (b.SK === boardID) {
-            const updatedBoard = { ...b, CategoryOrder: sortArr };
-            updateBoardCategoryOrder(boardID, JSON.stringify(sortArr));
-            return updatedBoard;
-        }
-        return b;
-    });
-    setBoards(updatedBoards);
+    setBoards(current => current.map(b => b.SK === boardID ? { ...b, CategoryOrder: sortArr } : b));
+    queueBoardUpdate(boardID, { CategoryOrder: JSON.stringify(sortArr) });
 }
 
 export function getBoardIdFromUrl() {

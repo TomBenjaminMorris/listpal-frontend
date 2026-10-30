@@ -1,13 +1,6 @@
 import { useState, useEffect, memo } from 'react';
-import { updateBoardTargetsAPI } from '../utils/apiGatewayClient';
-import PulseLoader from "react-spinners/PulseLoader";
+import { queueBoardUpdate } from '../utils/syncEngine';
 import './TargetSetter.css';
-
-const LOADER_STYLE = {
-  margin: "auto",
-  marginTop: "23px",
-  marginBottom: "12px",
-};
 
 const TARGET_FIELDS = [
   { name: 'weekly', label: 'Weekly', placeholder: 'W', dbField: 'WTarget' },
@@ -17,7 +10,6 @@ const TARGET_FIELDS = [
 
 const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClose }) => {
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
-  const [loadingTargets, setLoadingTargets] = useState(false);
 
   useEffect(() => {
     const board = boards.find(b => b.SK === boardID);
@@ -71,7 +63,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
     return true;
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     if (!validateTargets()) return;
 
@@ -81,21 +73,11 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
       WTarget: toNumber(formData.weekly)
     };
 
-    setLoadingTargets(true);
-    try {
-      await updateBoardTargetsAPI(boardID, targets);
-
-      setBoards(boards.map(board =>
-        board.SK === boardID ? { ...board, ...targets } : board
-      ));
-
-      handleClose();
-    } catch {
-      // apiPost has already raised the alert. Close, as validation does, so clicking it doesn't dismiss the form too
-      handleClose();
-    } finally {
-      setLoadingTargets(false);
-    }
+    setBoards(current => current.map(board =>
+      board.SK === boardID ? { ...board, ...targets } : board
+    ));
+    queueBoardUpdate(boardID, targets);
+    handleClose();
   };
 
   return (
@@ -124,18 +106,7 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
           ))}
         </div>
 
-        {loadingTargets ? (
-          <PulseLoader
-            cssOverride={LOADER_STYLE}
-            size={5}
-            color="var(--text-colour)"
-            speedMultiplier={1}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-          />
-        ) : (
-          <input className="set-targets-submit" type="submit" value="Save" />
-        )}
+        <input className="set-targets-submit" type="submit" value="Save" />
       </form>
     </div>
   );

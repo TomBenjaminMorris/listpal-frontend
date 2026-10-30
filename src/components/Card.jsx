@@ -42,7 +42,7 @@ const createdDateBeside = (list, SK, above) => {
   return midpoint > prev && midpoint < next ? String(midpoint) : String(Date.now());
 };
 
-const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
+const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
@@ -107,7 +107,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     delete newSortedTasks[title];
     // From what's on screen, for the same reason as renameCategory
     const sortArr = Object.keys(sortedTasks).filter(category => category !== title);
-    updateCategoryOrder(sortArr, boards, setBoards);
+    updateCategoryOrder(sortArr, setBoards);
     setSortedTasks(newSortedTasks, sortArr);
   }
 
@@ -150,7 +150,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     // Build the order from what's on screen, as the saved order can hold stale or missing names and
     // anything missing from it sorts to the top
     const sortArr = Object.keys(sortedTasks).map(category => category === title ? newTitle : category);
-    updateCategoryOrder(sortArr, boards, setBoards)
+    updateCategoryOrder(sortArr, setBoards)
     onRename(title, newTitle);
     setSortedTasks(tmpSortedTasks, sortArr);
   };
@@ -369,7 +369,6 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
               containerRef={cardMenuRef}
               onClose={() => setDropdownVisible(false)}
               handleDeleteCategory={() => setIsDeleting(true)}
-              boards={boards}
               title={title}
               sortedTasks={sortedTasks}
               setSortedTasks={setSortedTasks}

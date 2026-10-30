@@ -4,7 +4,7 @@ This document is a condensed map of the `listpal-frontend` repository. It is wri
 
 ## 1. Summary
 
-ListPal's frontend is a single-page React app. It shows a user's boards, lets them add and tick off tasks grouped by category, and displays scores against targets. The backend API is the source of truth. Task edits go into an outbox in IndexedDB and are pushed to the backend in batches, between half a second and ten seconds after an edit. Queued edits survive a reload and are retried with backoff until the server confirms them. The app needs the network to load a board, but edits made while offline are kept and sent later. When the user comes back to a page left open, it fetches the boards and the shown board's tasks again, so changes made on another device show up without a reload.
+ListPal's frontend is a single-page React app. It shows a user's boards, lets them add and tick off tasks grouped by category, and displays scores against targets. The backend API is the source of truth. Task edits and board settings (name, emoji, targets, category order) go into an outbox in IndexedDB and are pushed to the backend in batches, between half a second and ten seconds after an edit. Queued edits survive a reload and are retried with backoff until the server confirms them. The app needs the network to load a board, but edits made while offline are kept and sent later. When the user comes back to a page left open, it fetches the boards and the shown board's tasks again, so changes made on another device show up without a reload.
 
 | Concern | Choice |
 | --- | --- |
@@ -52,7 +52,7 @@ listpal-frontend/
 │   │   ├── localDBHelpers.js   openDB, a promise wrapper for indexedDB.open
 │   │   ├── refreshOnReturn.js  Decides when a page left open is worth refetching (tab shown, focus, online, wake, idle)
 │   │   ├── refreshOnReturn.test.js  Vitest tests for those triggers
-│   │   ├── syncEngine.js       Task outbox: queueing, merging, batching, retries, sync status hook and getter
+│   │   ├── syncEngine.js       Task and board settings outbox: queueing, merging, batching, retries, sync status hook and getter
 │   │   ├── syncEngine.test.js  Vitest tests for the outbox
 │   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
 │   └── components/             Pages and widgets (one .jsx and usually one .css each)
@@ -103,7 +103,7 @@ Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and 
 | --- | --- | --- | --- |
 | `/` | none | Redirects to `/home` | none |
 | `/home` | `HomePage` | Greeting (from the ID token's `given_name`), week number, a random quote, the board list, and board creation | `POST /new-board` (via `BoardList`) |
-| `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed (an alert says so if there are none). The delete, clear and target icons each show a hover label. A deleted category card fades out, and the remaining cards slide into place when categories are added, removed or reordered. Within a card, ticked tasks come first, in the order they were ticked, then unticked tasks in `CreatedDate` order. Tasks edit like lines in a notes app. Enter splits a task at the caret: the text after it (less any selection) moves into a new task directly below, with the caret at its start. Enter at the very start of a task instead adds an empty task above, so the task keeps its link and importance. A new task goes between its neighbours by taking a `CreatedDate` halfway between theirs (fractional if need be), as the server ignores `CreatedDate` on update and neighbours can't be renumbered; above the first unticked task it takes 1 ms before it. The "new task..." button, and Enter at the end of the last unticked task, add at the bottom. Backspace at the start of a task joins it onto the end of the unticked task above, and Delete at the end pulls the task below up into it, with the caret at the join. The upper task keeps its importance and link, a link on the lower one moves up if the upper has none, and a join between two tasks that both have links is refused. Backspace in an empty task deletes it and moves the caret to the end of the unticked task above, or to the start of the one below if it was the first; Delete in an empty task does the same, preferring the task below. Delete Task in a task's menu deletes it at once, with no confirmation. Deleting a category's only task, by key or from its menu, asks whether to delete the whole category instead, and confirming fades the card out as the category menu's delete does. The last unticked task beside ticked ones can't be deleted: one with text is blanked, and an empty one shows an alert. Shift+Enter is left to the textarea, so it adds a line break within the task. Cmd+Enter ticks the task and moves the caret to the start of the unticked task below, or the end of the one above if it was the last; ticking a card's last unticked task adds an empty one, which takes focus. Confetti for a target met by a tick, by click or Cmd+Enter, bursts from the ticked task's checkbox where the task ends up, so it stays in view when the page scrolls to follow the task. Any other burst, such as one from lowering a target, starts at the mouse pointer. Each target pins its own burst to where it started, so a second target hit while the first burst plays gets its own origin, not the first one's. Enter in a category title moves the caret to the start of the card's first unticked task, and Escape in a title or task leaves it; both save a title rename through blur. These keys do nothing to the list while an input method is composing. Tasks slide into place (300 ms) when one is ticked or unticked, so a newly ticked task visibly moves up to the bottom of the ticked tasks. Adding or deleting a task has no slide: the task appears or vanishes at once and the tasks below jump into place, as sliding them would draw them over the new task or leave a gap where the old one was | `GET /active-tasks`, `POST /board-emoji`, `POST /rename-board`, `POST /delete-board`, `POST /board-targets` (via `TargetSetter`) |
+| `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed (an alert says so if there are none). The delete, clear and target icons each show a hover label. A deleted category card fades out, and the remaining cards slide into place when categories are added, removed or reordered. Within a card, ticked tasks come first, in the order they were ticked, then unticked tasks in `CreatedDate` order. Tasks edit like lines in a notes app. Enter splits a task at the caret: the text after it (less any selection) moves into a new task directly below, with the caret at its start. Enter at the very start of a task instead adds an empty task above, so the task keeps its link and importance. A new task goes between its neighbours by taking a `CreatedDate` halfway between theirs (fractional if need be), as the server ignores `CreatedDate` on update and neighbours can't be renumbered; above the first unticked task it takes 1 ms before it. The "new task..." button, and Enter at the end of the last unticked task, add at the bottom. Backspace at the start of a task joins it onto the end of the unticked task above, and Delete at the end pulls the task below up into it, with the caret at the join. The upper task keeps its importance and link, a link on the lower one moves up if the upper has none, and a join between two tasks that both have links is refused. Backspace in an empty task deletes it and moves the caret to the end of the unticked task above, or to the start of the one below if it was the first; Delete in an empty task does the same, preferring the task below. Delete Task in a task's menu deletes it at once, with no confirmation. Deleting a category's only task, by key or from its menu, asks whether to delete the whole category instead, and confirming fades the card out as the category menu's delete does. The last unticked task beside ticked ones can't be deleted: one with text is blanked, and an empty one shows an alert. Shift+Enter is left to the textarea, so it adds a line break within the task. Cmd+Enter ticks the task and moves the caret to the start of the unticked task below, or the end of the one above if it was the last; ticking a card's last unticked task adds an empty one, which takes focus. Confetti for a target met by a tick, by click or Cmd+Enter, bursts from the ticked task's checkbox where the task ends up, so it stays in view when the page scrolls to follow the task. Any other burst, such as one from lowering a target, starts at the mouse pointer. Each target pins its own burst to where it started, so a second target hit while the first burst plays gets its own origin, not the first one's. Enter in a category title moves the caret to the start of the card's first unticked task, and Escape in a title or task leaves it; both save a title rename through blur. These keys do nothing to the list while an input method is composing. Tasks slide into place (300 ms) when one is ticked or unticked, so a newly ticked task visibly moves up to the bottom of the ticked tasks. Adding or deleting a task has no slide: the task appears or vanishes at once and the tasks below jump into place, as sliding them would draw them over the new task or leave a gap where the old one was | `GET /active-tasks`, `POST /delete-board`, `POST /board-scores` (via `ScoreCounter`). Name, emoji, targets and category order go through the outbox to `POST /sync` |
 | `/settings` | `Settings` | Theme choice | `POST /user-theme` (via `ThemeCard`) |
 | `/redirect` | `RedirectPage` | Receives the Cognito `code`, exchanges it for tokens, then goes to `/home`. Its ListPal logo is centred on the viewport, as is the loader `HomePage` shows next (`<Loader fullScreen />`), so the handover doesn't shift whatever the sidebar's width | Cognito token endpoint |
 | `/logout` | `Logout` | Clears storage and sends the user to the managed login | none |
@@ -192,12 +192,12 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 | --- | --- | --- | --- |
 | React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoardID` (the board object is derived from `boards`), modal config | Pages through props | Until a reload |
 | Module state in `boardCache.js` | The last `sortedTasks` shown for each board, keyed on board ID | `Board.jsx` whenever the shown board's `sortedTasks` changes, except the empty board shown behind a load error; dropped when the board is deleted | Until a reload or logout (which reloads). Survives Board unmounting |
-| IndexedDB `listpal-local` / `outbox` | One record per task with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
+| IndexedDB `listpal-local` / `outbox` | One record per task or board with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK`. A board record has `SK` and `boardID` both set to the board ID, `kind: "update"`, and only board settings in `fields` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll`, `queueBoardUpdate` in `syncEngine.js` | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
 | `localStorage` | `sidebarIsOpen`, `sidebarBoardsMenuIsOpen` (`"true"` or `"false"`), read once as the initial React state | `App.jsx` whenever either value changes | Until logout |
 
-`App.jsx` loads the user and the boards on start-up. `getBoards()` waits for an outbox flush first (at most `LOAD_FLUSH_TIMEOUT`, 3 s). Otherwise a tick queued just before a reload, or still in flight from the old page's keepalive request, could land after the scores were read. It parses `CategoryOrder` from a JSON string into an array for each board. `SideNavBar` isn't rendered until this first load settles (`initialLoadDone`, kept apart from `isLoading`, which `Board` turns back on for each board switch), so it fades in with the page content rather than beside the loader, over 250 ms ease-out like the content's `fadeUp-animation`. Board pages then load their tasks separately, in `getTasks` in `Board.jsx`:
+`App.jsx` loads the user and the boards on start-up. `getBoards()` waits for an outbox flush first (at most `LOAD_FLUSH_TIMEOUT`, 3 s). Otherwise a tick queued just before a reload, or still in flight from the old page's keepalive request, could land after the scores were read. It reads the outbox before the flush and again after `GET /boards`, parses `CategoryOrder` from a JSON string into an array for each board, and lays queued board settings over the result with `applyPendingBoards`, so a rename, emoji, target or category order change that hasn't reached the server yet still shows after a reload. `SideNavBar` isn't rendered until this first load settles (`initialLoadDone`, kept apart from `isLoading`, which `Board` turns back on for each board switch), so it fades in with the page content rather than beside the loader, over 250 ms ease-out like the content's `fadeUp-animation`. Board pages then load their tasks separately, in `getTasks` in `Board.jsx`:
 
 1. It reads the outbox (`readPending`).
 2. It calls `getActiveTasks(boardID)` and `flushNow` (waiting at most 3 s) in parallel.
@@ -230,7 +230,7 @@ sequenceDiagram
     A->>A: flushNow (at most 3 s)
     A->>S: GET /boards (silent)
     S-->>A: boards
-    A->>A: setBoards (boards with queued ticks keep their local scores), refreshCount + 1
+    A->>A: setBoards (queued board settings laid over, boards with queued ticks keep their local scores), refreshCount + 1
     A->>B: refreshCount prop
     B->>B: skip if the board is still loading
     B->>S: getTasks in the background, as for a cached board
@@ -242,18 +242,19 @@ Points to know:
 
 - Boards land before `refreshCount` moves, so the tasks are sorted by the latest `CategoryOrder`.
 - The task refetch reuses the background load of a cached board: the board as it stood when the refresh began is the baseline, and an edit made while the request is in flight keeps the local copy. That edit is queued, so nothing is lost, but the remote changes then wait for the next refresh.
-- A board with task changes still queued on this device keeps its own `WScore`, `MScore` and `YScore`, because the server's scores don't include them yet.
+- A board with task changes still queued on this device keeps its own `WScore`, `MScore` and `YScore`, because the server's scores don't include them yet. A queued board settings change doesn't count here, as it can't move scores.
+- Queued board settings are laid over the fetched boards with `applyPendingBoards`, using the same two outbox reads, so a refresh that lands mid-request can't put an old name or category order back on screen.
 - A target met on another device shows its star but no confetti or banner, the same as loading a board that is already over target. `ScoreCounter` treats a score change that arrives with a new `refreshCount` as a load rather than a crossing. It updates its copy of `refreshCount` in a separate effect, so a refresh that changes nothing doesn't bulge the counters.
 - Failures are logged and ignored: what is on screen stays, and the next trigger after 30 s tries again.
 - The user's theme and name are not refetched.
 
 ## 7. Task writes and sync
 
-Task edits do not call the API directly. Components call the queue functions in `src/utils/syncEngine.js` with only the fields that changed. The engine stores them in the IndexedDB outbox and sends them in batches to `POST /sync`. The engine is a module singleton, not React state. `App.jsx` calls `startSync` once.
+Task edits and board settings (name, emoji, targets, category order) do not call the API directly. Components call the queue functions in `src/utils/syncEngine.js` with only the fields that changed. The engine stores them in the IndexedDB outbox and sends them in batches to `POST /sync`. The engine is a module singleton, not React state. `App.jsx` calls `startSync` once.
 
 ```mermaid
 flowchart LR
-    E["Edit a task or category<br/>(description, tick, important, link, create, delete, clear,<br/>rename category, card emoji, delete category)"] --> Q["queueCreate / queueUpdate / queueDelete<br/>queueUpdateAll / queueDeleteAll<br/>merge into each task's outbox record<br/>in one IndexedDB transaction, rev + 1"]
+    E["Edit a task, category or board<br/>(description, tick, important, link, create, delete, clear,<br/>rename category, card emoji, delete category,<br/>board name, emoji, targets, category order)"] --> Q["queueCreate / queueUpdate / queueDelete<br/>queueUpdateAll / queueDeleteAll / queueBoardUpdate<br/>merge into each task's or board's outbox record<br/>in one IndexedDB transaction, rev + 1"]
     Q --> S["Schedule a flush<br/>500 ms (typing: 2 s, at most 10 s)"]
     S --> F["flushNow<br/>one at a time, Web Lock across tabs"]
     F --> P["POST /sync<br/>{ ops: [...] } up to 50"]
@@ -271,6 +272,7 @@ How the outbox works:
   - anything + delete becomes a delete
   - a delete ignores later edits, so the task cannot come back
 - **Category actions are per-task changes.** Renaming a category, changing a card's emoji, deleting a category and clearing completed tasks queue one change per task with `queueUpdateAll` or `queueDeleteAll`, in a single transaction. They merge with any queued edits like any other change, so a pending edit can't undo a rename. They work offline too. A large category is sent over several batches of 50.
+- **Board settings are one record per board.** `queueBoardUpdate` writes to a record keyed on the board ID, so two quick category moves or emoji picks merge into one op carrying the latest value, and nothing can arrive out of order. `CategoryOrder` is queued as the JSON string the server stores. Each caller updates `boards` first with a functional updater, so the change shows at once and works offline. The server applies board ops before task ops in a batch, and reports `gone` for a board deleted since. `applyPending` skips board records, and a queued board record doesn't hold back that board's confirmed scores.
 - **Create then delete.** A create that was never sent and is then deleted is dropped without a request. If the create may already have been sent (`maybeOnServer`), it becomes a delete instead.
 - **Acks are matched by `rev`.** A record edited while its request was in flight is kept, so nothing typed during a sync is lost.
 - **When flushes happen:** after the scheduled delay, when the browser comes back `online`, when the tab is hidden, and at start-up if anything is queued. On `pagehide`, `syncOpsKeepalive` sends the in-memory copy of the queue with `fetch(..., { keepalive: true })`. The records stay queued either way. The server treats a resend as a no-op.
@@ -282,9 +284,7 @@ Edits that bypass the queue and call the API straight away:
 | Action | Where | Endpoint |
 | --- | --- | --- |
 | Manually edit a score | `ScoreCounter.jsx` | `POST /board-scores` |
-| Save category order | `DropdownMenu.jsx` (move up or down), `utils.js` (`updateCategoryOrder`, called from `Card.jsx` and `CardList.jsx`) | `POST /board-category-order` |
-| Create, rename, change emoji, delete a board | `BoardList.jsx`, `Board.jsx` | `POST /new-board`, `/rename-board`, `/board-emoji`, `/delete-board` |
-| Save targets | `TargetSetter.jsx` | `POST /board-targets` |
+| Create, delete a board | `BoardList.jsx`, `Board.jsx` | `POST /new-board`, `/delete-board` |
 | Save theme | `ThemeCard.jsx` | `POST /user-theme` |
 
 ## 8. API client
@@ -300,16 +300,12 @@ Edits that bypass the queue and call the API straight away:
 | `syncOpsKeepalive` | `POST /sync` with `fetch` keepalive, used on `pagehide` | Present |
 | `updateThemeAPI` | `POST /user-theme` | Present |
 | `newBoardAPI` | `POST /new-board` | Present |
-| `renameBoardAPI` | `POST /rename-board` | Present |
-| `updateBoardEmojiAPI` | `POST /board-emoji` | Present |
-| `updateBoardCategoryOrder` | `POST /board-category-order` | Present |
 | `deleteBoard` | `POST /delete-board` | Present |
 | `updateBoardScoresAPI` | `POST /board-scores` | Present |
-| `updateBoardTargetsAPI` | `POST /board-targets` | Present |
 
 Failures are handled the same way for every call. `apiGet` and `apiPost` log the error, show the in-app `Alert` modal (unless the call passes `silent`) and rethrow. The app never uses `window.alert`, which would block the page. A failed token refresh throws an error with code `SESSION_EXPIRED` rather than returning an empty value. The backend returns real HTTP status codes (400, 403, 500) for errors, so axios rejects on them.
 
-Each exported function passes an `action` such as "load your boards" or "save the targets". `apiErrorAlert` in `apiErrors.js` combines it with the kind of failure, so the user reads "The internet seems to have wandered off, so we couldn't save the targets" rather than "Request failed with status code 500". Each kind of failure gets its own light-hearted title (such as "Oops, that's on us 🛠️" for a 5xx), but the text always says what failed and what to do next. An expired session (or a 401) adds a "Sign in" button that goes to `/logout`, which clears the old tokens and opens the sign-in page. Queued task edits sit in IndexedDB, which logout leaves alone, so they are sent after signing in. Errors that are not from axios, such as a failed outbox read, get a general message rather than blaming the network.
+Each exported function passes an `action` such as "load your boards" or "save the score". `apiErrorAlert` in `apiErrors.js` combines it with the kind of failure, so the user reads "The internet seems to have wandered off, so we couldn't save the score" rather than "Request failed with status code 500". Each kind of failure gets its own light-hearted title (such as "Oops, that's on us 🛠️" for a 5xx), but the text always says what failed and what to do next. An expired session (or a 401) adds a "Sign in" button that goes to `/logout`, which clears the old tokens and opens the sign-in page. Queued task edits sit in IndexedDB, which logout leaves alone, so they are sent after signing in. Errors that are not from axios, such as a failed outbox read, get a general message rather than blaming the network.
 
 The client is not a React component, so it reaches the modal through `alertBus.js`. `App` registers its `setAlertConf` as the one listener when it mounts.
 
@@ -321,7 +317,7 @@ flowchart LR
     App --> Alert["Alert modal"]
 ```
 
-Callers that already handle the failure (rename and delete in `Board`, `TargetSetter`) no longer show a second alert of their own. `Board`'s task load passes `silent` and reports the failure itself, because the outbox reads in the same `try` can fail too. The `Alert` sits at `z-index: 3100`, above the targets modal at 3000.
+Callers that already handle the failure (delete in `Board`) don't show a second alert of their own. `Board`'s task load passes `silent` and reports the failure itself, because the outbox reads in the same `try` can fail too. The `Alert` sits at `z-index: 3100`, above the targets modal at 3000.
 
 `Prompt`, `Confirm` and `Alert` share `Prompt.css`. The box is 400px wide with a 30px title. Under 650px it fills the screen less a 16px gutter each side, and the title drops to 24px. Titles use `text-wrap: balance`, so one that must wrap splits into even lines rather than leaving its emoji alone on the second. Keep fixed titles short enough for one line on desktop (about 25 characters with an emoji).
 
@@ -407,7 +403,7 @@ Things to know:
 
 The frontend has no backups of its own. Everything users care about is in the backend, so the backup and restore procedure is documented in `listpal-backend/ARCHITECTURE.md` (section 9).
 
-Unsynced task edits are kept in the IndexedDB outbox across reloads, logouts and network failures, and are sent once the app is open and signed in again. They are lost only if the browser's site data is cleared, or if the server rejects them (for example, edits to a board that has since been deleted).
+Unsynced task edits and board settings are kept in the IndexedDB outbox across reloads, logouts and network failures, and are sent once the app is open and signed in again. They are lost only if the browser's site data is cleared, or if the server rejects them (for example, edits to a board that has since been deleted).
 
 `localStorage` and `sessionStorage` are cleared on logout, so the user has to sign in again. This also resets the sidebar and its Boards menu to closed.
 
@@ -417,7 +413,7 @@ These are things a reader should know before changing the app. They are not fixe
 
 - **The API address is hard-coded.** `apiGatewayClient.js` sets `https://api.vinsp.in`. There is no way to point the app at a different API without editing source.
 - **Tokens sit in `sessionStorage`.** Any script on the page can read them. The managed login URLs in `config.json` carry no `code_challenge`, so the code exchange is not PKCE-protected.
-- **Failed saves aren't rolled back.** Creating a board, its emoji, the category order and the theme are applied on screen before the API call. If the call fails, the alert says so, but the change stays on screen until a reload. Task sync is different: it retries and shows its state on the sync indicator, with no alert. The background refresh of a cached board is silent too, and keeps the cached copy.
+- **Failed saves aren't rolled back.** Creating a board and the theme are applied on screen before the API call. If the call fails, the alert says so, but the change stays on screen until a reload. Task sync is different: it retries and shows its state on the sync indicator, with no alert. The background refresh of a cached board is silent too, and keeps the cached copy.
 - **Keepalive and CORS.** The `pagehide` flush is best effort. Browsers may refuse a keepalive request that needs a CORS preflight. Nothing is lost if it fails, because the outbox is flushed on the next load.
 - **Old tabs block the database upgrade.** A tab still running a build from before the outbox (IndexedDB version 1) does not close its connection, so a new tab's upgrade waits until that tab is closed or reloaded.
 - **Only `main.tsx` is type-checked.** The rest is JavaScript and `tsc` does not look at it, so `npm run build` gives little assurance about most of the code.
@@ -432,7 +428,7 @@ These are things a reader should know before changing the app. They are not fixe
 | --- | --- |
 | Add a page or change routing | `src/App.jsx` (routes), `src/components/` |
 | Add or change a backend call | `src/utils/apiGatewayClient.js`, then the caller in `src/components/` |
-| Change how edits are queued or synced | `src/utils/syncEngine.js` (and its tests), and the write points in `Task.jsx`, `TaskMenu.jsx`, `CardList.jsx`, `Card.jsx`, `Board.jsx` |
+| Change how edits are queued or synced | `src/utils/syncEngine.js` (and its tests), and the write points in `Task.jsx`, `TaskMenu.jsx`, `CardList.jsx`, `Card.jsx`, `Board.jsx`, `DropdownMenu.jsx`, `TargetSetter.jsx`, `utils.js` (`updateCategoryOrder`) |
 | Change scoring or completion dates | `src/components/Card.jsx` (`toggleTaskChecked`), `src/utils/utils.js` (`getNextMondayAt5AM`, `periodsContaining`, `calcPercents`). Server-side score rules are in `listpal-backend/src/task_sync.js` and `score_periods.js` |
 | Change sign-in, tokens or logout | `src/utils/authService.js`, `src/utils/utils.js` (`isTokenExpired`), `src/components/RedirectPage.jsx`, `src/config.json` |
 | Add a theme | `src/App.css` (new `:root` block), `src/components/ThemeSetter.jsx`, `src/components/ThemeCard.jsx` (`THEME_NAMES`) |

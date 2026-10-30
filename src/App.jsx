@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
-import { flushNow, startSync, getSyncStatus, readPending, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
+import { applyPendingBoards, boardsWithQueuedTasks, flushNow, mergePending, startSync, getSyncStatus, readPending, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import { setAlertListener } from './utils/alertBus';
 import { watchForReturn } from './utils/refreshOnReturn';
 import _debounce from 'lodash.debounce';
@@ -124,13 +124,16 @@ const App = () => {
       if (!isAuthenticated()) return;
 
       try {
+        // Read either side of the flush, as Board does for tasks, so a board edit settled in between still shows
+        const before = await readPending();
         // A tick queued before a reload must land before the boards are read, or the scores come back stale
         const boardsAfterSync = flushNow({ timeout: LOAD_FLUSH_TIMEOUT }).then(() => getBoards());
         const [userData, boardsData] = await Promise.all([getUser(), boardsAfterSync]);
+        const after = await readPending();
         const user = userData[0];
 
         setUserDetails(user);
-        setBoards(parseBoards(boardsData));
+        setBoards(applyPendingBoards(parseBoards(boardsData), mergePending(before, after)));
         localStorage.setItem('userDetails', JSON.stringify(user));
       } catch (error) {
         console.error('Failed to load initial data:', error);
@@ -159,10 +162,12 @@ const App = () => {
     try {
       await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
       const before = await readPending();
-      const fresh = parseBoards(await getBoards({ silent: true }));
+      const fetched = parseBoards(await getBoards({ silent: true }));
       const after = await readPending();
+      // Board settings still queued here win over the server's, so a refresh mid-request can't undo them
+      const fresh = applyPendingBoards(fetched, mergePending(before, after));
       // The server's scores leave out ticks still queued here, so those boards keep their optimistic scores
-      const pendingBoards = new Set([...before, ...after].map(r => r.boardID));
+      const pendingBoards = boardsWithQueuedTasks([...before, ...after]);
       setBoards(current => fresh.map(board => {
         const local = current.find(b => b.SK === board.SK);
         return local && pendingBoards.has(board.SK)
