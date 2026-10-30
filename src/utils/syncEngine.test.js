@@ -357,30 +357,20 @@ describe('new boards', () => {
     expect(engine.boardCreateQueued(await engine.readPending(), NEW)).toBe(false);
   });
 
-  it('deletes a board that was never sent by forgetting it and its tasks, leaving other boards alone', async () => {
+  it('forgets everything queued for a deleted board, so a resent create cannot bring it back', async () => {
     await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
     await engine.queueCreate(newTask('t#1'));
     await engine.queueUpdate('t#2', BOARD, { Description: 'elsewhere' });
+    api.syncOps.mockRejectedValueOnce(new Error('Network Error'));
+    await engine.flushNow();
 
-    expect(await engine.forgetUnsentBoard(NEW)).toBe(true);
+    await engine.forgetBoard(NEW);
 
     expect((await engine.readPending()).map(r => r.SK)).toEqual(['t#2']);
     expect(pendingCount()).toBe(1);
   });
 
-  it('leaves a board whose create may have reached the server for the server to delete', async () => {
-    await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
-    api.syncOps.mockRejectedValueOnce(new Error('Network Error'));
-    await engine.flushNow();
-
-    expect(await engine.forgetUnsentBoard(NEW)).toBe(false);
-    expect(pendingCount()).toBe(1);
-
-    expect(await engine.forgetBoard(NEW)).toBe(true);
-    expect(pendingCount()).toBe(0);
-  });
-
-  it('waits for a sync in flight before deciding a board was never sent', async () => {
+  it('waits for a sync in flight before forgetting a board', async () => {
     await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
     let respond;
     api.syncOps.mockImplementationOnce(ops => new Promise(resolve => { respond = () => resolve(applied(ops)); }));
@@ -388,13 +378,13 @@ describe('new boards', () => {
     await vi.waitFor(() => expect(api.syncOps).toHaveBeenCalled());
 
     let settled = false;
-    const forgetting = engine.forgetUnsentBoard(NEW).finally(() => { settled = true; });
+    const forgetting = engine.forgetBoard(NEW).finally(() => { settled = true; });
     await new Promise(resolve => setImmediate(resolve));
     expect(settled).toBe(false);
     respond();
     await flushing;
+    await forgetting;
 
-    // The create was on its way to the server, so the board must be deleted there
-    expect(await forgetting).toBe(false);
+    expect(pendingCount()).toBe(0);
   });
 });

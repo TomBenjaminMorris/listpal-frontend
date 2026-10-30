@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useLayoutEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks } from '../utils/apiGatewayClient';
-import { applyPending, boardCreateQueued, flushNow, forgetBoard, forgetUnsentBoard, mergePending, queueBoardUpdate, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { applyPending, boardCreateQueued, flushNow, forgetBoard, mergePending, queueBoardUpdate, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
 import { getBoardIdFromUrl } from '../utils/utils';
 import { apiErrorAlert } from '../utils/apiErrors';
@@ -177,17 +177,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   const handleDeleteBoard = async () => {
     setIsLoading(true);
     try {
-      const localOnly = await forgetUnsentBoard(boardID).catch(error => {
-        console.error('Could not check the outbox for an unsent board:', error);
-        return false;
-      });
-      if (!localOnly) {
-        // The delete reads the board's tasks and then removes them, so a sync creating one in between would leave it
-        // behind with no board. Sending the queue first means nothing for this board is in flight during the delete.
-        await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
-        await deleteBoard(boardID);
-        await forgetBoard(boardID).catch(error => console.error('Could not clear the deleted board from the outbox:', error));
-      }
+      // The delete reads the board's tasks and then removes them, so a sync creating one in between would leave it
+      // behind with no board. Sending the queue first means nothing for this board is in flight during the delete.
+      await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
+      await deleteBoard(boardID);
+      await forgetBoard(boardID).catch(error => console.error('Could not clear the deleted board from the outbox:', error));
       dropCachedTasks(boardID);
       setBoards((boards) => boards.filter(b => b.SK !== boardID));
       navigate('/home');

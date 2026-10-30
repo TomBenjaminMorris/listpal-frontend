@@ -199,30 +199,17 @@ export function queueBoardUpdate(boardID, fields) {
   return queue([{ SK: boardID, boardID, kind: 'update', fields }], ACTION_DELAY);
 }
 
-// Runs between syncs, never during one, so no record dropped here can be mid-request
-function dropBoardRecords(boardID, { onlyIfUnsent }) {
+// After the server deletes a board. A queued create whose ack was lost would otherwise bring the board back.
+// Runs between syncs, never during one, so no record dropped here can be mid-request.
+export function forgetBoard(boardID) {
   return exclusive(async () => {
-    const dropped = await withStore('readwrite', (store, setResult) => {
+    await withStore('readwrite', store => {
       const request = store.getAll();
-      request.onsuccess = () => {
-        const records = request.result.filter(r => r.boardID === boardID);
-        const board = records.find(r => r.SK === boardID);
-        if (onlyIfUnsent && !(board?.kind === 'create' && !board.maybeOnServer)) return setResult(false);
-        records.forEach(r => store.delete(r.SK));
-        setResult(true);
-      };
+      request.onsuccess = () => request.result.filter(r => r.boardID === boardID).forEach(r => store.delete(r.SK));
     });
     await refreshPending();
-    return dropped;
   });
 }
-
-// A board whose create was never sent exists only here, so dropping its records is the whole delete. Resolves
-// to whether it was such a board.
-export const forgetUnsentBoard = boardID => dropBoardRecords(boardID, { onlyIfUnsent: true });
-
-// After the server deletes a board. A queued create whose ack was lost would otherwise bring the board back.
-export const forgetBoard = boardID => dropBoardRecords(boardID, { onlyIfUnsent: false });
 
 function schedule(delay) {
   const now = Date.now();
