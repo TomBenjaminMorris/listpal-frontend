@@ -11,7 +11,7 @@
   box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
-/* Same duration and easing as fadeUp-animation, so the sidebar and the page content finish appearing together */
+/* The sign-in logo before it has no sidebar, so it would otherwise pop in at the handover to the loader */
 .sidebar-fade-in {
   animation: 250ms ease-out fadeInPure;
 }
@@ -148,4 +148,43 @@
 .sidenav-boards-link-item {
   display: flex;
   gap: 10px;
+}
+
+.sidenav-board-placeholder {
+  pointer-events: none;
+}
+
+.sidenav-board-placeholder>.sidenav-boards-link-item {
+  margin-left: 15px;
+  font-size: 15px;
+  align-items: center;
+}
+
+/* A real row's height comes from its emoji, which varies by platform, so a hidden one keeps the rows the same height */
+.sidenav-board-placeholder>.sidenav-boards-link-item::before {
+  content: "🏠";
+  visibility: hidden;
+  width: 0;
+  margin-right: -10px;
+}
+
+.sidenav-board-placeholder>.sidenav-boards-link-item>div {
+  height: 14px;
+  width: 95px;
+  border-radius: 4px;
+  background-color: var(--text-colour);
+  animation: 900ms ease-in-out infinite alternate sidenavBoardPlaceholderPulse;
+}
+
+.sidenav-board-placeholder>.sidenav-boards-link-item>div:first-child {
+  width: 20px;
+}
+
+@keyframes sidenavBoardPlaceholderPulse {
+  from {
+    opacity: 0.08;
+  }
+  to {
+    opacity: 0.2;
+  }
 }
