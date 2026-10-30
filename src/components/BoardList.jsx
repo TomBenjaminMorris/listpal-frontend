@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { newBoardAPI } from '../utils/apiGatewayClient';
+import { NEW_BOARD_DEFAULTS, queueBoardCreate } from '../utils/syncEngine';
 import './BoardList.css';
 
 const BoardCard = ({ board, onClick }) => {
@@ -27,7 +27,7 @@ const AddBoardButton = ({ onClick }) => (
 );
 
 const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
-  const handleNewBoard = async (name) => {
+  const handleNewBoard = (name) => {
     if (!name?.trim()) {
       setAlertConf({
         display: true,
@@ -37,21 +37,10 @@ const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setAct
       return;
     }
 
-    const newBoard = {
-      SK: "b#" + uuidv4(),
-      Board: name,
-      WTarget: 7,
-      YTarget: 365,
-      MTarget: 31,
-      WScore: 0,
-      MScore: 0,
-      YScore: 0,
-      Emoji: "🚀",
-      CategoryOrder: [],
-    };
+    const newBoard = { SK: "b#" + uuidv4(), Board: name, ...NEW_BOARD_DEFAULTS };
 
     setBoards(prevBoards => [...prevBoards, newBoard]);
-    await newBoardAPI(newBoard.SK, newBoard.Board);
+    queueBoardCreate(newBoard);
   };
 
   const handleAddBoardClick = () => {

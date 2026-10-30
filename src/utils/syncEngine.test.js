@@ -325,3 +325,76 @@ describe('outbox', () => {
     expect(sentOps(0)).toEqual([expect.objectContaining({ SK: 't#2', kind: 'delete' })]);
   });
 });
+
+describe('new boards', () => {
+  const NEW = 'b#new';
+  const newTask = (SK, fields = {}) => task(SK, { 'GSI1-PK': NEW, ...fields });
+
+  it('shows a board whose create is still queued, with the server defaults and its queued settings', () => {
+    const records = [
+      { SK: NEW, boardID: NEW, kind: 'create', fields: { Board: 'Garden', CategoryOrder: '["Beds"]' } },
+      { SK: BOARD, boardID: BOARD, kind: 'create', fields: { Board: 'Landed' } }
+    ];
+    const result = engine.applyPendingBoards([{ SK: BOARD, Board: 'Server', ...engine.NEW_BOARD_DEFAULTS, YScore: 5 }], records);
+
+    expect(result).toEqual([
+      { SK: BOARD, Board: 'Landed', ...engine.NEW_BOARD_DEFAULTS, YScore: 5 },
+      { SK: NEW, ...engine.NEW_BOARD_DEFAULTS, Board: 'Garden', CategoryOrder: ['Beds'] }
+    ]);
+  });
+
+  it('folds settings into the queued create and sends the board ahead of its tasks', async () => {
+    await engine.queueCreate(newTask('t#1', { Description: 'First' }));
+    await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
+    await engine.queueBoardUpdate(NEW, { Emoji: '🌱' });
+    expect(engine.boardCreateQueued(await engine.readPending(), NEW)).toBe(true);
+
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+
+    expect(sentOps(0).map(op => [op.SK, op.kind])).toEqual([[NEW, 'create'], ['t#1', 'create']]);
+    expect(sentOps(0)[0].fields).toEqual({ Board: 'Garden', Emoji: '🌱' });
+    expect(engine.boardCreateQueued(await engine.readPending(), NEW)).toBe(false);
+  });
+
+  it('deletes a board that was never sent by forgetting it and its tasks, leaving other boards alone', async () => {
+    await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
+    await engine.queueCreate(newTask('t#1'));
+    await engine.queueUpdate('t#2', BOARD, { Description: 'elsewhere' });
+
+    expect(await engine.forgetUnsentBoard(NEW)).toBe(true);
+
+    expect((await engine.readPending()).map(r => r.SK)).toEqual(['t#2']);
+    expect(pendingCount()).toBe(1);
+  });
+
+  it('leaves a board whose create may have reached the server for the server to delete', async () => {
+    await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
+    api.syncOps.mockRejectedValueOnce(new Error('Network Error'));
+    await engine.flushNow();
+
+    expect(await engine.forgetUnsentBoard(NEW)).toBe(false);
+    expect(pendingCount()).toBe(1);
+
+    expect(await engine.forgetBoard(NEW)).toBe(true);
+    expect(pendingCount()).toBe(0);
+  });
+
+  it('waits for a sync in flight before deciding a board was never sent', async () => {
+    await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
+    let respond;
+    api.syncOps.mockImplementationOnce(ops => new Promise(resolve => { respond = () => resolve(applied(ops)); }));
+    const flushing = engine.flushNow();
+    await vi.waitFor(() => expect(api.syncOps).toHaveBeenCalled());
+
+    let settled = false;
+    const forgetting = engine.forgetUnsentBoard(NEW).finally(() => { settled = true; });
+    await new Promise(resolve => setImmediate(resolve));
+    expect(settled).toBe(false);
+    respond();
+    await flushing;
+
+    // The create was on its way to the server, so the board must be deleted there
+    expect(await forgetting).toBe(false);
+  });
+});
