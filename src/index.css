@@ -29,12 +29,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-  }
-}
-
 /* swap: text shows straight away in a fallback font rather than staying invisible while a font downloads */
 @font-face {
   font-family: "CircularBook";

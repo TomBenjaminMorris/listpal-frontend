@@ -15,38 +15,112 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /*///////////// DARK THEMES /////////////*/
-
-  /* purple haze */
-  --purple-haze-fg: rgb(35, 34, 50);
-  --purple-haze-bg: rgb(24, 24, 35);
-  --purple-haze-text-colour: rgb(247, 247, 254);
-  --purple-haze-accent: rgb(230, 91, 64);
-  --purple-haze-accent-2: rgba(106, 86, 172, 0.468);
-
-  /* granite */
-  --granite-fg: #242424;
-  --granite-bg: #141414;
-  --granite-text-colour: rgb(247, 247, 254);
-  --granite-accent: rgb(230, 91, 64);
-  --granite-accent-2: rgba(138, 33, 1, 0.444);
-
-  /* aqua mentos */
-  --aqua-mentos-fg: rgb(14, 31, 45);
-  --aqua-mentos-bg: rgb(19, 21, 27);
-  --aqua-mentos-text-colour: rgb(210, 225, 230);
-  --aqua-mentos-accent: rgb(78, 160, 125);
-  --aqua-mentos-accent-2: rgba(215, 126, 94, 0.878);
-
-  /* cherry violet */
-  --cherry-violet-fg: rgb(48, 47, 66);
-  --cherry-violet-bg: rgb(33, 32, 52);
-  --cherry-violet-text-colour: rgb(247, 247, 254);
-  --cherry-violet-accent: rgb(220, 118, 146);
-  --cherry-violet-accent-2: rgba(231, 176, 94, 0.802);
-
   color: var(--text-colour);
-  background-color: var(--background, --purple-haze-bg);
+  background-color: var(--background);
+}
+
+/*///////////// DARK THEMES /////////////*/
+
+/* On :root as well, so a missing or unknown theme name still gets colours */
+:root,
+[data-theme="purple-haze"] {
+  --foreground: rgb(35, 34, 50);
+  --background: rgb(24, 24, 35);
+  --text-colour: rgb(247, 247, 254);
+  --accent: rgb(230, 91, 64);
+  --accent-2: rgba(106, 86, 172, 0.468);
+}
+
+[data-theme="granite"] {
+  --foreground: #242424;
+  --background: #141414;
+  --text-colour: rgb(247, 247, 254);
+  --accent: rgb(230, 91, 64);
+  --accent-2: rgba(138, 33, 1, 0.444);
+}
+
+[data-theme="aqua-mentos"] {
+  --foreground: rgb(14, 31, 45);
+  --background: rgb(19, 21, 27);
+  --text-colour: rgb(210, 225, 230);
+  --accent: rgb(78, 160, 125);
+  --accent-2: rgba(215, 126, 94, 0.878);
+}
+
+[data-theme="cherry-violet"] {
+  --foreground: rgb(48, 47, 66);
+  --background: rgb(33, 32, 52);
+  --text-colour: rgb(247, 247, 254);
+  --accent: rgb(220, 118, 146);
+  --accent-2: rgba(231, 176, 94, 0.802);
+}
+
+/*///////////// THEMES BASED ON EDITOR COLOUR SCHEMES /////////////*/
+/* Text sits on the accent colours, so each accent is the deepest shade
+   the scheme offers rather than its most recognisable pastel. */
+
+[data-theme="dracula"] {
+  --foreground: #343746;
+  --background: #21222c;
+  --text-colour: #f8f8f2;
+  --accent: #ff5555;
+  --accent-2: rgba(189, 147, 249, 0.5);
+}
+
+[data-theme="nord"] {
+  --foreground: #3b4252;
+  --background: #2e3440;
+  --text-colour: #eceff4;
+  --accent: #5e81ac;
+  --accent-2: rgba(191, 97, 106, 0.6);
+}
+
+[data-theme="gruvbox"] {
+  --foreground: #32302f;
+  --background: #1d2021;
+  --text-colour: #ebdbb2;
+  --accent: #d65d0e;
+  --accent-2: rgba(69, 133, 136, 0.7);
+}
+
+[data-theme="tokyo-night"] {
+  --foreground: #24283b;
+  --background: #1a1b26;
+  --text-colour: #c0caf5;
+  --accent: #4f6fc4;
+  --accent-2: rgba(187, 154, 247, 0.5);
+}
+
+[data-theme="solarized"] {
+  --foreground: #073642;
+  --background: #002b36;
+  --text-colour: #eee8d5;
+  --accent: #268bd2;
+  --accent-2: rgba(203, 75, 22, 0.7);
+}
+
+[data-theme="one-dark"] {
+  --foreground: #282c34;
+  --background: #21252b;
+  --text-colour: #dcdfe4;
+  --accent: #4d78cc;
+  --accent-2: rgba(198, 120, 221, 0.5);
+}
+
+[data-theme="monokai"] {
+  --foreground: #272822;
+  --background: #1e1f1c;
+  --text-colour: #f8f8f2;
+  --accent: #f92672;
+  --accent-2: rgba(166, 226, 46, 0.45);
+}
+
+[data-theme="rose-pine"] {
+  --foreground: #26233a;
+  --background: #191724;
+  --text-colour: #e0def4;
+  --accent: #31748f;
+  --accent-2: rgba(235, 111, 146, 0.6);
 }
 
 button {

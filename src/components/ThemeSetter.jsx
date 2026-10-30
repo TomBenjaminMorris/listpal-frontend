@@ -1,22 +1,17 @@
 import { memo } from 'react';
 import ThemeCard from './ThemeCard';
+import { THEMES } from '../utils/themes';
 import './ThemeSetter.css';
-
-const THEME_OPTIONS = [
-  'purple-haze',
-  'granite',
-  'aqua-mentos',
-  'cherry-violet'
-];
 
 const ThemeCards = memo(({ userDetails, setUserDetails }) => (
   <div className="theme-card-outer-wrapper">
-    {THEME_OPTIONS.map(theme => (
+    {THEMES.map(({ id, label }) => (
       <ThemeCard
-        key={theme}
-        name={theme}
+        key={id}
+        id={id}
+        label={label}
         setUserDetails={setUserDetails}
-        highlight={userDetails?.Theme === theme}
+        highlight={userDetails?.Theme === id}
       />
     ))}
   </div>

@@ -72,17 +72,7 @@ const App = () => {
   useEffect(() => setAlertListener(modalSetters.setAlertConf), [modalSetters]);
 
   const applyTheme = useCallback((theme) => {
-    const cssVars = {
-      '--background': `var(--${theme}-bg)`,
-      '--foreground': `var(--${theme}-fg)`,
-      '--text-colour': `var(--${theme}-text-colour)`,
-      '--accent': `var(--${theme}-accent)`,
-      '--accent-2': `var(--${theme}-accent-2)`
-    };
-
-    Object.entries(cssVars).forEach(([property, value]) => {
-      document.documentElement.style.setProperty(property, value);
-    });
+    document.documentElement.dataset.theme = theme;
   }, []);
 
   // Queued edits survive a reload and are resent on the next load, so only warn while syncing is failing:
