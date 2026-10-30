@@ -79,6 +79,43 @@ describe('applyPending', () => {
     const result = engine.applyPending(fetched, records, BOARD);
     expect(result.map(t => [t.SK, t.Description])).toEqual([['t#1', 'local'], ['t#3', 'new']]);
   });
+
+  it('ignores the board settings record for the same board', () => {
+    const records = [{ SK: BOARD, boardID: BOARD, kind: 'update', fields: { Emoji: '🏡' } }];
+    expect(engine.applyPending([task('t#1')], records, BOARD)).toEqual([task('t#1')]);
+  });
+});
+
+describe('applyPendingBoards', () => {
+  const board = (SK, fields = {}) => ({ SK, Board: 'Server', Emoji: '🚀', CategoryOrder: ['A', 'B'], WTarget: 7, WScore: 2, ...fields });
+
+  it('overlays queued settings, parsing the category order, and leaves other boards alone', () => {
+    const records = [
+      { SK: BOARD, boardID: BOARD, kind: 'update', fields: { Board: 'Local', CategoryOrder: '["B","A"]', WTarget: 3 } },
+      { SK: 't#1', boardID: 'b#other', kind: 'update', fields: { Emoji: '🐛' } }
+    ];
+    const result = engine.applyPendingBoards([board(BOARD), board('b#other')], records);
+    expect(result).toEqual([
+      board(BOARD, { Board: 'Local', CategoryOrder: ['B', 'A'], WTarget: 3 }),
+      board('b#other')
+    ]);
+  });
+
+  it('does not bring back a board the server no longer has', () => {
+    const records = [{ SK: 'b#deleted', boardID: 'b#deleted', kind: 'update', fields: { Emoji: '🏡' } }];
+    expect(engine.applyPendingBoards([board(BOARD)], records)).toEqual([board(BOARD)]);
+  });
+
+  it('keeps a setting the flush applied between the fetch and the second read', async () => {
+    await engine.queueBoardUpdate(BOARD, { Emoji: '🏡' });
+    const before = await engine.readPending();
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+    const after = await engine.readPending();
+    expect(after).toEqual([]);
+    const shown = engine.applyPendingBoards([board(BOARD)], engine.mergePending(before, after));
+    expect(shown[0].Emoji).toBe('🏡');
+  });
 });
 
 describe('mergePending', () => {
@@ -232,6 +269,51 @@ describe('outbox', () => {
     await engine.flushNow();
 
     expect(sentOps(0)).toEqual([expect.objectContaining({ fields: { Description: 'typed before the rename', Category: 'New' } })]);
+  });
+
+  it('folds board settings into one op per board, the latest value of each field winning', async () => {
+    await engine.queueBoardUpdate(BOARD, { CategoryOrder: '["A","B"]' });
+    await engine.queueBoardUpdate(BOARD, { Emoji: '🏡' });
+    await engine.queueBoardUpdate(BOARD, { CategoryOrder: '["B","A"]' });
+    expect(pendingCount()).toBe(1);
+
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+
+    expect(sentOps(0)).toEqual([{
+      opId: `${BOARD}:3`, SK: BOARD, boardID: BOARD, kind: 'update', fields: { CategoryOrder: '["B","A"]', Emoji: '🏡' }
+    }]);
+    expect(pendingCount()).toBe(0);
+  });
+
+  it('keeps a board setting changed again while its sync was in flight', async () => {
+    await engine.queueBoardUpdate(BOARD, { Board: 'First' });
+    api.syncOps.mockImplementationOnce(async ops => {
+      await engine.queueBoardUpdate(BOARD, { Board: 'Second' });
+      return applied(ops);
+    });
+    await engine.flushNow();
+    expect(pendingCount()).toBe(1);
+
+    api.syncOps.mockImplementation(async ops => applied(ops));
+    await engine.flushNow();
+    expect(sentOps(1)).toEqual([expect.objectContaining({ SK: BOARD, kind: 'update', fields: { Board: 'Second' } })]);
+  });
+
+  it('a queued board setting does not hold back confirmed scores', async () => {
+    const onBoardScores = vi.fn();
+    engine.startSync({ onBoardScores });
+    const scores = [{ SK: BOARD, WScore: 1, MScore: 1, YScore: 1 }];
+
+    await engine.queueUpdate('t#1', BOARD, { CompletedDate: '123' });
+    api.syncOps.mockImplementationOnce(async ops => {
+      await engine.queueBoardUpdate(BOARD, { Emoji: '🏡' });
+      return { ...applied(ops), boards: scores };
+    });
+    await engine.flushNow();
+
+    expect(onBoardScores).toHaveBeenCalledWith(scores);
+    expect(engine.boardsWithQueuedTasks(await engine.readPending())).toEqual(new Set());
   });
 
   it('deleting a category forgets unsent creates and deletes the rest', async () => {

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useLayoutEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
-import { deleteBoard, getActiveTasks, renameBoardAPI, updateBoardEmojiAPI } from '../utils/apiGatewayClient';
-import { applyPending, flushNow, mergePending, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { deleteBoard, getActiveTasks } from '../utils/apiGatewayClient';
+import { applyPending, flushNow, mergePending, queueBoardUpdate, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
 import { getBoardIdFromUrl } from '../utils/utils';
 import { apiErrorAlert } from '../utils/apiErrors';
@@ -161,7 +161,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
     ));
   }, [activeConfettiKey]);
 
-  const handleEditBoard = async (name) => {
+  const handleEditBoard = (name) => {
     if (!name) {
       setAlertConf({
         display: true,
@@ -170,19 +170,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
       });
       return;
     }
-    setIsLoading(true);
-
-    try {
-      await renameBoardAPI(boardID, name);
-      setBoards(current => {
-        return current.map(b => b.SK === boardID ? { ...b, Board: name } : b);
-      });
-
-    } catch {
-      // apiPost has already shown the user what went wrong
-    } finally {
-      setIsLoading(false);
-    }
+    setBoards(current => current.map(b => b.SK === boardID ? { ...b, Board: name } : b));
+    queueBoardUpdate(boardID, { Board: name });
   };
 
   const handleDeleteBoard = async () => {
@@ -274,12 +263,12 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
 
   const handleEmojiSelect = (e) => {
     const selectedEmoji = e.native;
-    updateBoardEmojiAPI(boardID, selectedEmoji);
     setBoards(current =>
       current.map(b =>
         b.SK === boardID ? { ...b, Emoji: selectedEmoji } : b
       )
     );
+    queueBoardUpdate(boardID, { Emoji: selectedEmoji });
   };
 
   const handleConfettiComplete = (type) => {
@@ -412,7 +401,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
               sortedTasks={sortedTasks}
               setSortedTasks={setSortedTasks}
               setBoards={setBoards}
-              boards={boards}
               setPromptConf={setPromptConf}
               setConfirmConf={setConfirmConf}
               setAlertConf={setAlertConf}

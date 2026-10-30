@@ -1,16 +1,13 @@
 import { memo } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
-import { updateBoardCategoryOrder } from '../utils/apiGatewayClient';
-import { getBoardIdFromUrl } from '../utils/utils';
+import { updateCategoryOrder as saveCategoryOrder } from '../utils/utils';
 import closeIcon from '../assets/icons8-delete-48.png';
 import moveIcon from '../assets/icons8-arrow-50.png';
 import "./DropdownMenu.css";
 
-const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, boards, title, setSortedTasks, sortedTasks, setBoards, setConfirmConf }) => {
+const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, title, setSortedTasks, sortedTasks, setBoards, setConfirmConf }) => {
   // Here rather than in Card, so only an open menu listens for outside clicks
   useOnClickOutside(containerRef, onClose);
-
-  const boardID = getBoardIdFromUrl();
 
   const moveArrayElement = (array, element, delta) => {
     const index = array.indexOf(element);
@@ -25,14 +22,7 @@ const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, boards
   const updateCategoryOrder = (direction) => {
     // Move within the categories actually on screen, as the saved order can hold stale or missing names
     const newCategoryOrder = moveArrayElement(Object.keys(sortedTasks), title, direction);
-    const updatedBoards = boards.map(board => {
-      if (board.SK !== boardID) return board;
-      const updatedBoard = { ...board, CategoryOrder: newCategoryOrder };
-      updateBoardCategoryOrder(boardID, JSON.stringify(newCategoryOrder));
-      return updatedBoard;
-    });
-
-    setBoards(updatedBoards);
+    saveCategoryOrder(newCategoryOrder, setBoards);
     // Pass the new order explicitly: the active board in App is only updated after this render
     setSortedTasks(sortedTasks, newCategoryOrder);
   };

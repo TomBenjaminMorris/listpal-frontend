@@ -85,21 +85,9 @@ export const updateThemeAPI = (theme) =>
 export const newBoardAPI = (boardID, boardName) =>
   apiPost('/new-board', { boardID, boardName }, { action: 'create the board' });
 
-export const renameBoardAPI = (boardID, name) =>
-  apiPost('/rename-board', { boardID, name }, { action: 'rename the board' });
-
-export const updateBoardEmojiAPI = (boardID, emoji) =>
-  apiPost('/board-emoji', { boardID, emoji }, { action: "save the board's emoji" });
-
-export const updateBoardCategoryOrder = (boardID, categoryOrder) =>
-  apiPost('/board-category-order', { boardID, categoryOrder }, { action: 'save the new category order' });
-
 export const deleteBoard = (boardID) =>
   apiPost('/delete-board', { boardID }, { action: 'delete the board' });
 
 
 export const updateBoardScoresAPI = (boardID, scores) =>
   apiPost('/board-scores', { boardID, scores }, { action: 'save the score' });
-
-export const updateBoardTargetsAPI = (boardID, targets) =>
-  apiPost('/board-targets', { boardID, targets }, { action: 'save the targets' });

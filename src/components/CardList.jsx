@@ -5,7 +5,7 @@ import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   // Stable React keys per category, so a rename doesn't remount the card and replay its entry animation
@@ -130,7 +130,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
 
     // From what's on screen, as the saved order can hold stale or missing names
     const sortArr = [...Object.keys(sortedTasks), name];
-    updateCategoryOrder(sortArr, boards, setBoards)
+    updateCategoryOrder(sortArr, setBoards)
 
     queueCreate(newCardDefaultTask);
 
@@ -153,7 +153,6 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, boards, setPromptCon
           sortedTasks={sortedTasks}
           handleDeleteTask={handleDeleteTask}
           setBoards={setBoards}
-          boards={boards}
           setPromptConf={setPromptConf}
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}

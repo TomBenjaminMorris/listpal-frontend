@@ -30,7 +30,7 @@ let onBoardScores = () => { };
 let status = { pending: 0, syncing: false, lastError: null };
 const listeners = new Set();
 
-// Pure merge of a new change into the outbox record for the same task. Returns null to drop the record.
+// Pure merge of a new change into the outbox record for the same task or board. Returns null to drop the record.
 export function mergeRecord(existing, { SK, boardID, kind, fields = {} }) {
   if (!existing) {
     return { SK, boardID, kind, fields: { ...fields }, rev: 1 };
@@ -46,10 +46,14 @@ export function mergeRecord(existing, { SK, boardID, kind, fields = {} }) {
   return { ...existing, fields: { ...existing.fields, ...fields }, rev };
 }
 
+// Board settings records share the outbox, keyed on the board ID
+const isTaskRecord = r => r.SK.startsWith('t#');
+const isBoardRecord = r => r.SK.startsWith('b#');
+
 // Pure overlay of queued changes onto tasks fetched from the server, so a reload shows unsynced edits.
 export function applyPending(tasks, records, boardID) {
   const bySK = new Map(tasks.map(t => [t.SK, t]));
-  records.filter(r => r.boardID === boardID).forEach(r => {
+  records.filter(r => isTaskRecord(r) && r.boardID === boardID).forEach(r => {
     if (r.kind === 'delete') {
       bySK.delete(r.SK);
     } else if (bySK.has(r.SK)) {
@@ -60,6 +64,21 @@ export function applyPending(tasks, records, boardID) {
   });
   return [...bySK.values()];
 }
+
+// Pure overlay of queued settings onto boards already parsed from the server. A board the server no longer
+// has stays gone, as its queued edit will come back gone too.
+export function applyPendingBoards(boards, records) {
+  const pending = new Map(records.filter(isBoardRecord).map(r => [r.SK, r.fields]));
+  return boards.map(board => {
+    const fields = pending.get(board.SK);
+    if (!fields) return board;
+    const { CategoryOrder, ...rest } = fields;
+    return { ...board, ...rest, ...(CategoryOrder !== undefined && { CategoryOrder: JSON.parse(CategoryOrder) }) };
+  });
+}
+
+// Boards whose scores the server can't know yet, because a tick on them is still queued
+export const boardsWithQueuedTasks = records => new Set(records.filter(isTaskRecord).map(r => r.boardID));
 
 // Pure union of two outbox reads taken either side of a flush. A record settled in between is still in
 // the first read, so it covers a fetch that ran before the server applied it; the later read wins per task.
@@ -158,6 +177,11 @@ export function queueDeleteAll(tasks) {
   return queue(tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind: 'delete' })), ACTION_DELAY);
 }
 
+// Board name, emoji, category order or targets. CategoryOrder goes as the JSON string the server stores.
+export function queueBoardUpdate(boardID, fields) {
+  return queue([{ SK: boardID, boardID, kind: 'update', fields }], ACTION_DELAY);
+}
+
 function schedule(delay) {
   const now = Date.now();
   if (firstQueuedAt === null) firstQueuedAt = now;
@@ -237,8 +261,8 @@ async function sendBatch() {
     await settle(response.results, records);
     const remaining = await refreshPending();
 
-    // Scores for a board with more changes queued would be out of date by the time they render
-    const boardsWithPending = new Set(remaining.map(r => r.boardID));
+    // Scores for a board with more task changes queued would be out of date by the time they render
+    const boardsWithPending = boardsWithQueuedTasks(remaining);
     const settledScores = (response.boards ?? []).filter(b => !boardsWithPending.has(b.SK));
     if (settledScores.length) onBoardScores(settledScores);
 
