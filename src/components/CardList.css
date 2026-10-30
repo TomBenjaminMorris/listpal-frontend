@@ -24,8 +24,10 @@
     /* Sized as one slot of a full row rather than growing into the leftover space, so it matches the card it creates.
        The breakpoints are where .card-container (550px min-width, 30% basis) fits 2 and 3 per row with the 20px gap */
     flex: 0 0 100%;
+    /* The flex-basis is a whole slot, so the border has to sit inside it */
+    box-sizing: border-box;
     transition: background-color 150ms, opacity 150ms;
-    height: 120px;
+    height: 128px;
 }
 
 @container (min-width: 1120px) {
