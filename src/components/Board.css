@@ -198,12 +198,13 @@
     pointer-events: none;
 }
 
+/* Above the bottom gradient and side bar (2000), but under the modal backdrop (3000) so an open modal blurs it too */
 .board-local-sync-indicator-wrapper {
     background-color: var(--background);
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 20000;
+    z-index: 2500;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     width: 30px;
     height: 30px;
@@ -224,7 +225,7 @@
     position: fixed;
     bottom: 20px;
     right: 62px;
-    z-index: 20000;
+    z-index: 2500;
     height: 30px;
     line-height: 30px;
     padding: 0 14px;
