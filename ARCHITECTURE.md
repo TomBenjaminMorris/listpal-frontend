@@ -37,7 +37,7 @@ listpal-frontend/
 ├── src/
 │   ├── main.tsx                ReactDOM.createRoot; StrictMode is commented out
 │   ├── App.jsx                 Shell: routes, boards state, starts the sync engine, modals, theme
-│   ├── App.css                 Theme variables (:root) for four themes
+│   ├── App.css                 Theme colours: a [data-theme] block for each of twelve themes
 │   ├── index.css               Global base styles and fonts (Circular)
 │   ├── config.json             Region, Cognito pool and client IDs, login URLs
 │   ├── fonts/                  Circular .woff2 files
@@ -53,6 +53,7 @@ listpal-frontend/
 │   │   ├── refreshOnReturn.test.js  Vitest tests for those triggers
 │   │   ├── syncEngine.js       Task and board settings outbox: queueing, merging, batching, retries, sync status hook and getter
 │   │   ├── syncEngine.test.js  Vitest tests for the outbox
+│   │   ├── themes.js           The list of themes: each one's ID and display name
 │   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
 │   └── components/             Pages and widgets (one .jsx and usually one .css each)
 ├── terraform/
@@ -322,9 +323,11 @@ Callers that already handle the failure (delete in `Board`) don't show a second 
 ## 9. Styling and theming
 
 - Each component imports its own CSS file. There is no CSS-in-JS.
-- `App.css` defines four themes on `:root`: `purple-haze` (the default), `granite`, `aqua-mentos` and `cherry-violet`. Each sets `-bg`, `-fg`, `-text-colour`, `-accent` and `-accent-2`.
-- `applyTheme` in `App.jsx` copies the user's theme into the generic variables `--background`, `--foreground`, `--text-colour`, `--accent` and `--accent-2` on `document.documentElement`. Components read the generic names.
-- `App.css` sets `color-scheme: dark`. `index.css` has a light-scheme media query that only changes text colour.
+- `App.css` defines twelve themes, each as a `[data-theme="<id>"]` block. Four are original: `purple-haze` (the default), `granite`, `aqua-mentos` and `cherry-violet`. Eight follow editor colour schemes: `dracula`, `nord`, `gruvbox`, `tokyo-night`, `solarized`, `one-dark`, `monokai` and `rose-pine`. Each sets `--background`, `--foreground`, `--text-colour`, `--accent` and `--accent-2`. The `purple-haze` block also applies to `:root`, so a missing or unknown theme name falls back to it.
+- `src/utils/themes.js` lists each theme's ID and display name. `ThemeSetter` builds the Settings cards from it.
+- Text in `--text-colour` sits on `--accent` (buttons, date pills, tooltips, board hover), so an accent must be dark enough to read on. The original themes range from about 2.4:1 to 3.3:1, and new themes should stay within that. Pastel schemes therefore use their deepest shade as the accent: Dracula uses its red, not its pink or purple.
+- `applyTheme` in `App.jsx` sets `data-theme` on `document.documentElement`, and components read the generic variable names. Custom properties apply to everything inside an element, so a nested `data-theme` overrides the page's theme for that subtree: each `ThemeCard` previews its own theme this way, and `RedirectPage` always uses `purple-haze`.
+- `App.css` sets `color-scheme: dark`. The operating system's light or dark setting has no effect: only the chosen theme decides the colours.
 - Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css` as WOFF2 with `font-display: swap`, so text shows at once in a fallback font while they download. Four faces are used: Book, Medium, Bold and Black. The original `.otf` files were converted with fontTools and deleted; they remain in git history.
 - Shared entrance and exit animations (`fadeIn`, `fadeUp`, `fadeOutDown`, `fadeInPure`) live in `TaskMenu.css` and last 150 to 250 ms. Animations honour `prefers-reduced-motion`: a rule at the end of `index.css` cuts every CSS animation and transition to 1 ms (not zero, so `animationend` still fires for category deletion), and `CardList.jsx` skips its card slide.
 - Layout is responsive. `App.jsx` treats a window narrower than 650 px as mobile (`MOBILE_BREAKPOINT`), and the side bar behaves differently in that mode.
@@ -427,7 +430,7 @@ These are things a reader should know before changing the app. They are not fixe
 | Change how edits are queued or synced | `src/utils/syncEngine.js` (and its tests), and the write points in `Task.jsx`, `TaskMenu.jsx`, `CardList.jsx`, `Card.jsx`, `Board.jsx`, `DropdownMenu.jsx`, `TargetSetter.jsx`, `utils.js` (`updateCategoryOrder`) |
 | Change scoring or completion dates | `src/components/Card.jsx` (`toggleTaskChecked`), `src/utils/utils.js` (`getNextMondayAt5AM`, `periodsContaining`, `calcPercents`). Server-side score rules are in `listpal-backend/src/task_sync.js` and `score_periods.js` |
 | Change sign-in, tokens or logout | `src/utils/authService.js`, `src/utils/utils.js` (`isTokenExpired`), `src/components/RedirectPage.jsx`, `src/config.json` |
-| Add a theme | `src/App.css` (new `:root` block), `src/components/ThemeSetter.jsx`, `src/components/ThemeCard.jsx` (`THEME_NAMES`) |
+| Add a theme | `src/App.css` (new `[data-theme]` block), `src/utils/themes.js` |
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |
 | Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.claude/skills/deploy/SKILL.md` |
 | Change when or how a page left open picks up changes from other devices | `src/utils/refreshOnReturn.js` (triggers and timings), `App.jsx` (boards), `Board.jsx` (tasks), `ScoreCounter.jsx` (no confetti for a refresh) |
