@@ -35,8 +35,6 @@ const SideNavBar = ({
     setSidebarBoardsMenuIsOpen(current => !current);
   };
 
-  const maxLength = 14;
-
   const boardsRendered = boards.map(board => (
     <div key={board.SK} className={activeBoard?.SK === board.SK ? "highlight-board-link" : ""}>
       <Link
@@ -45,7 +43,7 @@ const SideNavBar = ({
         onClick={() => handleBoardClick(board)}
       >
         <div>{board.Emoji}</div>
-        <div>{board.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board.Board}</div>
+        <div>{board.Board}</div>
       </Link>
     </div>
   ));
@@ -64,7 +62,7 @@ const SideNavBar = ({
 
   return (
     <div className={`sidebar-wrapper ${!isMobile ? "sidebar-fade-in" : ""}`} style={{
-      width: sidebarIsOpen ? "250px" : "80px", display: isMobile && hideMobileSidebar ? "none" : "flex"
+      width: sidebarIsOpen ? "240px" : "80px", display: isMobile && hideMobileSidebar ? "none" : "flex"
     }} >
 
       <div className="toggle-wrapper">
