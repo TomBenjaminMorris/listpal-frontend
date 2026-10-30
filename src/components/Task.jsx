@@ -14,14 +14,13 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const checked = task.CompletedDate !== "nil";
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
 
-  // Update description when task.Description changes
   useEffect(() => {
-    if (task.Description !== description) {  // Prevent unnecessary re-renders
+    if (task.Description !== description) {
       setDescription(task.Description);
     }
   }, [task.Description]);
 
-  // Toggle checkbox state. A target this tick meets bursts its confetti from here, wherever the task ends up
+  // A target this tick meets bursts its confetti from here, wherever the task ends up
   const checkboxRef = useRef(null);
   const handleCheckBox = () => {
     tickedCheckboxRef.current = checked ? null : checkboxRef.current;
@@ -127,7 +126,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     }
   };
 
-  // Calculate completed task opacity based on time since completed
   const taskExpiryOpacity = () => {
     const now = Date.now();
     const expiryDate = parseInt(task.ExpiryDate);
@@ -143,7 +141,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   // Wraps the menu icon and the menu, which closes itself on a click outside it
   const taskMenuRef = useRef(null);
 
-  // Extract repeated logic
   const isImportant = task.Important === "true";
   const taskExpiryOpacityStyle = checked ? { opacity: taskExpiryOpacity() } : null;
   const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null;
@@ -156,10 +153,8 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
       <img className="task-hover-indicator" src={arrowIcon} alt="follow link icon" />
 
-      {/* Checkbox */}
       <input ref={checkboxRef} style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 
-      {/* Description Input */}
       <div className="task-textarea-wrapper">
         {/* A textarea can't style its own text runs, so the highlight is drawn on a hidden copy of the text behind it */}
         {isImportant && description && (
@@ -184,7 +179,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
         />
       </div>
 
-      {/* Link Icon */}
       {isLinkAvailable ? (
         <a href={task.Link} target="_blank" rel="noreferrer">
           <img className="task-dropdown-icons task-three-dots-vertical" src={linkIcon} alt="follow link icon" />
@@ -193,7 +187,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
         <img className="task-dropdown-icons task-three-dots-vertical no-background" src={linkIcon} alt="follow link icon" style={{ opacity: '0.08' }} />
       )}
 
-      {/* Menu Icon */}
       <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : ""}`} ref={taskMenuRef}>
         <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (

@@ -15,7 +15,6 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
   const handleAddLink = (enteredLink) => {
     if (enteredLink === null) return;
 
-    // Validate URL
     if (enteredLink !== "" && !isUrlValid(enteredLink)) {
       setAlertConf({
         display: true,

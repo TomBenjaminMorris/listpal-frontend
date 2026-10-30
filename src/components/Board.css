@@ -9,21 +9,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* padding-left: 250px; */
     flex-grow: 1;
     margin-top: 20px;
-    /* padding-right: 20px; */
 }
-
-/* .board-filter-wrapper {
-    margin-top: 110px;
-    width: 120px;
-    background-color: var(--accent);
-    padding: 5px;
-    border-radius: 35px;
-    margin-left: 35px;
-    margin-right: auto;
-} */
 
 .board-name-wrapper {
     margin-right: auto;
@@ -32,9 +20,7 @@
 }
 
 .board-name {
-    /* margin-right: auto; */
     font-size: 20px;
-    /* opacity: 0.9; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -45,27 +31,14 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-.basic-multi-select {
-    /* width: 95%; */
-    /* margin-top: 10px; */
-
-    width: 40%;
-    text-align: left;
-    max-width: 600px;
-}
-
 .board-filter-actions-wrapper {
     width: 100%;
     display: flex;
-    /* background-color: black; */
     flex-wrap: wrap;
-    /* justify-content: center; */
     justify-content: flex-end;
     align-items: center;
     gap: 15px;
-    /* margin-top: 20px; */
     flex-grow: 1;
-    /* position: relative; */
 }
 
 .board-actions-wrapper {
@@ -85,29 +58,20 @@
     margin-top: -3px;
     margin-left: 3px;
     transition-duration: 100ms;
-    /* opacity: 0.7; */
 }
 
 .edit-icon:hover, .delete-icon:hover, .clear-icon:hover, .emoji-icon:hover {
-    /* opacity: 1; */
-    /* -webkit-animation-name: bulge; */
-    /* -webkit-animation-duration: 1s;
-    -webkit-animation-iteration-count: initial;
-    -webkit-animation-timing-function: ease-in; */
     cursor: pointer;
-    /* transform: scale(1.2); */
     transition-duration: 100ms;
     opacity: 0.3;
 }
 
 .delete-icon {
-    /* opacity: 0.7; */
     transition-duration: 100ms;
     width: 25px;
 }
 
 .clear-icon {
-    /* opacity: 0.7; */
     width: 27px;
     transition-duration: 100ms;
     margin-left: -2px;
@@ -168,7 +132,6 @@
     margin-top: 505px;
     margin-left: 260px;
     box-shadow: rgba(65, 65, 65, 0.35) 0px 5px 15px;
-    /* border: solid var(--text-colour) 2px; */
     border-radius: 12px;
 }
 
@@ -180,10 +143,6 @@
 
 .emoji-highlight {
     background-color: var(--text-colour);
-}
-
-.emoji-highlight-dark {
-    background-color: var(--background);
 }
 
 .transparent_gradient {

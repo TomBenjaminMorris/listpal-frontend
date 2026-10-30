@@ -6,12 +6,10 @@ import { apiErrorAlert, SESSION_EXPIRED } from './apiErrors';
 
 axios.defaults.baseURL = 'https://api.vinsp.in';
 
-// Helper function to get headers
 const getHeaders = () => ({
   'Authorization': 'Bearer ' + sessionStorage.accessToken
 });
 
-// Helper function to check token expiration and refresh
 const tokenCheck = async () => {
   try {
     if (isTokenExpired()) {
@@ -58,13 +56,11 @@ const apiPost = async (url, body, { silent = false, action } = {}) => {
   }
 };
 
-// GET API methods
 export const getActiveTasks = (boardID, { silent = false } = {}) =>
   apiGet('/active-tasks', { boardID }, { silent, action: "load this board's tasks" });
 export const getBoards = ({ silent = false } = {}) => apiGet('/boards', {}, { silent, action: 'load your boards' });
 export const getUser = () => apiGet('/user', {}, { action: 'load your account details' });
 
-// POST API methods
 export const syncOps = (ops) =>
   apiPost('/sync', { ops }, { silent: true });
 
@@ -84,7 +80,6 @@ export const updateThemeAPI = (theme) =>
 
 export const deleteBoard = (boardID) =>
   apiPost('/delete-board', { boardID }, { action: 'delete the board' });
-
 
 export const updateBoardScoresAPI = (boardID, scores) =>
   apiPost('/board-scores', { boardID, scores }, { action: 'save the score' });

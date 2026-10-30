@@ -15,7 +15,6 @@ const ScoreBoard = memo(({ boards, setBoards, boardID, refreshCount, setAlertCon
     [currentBoardScores]
   );
 
-  // Define the score counters for weekly/monthly/yearly
   const renderScoreCounter = (type, score, percent) => (
     <ScoreCounter
       key={type}

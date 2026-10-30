@@ -25,10 +25,6 @@ const Settings = ({
         <div className="settings-content-sub-wrapper fadeUp-animation">
           <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
         </div>
-        {/* <div className="settings-content-sub-wrapper fadeUp-animation">
-          <h2 className="settings-headers">User</h2>
-          <hr className="settings-line" />
-        </div> */}
       </div>
     </div>
   );

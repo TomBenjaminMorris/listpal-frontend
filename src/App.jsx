@@ -18,7 +18,6 @@ import Logout from './components/Logout';
 import config from "./config.json";
 import './App.css';
 
-// Define constants
 const DEFAULT_THEME = 'purple-haze';
 const MOBILE_BREAKPOINT = 650;
 const SIDEBAR_OPEN_KEY = 'sidebarIsOpen';
@@ -31,7 +30,6 @@ const parseBoards = (boardsData) => boardsData.map(board => ({
   CategoryOrder: board.CategoryOrder ? JSON.parse(board.CategoryOrder) : []
 }));
 
-// Determine if the app is running id dev or prod
 let isDev = true;
 if (process.env.NODE_ENV === 'development') {
   isDev = true;
@@ -64,7 +62,6 @@ const App = () => {
   const [activeBoardID, setActiveBoardID] = useState(null);
   const activeBoard = useMemo(() => boards.find(b => b.SK === activeBoardID) ?? null, [boards, activeBoardID]);
 
-  // Setup the alert/promot/confirm modals
   const modalSetters = useMemo(() => ({
     setPromptConf: (conf) => setModalStates(prev => ({ ...prev, prompt: conf })),
     setConfirmConf: (conf) => setModalStates(prev => ({ ...prev, confirm: conf })),
@@ -74,7 +71,6 @@ const App = () => {
   // Declared before the data load so API failures from it have somewhere to go
   useEffect(() => setAlertListener(modalSetters.setAlertConf), [modalSetters]);
 
-  // Set CSS vars for the user theme
   const applyTheme = useCallback((theme) => {
     const cssVars = {
       '--background': `var(--${theme}-bg)`,
@@ -118,7 +114,6 @@ const App = () => {
     });
   }, []);
 
-  // Load initial data
   useEffect(() => {
     const loadInitialData = async () => {
       if (!isAuthenticated()) return;
@@ -180,7 +175,6 @@ const App = () => {
     }
   }), []);
 
-  // Apply themes
   useEffect(() => {
     applyTheme(userDetails.Theme);
   }, [userDetails]);
@@ -214,13 +208,11 @@ const App = () => {
     });
   }, []);
 
-  // Set state for sidebar collapse action
   const handleSidebarCollapse = useCallback(() => {
     setSidebarIsOpen(prev => !prev);
     setHideMobileSidebar(prev => !prev);
   }, []);
 
-  // Actions to be triggered on logout
   const handleLogout = useCallback(() => {
     localStorage.clear();
     sessionStorage.clear();

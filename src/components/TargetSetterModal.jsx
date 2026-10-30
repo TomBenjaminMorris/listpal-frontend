@@ -11,7 +11,6 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
 
   const ref = useRef(null);
 
-  // Lock and unlock scroll based on display state
   useEffect(() => {
     if (display) {
       lock();
@@ -20,7 +19,6 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
     }
   }, [display]);
 
-  // Close modal on 'Escape' key press
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -29,16 +27,13 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
     };
     document.addEventListener('keydown', handleKeyDown, true);
 
-    // Cleanup listener on unmount
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [setDisplay]);
 
-  // Close modal when clicking outside
   useOnClickOutside(ref, () => setDisplay(false));
 
-  // Return early if not displaying
   if (!display) return null;
 
   return (

@@ -62,9 +62,6 @@
   outline: none;
 }
 
-.prompt-button-cancel{
-}
-
 .prompt-button-cancel:hover{
   background-color: var(--accent-2);
 }

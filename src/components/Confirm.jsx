@@ -6,18 +6,15 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
 
   const ref = useRef(null);
 
-  // Close the confirmation modal
   const closeConfirm = () => {
     setConfirmConf({ display: false });
   };
 
-  // Handle confirmation action
   const handleConfirm = () => {
     confirmConf.callbackFunc();
     closeConfirm();
   };
 
-  // Handle keyboard events for modal interaction
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') closeConfirm();
     if (e.key === 'Enter') {
@@ -27,16 +24,13 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
     }
   };
 
-  // Add and remove keyboard event listener
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Close modal when clicking outside
   useOnClickOutside(ref, closeConfirm);
 
-  // Don't render if modal is not displayed
   if (!confirmConf?.display) return null;
 
   return (

@@ -22,9 +22,9 @@ export function isTokenExpired() {
     }
     const accessToken = parseJwt(token);
     if (!accessToken) {
-        return true; // Invalid token
+        return true;
     }
-    const now = Math.floor(Date.now() / 1000); // Current time in seconds
+    const now = Math.floor(Date.now() / 1000);
     return now > accessToken.exp;
 }
 
@@ -60,14 +60,13 @@ export function getNextMondayAt5AM() {
     const today = new Date();
     const currentDay = today.getDay();
     const currentTime = today.getHours() * 100 + today.getMinutes(); // Time in HHMM format
-    let daysUntilMonday = (1 - currentDay + 7) % 7; // Calculate days until next Monday
+    let daysUntilMonday = (1 - currentDay + 7) % 7;
     if (currentDay === 1 && currentTime >= 500) {
-        // If today is Monday and after 5 AM, skip to next Monday
         daysUntilMonday = 7;
     }
-    today.setDate(today.getDate() + daysUntilMonday); // Set to next Monday
-    today.setHours(5, 0, 0, 0); // Set time to 5 AM (hours, minutes, seconds, milliseconds)
-    return String(today.valueOf()); // Return the value as a string
+    today.setDate(today.getDate() + daysUntilMonday);
+    today.setHours(5, 0, 0, 0);
+    return String(today.valueOf());
 }
 
 // Mirrors listpal-backend/src/score_periods.js so the optimistic score matches what the server will apply

@@ -16,7 +16,6 @@ ListPal's frontend is a single-page React app. It shows a user's boards, lets th
 | Auth | Cognito managed login (OAuth code flow), token refresh through the same OAuth token endpoint |
 | Local queue | IndexedDB database `listpal-local` (version 2), object store `outbox`, managed by `syncEngine.js` |
 | Styling | Plain CSS, one file per component, theme colours as CSS custom properties |
-| Charts | Victory (`victory`) |
 | Hosting | S3 bucket `www.listpal.dev.vinsp.in` behind CloudFront, provisioned by Terraform |
 | Environments | Effectively one. Local dev (`npm run dev`) talks to the same production API as the deployed site |
 
@@ -62,8 +61,6 @@ listpal-frontend/
 └── dist/                       Vite build output (gitignored)
 ```
 
-`src/components/Header.jsx` is not rendered anywhere. `public/vite.svg`, `public/checked.svg` and `public/listpal-icon-bak.png` are not referenced from `src/` or `index.html`.
-
 ## 3. System architecture
 
 ```mermaid
@@ -102,7 +99,7 @@ Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and 
 | Path | Component | Purpose | Backend calls |
 | --- | --- | --- | --- |
 | `/` | none | Redirects to `/home` | none |
-| `/home` | `HomePage` | Greeting (from the ID token's `given_name`), week number, a random quote, the board list, and board creation | none. A new board goes through the outbox to `POST /sync` |
+| `/home` | `HomePage` | Greeting (from the ID token's `given_name`), week number, the board list, and board creation | none. A new board goes through the outbox to `POST /sync` |
 | `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed (an alert says so if there are none). The delete, clear and target icons each show a hover label. A deleted category card fades out, and the remaining cards slide into place when categories are added, removed or reordered. Within a card, ticked tasks come first, in the order they were ticked, then unticked tasks in `CreatedDate` order. Tasks edit like lines in a notes app. Enter splits a task at the caret: the text after it (less any selection) moves into a new task directly below, with the caret at its start. Enter at the very start of a task instead adds an empty task above, so the task keeps its link and importance. A new task goes between its neighbours by taking a `CreatedDate` halfway between theirs (fractional if need be), as the server ignores `CreatedDate` on update and neighbours can't be renumbered; above the first unticked task it takes 1 ms before it. The "new task..." button, and Enter at the end of the last unticked task, add at the bottom. Backspace at the start of a task joins it onto the end of the unticked task above, and Delete at the end pulls the task below up into it, with the caret at the join. The upper task keeps its importance and link, a link on the lower one moves up if the upper has none, and a join between two tasks that both have links is refused. Backspace in an empty task deletes it and moves the caret to the end of the unticked task above, or to the start of the one below if it was the first; Delete in an empty task does the same, preferring the task below. Delete Task in a task's menu deletes it at once, with no confirmation. Deleting a category's only task, by key or from its menu, asks whether to delete the whole category instead, and confirming fades the card out as the category menu's delete does. The last unticked task beside ticked ones can't be deleted: one with text is blanked, and an empty one shows an alert. Shift+Enter is left to the textarea, so it adds a line break within the task. Cmd+Enter ticks the task and moves the caret to the start of the unticked task below, or the end of the one above if it was the last; ticking a card's last unticked task adds an empty one, which takes focus. Confetti for a target met by a tick, by click or Cmd+Enter, bursts from the ticked task's checkbox where the task ends up, so it stays in view when the page scrolls to follow the task. Any other burst, such as one from lowering a target, starts at the mouse pointer. Each target pins its own burst to where it started, so a second target hit while the first burst plays gets its own origin, not the first one's. Enter in a category title moves the caret to the start of the card's first unticked task, and Escape in a title or task leaves it; both save a title rename through blur. These keys do nothing to the list while an input method is composing. Tasks slide into place (300 ms) when one is ticked or unticked, so a newly ticked task visibly moves up to the bottom of the ticked tasks. Adding or deleting a task has no slide: the task appears or vanishes at once and the tasks below jump into place, as sliding them would draw them over the new task or leave a gap where the old one was | `GET /active-tasks`, `POST /delete-board`, `POST /board-scores` (via `ScoreCounter`). Name, emoji, targets and category order go through the outbox to `POST /sync` |
 | `/settings` | `Settings` | Theme choice | `POST /user-theme` (via `ThemeCard`) |
 | `/redirect` | `RedirectPage` | Receives the Cognito `code`, exchanges it for tokens, then goes to `/home`. Its ListPal logo is centred on the viewport, as is the loader `HomePage` shows next (`<Loader fullScreen />`), so the handover doesn't shift whatever the sidebar's width | Cognito token endpoint |
@@ -324,11 +321,11 @@ Callers that already handle the failure (delete in `Board`) don't show a second 
 
 ## 9. Styling and theming
 
-- Each component imports its own CSS file. There is no CSS-in-JS, although `@emotion/react` is installed.
+- Each component imports its own CSS file. There is no CSS-in-JS.
 - `App.css` defines four themes on `:root`: `purple-haze` (the default), `granite`, `aqua-mentos` and `cherry-violet`. Each sets `-bg`, `-fg`, `-text-colour`, `-accent` and `-accent-2`.
 - `applyTheme` in `App.jsx` copies the user's theme into the generic variables `--background`, `--foreground`, `--text-colour`, `--accent` and `--accent-2` on `document.documentElement`. Components read the generic names.
 - `App.css` sets `color-scheme: dark`. `index.css` has a light-scheme media query that only changes text colour.
-- Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css` as WOFF2 with `font-display: swap`, so text shows at once in a fallback font while they download. Five faces are used: Book, Medium, Medium Italic, Bold and Black. The original `.otf` files were converted with fontTools and deleted; they remain in git history.
+- Fonts are the Circular family from `src/fonts/`, loaded with `@font-face` in `index.css` as WOFF2 with `font-display: swap`, so text shows at once in a fallback font while they download. Four faces are used: Book, Medium, Bold and Black. The original `.otf` files were converted with fontTools and deleted; they remain in git history.
 - Shared entrance and exit animations (`fadeIn`, `fadeUp`, `fadeOutDown`, `fadeInPure`) live in `TaskMenu.css` and last 150 to 250 ms. Animations honour `prefers-reduced-motion`: a rule at the end of `index.css` cuts every CSS animation and transition to 1 ms (not zero, so `animationend` still fires for category deletion), and `CardList.jsx` skips its card slide.
 - Layout is responsive. `App.jsx` treats a window narrower than 650 px as mobile (`MOBILE_BREAKPOINT`), and the side bar behaves differently in that mode.
 - The Important highlight on a task covers only the text, line by line. A textarea can't style its own text, so `Task.jsx` renders a hidden copy of the description (`.task-highlight-mirror`) behind the textarea and gives its inline `<span>` the background. The copy shares the `.task-textarea-box` class so it wraps identically. Any change to the textarea's font, padding or width must keep the two in step.
@@ -418,10 +415,8 @@ These are things a reader should know before changing the app. They are not fixe
 - **Keepalive and CORS.** The `pagehide` flush is best effort. Browsers may refuse a keepalive request that needs a CORS preflight. Nothing is lost if it fails, because the outbox is flushed on the next load.
 - **Old tabs block the database upgrade.** A tab still running a build from before the outbox (IndexedDB version 1) does not close its connection, so a new tab's upgrade waits until that tab is closed or reloaded.
 - **Only `main.tsx` is type-checked.** The rest is JavaScript and `tsc` does not look at it, so `npm run build` gives little assurance about most of the code.
-- **StrictMode is off.** `main.tsx` has `<React.StrictMode>` commented out, so React's development double-render checks do not run.
-- **Unused dependencies.** `react-select`, `react-dropdown` and `@emotion/react` are not imported anywhere.
+- **StrictMode is off.** `main.tsx` renders `<App />` without `<React.StrictMode>`, so React's development double-render checks do not run.
 - **Category sort.** `setOrderedSortedTasks` sorts by each category's first position in `CategoryOrder`. A category missing from that array ranks -1 and sorts to the top. The saved order can hold stale or missing names. So every category action (new, rename, delete, move) builds the new order from the categories on screen, passes it to `setSortedTasks` and saves it, which also repairs the saved order. A board whose saved order is stale can still load with the missing categories at the top, until one of those actions runs.
-- **Unused component and assets.** `Header.jsx` is not rendered. Several files in `public/` are not referenced.
 
 ## 14. Where to look
 

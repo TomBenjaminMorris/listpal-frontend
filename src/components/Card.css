@@ -6,35 +6,17 @@
     overflow: auto;
     min-width: 550px;
     flex-grow: 1;
-    /* flex-basis: 48%; */
     flex-basis: 30%;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    /* width: 550px; */
-    /* max-width: 750px; */
-    /* min-height: 400px; */
-    /* resize: both; */
-    /* resize: vertical; */
-    /* resize: horizontal; */
 }
 
 .addTaskWrapper {
     display: flex;
-    /* gap: 14px; */
     gap: 13px;
-    /* margin-top: 3px; */
     padding-bottom: 10px;
     padding-top: 2px;
 }
 
-/* plain plus symbol */
-/* .addTask {
-    width: 21px;
-    height: 21px;
-    margin-top: -2px;
-    opacity: 0.4;
-} */
-
-/* plus with box */
 .addTask {
     margin-top: -2px;
     opacity: 0.4;
@@ -52,18 +34,11 @@
     font-size: 18px;
 }
 
-.deleteCategory {
-    width: 21px;
-    margin-top: 10px;
-    margin-right: 25px;
-    opacity: 0.4;
-}
-
 .addTaskWrapper:hover {
     cursor: pointer;
 }
 
-.addTaskWrapper:hover > .addTaskText, .deleteCategory:hover {
+.addTaskWrapper:hover > .addTaskText {
     opacity: 0.8;
 }
 
@@ -102,14 +77,6 @@ hr {
     cursor: text;
 }
 
-.headingWrapper .edit-title {
-    display: none;
-    height: 24px;
-    width: 24px;
-    margin-top: 5px;
-    padding-left: 10px;
-}
-
 .headingWrapper .score {
     margin-right: 30px;
     margin-bottom: 0px;
@@ -123,10 +90,7 @@ hr {
     font-family: CircularBold;
     font-size: 25px;
     margin-left: 4px;
-    /* margin: 0; */
-    /* padding-left: 10px; */
     padding-top: 14px;
-    /* padding-bottom: 10px; */
 }
 
 .edit-title-input:focus {
@@ -147,9 +111,6 @@ hr {
     margin-top: 12px;
     padding: 6px;
     border-radius: 10px;
-
-    /* border-top-left-radius: 10px;
-    border-top-right-radius: 10px; */
 }
 
 .card-menu-dots:hover {
@@ -161,26 +122,19 @@ hr {
 .card-menu-dots-bg-fill {
     background-color: var(--background);
     opacity: 1;
-    /* border: solid 2px var(--accent-2); */
-    /* padding: 3px !important; */
 }
 
 .card-emoji-picker-wrapper {
-    /* width: 30px; */
-    /* background-color: var(--background); */
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 10px;
     margin-left: 12px;
     margin-top: 12px;
-    /* display: none; */
 }
 
 .card-emoji-picker-wrapper:hover {
     background-color: var(--text-colour);
-    /* background-color: var(--background); */
-    /* background-color: transparent; */
     cursor: pointer;
 }
 
