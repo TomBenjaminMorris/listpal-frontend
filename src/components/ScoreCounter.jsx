@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, memo } from 'react';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import { flushNow, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { applyManualScore, parseScoreInput } from '../utils/utils';
 import starIcon from '../assets/icons8-star-50.png';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css';
@@ -22,15 +23,6 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
   const prevRef = useRef({ boardSK: undefined, percent: undefined, refreshCount });
 
   const validateAndUpdateScore = async () => {
-    if (scoreValue < 0) {
-      setAlertConf({
-        display: true,
-        animate: true,
-        title: "Nice try 😏",
-        textValue: "Scores can't dip below zero.",
-      });
-      return false;
-    }
     if (scoreValue === "") {
       setAlertConf({
         display: true,
@@ -47,7 +39,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
     if (!scoreHasChanged || !(await validateAndUpdateScore())) return;
 
     const { SK, YScore, MScore, WScore } = currentBoardScores;
-    const scores = { YScore, MScore, WScore, [TYPE_MAPPINGS[type].detail]: scoreValue };
+    const scores = applyManualScore({ YScore, MScore, WScore }, TYPE_MAPPINGS[type].detail, scoreValue);
 
     try {
       // The value typed already counts any tick still queued, and the server sets it outright, so a tick landing
@@ -105,8 +97,10 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
         {(percent || percent >= 0) && (
           <CircularProgressbarWithChildren value={percent} styles={progressBarStyles}>
             <div style={{ fontSize: 15, marginTop: 0 }}>
-              <input className="score-input" type="text" value={scoreValue} onChange={e => {
-                setScoreValue(e.target.value);
+              <input className="score-input" type="text" inputMode="numeric" value={scoreValue} onChange={e => {
+                const parsed = parseScoreInput(e.target.value);
+                if (parsed === null) return;
+                setScoreValue(parsed);
                 setScoreHasChanged(true);
               }} onBlur={handleScoreUpdate} />
               {isExploding[TYPE_MAPPINGS[type].label] && <img className="star-icon" src={starIcon} alt="star icon" />}

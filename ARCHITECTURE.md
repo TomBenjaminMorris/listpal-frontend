@@ -283,7 +283,7 @@ Edits that bypass the queue and call the API straight away. Deleting a board and
 
 | Action | Where | Endpoint |
 | --- | --- | --- |
-| Manually edit a score | `ScoreCounter.jsx` | `POST /board-scores` |
+| Manually edit a score (the input takes whole numbers only and drops leading zeros, so an edit with any other character is ignored; raising a weekly score also lifts the monthly and yearly scores to at least that value, and a monthly score lifts the yearly one; lowering a score changes nothing else) | `ScoreCounter.jsx`, `parseScoreInput` and `applyManualScore` in `utils.js` | `POST /board-scores` |
 | Delete a board | `Board.jsx` | `POST /delete-board` |
 | Save theme | `ThemeCard.jsx` | `POST /user-theme` |
 

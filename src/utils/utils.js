@@ -35,6 +35,22 @@ export function calcPercents({ YTarget, MTarget, WTarget, WScore, MScore, YScore
     return { Y: YP, M: MP, W: WP };
 }
 
+// Null rejects the whole edit rather than stripping characters, as a pasted 1.5 must not become 15
+export function parseScoreInput(value) {
+    return /^\d*$/.test(value) ? value.replace(/^0+(?=\d)/, '') : null;
+}
+
+const SCORE_FIELDS_SHORTEST_FIRST = ['WScore', 'MScore', 'YScore'];
+
+// A week sits inside its month and year, so a longer period can't have scored less than a shorter one
+export function applyManualScore(scores, field, value) {
+    const updated = { ...scores, [field]: value };
+    SCORE_FIELDS_SHORTEST_FIRST.slice(SCORE_FIELDS_SHORTEST_FIRST.indexOf(field) + 1).forEach(longer => {
+        if (Number(value) > Number(scores[longer])) updated[longer] = Number(value);
+    });
+    return updated;
+}
+
 export function isAuthenticated() {
     return !!sessionStorage.getItem('accessToken');
 }
