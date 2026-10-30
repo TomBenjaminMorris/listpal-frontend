@@ -11,8 +11,9 @@ import './SideNavBar.css';
 const SideNavBar = ({ 
   sidebarIsOpen, 
   handleSidebarCollapse, 
-  boards, 
-  setSidebarBoardsMenuIsOpen, 
+  boards,
+  placeholderBoardCount,
+  setSidebarBoardsMenuIsOpen,
   sidebarBoardsMenuIsOpen, 
   isMobile, 
   hideMobileSidebar,
@@ -46,6 +47,15 @@ const SideNavBar = ({
         <div>{board.Emoji}</div>
         <div>{board.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board.Board}</div>
       </Link>
+    </div>
+  ));
+
+  const boardPlaceholders = Array.from({ length: placeholderBoardCount }, (_, i) => (
+    <div key={i} className="sidenav-board-placeholder" aria-hidden="true">
+      <div className="sidenav-boards-link-item">
+        <div />
+        <div />
+      </div>
     </div>
   ));
 
@@ -83,7 +93,7 @@ const SideNavBar = ({
         </div>
 
         <div className={`sidenav-link-boards-sub ${textClass} ${sidebarBoardsMenuIsOpen ? "sidenav-link-text" : "hidden"}`}>
-          {boardsRendered}
+          {placeholderBoardCount ? boardPlaceholders : boardsRendered}
         </div>
       </div>
 

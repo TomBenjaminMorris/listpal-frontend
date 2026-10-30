@@ -22,6 +22,8 @@ const DEFAULT_THEME = 'purple-haze';
 const MOBILE_BREAKPOINT = 650;
 const SIDEBAR_OPEN_KEY = 'sidebarIsOpen';
 const SIDEBAR_BOARDS_MENU_OPEN_KEY = 'sidebarBoardsMenuIsOpen';
+const BOARD_COUNT_KEY = 'boardCount';
+const DEFAULT_PLACEHOLDER_BOARD_COUNT = 3;
 
 const readStoredFlag = (key) => localStorage.getItem(key) === 'true';
 
@@ -48,8 +50,9 @@ const App = () => {
   const [hideMobileSidebar, setHideMobileSidebar] = useState(() => !readStoredFlag(SIDEBAR_OPEN_KEY));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
   const [isLoading, setIsLoading] = useState(true);
-  // Separate from isLoading, which Board turns back on for each board switch and would hide the sidebar each time
+  // Separate from isLoading, which Board turns back on for each board switch and would bring the placeholders back each time
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [placeholderBoardCount] = useState(() => Number(localStorage.getItem(BOARD_COUNT_KEY)) || DEFAULT_PLACEHOLDER_BOARD_COUNT);
   const [refreshCount, setRefreshCount] = useState(0); // Moves on each refresh on return, after the boards have landed
   const [modalStates, setModalStates] = useState({ prompt: { callbackFunc: () => { } }, confirm: { callbackFunc: () => { } }, alert: {} });
   const [userDetails, setUserDetails] = useState(() => {
@@ -177,6 +180,11 @@ const App = () => {
     localStorage.setItem(SIDEBAR_BOARDS_MENU_OPEN_KEY, sidebarBoardsMenuIsOpen);
   }, [sidebarBoardsMenuIsOpen]);
 
+  // Boards are also empty during a load and after a failed one, neither of which should wipe the count
+  useEffect(() => {
+    if (boards.length) localStorage.setItem(BOARD_COUNT_KEY, boards.length);
+  }, [boards.length]);
+
   // Read at call time, so the setter below can keep one identity for memoised children
   const categoryOrderRef = useRef([]);
   categoryOrderRef.current = activeBoard?.CategoryOrder ?? [];
@@ -219,12 +227,12 @@ const App = () => {
         {Object.keys(modalStates.confirm).length > 1 && (<Confirm confirmConf={modalStates.confirm} setConfirmConf={modalSetters.setConfirmConf} />)}
         {Object.keys(modalStates.alert).length > 1 && (<Alert alertConf={modalStates.alert} setAlertConf={modalSetters.setAlertConf} />)}
 
-        {/* Held back until the first load lands, so it arrives with the page content instead of beside the loader */}
-        {isAuthenticated() && initialLoadDone ? (<SideNavBar
+        {isAuthenticated() ? (<SideNavBar
           handleSidebarCollapse={handleSidebarCollapse}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
           sidebarIsOpen={sidebarIsOpen}
           boards={boards}
+          placeholderBoardCount={initialLoadDone ? 0 : placeholderBoardCount}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           isMobile={isMobile}
           hideMobileSidebar={hideMobileSidebar}
