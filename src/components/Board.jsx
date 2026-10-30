@@ -177,6 +177,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   const handleDeleteBoard = async () => {
     setIsLoading(true);
     try {
+      // The delete reads the board's tasks and then removes them, so a sync creating one in between would leave it
+      // behind with no board. Sending the queue first means nothing for this board is in flight during the delete.
+      await flushNow({ timeout: LOAD_FLUSH_TIMEOUT });
       await deleteBoard(boardID);
       dropCachedTasks(boardID);
       setBoards((boards) => boards.filter(b => b.SK !== boardID));
