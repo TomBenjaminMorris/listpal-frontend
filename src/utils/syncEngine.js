@@ -211,6 +211,15 @@ export function forgetBoard(boardID) {
   });
 }
 
+// After the server deletes the account. The outbox survives logout, so queued edits would otherwise be
+// resent at the next sign-in on this browser, under whoever signs in.
+export function clearOutbox() {
+  return exclusive(async () => {
+    await withStore('readwrite', store => store.clear());
+    await refreshPending();
+  });
+}
+
 function schedule(delay) {
   const now = Date.now();
   if (firstQueuedAt === null) firstQueuedAt = now;

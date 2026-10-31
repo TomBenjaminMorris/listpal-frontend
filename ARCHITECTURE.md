@@ -43,6 +43,8 @@ listpal-frontend/
 │   ├── fonts/                  Circular .woff2 files
 │   ├── assets/                 PNG icons (icons8), the task menu's duplicate icon (SVG), plus a copy of the app icon for the target banner
 │   ├── utils/
+│   │   ├── accountService.js   Account changes through Cognito's user API, and the plain-language messages for their failures
+│   │   ├── accountService.test.js  Vitest tests for those calls and messages
 │   │   ├── alertBus.js         Lets non-React code raise the in-app Alert that App owns
 │   │   ├── apiErrors.js        Turns a failed API call into a plain-language alert
 │   │   ├── apiErrors.test.js   Vitest tests for those messages
@@ -83,6 +85,7 @@ flowchart LR
     CF --> S3
     SPA -->|"static assets"| CF
     SPA -->|"OAuth code exchange, token refresh"| COG
+    SPA -->|"Account changes"| IDP["Cognito user API<br/>cognito-idp.eu-west-2.amazonaws.com"]
     SPA -->|"Bearer access token"| API
     SPA --- SS
     SPA --- LS
@@ -102,7 +105,7 @@ Routes are declared in `App.jsx`. The board route is a `/board/*` wildcard, and 
 | `/` | none | Redirects to `/home` | none |
 | `/home` | `HomePage` | Greeting (from the ID token's `given_name`), week number, the board list, and board creation | none. A new board goes through the outbox to `POST /sync` |
 | `/board/*` | `Board` | Tasks grouped by category, scores, targets, board emoji and name, delete, clear completed (an alert says so if there are none). The delete, clear and target icons each show a hover label. A deleted category card fades out, and the remaining cards slide into place when categories are added, removed or reordered. Within a card, ticked tasks come first, in the order they were ticked, then unticked tasks in `CreatedDate` order. Tasks edit like lines in a notes app. Enter splits a task at the caret: the text after it (less any selection) moves into a new task directly below, with the caret at its start. Enter at the very start of a task instead adds an empty task above, so the task keeps its link and importance. A new task goes between its neighbours by taking a `CreatedDate` halfway between theirs (fractional if need be), as the server ignores `CreatedDate` on update and neighbours can't be renumbered; above the first unticked task it takes 1 ms before it. The "new task..." button, and Enter at the end of the last unticked task, add at the bottom. Backspace at the start of a task joins it onto the end of the unticked task above, and Delete at the end pulls the task below up into it, with the caret at the join. The upper task keeps its importance and link, a link on the lower one moves up if the upper has none, and a join between two tasks that both have links is refused. Backspace in an empty task deletes it and moves the caret to the end of the unticked task above, or to the start of the one below if it was the first; Delete in an empty task does the same, preferring the task below. Duplicate Task in a task's menu adds an unticked copy directly below, with the same text, link and importance, and the caret at the end of its text. A ticked task's copy goes first among the unticked tasks, the nearest place below it. Delete Task in a task's menu deletes it at once, with no confirmation. Deleting a category's only task, by key or from its menu, asks whether to delete the whole category instead, and confirming fades the card out as the category menu's delete does. The last unticked task beside ticked ones can't be deleted: one with text is blanked, and an empty one shows an alert. Shift+Enter is left to the textarea, so it adds a line break within the task. Cmd+Enter ticks the task and moves the caret to the start of the unticked task below, or the end of the one above if it was the last; ticking a card's last unticked task adds an empty one, which takes focus. Confetti for a target met by a tick, by click or Cmd+Enter, bursts from the ticked task's checkbox where the task ends up, so it stays in view when the page scrolls to follow the task. Any other burst, such as one from lowering a target, starts at the mouse pointer. Each target pins its own burst to where it started, so a second target hit while the first burst plays gets its own origin, not the first one's. Enter in a category title moves the caret to the start of the card's first unticked task, and Escape in a title or task leaves it; both save a title rename through blur. These keys do nothing to the list while an input method is composing. Tasks slide into place (300 ms) when one is ticked or unticked, so a newly ticked task visibly moves up to the bottom of the ticked tasks. Adding or deleting a task has no slide: the task appears or vanishes at once and the tasks below jump into place, as sliding them would draw them over the new task or leave a gap where the old one was. A task arriving in a fresh copy from another device is different: it fades in and the tasks and cards below slide to make way | `GET /active-tasks`, `POST /delete-board`, `POST /board-scores` (via `ScoreCounter`). Name, emoji, targets and category order go through the outbox to `POST /sync` |
-| `/settings` | `Settings` | Theme choice | `POST /user-theme` (via `ThemeCard`) |
+| `/settings` | `Settings` | Name, email, password, account deletion, theme choice | Cognito user API, `POST /delete-account` (via `AccountSettings`), `POST /user-theme` (via `ThemeCard`) |
 | `/redirect` | `RedirectPage` | Receives the Cognito `code`, exchanges it for tokens, then goes to `/home`. Its ListPal logo is centred on the viewport whatever the sidebar's width. `HomePage` follows with its own placeholders | Cognito token endpoint |
 | `/logout` | `Logout` | Clears storage and sends the user to the managed login | none |
 | `*` | none | `/home` when signed in, `/logout` when not | none |
@@ -118,6 +121,7 @@ flowchart TB
     App --> Settings["Settings"]
     App --> Board["Board"]
     Home --> BL["BoardList"]
+    Settings --> AS["AccountSettings"]
     Settings --> TS["ThemeSetter"] --> TC["ThemeCard"]
     Board --> SB["ScoreBoard"] --> SC["ScoreCounter"]
     Board --> TSM["TargetSetterModal"]
@@ -180,7 +184,48 @@ Points to know:
 - Before every API call, `apiGatewayClient.js` checks the access token's `exp` claim. If it has passed, `authService.refreshTokens` POSTs `grant_type=refresh_token` to the token endpoint, as a form body like the code exchange. Calls that find the token expired at the same moment share one refresh. The response has no refresh token (rotation is off), so the stored one is kept. There is no AWS SDK in the bundle and no AWS credentials involved.
 - If the refresh fails, `sessionStorage` is cleared. The next render sees no token and routes to `/logout`.
 - Logout clears both `localStorage` and `sessionStorage` and then replaces the location with the managed login URL.
-- The `Authorization` header is `Bearer <accessToken>`. The ID token is only read locally, to show the user's first name.
+- The `Authorization` header is `Bearer <accessToken>`. The ID token is only read locally, for the greeting and the Account section.
+- Sign-in requests the `openid` and `aws.cognito.signin.user.admin` scopes. The second lets the access token call Cognito's user API. A session from before it was added gets `NotAuthorizedException` on account changes and is told to sign out and back in.
+
+### Account changes
+
+`AccountSettings` shows Name, Email and Password as rows that open a form in place, one at a time, and Delete account below them. `accountService.js` calls `cognito-idp.<region>.amazonaws.com` directly with axios, using the `X-Amz-Target` header and the access token, so no AWS SDK or backend route is involved. The one exception is deletion, which needs the backend to remove DynamoDB data.
+
+- **These changes need the network.** They don't use the outbox. A failure shows under the form and keeps what the user typed.
+- **Passwords stay out of logs.** Axios errors carry the request body, so `callCognito` throws a new error holding only Cognito's error name and message, and callers log only the name.
+- **Name.** Filled fields go through `UpdateUserAttributes` and blank ones through `DeleteUserAttributes`. The tokens are then refreshed, as the ID token is the only place the app reads them from.
+- **Email.** The user pool keeps the current email active until the new one is verified. Cognito can't report a pending email, so `requestEmailChange` keeps it in `sessionStorage` and the code form comes back after a reload. Resending calls `UpdateUserAttributes` again.
+- **Password.** Changing it needs the current password, and "Forgot your password?" swaps that field for an emailed code. Either way, `GlobalSignOut` then revokes all refresh tokens and the user is sent to sign in. Access tokens keep working on the API until they expire, because the JWT authoriser doesn't check revocation.
+- **Sign-out goes through Cognito's `/logout`.** `endSession` uses `managedLogoutLocal` or `managedLogoutRemote` from `config.json`, so Cognito's own login session ends too. The ordinary Log Out button still goes straight to the login page.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as AccountSettings
+    participant C as Cognito user API
+    participant O as Outbox
+    participant A as ListPal API
+
+    U->>F: Delete account, enter password
+    F->>C: InitiateAuth (checks the password, tokens discarded)
+    alt Wrong password
+        C-->>F: NotAuthorizedException
+        F-->>U: Dialog stays open, nothing deleted
+    else Correct password
+        F->>O: flushNow, at most 3 s
+        F->>A: POST /delete-account
+        alt Failure
+            A-->>F: 500
+            F-->>U: Dialog stays open so the user can retry
+        else Success
+            A-->>F: deleted
+            F->>O: clearOutbox
+            F->>C: Redirect to /logout
+        end
+    end
+```
+
+The password check runs in the browser, so it guards against someone at an unlocked device, not against a stolen token. `clearOutbox` matters because the outbox survives logout and would otherwise resend the deleted user's edits at the next sign-in on that browser.
 
 ## 6. Data and state
 
@@ -190,8 +235,9 @@ The frontend owns no durable data. Everything persistent lives in the backend. T
 | --- | --- | --- | --- |
 | React state in `App.jsx` | `boards`, `sortedTasks` (tasks grouped by category), `userDetails`, `activeBoardID` (the board object is derived from `boards`), modal config | Pages through props | Until a reload |
 | Module state in `boardCache.js` | The last `sortedTasks` shown for each board, keyed on board ID | `Board.jsx` whenever the shown board's `sortedTasks` changes, except the empty board shown behind a load error; dropped when the board is deleted | Until a reload or logout (which reloads). Survives Board unmounting |
-| IndexedDB `listpal-local` / `outbox` | One record per task or board with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK`. A board record has `SK` and `boardID` both set to the board ID, `kind: "create"` (a new board) or `"update"`, and only board settings in `fields` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll`, `queueBoardCreate`, `queueBoardUpdate` in `syncEngine.js`. `forgetBoard` drops a deleted board's records | Until the server confirms the change. Survives reloads and logout |
+| IndexedDB `listpal-local` / `outbox` | One record per task or board with queued changes: `{ SK, boardID, kind, fields, rev }`, keyed on `SK`. A board record has `SK` and `boardID` both set to the board ID, `kind: "create"` (a new board) or `"update"`, and only board settings in `fields` | `queueCreate`, `queueUpdate`, `queueDelete`, `queueUpdateAll`, `queueDeleteAll`, `queueBoardCreate`, `queueBoardUpdate` in `syncEngine.js`. `forgetBoard` drops a deleted board's records, `clearOutbox` drops everything once the account is deleted | Until the server confirms the change. Survives reloads and logout |
 | `sessionStorage` | `idToken`, `accessToken`, `refreshToken` | `authService.js` | Browser session |
+| `sessionStorage` | `pendingEmail`, the new address awaiting its code | `accountService.js` | Until the change is confirmed or cancelled, or logout |
 | `localStorage` | `userDetails` (user record, mostly for the theme) | `App.jsx` after loading, `ThemeCard` on change | Until logout |
 | `localStorage` | `sidebarIsOpen`, `sidebarBoardsMenuIsOpen` (`"true"` or `"false"`), read once as the initial React state | `App.jsx` whenever either value changes | Until logout |
 | `localStorage` | `boardCount`, the number of placeholder rows to show during the next load, read once as the initial React state | `App.jsx` whenever the number of boards changes, unless it is zero, as a failed load also leaves no boards | Until logout |

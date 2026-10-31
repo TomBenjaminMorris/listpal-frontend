@@ -370,6 +370,16 @@ describe('new boards', () => {
     expect(pendingCount()).toBe(1);
   });
 
+  it('clears every queued record when the account is deleted', async () => {
+    await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
+    await engine.queueCreate(task('t#2'));
+
+    await engine.clearOutbox();
+
+    expect(await engine.readPending()).toEqual([]);
+    expect(pendingCount()).toBe(0);
+  });
+
   it('waits for a sync in flight before forgetting a board', async () => {
     await engine.queueBoardCreate({ SK: NEW, Board: 'Garden' });
     let respond;

@@ -1,0 +1,161 @@
+.account-settings-wrapper {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.account-rows {
+  width: 80%;
+  max-width: 900px;
+  margin: auto;
+  text-align: left;
+}
+
+.account-row {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.account-row-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Lets a long email wrap instead of pushing the button off the row */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-row-label {
+  font-family: "CircularMedium";
+}
+
+.account-row-value,
+.account-row-sub {
+  opacity: 0.8;
+}
+
+.account-row-sub {
+  font-size: 0.9em;
+}
+
+/* The global button margin would push these out of line with the inputs and dividers */
+.account-row-button,
+.account-form-buttons button,
+.account-delete button {
+  margin: 0;
+}
+
+.account-row-button {
+  flex-shrink: 0;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.account-row .account-form {
+  margin-top: 14px;
+}
+
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.account-input {
+  font-size: 1em;
+  padding: 8px;
+  background-color: var(--text-colour);
+  color: black;
+  border: none;
+  border-radius: 10px;
+  font-family: "CircularBook";
+}
+
+.account-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.account-hint,
+.account-form p {
+  margin: 0;
+}
+
+.account-hint {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.account-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* The themes share no error colour, and every theme's foreground is dark enough for this to read */
+.account-error {
+  color: rgb(255, 154, 139);
+  margin: 0;
+}
+
+.account-notice {
+  margin: 0;
+  font-family: "CircularMedium";
+}
+
+.account-rows > .account-notice {
+  padding-top: 12px;
+}
+
+.account-form-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.account-form-buttons-end {
+  justify-content: flex-end;
+}
+
+.account-form-buttons button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.account-link-button {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  padding: 0.6em 0;
+}
+
+.account-danger-button {
+  background-color: rgb(170, 45, 45);
+  color: white;
+  flex-shrink: 0;
+}
+
+.account-danger-button:hover {
+  background-color: rgb(140, 32, 32);
+}
+
+.account-delete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+}

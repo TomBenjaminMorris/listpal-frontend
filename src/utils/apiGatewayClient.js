@@ -24,7 +24,7 @@ const tokenCheck = async () => {
 };
 
 // Callers must see a failure here, otherwise an expired session looks like an empty response
-const ensureToken = async () => {
+export const ensureToken = async () => {
   const ok = await tokenCheck();
   if (!ok) throw Object.assign(new Error("Session expired, please sign in again"), { code: SESSION_EXPIRED });
 };
@@ -83,3 +83,7 @@ export const deleteBoard = (boardID) =>
 
 export const updateBoardScoresAPI = (boardID, scores) =>
   apiPost('/board-scores', { boardID, scores }, { action: 'save the score' });
+
+// Silent: the delete dialog stays open and shows the failure itself, so the user can retry
+export const deleteAccount = () =>
+  apiPost('/delete-account', {}, { silent: true });
