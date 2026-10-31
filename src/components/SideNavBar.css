@@ -178,18 +178,10 @@
   width: 95px;
   border-radius: 4px;
   background-color: var(--text-colour);
-  animation: 900ms ease-in-out infinite alternate sidenavBoardPlaceholderPulse;
+  opacity: 0.14;
+  animation: 900ms ease-in-out infinite alternate placeholderPulse;
 }
 
 .sidenav-board-placeholder>.sidenav-boards-link-item>div:first-child {
   width: 20px;
-}
-
-@keyframes sidenavBoardPlaceholderPulse {
-  from {
-    opacity: 0.08;
-  }
-  to {
-    opacity: 0.2;
-  }
 }

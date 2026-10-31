@@ -5,8 +5,12 @@ import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import Card from './Card';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
+const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, remoteUpdateRef }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+  // Where the caret goes once a task shows a given text: { SK, caret, description }. Task reads it, as React moves the
+  // caret to the end whenever it changes a value. Held here because a new category's first task asks for it from a new Card
+  const focusRequestRef = useRef(null);
 
   // Stable React keys per category, so a rename doesn't remount the card and replay its entry animation
   const cardKeys = useRef({});
@@ -26,13 +30,15 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
     [...containerRef.current.children].map(el => [el, { left: el.offsetLeft, top: el.offsetTop }])
   );
 
-  // Measured during render, while the DOM still shows the old layout. Only done when categories are
-  // added, removed or reordered: other re-renders would capture positions already stale from task edits
-  if (categoryOrder !== lastCategoryOrder.current && containerRef.current) {
+  // Measured during render, while the DOM still shows the old layout. Only done when categories are added, removed or
+  // reordered, or when a fresh copy of the board lands and may resize the cards above others: other re-renders would
+  // capture positions already stale from task edits
+  if ((categoryOrder !== lastCategoryOrder.current || remoteUpdateRef.current) && containerRef.current) {
     positionsBeforeChange.current = measurePositions();
     lastCategoryOrder.current = categoryOrder;
   }
 
+  // No dependencies, as a fresh copy can move the cards without changing the category order. Does nothing unless measured above
   useLayoutEffect(() => {
     const before = positionsBeforeChange.current;
     if (!before) return;
@@ -51,7 +57,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
         { duration: 250, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
       );
     });
-  }, [categoryOrder]);
+  });
 
   const handleRenameCard = (oldTitle, newTitle) => {
     cardKeys.current[newTitle] = cardKeys.current[oldTitle];
@@ -130,6 +136,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
     const sortArr = [...Object.keys(sortedTasks), name];
     updateCategoryOrder(sortArr, setBoards)
 
+    focusRequestRef.current = { SK: newCardDefaultTask.SK, caret: 0, description: "" };
     queueCreate(newCardDefaultTask);
 
     setSortedTasks({
@@ -155,6 +162,8 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
           setConfirmConf={setConfirmConf}
           setAlertConf={setAlertConf}
           tickedCheckboxRef={tickedCheckboxRef}
+          focusRequestRef={focusRequestRef}
+          remoteUpdateRef={remoteUpdateRef}
         />
       ))}
       {sortedTasks && (

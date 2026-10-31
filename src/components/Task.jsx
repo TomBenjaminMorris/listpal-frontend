@@ -27,14 +27,14 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     toggleTaskChecked(task.SK, !checked);
   }
 
-  // A split or join asks for the caret here once this task shows the text it produced. Run on mount and on each new
-  // text, after React has written it to the textarea and so moved the caret to the end
+  // A task the user just created, split or joined asks for the caret here once it shows the text that produced. Run on
+  // mount and on each new text, after React has written it to the textarea and so moved the caret to the end. Tasks that
+  // merely load never ask, as focusing one scrolls the page to it
   const textareaRef = useRef(null);
   useLayoutEffect(() => {
     const request = focusRequestRef.current;
     if (request?.SK !== task.SK || request.description !== description) return;
     focusRequestRef.current = null;
-    if (request.caret === null) return;
     textareaRef.current.focus();
     textareaRef.current.setSelectionRange(request.caret, request.caret);
   }, [description]);
@@ -144,8 +144,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const isImportant = task.Important === "true";
   const taskExpiryOpacityStyle = checked ? { opacity: taskExpiryOpacity() } : null;
   const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null;
-  // Unless Card asked otherwise, as for an empty task pushed in above the caret
-  const taskAutoFocus = description === "" && focusRequestRef.current?.SK !== task.SK;
   const isLinkAvailable = task.Link && task.Link !== "";
 
   return (
@@ -173,7 +171,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           disabled={checked}
           placeholder="new task..."
           onChange={handleTextUpdate}
-          autoFocus={taskAutoFocus}
           onKeyDown={(e) => onKeyDown(e, task.SK, title)}
           style={taskTextDecorationStyle}
         />

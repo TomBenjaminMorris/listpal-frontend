@@ -25,6 +25,20 @@
     transform: translateY(-5px);
 }
 
+/* The height of a real card's line of text */
+.board-list-item-placeholder {
+    height: 105px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.board-list-item-placeholder > .placeholder-bar {
+    width: 120px;
+    height: 14px;
+}
+
 .board-list-item-score {
     background-color: var(--background);
     color: var(--text-colour);
@@ -59,6 +73,10 @@
     border-width: 4px;
     font-size: 50px;
     transition: background-color 150ms, opacity 150ms;
+}
+
+.add-board-button-loading {
+    visibility: hidden;
 }
 
 #addBoardButton:hover {

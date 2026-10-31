@@ -36,7 +36,7 @@ const SideNavBar = ({
   };
 
   const boardsRendered = boards.map(board => (
-    <div key={board.SK} className={activeBoard?.SK === board.SK ? "highlight-board-link" : ""}>
+    <div key={board.SK} className={`fadeInPure-animation ${activeBoard?.SK === board.SK ? "highlight-board-link" : ""}`}>
       <Link
         to={`/board/${board.SK}`}
         className={`sidenav-boards-link-item ${activeBoard?.SK === board.SK ? "highlight-board-link-text" : ""}`}

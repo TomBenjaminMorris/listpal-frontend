@@ -18,7 +18,7 @@ const setFlag = (setter, label, value) => setter(current => current[label] === v
 
 const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCount, setBoards, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const [scoreValue, setScoreValue] = useState(score);
-  const [animate, setAnimate] = useState(true);
+  const [animate, setAnimate] = useState(false);
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
   const prevRef = useRef({ boardSK: undefined, percent: undefined, refreshCount });
 
@@ -60,13 +60,14 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
 
   useEffect(() => {
     setScoreValue(score)
-    setAnimate(true);
     const label = TYPE_MAPPINGS[type].label;
     const boardSK = currentBoardScores?.SK;
     // A celebration needs a real crossing: same board, previous percent known and below 100.
     // Loading a board that is already at or above target (or switching to one) must stay silent, and so must a
     // refresh on return bringing in a target met on another device.
     const prev = prevRef.current;
+    // Only a change bulges, so opening a board doesn't set every counter pulsing during its entrance
+    if (prev.boardSK === boardSK) setAnimate(true);
     const crossedTarget = !!boardSK && prev.boardSK === boardSK && prev.refreshCount === refreshCount && prev.percent < 100 && percent >= 100;
     prevRef.current = { ...prev, boardSK, percent };
     if (percent >= 100) {

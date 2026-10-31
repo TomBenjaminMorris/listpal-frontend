@@ -31,6 +31,13 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+.board-name-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
 .board-filter-actions-wrapper {
     width: 100%;
     display: flex;
@@ -69,10 +76,12 @@
 .delete-icon {
     transition-duration: 100ms;
     width: 25px;
+    height: 25px;
 }
 
 .clear-icon {
     width: 27px;
+    height: 27px;
     transition-duration: 100ms;
     margin-left: -2px;
 }
@@ -80,6 +89,14 @@
 .board-action {
     position: relative;
     display: flex;
+    transition: opacity 150ms;
+}
+
+/* Delayed, so a fast load doesn't dim the icons at all */
+.board-actions-loading .board-action {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 150ms 120ms;
 }
 
 .board-action:hover .board-action-tooltip {
