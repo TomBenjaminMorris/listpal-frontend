@@ -14,7 +14,6 @@ import DatePills from './DatePills';
 import ScoreBoard from './ScoreBoard';
 import TargetSetterModal from './TargetSetterModal';
 import TargetBanner from './TargetBanner';
-import Loader from './Loader';
 import SyncIndicator from './SyncIndicator';
 import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Board.css';
@@ -23,7 +22,7 @@ const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
 const SHOWING_CACHE = Symbol('showing cache');
 const TARGET_TYPES = ['weekly', 'monthly', 'yearly'];
 
-const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, isLoading, setIsLoading, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
@@ -35,13 +34,17 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   const [banners, setBanners] = useState([]);
   const announced = useRef(new Set()); // Targets already given a banner, cleared when the score drops below target
   const [remoteData, setRemoteData] = useState(null); // { boardID, load, tasks, failed } so a late response can't land on another board or visit
-  const [loadedBoardID, setLoadedBoardID] = useState(null); // Board whose tasks are in sortedTasks; the loader shows until it matches
+  const [loadedBoardID, setLoadedBoardID] = useState(null); // Board whose tasks are in sortedTasks; the cards wait until it matches
+  const [isDeleting, setIsDeleting] = useState(false);
   const loadCount = useRef(0); // Numbers each board switch, so only the latest load's response is applied
   // While a background load runs: SHOWING_CACHE until a cached copy lands, then the sortedTasks on screen when it
   // started (the cached copy, or the board as it was when a refresh on return began)
   const shownFromCache = useRef(null);
+  // True for the one commit in which a fresh copy replaces the board on screen, so the cards can animate what it changes
+  const remoteUpdateRef = useRef(false);
   const boardID = getBoardIdFromUrl();
   const board = boards.find(b => b.SK === boardID)
+  const tasksReady = loadedBoardID === boardID && !isDeleting;
   const maxLength = 20;
   const navigate = useNavigate();
   const emojiMenuRef = useRef(null)
@@ -58,6 +61,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
       shownFromCache.current = null;
       // The user may have edited the cached copy while the fresh one loaded; those edits are queued, so keep them
       if (baseline && sortedTasks !== baseline) return;
+      remoteUpdateRef.current = !!baseline;
       sortTasks(remoteData.tasks);
       setLoadedBoardID(board.SK);
     }
@@ -72,8 +76,14 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
     if (shownFromCache.current === SHOWING_CACHE) shownFromCache.current = sortedTasks;
   }, [sortedTasks, loadedBoardID, boardID]);
 
-  // A layout effect, so a cached copy replaces the loader before the browser paints it
+  // Runs after the children's layout effects, which is when the cards read it
   useLayoutEffect(() => {
+    remoteUpdateRef.current = false;
+  }, [sortedTasks]);
+
+  // A layout effect, so a cached copy is on screen before the browser paints the board without it
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
     setActiveBoardID(boardID);
     const load = ++loadCount.current;
     // board is undefined on a direct page load until boards arrive, and the cache is empty then anyway
@@ -83,6 +93,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
       setLoadedBoardID(boardID);
       shownFromCache.current = SHOWING_CACHE;
     } else {
+      setLoadedBoardID(null);
       shownFromCache.current = null;
     }
     getTasks({ load, background: !!(cached && board) });
@@ -175,7 +186,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   };
 
   const handleDeleteBoard = async () => {
-    setIsLoading(true);
+    setIsDeleting(true);
     try {
       // The delete reads the board's tasks and then removes them, so a sync creating one in between would leave it
       // behind with no board. Sending the queue first means nothing for this board is in flight during the delete.
@@ -188,7 +199,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
     } catch {
       // apiPost has already shown the user what went wrong
     } finally {
-      setIsLoading(false);
+      setIsDeleting(false);
     }
   };
 
@@ -208,6 +219,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
   };
 
   const handleClearClick = () => {
+    // Until the tasks land, sortedTasks still holds the previous board's, and clearing would delete those
+    if (!tasksReady) return;
     const hasCompleted = Object.values(sortedTasks ?? {}).some(tasks => tasks.some(t => t.CompletedDate !== 'nil'));
     if (!hasCompleted) {
       setAlertConf({
@@ -239,12 +252,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
       return acc;
     }, {});
     setSortedTasks(sortedData, board.CategoryOrder);
-    setIsLoading(false);
   };
 
-  // In the background a cached copy is already on screen, so there is no loader, and a failure leaves that copy in place
+  // In the background a cached copy is already on screen, so a failure leaves that copy in place
   const getTasks = async ({ load, background = false }) => {
-    if (!background) setIsLoading(true);
     try {
       // Records queued now are overlaid even if the flush settles them before the fetch reads, and queued
       // changes hold whole field values, so applying one the server already has changes nothing
@@ -268,8 +279,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
       setRemoteData({ boardID, load, tasks: [], failed: true }); // Show the empty board behind the alert rather than spinning forever
       // Reported here rather than by apiGet, because the local outbox reads can fail too
       setAlertConf({ display: true, ...apiErrorAlert(error, "load this board's tasks") });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -332,35 +341,37 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
       />
 
       <div className="board-content-wrapper">
-        {
-          isLoading || loadedBoardID !== boardID ? <Loader /> : <div className="flex-container">
+        <div className="flex-container">
+          {board && (
             <div className="board-filter-actions-wrapper fadeUp-animation">
 
               <div className="board-name-wrapper">
 
                 <div className="board-name">
-                  <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
-                    <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{board?.Emoji}</div>
-                    {
-                      displayEmojiPicker ? <div className="board-emoji-wrapper">
-                        <EmojiPicker onEmojiSelect={handleEmojiSelect} containerRef={emojiMenuRef} onClose={() => setDisplayEmojiPicker(false)} />
-                      </div> : null
-                    }
+                  <div key={boardID} className="board-name-content fadeInPure-animation">
+                    <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
+                      <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{board.Emoji}</div>
+                      {
+                        displayEmojiPicker ? <div className="board-emoji-wrapper">
+                          <EmojiPicker onEmojiSelect={handleEmojiSelect} containerRef={emojiMenuRef} onClose={() => setDisplayEmojiPicker(false)} />
+                        </div> : null
+                      }
+                    </div>
+                    {board.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board.Board}
+                    <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
+                      display: true,
+                      isEdit: true,
+                      defaultText: board.Board,
+                      title: "Rename this board ✏️",
+                      callbackFunc: handleEditBoard,
+                    })} />
                   </div>
-                  {board?.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board?.Board}
-                  <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
-                    display: true,
-                    isEdit: true,
-                    defaultText: board.Board,
-                    title: "Rename this board ✏️",
-                    callbackFunc: handleEditBoard,
-                  })} />
                 </div>
               </div>
 
               <DatePills />
 
-              <div className="board-actions-wrapper">
+              <div className={`board-actions-wrapper ${tasksReady ? "" : "board-actions-loading"}`}>
                 <div className="board-action">
                   <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
                     display: true,
@@ -395,25 +406,30 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, i
               />
 
             </div>
-            {
-              !sortedTasks || Object.keys(sortedTasks).length === 0 ? (
-                <div className="fadeUp-animation" style={{ fontSize: "20px", marginTop: "40px", marginBottom: "30px", }}>
-                  Create a category to get going...
-                </div>
-              ) : null
-            }
-            <CardList
-              key={boardID}
-              sortedTasks={sortedTasks}
-              setSortedTasks={setSortedTasks}
-              setBoards={setBoards}
-              setPromptConf={setPromptConf}
-              setConfirmConf={setConfirmConf}
-              setAlertConf={setAlertConf}
-              tickedCheckboxRef={tickedCheckbox}
-            />
-          </div>
-        }
+          )}
+          {tasksReady && (
+            <>
+              {
+                !sortedTasks || Object.keys(sortedTasks).length === 0 ? (
+                  <div className="fadeUp-animation" style={{ fontSize: "20px", marginTop: "40px", marginBottom: "30px", }}>
+                    Create a category to get going...
+                  </div>
+                ) : null
+              }
+              <CardList
+                key={boardID}
+                sortedTasks={sortedTasks}
+                setSortedTasks={setSortedTasks}
+                setBoards={setBoards}
+                setPromptConf={setPromptConf}
+                setConfirmConf={setConfirmConf}
+                setAlertConf={setAlertConf}
+                tickedCheckboxRef={tickedCheckbox}
+                remoteUpdateRef={remoteUpdateRef}
+              />
+            </>
+          )}
+        </div>
       </div>
       <SyncIndicator />
     </div >

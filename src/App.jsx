@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
 import { getBoards, getUser } from './utils/apiGatewayClient';
 import { isAuthenticated } from './utils/utils';
 import { applyPendingBoards, boardsWithQueuedTasks, flushNow, mergePending, startSync, getSyncStatus, readPending, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
@@ -49,8 +49,6 @@ const App = () => {
   // Toggled in step with sidebarIsOpen, so it starts as its inverse
   const [hideMobileSidebar, setHideMobileSidebar] = useState(() => !readStoredFlag(SIDEBAR_OPEN_KEY));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
-  const [isLoading, setIsLoading] = useState(true);
-  // Separate from isLoading, which Board turns back on for each board switch and would bring the placeholders back each time
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [placeholderBoardCount] = useState(() => Number(localStorage.getItem(BOARD_COUNT_KEY)) || DEFAULT_PLACEHOLDER_BOARD_COUNT);
   const [refreshCount, setRefreshCount] = useState(0); // Moves on each refresh on return, after the boards have landed
@@ -130,12 +128,10 @@ const App = () => {
       } catch (error) {
         console.error('Failed to load initial data:', error);
       } finally {
-        setIsLoading(false);
         setInitialLoadDone(true);
       }
     };
 
-    applyTheme(userDetails.Theme);
     loadInitialData();
 
     const handleResize = _debounce(
@@ -172,7 +168,8 @@ const App = () => {
     }
   }), []);
 
-  useEffect(() => {
+  // A layout effect, so a theme arriving with the user's data is on screen in the same frame as that data
+  useLayoutEffect(() => {
     applyTheme(userDetails.Theme);
   }, [userDetails]);
 
@@ -256,7 +253,7 @@ const App = () => {
               element={isAuthenticated() ? (<HomePage
                 boards={boards}
                 setBoards={setBoards}
-                isLoading={isLoading}
+                placeholderBoardCount={initialLoadDone ? 0 : placeholderBoardCount}
                 setPromptConf={modalSetters.setPromptConf}
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoardID={setActiveBoardID}
@@ -271,8 +268,6 @@ const App = () => {
                 setSortedTasks={setOrderedSortedTasks}
                 boards={boards}
                 refreshCount={refreshCount}
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
                 setPromptConf={modalSetters.setPromptConf}
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
@@ -285,7 +280,6 @@ const App = () => {
               element={isAuthenticated() ? (<Settings
                 userDetails={userDetails}
                 setUserDetails={setUserDetails}
-                isLoading={isLoading}
               />) : (<Navigate replace to="/logout" />)}
             />
 

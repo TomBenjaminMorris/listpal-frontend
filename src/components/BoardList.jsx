@@ -10,7 +10,7 @@ const BoardCard = ({ board, onClick }) => {
     : board.Board;
 
   return (
-    <Link className="board-list-item-wrapper" to={"/board/" + board.SK} onClick={onClick} >
+    <Link className="board-list-item-wrapper fadeInPure-animation" to={"/board/" + board.SK} onClick={onClick} >
       <div className="board-list-item-score">{board.YScore}</div>
       <div className="board-list-text-emoji-wrapper">
         <div className="boardLink">{truncatedText}</div>
@@ -20,13 +20,20 @@ const BoardCard = ({ board, onClick }) => {
   );
 };
 
-const AddBoardButton = ({ onClick }) => (
-  <div id="addBoardButton" onClick={onClick}>
+const BoardCardPlaceholder = () => (
+  <div className="board-list-item-wrapper board-list-item-placeholder" aria-hidden="true">
+    <div className="placeholder-bar" />
+  </div>
+);
+
+// Hidden rather than left out while loading, as the row is centred and the boards would shift when it arrived
+const AddBoardButton = ({ onClick, hidden }) => (
+  <div id="addBoardButton" className={hidden ? "add-board-button-loading" : ""} onClick={onClick}>
     +
   </div>
 );
 
-const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
+const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
   const handleNewBoard = (name) => {
     if (!name?.trim()) {
       setAlertConf({
@@ -55,14 +62,16 @@ const BoardList = ({ boards = [], setBoards, setPromptConf, setAlertConf, setAct
 
   return (
     <div className="flex-container-board-list">
-      {boards.map(board => (
-        <BoardCard
-          key={board.SK}
-          board={board}
-          onClick={() => setActiveBoardID(board.SK)}
-        />
-      ))}
-      <AddBoardButton onClick={handleAddBoardClick} />
+      {placeholderBoardCount > 0
+        ? Array.from({ length: placeholderBoardCount }, (_, i) => <BoardCardPlaceholder key={i} />)
+        : boards.map(board => (
+          <BoardCard
+            key={board.SK}
+            board={board}
+            onClick={() => setActiveBoardID(board.SK)}
+          />
+        ))}
+      <AddBoardButton onClick={handleAddBoardClick} hidden={placeholderBoardCount > 0} />
     </div>
   );
 };

@@ -107,6 +107,7 @@ hr {
 .card-menu-dots {
     opacity: 0.6;
     width: 24px;
+    height: 24px;
     margin-right: 18px;
     margin-top: 12px;
     padding: 6px;

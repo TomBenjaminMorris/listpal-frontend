@@ -6,6 +6,16 @@
   <link rel="icon" type="image/png" href="/listpal-icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ListPal</title>
+  <!-- Fetched now rather than when text first needs them, which is partway through the board's entrance -->
+  <link rel="preload" href="/src/fonts/circular-medium.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/src/fonts/circular-bold.woff2" as="font" type="font/woff2" crossorigin />
+  <!-- Inline, as the app's script can arrive long after the first paint and the default theme would show until then -->
+  <script>
+    try {
+      const theme = JSON.parse(localStorage.getItem('userDetails'))?.Theme;
+      if (theme) document.documentElement.dataset.theme = theme;
+    } catch { }
+  </script>
 </head>
 
 <body>

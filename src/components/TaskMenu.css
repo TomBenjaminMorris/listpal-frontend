@@ -78,14 +78,11 @@ a {
   animation: 150ms ease-out fadeIn;
 }
 
+/* No end keyframe, so it finishes at the element's own opacity instead of snapping down to it from 1 */
 @keyframes fadeUp {
   0% {
     transform: translateY(12px);
     opacity: 0;
-  }
-  100% {
-    transform: none;
-    opacity: 1;
   }
 }
 
@@ -120,4 +117,22 @@ a {
 
 .fadeInPure-animation {
   animation: 200ms ease-out fadeInPure;
+}
+
+@keyframes placeholderPulse {
+  from {
+    opacity: 0.08;
+  }
+  to {
+    opacity: 0.2;
+  }
+}
+
+/* The resting opacity is for reduced motion, where the pulse is cut short. No height here, as each use sets its own
+   and CSS import order would otherwise decide which one wins */
+.placeholder-bar {
+  border-radius: 4px;
+  background-color: var(--text-colour);
+  opacity: 0.14;
+  animation: 900ms ease-in-out infinite alternate placeholderPulse;
 }

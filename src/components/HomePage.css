@@ -20,7 +20,7 @@
     justify-content: center
 }
 
-/* Centred on the viewport rather than the content area, so the sign-in logo and the loader after it share a centre whatever the sidebar's width */
+/* Centred on the viewport rather than the content area, whatever the sidebar's width */
 .loadingWrapper.fullScreen {
     position: fixed;
     inset: 0;
@@ -52,6 +52,13 @@
 .home-page-total-score-inner-label {
     font-size: 18px;
     opacity: 0.5;
+}
+
+/* Margins make up the height of the score's line, so the box doesn't resize when the score arrives */
+.home-page-score-placeholder {
+    width: 40px;
+    height: 20px;
+    margin: 12.5px auto;
 }
 
 .home-page-total-score-inner-score {

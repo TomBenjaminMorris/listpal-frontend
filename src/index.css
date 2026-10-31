@@ -1,3 +1,8 @@
+/* A classic scroll bar appears once a page outgrows the window, which would otherwise narrow everything already on screen */
+html {
+  scrollbar-gutter: stable;
+}
+
 a {
   font-weight: 500;
   text-decoration: inherit;

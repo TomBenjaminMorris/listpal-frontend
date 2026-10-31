@@ -42,7 +42,7 @@ const createdDateBeside = (list, SK, above) => {
   return midpoint > prev && midpoint < next ? String(midpoint) : String(Date.now());
 };
 
-const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef }) => {
+const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, focusRequestRef, remoteUpdateRef }) => {
   const [titleEdited, setTitleEdited] = useState(title);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
@@ -86,12 +86,15 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     // Web Animations ignore the CSS reduced-motion rule, so check it here
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // Only reorders slide. An added task appears at once in its place and a deleted one vanishes at once, so sliding
-    // the tasks below would draw them over the new task or leave a gap where the old one was
+    // Only reorders slide when the user is editing. A task they add appears at once in its place and one they delete
+    // vanishes at once, so sliding the tasks below would draw them over the new task or leave a gap where the old one
+    // was. A task arriving from another device isn't under their caret, so there it fades in and the others make way
     const after = measurePositions();
-    if (after.size !== before.size) return;
+    const remote = remoteUpdateRef.current;
+    if (after.size !== before.size && !remote) return;
     after.forEach((top, el) => {
       const prev = before.get(el);
+      if (prev === undefined && remote) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
       if (prev === undefined || prev === top) return;
       el.animate(
         [{ transform: `translateY(${prev - top}px)` }, { transform: 'none' }],
@@ -165,10 +168,6 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       : prev);
   }, [title, setSortedTasks]);
 
-  // Where the caret goes once a task shows a given text: { SK, caret, description }, or caret null to keep a new
-  // empty task from taking focus. Task reads it, as React moves the caret to the end whenever it changes a value
-  const focusRequestRef = useRef(null);
-
   // With besideSK, the new task goes directly below that task (or above it) rather than at the bottom. A split
   // passes the text after the caret, and the caret follows it to the start of the new task
   const addTask = useCallback((besideSK, { above = false, description = "" } = {}) => {
@@ -190,11 +189,10 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     };
 
     // An empty task above the caret's task is pushed in by Enter at its start, so the caret stays where it is
-    if (above) focusRequestRef.current = { SK: newTaskData.SK, caret: null, description };
-    else if (description) focusRequestRef.current = { SK: newTaskData.SK, caret: 0, description };
+    if (!above) focusRequestRef.current = { SK: newTaskData.SK, caret: 0, description };
     queueCreate(newTaskData);
     setSortedTasks(prev => ({ ...prev, [title]: [newTaskData, ...(prev[title] || [])] }));
-  }, [title, cardEmoji, setSortedTasks]);
+  }, [title, cardEmoji, setSortedTasks, focusRequestRef]);
 
   // Joins a task to the unticked task above or below it, as deleting the break between two lines in an editor: the
   // lower one's text goes onto the end of the upper one, the lower one is deleted, and the caret sits at the join.
@@ -215,7 +213,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     setTaskFields(upper.SK, fields);
     handleDeleteTask(lower.SK, title);
     return true;
-  }, [title, setTaskFields, handleDeleteTask]);
+  }, [title, setTaskFields, handleDeleteTask, focusRequestRef]);
 
   // A category can't be left with no tasks, so deleting its only task offers to delete the category instead. A join
   // never gets here, as it needs two tasks
@@ -291,6 +289,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
         "Important": "false",
         "ExpiryDateTTL": 0
       };
+      focusRequestRef.current = { SK: newCardDefaultTask.SK, caret: 0, description: "" };
       queueCreate(newCardDefaultTask);
     }
 
@@ -299,7 +298,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       const updatedList = prev[title].map(t => t.SK === SK ? { ...t, ...completion } : t);
       return { ...prev, [title]: newCardDefaultTask ? [...updatedList, newCardDefaultTask] : updatedList };
     });
-  }, [title, cardEmoji, setSortedTasks, setBoards]);
+  }, [title, cardEmoji, setSortedTasks, setBoards, focusRequestRef]);
 
   const handleEmojiSelect = (e) => {
     const newEmoji = e.native;
