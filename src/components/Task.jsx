@@ -62,6 +62,11 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     setTaskMenuVisible(false);
   };
 
+  const handleDuplicate = () => {
+    addTask(task.SK, { description, caret: description.length, link: task.Link, important: task.Important });
+    setTaskMenuVisible(false);
+  };
+
   // Keyboard shortcuts for creating, splitting, joining, ticking, deleting and moving between tasks, as with lines in
   // an editor
   const onKeyDown = (e, taskID, title) => {
@@ -191,6 +196,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             containerRef={taskMenuRef}
             onClose={() => setTaskMenuVisible(false)}
             markAsImportant={handleMarkAsImportant}
+            duplicateTask={handleDuplicate}
             deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
             isImportant={isImportant}
             task={task}

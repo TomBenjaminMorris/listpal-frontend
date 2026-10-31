@@ -6,9 +6,10 @@ import importantIcon from '../assets/icons8-important-30-white.png';
 import deleteIcon from '../assets/icons8-delete-48.png';
 import plusIcon from '../assets/icons8-plus-30.png';
 import editIcon from '../assets/icons8-edit-48.png';
+import duplicateIcon from '../assets/duplicate.svg';
 import "./TaskMenu.css";
 
-const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setAlertConf }) => {
+const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setAlertConf }) => {
   // Here rather than in Task, so only an open menu listens for outside clicks, not every task on the board
   useOnClickOutside(containerRef, onClose);
 
@@ -72,6 +73,10 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, deleteAndHideTa
           {`${isImportant ? "Unmark" : "Mark"} as Important`}
         </li>
         {linkAction}
+        <li className="task-dropdown-li" onClick={duplicateTask}>
+          <img className="task-dropdown-icons" src={duplicateIcon} alt="Duplicate Icon" />
+          Duplicate Task
+        </li>
         <li className="task-dropdown-li" onClick={deleteAndHideTask}>
           <img className="task-dropdown-icons" src={deleteIcon} alt="Delete Icon" />
           Delete Task

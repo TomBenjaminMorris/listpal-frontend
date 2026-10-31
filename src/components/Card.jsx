@@ -34,7 +34,8 @@ const sortedUnticked = list => sortList(list).filter(t => t.CompletedDate === "n
 const createdDateBeside = (list, SK, above) => {
   const unticked = sortedUnticked(list);
   const index = unticked.findIndex(t => t.SK === SK);
-  if (index === -1) return String(Date.now());
+  // A ticked task's duplicate is unticked, so it can't sit beside it. First among the unticked is the nearest place below
+  if (index === -1) return unticked.length ? String(Number(unticked[0].CreatedDate) - 1) : String(Date.now());
   if (above && index === 0) return String(Number(unticked[0].CreatedDate) - 1);
   const prev = Number(unticked[above ? index - 1 : index].CreatedDate);
   const next = Number(unticked[above ? index : index + 1]?.CreatedDate);
@@ -169,8 +170,9 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
   }, [title, setSortedTasks]);
 
   // With besideSK, the new task goes directly below that task (or above it) rather than at the bottom. A split
-  // passes the text after the caret, and the caret follows it to the start of the new task
-  const addTask = useCallback((besideSK, { above = false, description = "" } = {}) => {
+  // passes the text after the caret, and the caret follows it to the start of the new task. A duplicate also passes
+  // the link and importance, with the caret at the end of the copied text
+  const addTask = useCallback((besideSK, { above = false, description = "", caret = 0, link = "", important = "false" } = {}) => {
     const newTaskData = {
       CreatedDate: besideSK ? createdDateBeside(tasksRef.current, besideSK, above) : String(Date.now()),
       SK: "t#" + uuidv4(),
@@ -183,13 +185,13 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
       Category: title,
       EntityType: "Task",
       Emoji: cardEmoji,
-      Link: "",
-      Important: "false",
+      Link: link,
+      Important: important,
       ExpiryDateTTL: 0
     };
 
     // An empty task above the caret's task is pushed in by Enter at its start, so the caret stays where it is
-    if (!above) focusRequestRef.current = { SK: newTaskData.SK, caret: 0, description };
+    if (!above) focusRequestRef.current = { SK: newTaskData.SK, caret, description };
     queueCreate(newTaskData);
     setSortedTasks(prev => ({ ...prev, [title]: [newTaskData, ...(prev[title] || [])] }));
   }, [title, cardEmoji, setSortedTasks, focusRequestRef]);
