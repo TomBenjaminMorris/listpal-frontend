@@ -26,7 +26,6 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
     if (scoreValue === "") {
       setAlertConf({
         display: true,
-        animate: true,
         title: "Missing a number 🔢",
         textValue: "The score can't be empty. Pop a number in and try again.",
       });
