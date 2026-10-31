@@ -80,10 +80,6 @@
   font-family: CircularBook;
 }
 
-.sidenav-link-boards {
-  gap: 10px;
-}
-
 .sidenav-link-boards>div {
   align-self: flex-start;
 }
