@@ -1,4 +1,5 @@
 import { memo, useEffect } from 'react';
+import AccountSettings from './AccountSettings';
 import ThemeSetter from './ThemeSetter';
 import settingsIcon from '../assets/icons8-settings-50-white.png';
 import './Settings.css';
@@ -22,6 +23,7 @@ const Settings = ({
             <img className="heading-icon" src={settingsIcon} alt="Settings Icon" />
           </div>
           <div className="settings-content-sub-wrapper fadeUp-animation">
+            <AccountSettings />
             <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
           </div>
         </div>
