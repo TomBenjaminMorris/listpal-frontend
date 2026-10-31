@@ -377,7 +377,7 @@ Key points:
 
 ## 11. Deployment and local development
 
-There is no pipeline. Releases are run by hand with the `/deploy` skill in `.claude/skills/deploy/SKILL.md`. It builds a clean worktree of `origin/main`, syncs `dist/` to the bucket and invalidates CloudFront. It asks before each step that changes something.
+There is no pipeline. Releases are run by hand with the `/deploy` skill in `.claude/skills/deploy/SKILL.md`. It builds a clean worktree of `origin/main`, syncs `dist/` to the bucket and invalidates CloudFront. It asks before each step that changes something. Getting a change onto `main` comes first and has its own skills: `/pr` (`.claude/skills/pr/SKILL.md`) raises a PR with a description written for later auditing and leaves it open, and `/merge` (`.claude/skills/merge/SKILL.md`) does the same and merges it. Neither one releases anything.
 
 ```mermaid
 flowchart LR
@@ -434,5 +434,6 @@ These are things a reader should know before changing the app. They are not fixe
 | Add a theme | `src/App.css` (new `[data-theme]` block), `src/utils/themes.js` |
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |
 | Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.claude/skills/deploy/SKILL.md` |
+| Change how PRs are raised or merged | `.claude/skills/pr/SKILL.md` (steps and description format), `.claude/skills/merge/SKILL.md` (merging and forcing) |
 | Change when or how a page left open picks up changes from other devices | `src/utils/refreshOnReturn.js` (triggers and timings), `App.jsx` (boards), `Board.jsx` (tasks), `ScoreCounter.jsx` (no confetti for a refresh) |
 | Change the API address or Cognito pool | `src/utils/apiGatewayClient.js`, `src/config.json` |
