@@ -62,8 +62,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
     setAlertConf({
       display: true,
       title,
-      textValue,
-      animate: false
+      textValue
     });
   }, [setAlertConf]);
 

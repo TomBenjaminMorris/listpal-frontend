@@ -68,7 +68,11 @@ const App = () => {
   const modalSetters = useMemo(() => ({
     setPromptConf: (conf) => setModalStates(prev => ({ ...prev, prompt: conf })),
     setConfirmConf: (conf) => setModalStates(prev => ({ ...prev, confirm: conf })),
-    setAlertConf: (conf) => setModalStates(prev => ({ ...prev, alert: conf }))
+    // A prompt or confirm closes as its alert opens, so fading the alert's backdrop in from nothing would flash the page
+    setAlertConf: (conf) => setModalStates(prev => ({
+      ...prev,
+      alert: conf.display && (prev.prompt.display || prev.confirm.display) ? { ...conf, replacesModal: true } : conf
+    }))
   }), []);
 
   // Declared before the data load so API failures from it have somewhere to go
