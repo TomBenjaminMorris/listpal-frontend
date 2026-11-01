@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BoardsIcon, ChevronIcon, HomeIcon, LogOutIcon, LogoMark, MenuIcon, PanelIcon, SettingsIcon } from './Icons';
 import './SideNavBar.css';
@@ -31,6 +32,13 @@ const SideNavBar = ({
   const { pathname } = useLocation();
   const onBoardPage = pathname.startsWith('/board/');
   const boardsListIsOpen = sidebarIsOpen && sidebarBoardsMenuIsOpen;
+
+  // True only for the render that opens or collapses the sidebar, which is the one that must not animate the list
+  const previousSidebarIsOpen = useRef(sidebarIsOpen);
+  const sidebarJustToggled = previousSidebarIsOpen.current !== sidebarIsOpen;
+  useEffect(() => {
+    previousSidebarIsOpen.current = sidebarIsOpen;
+  }, [sidebarIsOpen]);
 
   // Board shows its own loader on a board change; setting it here would never clear when re-clicking the current board
   const handleBoardClick = (board) => {
@@ -124,7 +132,7 @@ const SideNavBar = ({
             <ChevronIcon className={`sidenav-chevron ${boardsListIsOpen ? "sidenav-chevron-open" : ""}`} />
           </button>
 
-          <div className={`sidenav-boards ${boardsListIsOpen ? "sidenav-boards-open" : ""}`}>
+          <div className={`sidenav-boards ${boardsListIsOpen ? "sidenav-boards-open" : ""} ${sidebarJustToggled ? "sidenav-boards-instant" : ""}`}>
             <div className="sidenav-boards-inner">
               {placeholderBoardCount ? boardPlaceholders : boardsRendered}
             </div>

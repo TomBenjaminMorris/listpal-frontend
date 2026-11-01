@@ -1,5 +1,4 @@
-/* The rail's width puts each icon exactly where it sits in the open sidebar, so nothing moves sideways on a toggle.
-   Only the sidebar animates: the page's padding snaps, as reflowing a whole board every frame would stutter. */
+/* The rail's width puts each icon exactly where it sits in the open sidebar, so nothing moves sideways on a toggle */
 .sidebar-wrapper {
   box-sizing: border-box;
   background-color: var(--foreground);
@@ -13,7 +12,6 @@
   display: flex;
   flex-direction: column;
   text-align: left;
-  transition: width 200ms ease;
 }
 
 .sidebar-open {
@@ -50,7 +48,6 @@
   color: var(--text-colour);
   font-family: CircularBold;
   font-size: 17px;
-  transition: opacity 150ms ease;
 }
 
 /* No padding here, or it would keep the brand wide enough to push the toggle out of line with the rail's icons */
@@ -157,7 +154,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: opacity 150ms ease;
 }
 
 .sidebar-collapsed .sidenav-label {
@@ -197,33 +193,35 @@
   transition: grid-template-rows 180ms ease, visibility 0s;
 }
 
-/* The margin lines the guide up under the centre of the Boards icon */
+/* Only a click on the Boards row animates the list. Opening or collapsing the sidebar itself is instant. */
+.sidenav-boards-instant {
+  transition: none;
+}
+
 .sidenav-boards-inner {
   display: flex;
   flex-direction: column;
   min-height: 0;
   gap: 2px;
-  margin-left: 19px;
-  padding-left: 8px;
+  padding-top: 2px;
   overflow: hidden;
-  border-left: 1px solid var(--hairline);
 }
 
 .sidenav-board {
   flex-shrink: 0;
   gap: 8px;
-  height: 32px;
-  padding: 0 8px;
+  height: 34px;
+  /* Full width like the rows above it, with a small indent to show the boards belong to the row above */
+  padding: 0 10px 0 26px;
   font-family: CircularBook;
   font-size: 14px;
   font-weight: normal;
 }
 
 .sidenav-board-emoji {
-  flex: 0 0 20px;
+  flex: 0 0 18px;
   font-size: 15px;
   line-height: 1;
-  text-align: center;
 }
 
 .sidenav-board-placeholder {
