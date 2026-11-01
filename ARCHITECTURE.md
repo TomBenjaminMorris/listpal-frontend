@@ -50,6 +50,8 @@ listpal-frontend/
 │   │   ├── apiErrors.test.js   Vitest tests for those messages
 │   │   ├── apiGatewayClient.js API wrapper: one function per backend route
 │   │   ├── authService.js      Token exchange, refresh, storage of tokens
+│   │   ├── loadAccount.js      First load's user read, setting up a new user's starter data if they have none
+│   │   ├── loadAccount.test.js  Vitest tests for that setup
 │   │   ├── localDBHelpers.js   openDB, a promise wrapper for indexedDB.open
 │   │   ├── refreshOnReturn.js  Decides when a page left open is worth refetching (tab shown, focus, online, wake, idle)
 │   │   ├── refreshOnReturn.test.js  Vitest tests for those triggers
@@ -185,6 +187,7 @@ Points to know:
 - If the refresh fails, `sessionStorage` is cleared. The next render sees no token and routes to `/logout`.
 - Logout clears both `localStorage` and `sessionStorage` and then replaces the location with the managed login URL.
 - The `Authorization` header is `Bearer <accessToken>`. The ID token is only read locally, for the greeting and the Account section.
+- Sign-up also happens on the managed login, and Cognito tells ListPal nothing about it. A new user has no records until `loadAccount` finds `GET /user` empty on their first load and calls `POST /new-user`, which creates the user and an example board called "Welcome" with its tasks. It then reads the user and boards again. If setup fails, the API error alert shows, the theme stays as it was, and the next load tries again.
 - Sign-in requests the `openid` and `aws.cognito.signin.user.admin` scopes. The second lets the access token call Cognito's user API. A session from before it was added gets `NotAuthorizedException` on account changes and is told to sign out and back in.
 
 ### Account changes
@@ -344,6 +347,7 @@ Edits that bypass the queue and call the API straight away. Deleting a board and
 | --- | --- | --- |
 | `getBoards` | `GET /boards` (silent for a refresh on return) | Present |
 | `getUser` | `GET /user` | Present |
+| `setUpAccount` | `POST /new-user`, on a new user's first load | Present |
 | `getActiveTasks` | `GET /active-tasks` (silent for a background refresh of a cached board) | Present |
 | `syncOps` | `POST /sync` (silent, the sync engine reports failures) | Present |
 | `syncOpsKeepalive` | `POST /sync` with `fetch` keepalive, used on `pagehide` | Present |

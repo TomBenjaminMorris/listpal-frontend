@@ -60,6 +60,7 @@ export const getActiveTasks = (boardID, { silent = false } = {}) =>
   apiGet('/active-tasks', { boardID }, { silent, action: "load this board's tasks" });
 export const getBoards = ({ silent = false } = {}) => apiGet('/boards', {}, { silent, action: 'load your boards' });
 export const getUser = () => apiGet('/user', {}, { action: 'load your account details' });
+export const setUpAccount = () => apiPost('/new-user', {}, { action: 'set up your account' });
 
 export const syncOps = (ops) =>
   apiPost('/sync', { ops }, { silent: true });

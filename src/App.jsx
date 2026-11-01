@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
-import { getBoards, getUser } from './utils/apiGatewayClient';
+import { getBoards } from './utils/apiGatewayClient';
+import { loadAccount } from './utils/loadAccount';
 import { isAuthenticated } from './utils/utils';
 import { applyPendingBoards, boardsWithQueuedTasks, flushNow, mergePending, startSync, getSyncStatus, readPending, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import { setAlertListener } from './utils/alertBus';
@@ -118,13 +119,15 @@ const App = () => {
         const before = await readPending();
         // A tick queued before a reload must land before the boards are read, or the scores come back stale
         const boardsAfterSync = flushNow({ timeout: LOAD_FLUSH_TIMEOUT }).then(() => getBoards());
-        const [userData, boardsData] = await Promise.all([getUser(), boardsAfterSync]);
+        const { user, boardsData } = await loadAccount(boardsAfterSync);
         const after = await readPending();
-        const user = userData[0];
 
-        setUserDetails(user);
+        // The theme effect reads userDetails.Theme, so a missing user must leave the current details in place
+        if (user) {
+          setUserDetails(user);
+          localStorage.setItem('userDetails', JSON.stringify(user));
+        }
         setBoards(applyPendingBoards(parseBoards(boardsData), mergePending(before, after)));
-        localStorage.setItem('userDetails', JSON.stringify(user));
       } catch (error) {
         console.error('Failed to load initial data:', error);
       } finally {
