@@ -72,6 +72,33 @@ export function getBoardIdFromUrl() {
     return boardID || null;
 }
 
+// Large scores share a small space with other text, which has room for "9,999" but not "12,345"
+export function formatScore(score) {
+    return score < 10000
+        ? score.toLocaleString()
+        : score.toLocaleString(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+}
+
+// The ISO week of the year
+export function getWeek(date) {
+    const target = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() != 4) {
+        target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - target) / 604800000);
+}
+
+// Days left after today in the current year
+export function getDaysRemaining(date) {
+    const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endOfYear = new Date(date.getFullYear(), 11, 31);
+    return Math.round((endOfYear - today) / 86400000);
+}
+
 export function getNextMondayAt5AM() {
     const today = new Date();
     const currentDay = today.getDay();

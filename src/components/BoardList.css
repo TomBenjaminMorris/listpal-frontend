@@ -1,94 +1,137 @@
-.flex-container-board-list {
-    width: 80%;
-    max-width: 1000px;
-    margin: auto;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 50px;
-    margin-bottom: 40px;
+/* A row that isn't full leaves its space empty, so a card's width doesn't depend on how many boards there are */
+.board-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 16px;
 }
 
-.board-list-item-wrapper {
-    width: 240px;
+/* Left-aligned even where Home centres its text on a phone, as its name and figures are laid out against the card's edges */
+.board-card {
+    box-sizing: border-box;
+    height: 120px;
+    border-radius: 12px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
     background-color: var(--foreground);
-    border-radius: 10px;
-    position: relative;
-    transition: background-color 150ms, transform 150ms;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    color: var(--text-colour);
+    font-weight: normal;
+    transition: background-color 150ms, transform 150ms;
 }
 
-.board-list-item-wrapper:hover {
-    background-color: var(--accent);
-    transform: translateY(-5px);
+@media (hover: hover) {
+    .board-card:not(.board-card-placeholder):hover {
+        background-color: color-mix(in srgb, var(--foreground) 92%, var(--text-colour));
+        transform: translateY(-5px);
+    }
 }
 
-/* The height of a real card's line of text */
-.board-list-item-placeholder {
-    height: 105px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.board-card:focus-visible {
+    outline: 2px solid var(--text-colour);
+    outline-offset: 2px;
+}
+
+.board-card-placeholder {
     pointer-events: none;
 }
 
-.board-list-item-placeholder > .placeholder-bar {
+.board-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    height: 40px;
+}
+
+.board-card-emoji {
+    display: flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border-radius: 9px;
+    background-color: var(--surface-hover);
+    font-size: 19px;
+    line-height: 1;
+}
+
+.board-card-name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.board-card-year {
+    flex-shrink: 0;
+    margin-left: auto;
+    text-align: right;
+}
+
+.board-card-year-value {
+    font-family: CircularBold;
+    font-size: 24px;
+    line-height: 26px;
+}
+
+.board-card-year-label {
+    color: var(--text-muted);
+    font-family: CircularBook;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.board-card-figures {
+    margin-bottom: 8px;
+    overflow: hidden;
+    font-family: CircularBook;
+    font-size: 13px;
+    line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.board-card-meter {
+    height: 5px;
+    overflow: hidden;
+    border-radius: 3px;
+    background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.board-card-meter>div {
+    height: 100%;
+    border-radius: 3px;
+    background-color: var(--accent);
+}
+
+.board-card-placeholder .board-card-emoji>.placeholder-bar {
+    width: 20px;
+    height: 20px;
+}
+
+.board-card-placeholder .board-card-head>.placeholder-bar {
     width: 120px;
     height: 14px;
 }
 
-.board-list-item-score {
-    background-color: var(--background);
-    color: var(--text-colour);
-    padding: 6px;
-    width: 35px;
-    height: 25px;
-    line-height: 25px;
-    border-bottom-left-radius: 10px;
-    border-top-right-radius: 5px;
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    font-size: 15px;
+.board-card-placeholder .board-card-year>.placeholder-bar {
+    width: 44px;
+    height: 22px;
 }
 
-.boardLink {
-    color: var(--text-colour);
-    text-align: center;
-    line-height: 105px;
-    font-size: 22px;
-}
-
-#addBoardButton {
-    color: var(--text-colour);
-    height: 92px;
-    line-height: 92px;
-    width: 250px;
-    text-align: center;
-    border-radius: 10px;
-    border: rgb(158, 158, 158);
-    border-style: dashed;
-    border-width: 4px;
-    font-size: 50px;
-    transition: background-color 150ms, opacity 300ms ease-out;
+/* Same height as the figures' line, so nothing moves when they arrive */
+.board-card-placeholder .board-card-figures>.placeholder-bar {
+    width: 110px;
+    height: 10px;
+    margin: 5px 0;
 }
 
 /* Fades in with the boards it waits for */
 .add-board-button-loading {
     opacity: 0;
     pointer-events: none;
-}
-
-#addBoardButton:hover {
-    background-color: rgb(86, 86, 86);
-    opacity: 1;
-    cursor: pointer;
-}
-
-.board-list-text-emoji-wrapper {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
 }

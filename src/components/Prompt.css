@@ -1,13 +1,11 @@
 .prompt-outer-wrapper {
-  background-color: rgba(154, 154, 154, 0.534);
+  background-color: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
-  width: 100%;
-  height: 100vh;
   position: fixed;
-  left: 0;
-  top: 0;
+  inset: 0;
   z-index: 3000;
   display: flex;
+  overflow-y: auto;
 }
 
 .alert-outer-wrapper {
@@ -15,93 +13,153 @@
   z-index: 3100;
 }
 
-.prompt-inner-wrapper {
-  background-color: var(--foreground);
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-  border-radius: 10px;
-  padding: 30px;
-  text-align: left;
-  width: 400px;
-  margin: auto;
-  margin-top: 20vh;
+/* No end keyframe, so it finishes at the panel's own state and leaves no transform behind */
+@keyframes modalRise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
 }
 
-.prompt-inner-wrapper>h1 {
-  font-size: 30px;
-  font-family: "CircularMedium";
-  margin-top: 0;
+.prompt-inner-wrapper {
+  box-sizing: border-box;
+  align-self: flex-start;
+  width: 420px;
+  margin: 20vh auto 24px;
+  padding: 28px;
+  background-color: var(--foreground);
+  border-radius: 16px;
+  box-shadow: rgba(0, 0, 0, 0.45) 0px 16px 48px;
+  text-align: left;
+  animation: 200ms ease-out modalRise;
+}
+
+.prompt-inner-wrapper h1 {
+  margin: 0 0 8px;
+  font-family: "CircularBold";
+  font-size: 22px;
+  font-weight: normal;
+  line-height: 1.25;
   /* A title that must wrap, such as a long board name, splits into even lines instead of stranding its emoji */
   text-wrap: balance;
 }
 
-.prompt-input {
-  font-size: 1.1em;
-  padding: 8px;
-  background-color: var(--text-colour);
-  color: black;
-  border: none;
-  margin-top: 3px;
-  margin-bottom: 20px;
-  border-radius: 10px;
+.prompt-inner-wrapper p {
+  color: var(--text-muted);
   font-family: "CircularBook";
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-.prompt-input:focus {
-  outline: none;
-}
-
-.prompt-button{
-  background-color: var(--accent);
-}
-
-.prompt-button:hover{
-  background-color: var(--accent-2);
-}
-
-.prompt-button:focus {
-  outline: none;
-}
-
-.prompt-button-cancel:hover{
-  background-color: var(--accent-2);
-}
-
-.prompt-button-cancel:focus {
-  outline: none;
+.prompt-inner-wrapper>p {
+  margin: 0 0 24px;
 }
 
 .prompt-content {
   display: flex;
   flex-direction: column;
+  margin-top: 16px;
 }
 
-.prompt-buttons {
-  display: flex;
-  flex-direction: row-reverse;
-  margin-bottom: -10px;
+/* The fields sit on a panel or card, so they take the page's darker colour to read as wells rather than bright white boxes */
+.prompt-input,
+.account-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  background-color: var(--background);
+  color: var(--text-colour);
+  border: none;
+  border-radius: 10px;
+  font-family: "CircularBook";
+  /* Any smaller and iOS Safari zooms the page when the field takes focus */
+  font-size: 16px;
 }
 
-.prompt-button-container {
-  display: flex;
-  flex-direction: column;
+.prompt-input {
+  margin-bottom: 24px;
 }
 
+.prompt-input:focus,
+.account-input:focus {
+  outline: none;
+}
+
+.prompt-buttons,
 .prompt-button-wrapper {
   display: flex;
   flex-direction: row-reverse;
-  margin-bottom: -10px;
+  gap: 8px;
+}
+
+.prompt-button,
+.prompt-button-cancel,
+.account-danger-button {
+  box-sizing: border-box;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: 9px;
+  font-family: "CircularMedium";
+  font-size: 14px;
+  font-weight: normal;
+  transition: background-color 150ms, filter 150ms;
+}
+
+.prompt-button {
+  background-color: var(--accent);
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 10px;
+  color: var(--text-colour);
+}
+
+.prompt-button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.prompt-button-cancel {
+  background-color: var(--surface-hover);
+  color: var(--text-colour);
+}
+
+.prompt-button-cancel:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--text-colour) 15%, transparent);
+}
+
+/* No ring, overriding the one index.css gives every focused button. Keyboard users still need to see where they are,
+   so the button they've tabbed to changes shade as it does on hover. */
+.prompt-button:focus,
+.prompt-button-cancel:focus,
+.account-danger-button:focus {
+  outline: none;
+}
+
+.prompt-button:focus-visible,
+.account-danger-button:focus-visible {
+  filter: brightness(1.2);
+}
+
+.prompt-button-cancel:focus-visible {
+  background-color: color-mix(in srgb, var(--text-colour) 20%, transparent);
 }
 
 @media screen and (max-width: 650px) {
-  /* The fixed 400px width plus padding is wider than a phone, which pushed the modal off the right edge */
+  /* The fixed width is wider than a phone, which pushed the modal off the right edge */
   .prompt-inner-wrapper {
-    width: auto;
     flex: 1;
-    padding: 24px;
-    margin: 20vh 16px auto;
+    width: auto;
+    margin: 20vh 16px 24px;
+    padding: 22px;
   }
 
-  .prompt-inner-wrapper>h1 {
-    font-size: 24px;
+  .prompt-inner-wrapper h1 {
+    font-size: 20px;
+  }
+
+  /* A little taller than on desktop, for a finger */
+  .prompt-inner-wrapper button {
+    flex: 1;
+    min-height: 40px;
   }
 }

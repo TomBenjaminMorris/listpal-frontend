@@ -1,16 +1,46 @@
 .score-button {
+  position: relative;
+}
+
+.score-ring {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+/* Marks a met target on the ring's corner. The shadow is the card's colour, which cuts it cleanly out of the ring. */
+.score-star {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--foreground);
+  color: var(--text-colour);
+}
+
+.star-line-icon {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
 }
 
 .score-input {
   background: transparent;
   color: var(--text-colour);
   border: none;
+  padding: 0;
   text-align: center;
-  width: 40px;
+  width: 36px;
   border-radius: 15px;
-  font-size: 15px;
-  font-weight: bold;
-  font-family: CircularMedium;
+  font-size: 13px;
+  font-weight: normal;
+  font-family: CircularBold;
   z-index: 200 !important;
 }
 
@@ -22,31 +52,31 @@
   display: block;
 }
 
+/* Matches .board-action-tooltip in Board.css */
 .score-type-tooltip {
   display: none;
   position: absolute;
   z-index: 1000;
-  margin-left: 4px;
-  margin-top: 15px;
-  font-size: 16px;
-  width: 30px;
-  height: 30px;
-  background-color: var(--accent);
-  line-height: 30px;
-  padding: 3px;
-  border-radius: 5px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: var(--tooltip-background);
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 4px 12px;
+  font-family: CircularBook;
+  font-size: 12.5px;
+  line-height: 18px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
-.score-type-tooltip:before {
-  content: "";
-  position: absolute;
-  height: 0px;
-  width: 0px;
-  left: 8px;
-  top: -19px;
-  border-width: 10px;
-  border-color: transparent transparent var(--accent) transparent;
-  border-style: solid;
+/* The last ring sits at the page's right edge, where a centred tooltip would run off it */
+.score-button:last-child .score-type-tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
 @keyframes bulge {
@@ -74,13 +104,3 @@
   animation: bulge 300ms ease-out;
 }
 
-.star-icon {
-  opacity: 0.2;
-  position: absolute;
-  left: 0;
-  top: 0;
-  margin-top: 4px;
-  margin-left: 5px;
-  width: 35px;
-  z-index: -1;
-}

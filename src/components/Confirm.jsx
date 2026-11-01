@@ -33,7 +33,7 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
 
   return (
     <div className="prompt-outer-wrapper fadeInPure-animation">
-      <div className="prompt-inner-wrapper" ref={ref}>
+      <div className="prompt-inner-wrapper" ref={ref} role="alertdialog" aria-modal="true" aria-label={confirmConf.title}>
         <h1>{confirmConf.title}</h1>
         <p>{confirmConf.textValue}</p>
         <div className="prompt-button-container">

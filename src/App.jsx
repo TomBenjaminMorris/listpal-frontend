@@ -47,9 +47,9 @@ const App = () => {
   const [sortedTasks, setSortedTasks] = useState({});
   const [sidebarIsOpen, setSidebarIsOpen] = useState(() => readStoredFlag(SIDEBAR_OPEN_KEY));
   const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(() => readStoredFlag(SIDEBAR_BOARDS_MENU_OPEN_KEY));
-  // Toggled in step with sidebarIsOpen, so it starts as its inverse
-  const [hideMobileSidebar, setHideMobileSidebar] = useState(() => !readStoredFlag(SIDEBAR_OPEN_KEY));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
+  // Separate from sidebarIsOpen and never stored: the drawer covers the page, so it must always start shut
+  const [mobileNavIsOpen, setMobileNavIsOpen] = useState(false);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [placeholderBoardCount] = useState(() => Number(localStorage.getItem(BOARD_COUNT_KEY)) || DEFAULT_PLACEHOLDER_BOARD_COUNT);
   const [refreshCount, setRefreshCount] = useState(0); // Moves on each refresh on return, after the boards have landed
@@ -211,9 +211,11 @@ const App = () => {
   }, []);
 
   const handleSidebarCollapse = useCallback(() => {
-    setSidebarIsOpen(prev => !prev);
-    setHideMobileSidebar(prev => !prev);
-  }, []);
+    const setOpen = isMobile ? setMobileNavIsOpen : setSidebarIsOpen;
+    setOpen(prev => !prev);
+  }, [isMobile]);
+
+  const closeMobileNav = useCallback(() => setMobileNavIsOpen(false), []);
 
   const handleLogout = useCallback(() => {
     localStorage.clear();
@@ -234,17 +236,17 @@ const App = () => {
         {isAuthenticated() ? (<SideNavBar
           handleSidebarCollapse={handleSidebarCollapse}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          sidebarIsOpen={sidebarIsOpen}
+          sidebarIsOpen={isMobile ? mobileNavIsOpen : sidebarIsOpen}
           boards={boards}
           placeholderBoardCount={initialLoadDone ? 0 : placeholderBoardCount}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           isMobile={isMobile}
-          hideMobileSidebar={hideMobileSidebar}
+          closeMobileNav={closeMobileNav}
           setActiveBoardID={setActiveBoardID}
           activeBoard={activeBoard}
         />) : null}
 
-        <div className={`${sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'}`} >
+        <div className={isMobile ? '' : sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'} >
 
           <Routes>
             <Route path="/" element={<Navigate replace to="/home" />} />

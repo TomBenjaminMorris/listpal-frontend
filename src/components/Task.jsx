@@ -3,7 +3,6 @@ import { queueUpdate } from '../utils/syncEngine';
 import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caretNavigation';
 import linkIcon from '../assets/icons8-link-64.png';
 import menuIcon from "../assets/icons8-dots-50.png"
-import arrowIcon from "../assets/icons8-line-50.png"
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
@@ -153,8 +152,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
   return (
     <div className="task-container">
-
-      <img className="task-hover-indicator" src={arrowIcon} alt="follow link icon" />
 
       <input ref={checkboxRef} style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 

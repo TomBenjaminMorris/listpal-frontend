@@ -78,9 +78,8 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
   };
 
   return (
-    <div className="set-targets-wrapper">
-      <h2 className="target-setter-header">Update Board Targets</h2>
-      <hr className="settings-line" />
+    <>
+      <h1>Update board targets 🎯</h1>
       <form onSubmit={handleSubmit}>
         <div className="set-targets-inputs">
           {TARGET_FIELDS.map(({ name, label, placeholder }) => (
@@ -98,14 +97,18 @@ const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClo
                 }))}
                 min={0}
                 max={1000}
+                autoFocus={name === 'weekly'}
               />
             </label>
           ))}
         </div>
 
-        <input className="set-targets-submit" type="submit" value="Save" />
+        <div className="prompt-buttons">
+          <button className="prompt-button" type="submit">Save</button>
+          <button className="prompt-button-cancel" type="button" onClick={handleClose}>Cancel</button>
+        </div>
       </form>
-    </div>
+    </>
   );
 });
 

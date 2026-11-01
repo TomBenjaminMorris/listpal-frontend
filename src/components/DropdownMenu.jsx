@@ -1,8 +1,7 @@
 import { memo } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
 import { updateCategoryOrder as saveCategoryOrder } from '../utils/utils';
-import closeIcon from '../assets/icons8-delete-48.png';
-import moveIcon from '../assets/icons8-arrow-50.png';
+import { ArrowDownIcon, ArrowUpIcon, TrashIcon } from './Icons';
 import "./DropdownMenu.css";
 
 const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, title, setSortedTasks, sortedTasks, setBoards, setConfirmConf }) => {
@@ -31,21 +30,21 @@ const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, title,
     <div className="dropdown-menu fadeIn-animation">
       <ul>
         <li onClick={() => updateCategoryOrder(-1)}>
-          <img className="dropdown-icons rotate-back" src={moveIcon} alt="up icon" />
-          Move Category Up
+          <ArrowUpIcon />
+          Move up
         </li>
         <li onClick={() => updateCategoryOrder(1)}>
-          <img className="dropdown-icons rotate" src={moveIcon} alt="down icon" />
-          Move Category Down
+          <ArrowDownIcon />
+          Move down
         </li>
-        <li onClick={() => setConfirmConf({
+        <li className="menu-danger" onClick={() => setConfirmConf({
           display: true,
           title: "Delete this category?",
           textValue: "🚨 No take-backs: this can't be undone 🚨",
           callbackFunc: handleDeleteCategory,
         })}>
-          <img className="dropdown-icons" src={closeIcon} alt="delete icon" />
-          Delete Category
+          <TrashIcon />
+          Delete
         </li>
       </ul>
     </div>

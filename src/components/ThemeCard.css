@@ -1,76 +1,113 @@
+/* A row that isn't full leaves its space empty, as on Home's board grid */
 .theme-card-outer-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 92%;
-    margin: auto;
-    align-items: stretch;
-    gap: 25px;
-    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 16px;
 }
 
+/* Each card sets data-theme, so everything inside it shows that theme rather than the page's */
 .theme-card-wrapper {
-    background-color: var(--background);
-    color: var(--text-colour);
-    border-radius: 15px;
-    border-color: var(--accent-2);
-    border-style: solid;
-    border-width: 2px;
-    min-width: 300px;
-    max-width: 300px;
-    align-items: center;
-    flex-basis: 30%;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 14px;
+    /* From the text colour rather than an accent, as some accent-2 shades nearly vanish against some page themes */
+    border: 2px solid color-mix(in srgb, var(--text-colour) 35%, transparent);
+    border-radius: 12px;
+    background-color: var(--background);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    color: var(--text-colour);
+    font-family: CircularMedium;
+    font-size: 15px;
+    font-weight: normal;
+    text-align: left;
     transition: transform 150ms;
 }
 
-.theme-card-wrapper:hover {
-    cursor: pointer;
+/* index.css rings every focused button. Lifting the card shows keyboard users where they are without one. */
+.theme-card-wrapper:focus {
+    outline: none;
+}
+
+.theme-card-wrapper:focus-visible {
     transform: translateY(-5px);
 }
 
-.theme-card-wrapper h2 {
-    color: var(--accent);
-    font-size: 20px;
-    text-align: left;
-    padding: 20px;
-    padding-bottom: 0px;
-    margin: 0;
-    font-family: CircularBlack;
+@media (hover: hover) {
+    .theme-card-wrapper:hover {
+        transform: translateY(-5px);
+    }
 }
 
-.theme-card-wrapper p {
-    text-align: left;
-    margin: 0;
-}
-
-.theme-card-inner-wrapper {
-    background-color: var(--foreground);
-    border-radius: 15px;
-    margin: 15px;
-    padding: 15px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-}
-
-.selected-indicator {
-    display: none;
-    position: absolute;
-    right: 0;
-    margin-right: 20px;
-    margin-top: -5px;
-    height: 40px; 
-    width: 15px; 
-    -webkit-transform: rotate(0deg) skew(0deg); 
-    transform: rotate(0deg) skew(0deg); 
-    border-left: 10px solid var(--accent); 
-    border-right: 10px solid var(--accent); 
-    border-bottom: 10px solid transparent; 
-    box-sizing: border-box; 
-    -moz-box-sizing: border-box; 
-    -webkit-box-sizing: border-box; 
-}
-
-.selected-indicator-display {
+.theme-card-header {
     display: block;
+    line-height: 24px;
+}
+
+/* A bookmark: a transparent bottom border cuts the notch between the two side borders */
+.selected-indicator {
+    position: absolute;
+    top: -5px;
+    right: 14px;
+    box-sizing: border-box;
+    width: 14px;
+    height: 28px;
+    border-left: 7px solid var(--accent);
+    border-right: 7px solid var(--accent);
+    border-bottom: 7px solid transparent;
+}
+
+.theme-card-preview {
+    display: block;
+    padding: 12px;
+    border-radius: 10px;
+    background-color: var(--foreground);
+}
+
+.theme-card-pills {
+    display: flex;
+    gap: 6px;
+}
+
+.theme-card-pill {
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.theme-card-pill-accent {
+    background-color: var(--accent);
+}
+
+.theme-card-pill-accent-2 {
+    background-color: var(--accent-2);
+}
+
+.theme-card-figures {
+    display: block;
+    margin: 12px 0 6px;
+    font-family: CircularBook;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.theme-card-meter {
+    display: block;
+    height: 5px;
+    overflow: hidden;
+    border-radius: 3px;
+    background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.theme-card-meter>span {
+    display: block;
+    width: 57%;
+    height: 100%;
+    border-radius: 3px;
+    background-color: var(--accent);
 }

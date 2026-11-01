@@ -3,40 +3,61 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { setCachedTasks } from '../utils/boardCache';
 import { NEW_BOARD_DEFAULTS, queueBoardCreate } from '../utils/syncEngine';
+import { formatScore } from '../utils/utils';
+import { PlusIcon } from './Icons';
 import './BoardList.css';
 
 const BoardCard = ({ board, onClick, replacesPlaceholder }) => {
-  const maxLength = 12;
-  const truncatedText = board.Board.length > maxLength
-    ? `${board.Board.substring(0, maxLength)}...`
-    : board.Board;
+  const weeklyScore = Number(board.WScore);
+  const weeklyTarget = Number(board.WTarget);
+  const weeklyPercent = weeklyTarget > 0 ? Math.min(weeklyScore / weeklyTarget, 1) * 100 : 0;
 
   // Fading the whole card over a placeholder would make its frame vanish and return, so only the contents fade
   const cardFade = replacesPlaceholder ? "" : "fadeInPure-animation";
   const contentFade = replacesPlaceholder ? "placeholderReveal-animation" : "";
 
   return (
-    <Link className={`board-list-item-wrapper ${cardFade}`} to={"/board/" + board.SK} onClick={onClick} >
-      <div className={`board-list-item-score ${contentFade}`}>{board.YScore}</div>
-      <div className={`board-list-text-emoji-wrapper ${contentFade}`}>
-        <div className="boardLink">{truncatedText}</div>
-        <div className="boardLink">{board.Emoji}</div>
+    <Link className={`board-card ${cardFade}`} to={"/board/" + board.SK} title={board.Board} onClick={onClick} >
+      <div className={`board-card-head ${contentFade}`}>
+        <span className="board-card-emoji">{board.Emoji}</span>
+        <span className="board-card-name">{board.Board}</span>
+        <div className="board-card-year">
+          <div className="board-card-year-value">{formatScore(Number(board.YScore))}</div>
+          <div className="board-card-year-label">this year</div>
+        </div>
+      </div>
+      <div className={contentFade}>
+        <div className="board-card-figures">
+          {weeklyScore.toLocaleString()}{weeklyTarget > 0 && ` of ${weeklyTarget.toLocaleString()}`} this week
+        </div>
+        <div className="board-card-meter" aria-hidden="true">
+          <div style={{ width: `${weeklyPercent}%` }} />
+        </div>
       </div>
     </Link>
   );
 };
 
 const BoardCardPlaceholder = () => (
-  <div className="board-list-item-wrapper board-list-item-placeholder" aria-hidden="true">
-    <div className="placeholder-bar" />
+  <div className="board-card board-card-placeholder" aria-hidden="true">
+    <div className="board-card-head">
+      <div className="board-card-emoji"><div className="placeholder-bar" /></div>
+      <div className="placeholder-bar" />
+      <div className="board-card-year"><div className="placeholder-bar" /></div>
+    </div>
+    <div>
+      <div className="board-card-figures"><div className="placeholder-bar" /></div>
+      <div className="board-card-meter" />
+    </div>
   </div>
 );
 
-// Hidden rather than left out while loading, as the row is centred and the boards would shift when it arrived
+// Hidden rather than left out while loading, so it can't be clicked before the boards it would be added to have landed
 const AddBoardButton = ({ onClick, hidden }) => (
-  <div id="addBoardButton" className={hidden ? "add-board-button-loading" : ""} onClick={onClick}>
-    +
-  </div>
+  <button className={`add-tile ${hidden ? "add-board-button-loading" : ""}`} onClick={onClick} disabled={hidden}>
+    <span className="add-tile-icon"><PlusIcon /></span>
+    <span>New board</span>
+  </button>
 );
 
 const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
@@ -77,7 +98,7 @@ const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromp
   };
 
   return (
-    <div className="flex-container-board-list">
+    <div className="board-list">
       {placeholderBoardCount > 0
         ? Array.from({ length: placeholderBoardCount }, (_, i) => <BoardCardPlaceholder key={i} />)
         : boards.map((board, i) => (

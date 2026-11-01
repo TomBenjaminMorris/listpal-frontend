@@ -36,7 +36,7 @@ const Prompt = ({ promptConf, setPromptConf }) => {
 
   return (
     <div className="prompt-outer-wrapper fadeInPure-animation">
-      <div className="prompt-inner-wrapper" ref={ref}>
+      <div className="prompt-inner-wrapper" ref={ref} role="dialog" aria-modal="true" aria-label={promptConf.title}>
         <h1>{promptConf.title}</h1>
         <div className="prompt-content">
           <input

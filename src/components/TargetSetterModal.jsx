@@ -2,7 +2,7 @@ import { useRef, useEffect, memo } from 'react';
 import { useOnClickOutside, useScrollLock } from 'usehooks-ts';
 import { useEnterToAccept } from '../utils/useEnterToAccept';
 import TargetSetter from './TargetSetter';
-import './TargetSetterModal.css';
+import './Prompt.css';
 
 const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoards, setAlertConf }) => {
   const { lock, unlock } = useScrollLock({
@@ -33,7 +33,7 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
     };
   }, [setDisplay]);
 
-  // No field has focus when the modal opens, so the browser's own Enter-to-submit wouldn't fire
+  // Focus can leave the fields, where the browser's own Enter-to-submit wouldn't fire
   useEnterToAccept(ref, () => ref.current?.querySelector('form')?.requestSubmit(), display);
 
   useOnClickOutside(ref, () => setDisplay(false));
@@ -41,8 +41,8 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
   if (!display) return null;
 
   return (
-    <div className="target-setter-modal-external-wrapper fadeInPure-animation">
-      <div className="target-setter-modal-inner-wrapper" ref={ref}>
+    <div className="prompt-outer-wrapper fadeInPure-animation">
+      <div className="prompt-inner-wrapper" ref={ref} role="dialog" aria-modal="true" aria-label="Update board targets">
         <TargetSetter
           boardID={boardID}
           boards={boards}

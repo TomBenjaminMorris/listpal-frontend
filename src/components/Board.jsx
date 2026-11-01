@@ -1,14 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useLayoutEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks } from '../utils/apiGatewayClient';
 import { applyPending, boardCreateQueued, flushNow, forgetBoard, mergePending, queueBoardUpdate, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
 import { getBoardIdFromUrl } from '../utils/utils';
 import { apiErrorAlert } from '../utils/apiErrors';
-import deleteIcon from '../assets/icons8-delete-48.png';
-import editIcon from '../assets/icons8-edit-64.png';
-import targetIcon from '../assets/icons8-bullseye-50.png';
-import clearIcon from '../assets/icons8-clear-60.png';
+import { EraserIcon, PencilIcon, TargetIcon, TrashIcon } from './Icons';
 import CardList from './CardList';
 import DatePills from './DatePills';
 import ScoreBoard from './ScoreBoard';
@@ -18,7 +15,8 @@ import SyncIndicator from './SyncIndicator';
 import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
 import './Board.css';
 
-const ConfettiExplosion = lazy(() => import('react-confetti-explosion'));
+// Memoised as the library rebuilds its styles for every particle on each render, which ticking a task mid-burst would otherwise trigger
+const ConfettiExplosion = memo(lazy(() => import('react-confetti-explosion')));
 const SHOWING_CACHE = Symbol('showing cache');
 const TARGET_TYPES = ['weekly', 'monthly', 'yearly'];
 
@@ -45,7 +43,6 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   const boardID = getBoardIdFromUrl();
   const board = boards.find(b => b.SK === boardID)
   const tasksReady = loadedBoardID === boardID && !isDeleting;
-  const maxLength = 20;
   const navigate = useNavigate();
   const emojiMenuRef = useRef(null)
   const deleteMessage = `Delete "${board?.Board}" for good?`;
@@ -315,7 +312,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
           duration={3000}
           width={window.innerWidth}
           particleSize={15}
-          particleCount={60}
+          particleCount={40}
           onComplete={confettiCompleteHandlers[type]}
         />
       </div>
@@ -345,51 +342,55 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
           {board && (
             <div className="board-filter-actions-wrapper fadeUp-animation">
 
-              <div className="board-name-wrapper">
-
-                <div className="board-name">
-                  <div key={boardID} className="board-name-content fadeInPure-animation">
-                    <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : null}`} ref={emojiMenuRef}>
-                      <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{board.Emoji}</div>
-                      {
-                        displayEmojiPicker ? <div className="board-emoji-wrapper">
-                          <EmojiPicker onEmojiSelect={handleEmojiSelect} containerRef={emojiMenuRef} onClose={() => setDisplayEmojiPicker(false)} />
-                        </div> : null
-                      }
-                    </div>
-                    {board.Board.length > maxLength ? `${board.Board.substring(0, maxLength)}...` : board.Board}
-                    <img className="edit-icon" src={editIcon} alt="edit icon" onClick={() => setPromptConf({
-                      display: true,
-                      isEdit: true,
-                      defaultText: board.Board,
-                      title: "Rename this board ✏️",
-                      callbackFunc: handleEditBoard,
-                    })} />
-                  </div>
+              {/* Prefixed because ScoreBoard, a sibling, is keyed by the board too. A shared key leaves old titles on screen */}
+              <div key={`name-${boardID}`} className="board-name-content fadeInPure-animation">
+                <div className={`board-emoji-picker-wrapper ${displayEmojiPicker ? "emoji-highlight" : ""}`} ref={emojiMenuRef}>
+                  <div className="emoji-icon" onPointerEnter={preloadEmojiPicker} onClick={() => setDisplayEmojiPicker(current => !current)}>{board.Emoji}</div>
+                  {
+                    displayEmojiPicker ? <div className="board-emoji-wrapper">
+                      <EmojiPicker onEmojiSelect={handleEmojiSelect} containerRef={emojiMenuRef} onClose={() => setDisplayEmojiPicker(false)} />
+                    </div> : null
+                  }
                 </div>
+                <h1 className="board-title" title={board.Board}>{board.Board}</h1>
+                <button className="board-rename" aria-label="Rename board" onClick={() => setPromptConf({
+                  display: true,
+                  isEdit: true,
+                  defaultText: board.Board,
+                  title: "Rename this board ✏️",
+                  callbackFunc: handleEditBoard,
+                })}>
+                  <PencilIcon />
+                </button>
               </div>
 
               <DatePills />
 
               <div className={`board-actions-wrapper ${tasksReady ? "" : "board-actions-loading"}`}>
                 <div className="board-action">
-                  <img className="delete-icon" src={deleteIcon} alt="delete icon" onClick={() => setConfirmConf({
+                  <button aria-label="Delete board" onClick={() => setConfirmConf({
                     display: true,
                     title: deleteMessage,
                     textValue: "🚨 No take-backs: this can't be undone 🚨",
                     callbackFunc: handleDeleteBoard,
-                  })} />
-                  <div className="board-action-tooltip">Delete Board</div>
+                  })}>
+                    <TrashIcon />
+                  </button>
+                  <div className="board-action-tooltip">Delete board</div>
                 </div>
 
                 <div className="board-action">
-                  <img className="clear-icon" src={clearIcon} alt="clear icon" onClick={handleClearClick} />
-                  <div className="board-action-tooltip">Clear Tasks</div>
+                  <button aria-label="Clear tasks" onClick={handleClearClick}>
+                    <EraserIcon />
+                  </button>
+                  <div className="board-action-tooltip">Clear tasks</div>
                 </div>
 
                 <div className="board-action">
-                  <img className="clear-icon" src={targetIcon} alt="target icon" onClick={() => setDisplayTargetSetter(true)} />
-                  <div className="board-action-tooltip">Set Targets</div>
+                  <button aria-label="Set targets" onClick={() => setDisplayTargetSetter(true)}>
+                    <TargetIcon />
+                  </button>
+                  <div className="board-action-tooltip">Set targets</div>
                 </div>
               </div>
 

@@ -1,26 +1,14 @@
+/* Looks are shared with .dropdown-menu in DropdownMenu.css. The margin is this width plus 2px, which, with the icon's own
+   margin, leaves the same gap to its button as the category menu has */
 .task-dropdown-menu {
-  background-color: var(--background);
-  border: solid 2px var(--accent-2);
-  box-shadow: rgba(54, 54, 54, 0.35) 0px 0px 15px;
-  transition: opacity 150ms, transform 150ms;
-  position: absolute;
-  z-index: 100;
-  border-radius: 10px;
-  padding: 8px 0px 8px 0px;
-  margin-left: -203px;
-  margin-top: -30px;
+  width: 184px;
+  margin-left: -186px;
+  margin-top: -22px;
 }
 
 .task-dropdown-icons {
   width: 16px;
   height: 16px;
-}
-
-.task-dropdown-li {
-  padding: 5px;
-  padding-right: 20px;
-  padding-left: 15px;
-  gap: 10px;
 }
 
 .taskMenu {
@@ -33,9 +21,11 @@
   cursor: pointer;
 }
 
+/* Block, so it doesn't sit on a line of text whose spacing would lift it out of line with the rest of the row */
 .taskMenu img {
-  width: 15px;
-  padding: 1px;
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 .task-container:hover .taskMenu {
@@ -43,10 +33,8 @@
 }
 
 .menu-background-display .task-three-dots-vertical {
-  background-color: var(--background) !important;
+  background-color: var(--surface-hover);
   opacity: 1;
-  border: solid 2px var(--accent-2);
-  padding: 0px !important;
 }
 
 .menu-background-display {
@@ -55,10 +43,6 @@
 
 a {
   color: var(--text-colour);
-}
-
-.task-dropdown-menu.important-menu {
-  margin-left: -220px;
 }
 
 /* Fixed pixel offsets and short durations: content should settle quickly after it appears, and a percentage

@@ -1,33 +1,63 @@
-.page-content-wrapper {
-  display: flex;
-  justify-content: space-evenly;
-  padding: 0px 20px 0px 20px;
+.page-column {
+    box-sizing: border-box;
+    max-width: 1008px;
+    margin: 0 auto;
+    padding: 80px 24px 120px;
+    text-align: left;
 }
 
-.page-content-sub-wrapper {
-  margin-top: 10px;
-  margin-bottom: 100px;
-  flex-grow: 1;
+.page-heading {
+    margin: 0;
+    font-family: CircularBold;
+    font-size: 32px;
+    font-weight: normal;
+    line-height: 1.2;
+    /* A long name would otherwise leave the emoji alone on the second line */
+    text-wrap: balance;
 }
 
-.page-title-wrapper {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  align-items: center;
+.page-section {
+    margin-top: 40px;
 }
 
-.page-title-wrapper>img{
-  width: 35px;
-  height: 35px;
+.page-section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 14px;
 }
 
-.page-title {
-  font-size: 30px;
+.page-section-header>h2 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 18px;
+    font-weight: normal;
 }
 
-.heading-icon {
-  width: 30px !important;
-  height: 30px !important;
-  margin-bottom: -3px;
+.page-section-header>span {
+    color: var(--text-muted);
+    font-family: CircularBook;
+    font-size: 14px;
+}
+
+/* The fixed menu button sits at the top left, so the heading starts below it */
+@media screen and (max-width: 650px) {
+    .page-column {
+        padding: 76px 16px 100px;
+        text-align: center;
+    }
+
+    .page-heading {
+        font-size: 26px;
+    }
+
+    .page-section {
+        margin-top: 32px;
+    }
+
+    .page-section-header {
+        justify-content: center;
+    }
 }
