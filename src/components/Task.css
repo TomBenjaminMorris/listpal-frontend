@@ -2,8 +2,8 @@
 .task-container {
     display: flex;
     margin: 0 8px;
-    /* With the 26px text box, every item below is centred on the same line: 16px from the top of the row */
-    padding: 3px 8px 3px 12px;
+    /* With the 26px text box, every item below is centred on the same line: 15px from the top of the row */
+    padding: 2px 8px 2px 12px;
     border-radius: 8px;
     transition: background-color 120ms;
 }
@@ -115,6 +115,16 @@
 
 .no-background:hover {
     background-color: transparent !important;
+}
+
+/* Keeps its place in the row, but only shows on hover, as a faint icon on every task with no link is clutter */
+.task-three-dots-vertical.task-link-empty {
+    opacity: 0;
+    cursor: default;
+}
+
+.task-container:hover .task-three-dots-vertical.task-link-empty {
+    opacity: 0.25;
 }
 
 .task-textarea-box:focus {

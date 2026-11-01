@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { formatScore, parseJwt } from '../utils/utils';
 import BoardList from './BoardList';
 import DatePills from './DatePills';
-import { LogoMark } from './Icons';
 import './HomePage.css';
 import './PageLayout.css';
 
@@ -15,30 +14,27 @@ const getGreetingEmoji = () => new Date().getHours() < 18 ? "☀️" : "🌙";
 
 const ScoreContent = ({ totalYScore, totalMScore, totalWScore, isLoading }) => {
   const SCORE_MAP = [
-    { name: "This week", score: totalWScore },
-    { name: "This month", score: totalMScore },
-    { name: "This year", score: totalYScore },
+    { name: "Week", score: totalWScore },
+    { name: "Month", score: totalMScore },
+    { name: "Year", score: totalYScore },
   ]
 
   return (
-    <section className="page-section">
-      <div className="page-section-header">
-        <h2>✨ Tasks completed</h2>
-        <span>across all boards</span>
-      </div>
+    <div className="home-totals" title="Tasks completed across all boards">
+      <div className="home-totals-caption">✨ Tasks completed</div>
       <div className="home-stats">
         {SCORE_MAP.map(({ name, score }) => (
           <div key={name} className="home-stat">
-            <div className="home-stat-label">{name}</div>
             <div className="home-stat-value">
               {isLoading
                 ? <div className="placeholder-bar home-stat-placeholder" aria-hidden="true" />
                 : <div className="placeholderReveal-animation">{formatScore(score)}</div>}
             </div>
+            <div className="home-stat-label">{name}</div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 
@@ -57,21 +53,23 @@ const HomePage = ({ boards = [], setBoards, placeholderBoardCount, setPromptConf
 
   return (
     <div className="page-column fadeUp-animation">
-      <header>
-        <h1 className="page-heading">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h1>
-        <DatePills showDate />
-      </header>
+      <header className="home-header">
+        <div>
+          <h1 className="page-heading">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h1>
+          <DatePills showDate showDaysLeft={false} />
+        </div>
 
-      <ScoreContent
-        totalYScore={totalYScore}
-        totalMScore={totalMScore}
-        totalWScore={totalWScore}
-        isLoading={placeholderBoardCount > 0}
-      />
+        <ScoreContent
+          totalYScore={totalYScore}
+          totalMScore={totalMScore}
+          totalWScore={totalWScore}
+          isLoading={placeholderBoardCount > 0}
+        />
+      </header>
 
       <section className="page-section">
         <div className="page-section-header">
-          <h2><LogoMark className="home-section-logo" />Your boards</h2>
+          <h2>Your boards</h2>
         </div>
         <BoardList
           boards={boards}

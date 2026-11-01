@@ -17,12 +17,12 @@
   height: 0px;
 }
 
-.taskMenu img:hover {
+.taskMenu > svg:hover {
   cursor: pointer;
 }
 
 /* Block, so it doesn't sit on a line of text whose spacing would lift it out of line with the rest of the row */
-.taskMenu img {
+.taskMenu > svg {
   display: block;
   width: 16px;
   height: 16px;

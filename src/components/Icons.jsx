@@ -1,6 +1,7 @@
 // Paths are from Lucide (ISC licence). Inline rather than PNGs, so they stay sharp and take their colour from the theme.
-const Icon = ({ className = "line-icon", children }) => (
+const Icon = ({ className = "line-icon", children, ...props }) => (
   <svg
+    {...props}
     className={className}
     viewBox="0 0 24 24"
     fill="none"
@@ -143,6 +144,36 @@ export const StarIcon = () => (
   </Icon>
 );
 
+export const MoreIcon = (props) => (
+  <Icon {...props}>
+    <circle cx="5" cy="12" r="2" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+    <circle cx="19" cy="12" r="2" fill="currentColor" stroke="none" />
+  </Icon>
+);
+
+export const LinkIcon = (props) => (
+  <Icon {...props}>
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </Icon>
+);
+
+export const SyncIcon = (props) => (
+  <Icon {...props}>
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M8 16H3v5" />
+  </Icon>
+);
+
+export const CheckIcon = (props) => (
+  <Icon {...props}>
+    <path d="M20 6 9 17l-5-5" />
+  </Icon>
+);
+
 export const ChevronIcon = ({ className }) => (
   <Icon className={className}>
     <path d="m9 18 6-6-6-6" />
@@ -150,8 +181,8 @@ export const ChevronIcon = ({ className }) => (
 );
 
 // Redrawn from listpal-icon.png, which is only 32 px and looks soft at this size on a high-density screen
-export const LogoMark = ({ className = "sidenav-logo" }) => (
-  <svg className={className} viewBox="0 0 32 32" aria-hidden="true">
+export const LogoMark = () => (
+  <svg className="sidenav-logo" viewBox="0 0 32 32" aria-hidden="true">
     <circle cx="16" cy="16" r="16" fill="#e21b1b" />
     <path d="M9.5 17.5 14 22l8.5-11.5" fill="none" stroke="#fff" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>

@@ -22,8 +22,8 @@ const BoardCard = ({ board, onClick, replacesPlaceholder }) => {
         <span className="board-card-emoji">{board.Emoji}</span>
         <span className="board-card-name">{board.Board}</span>
         <div className="board-card-year">
-          <div className="board-card-year-value">{formatScore(Number(board.YScore))}</div>
-          <div className="board-card-year-label">this year</div>
+          <span className="board-card-year-value">{formatScore(Number(board.YScore))}</span>
+          <span className="board-card-year-label"> / year</span>
         </div>
       </div>
       <div className={contentFade}>

@@ -17,6 +17,9 @@
 
   color: var(--text-colour);
   background-color: var(--background);
+
+  /* Inherited, so it covers the page and everything that scrolls inside it */
+  scrollbar-color: color-mix(in srgb, var(--text-colour) 25%, transparent) transparent;
 }
 
 /*///////////// DARK THEMES /////////////*/

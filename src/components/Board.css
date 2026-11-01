@@ -27,7 +27,7 @@
 .board-name-content {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
     margin-right: auto;
 }
@@ -139,16 +139,15 @@
     pointer-events: none;
 }
 
+/* Matches a category card's emoji. Centred rather than left-aligned, as the emoji picker's offsets below depend on it. */
 .board-emoji-picker-wrapper {
     display: flex;
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
-    width: 40px;
+    width: 24px;
     height: 40px;
-    border-radius: 10px;
-    background-color: var(--surface-hover);
-    transition: background-color 120ms;
+    cursor: pointer;
 }
 
 /* No positioned parent, so it escapes the card's overflow. The margins put it just below the emoji. */
@@ -161,20 +160,20 @@
     border-radius: 12px;
 }
 
+/* Shrinks to the emoji, so the hover highlight is even around it. The auto margin keeps it in line with the cards below. */
 .emoji-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    font-size: 21px;
-    line-height: 1;
-    cursor: pointer;
+    width: fit-content;
+    margin-right: auto;
+    border-radius: 7px;
+    font-size: 24px;
+    line-height: 24px;
+    transition: background-color 120ms, box-shadow 120ms;
 }
 
-.emoji-highlight,
-.board-emoji-picker-wrapper:hover {
-    background-color: color-mix(in srgb, var(--text-colour) 18%, transparent);
+.board-emoji-picker-wrapper:hover .emoji-icon,
+.board-emoji-picker-wrapper.emoji-highlight .emoji-icon {
+    background-color: var(--surface-hover);
+    box-shadow: 0 0 0 4px var(--surface-hover);
 }
 
 .transparent_gradient {
@@ -191,7 +190,11 @@
 
 /* Above the bottom gradient and side bar (2000), but under the modal backdrop (3000) so an open modal blurs it too */
 .board-local-sync-indicator-wrapper {
-    background-color: var(--background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--foreground);
+    color: var(--text-muted);
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -203,8 +206,8 @@
 }
 
 .sync-status-icon {
-    width: 30px;
-    height: 30px;
+    width: 16px;
+    height: 16px;
 }
 
 .sync-error {

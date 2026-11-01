@@ -1,8 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo } from 'react';
 import { queueUpdate } from '../utils/syncEngine';
 import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caretNavigation';
-import linkIcon from '../assets/icons8-link-64.png';
-import menuIcon from "../assets/icons8-dots-50.png"
+import { LinkIcon, MoreIcon } from './Icons';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
@@ -147,7 +146,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
   const isImportant = task.Important === "true";
   const taskExpiryOpacityStyle = checked ? { opacity: taskExpiryOpacity() } : null;
-  const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 2px", opacity: taskExpiryOpacity() } : null;
+  const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 1.5px", opacity: taskExpiryOpacity() } : null;
   const isLinkAvailable = task.Link && task.Link !== "";
 
   return (
@@ -180,14 +179,14 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
       {isLinkAvailable ? (
         <a href={task.Link} target="_blank" rel="noreferrer">
-          <img className="task-dropdown-icons task-three-dots-vertical" src={linkIcon} alt="follow link icon" />
+          <LinkIcon className="task-dropdown-icons task-three-dots-vertical" />
         </a>
       ) : (
-        <img className="task-dropdown-icons task-three-dots-vertical no-background" src={linkIcon} alt="follow link icon" style={{ opacity: '0.08' }} />
+        <LinkIcon className="task-dropdown-icons task-three-dots-vertical no-background task-link-empty" />
       )}
 
       <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : ""}`} ref={taskMenuRef}>
-        <img className="task-three-dots-vertical" src={menuIcon} alt="menu icon" onClick={() => setTaskMenuVisible(prev => !prev)} />
+        <MoreIcon className="task-three-dots-vertical" onClick={() => setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
             containerRef={taskMenuRef}

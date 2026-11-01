@@ -12,14 +12,20 @@
 
 #addCardButton {
     /* Sized as one column rather than growing into the leftover space, like the cards, so a row that isn't full doesn't
-       stretch. The breakpoints are where .card-container's 556px min-width fits 2 and 3 per row with the 20px gap */
+       stretch. The breakpoints are where .card-container's 556px min-width fits 2 and 3 per row with the 20px gap.
+       A lone column can be very wide, which is too much for one button, so it stops at a card's narrowest width */
     flex: 0 0 100%;
+    max-width: 556px;
 }
 
 @container (min-width: 1132px) {
     #addCardButton,
     .card-container {
         flex-basis: calc((100% - 20px) / 2);
+    }
+
+    #addCardButton {
+        max-width: none;
     }
 }
 

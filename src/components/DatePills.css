@@ -9,9 +9,9 @@
     align-items: center;
     gap: 7px;
     white-space: nowrap;
-    padding: 5px 16px;
+    padding: 4px 14px;
     border-radius: 20px;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 22px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
