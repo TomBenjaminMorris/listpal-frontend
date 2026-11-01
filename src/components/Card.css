@@ -4,9 +4,10 @@
     padding-bottom: 40px;
     border-radius: 15px;
     overflow: auto;
-    min-width: 550px;
-    flex-grow: 1;
-    flex-basis: 30%;
+    /* Column widths are set with the add button's in CardList.css. The basis is a whole column, so the padding has to sit inside it */
+    box-sizing: border-box;
+    min-width: 556px;
+    flex: 0 0 100%;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
