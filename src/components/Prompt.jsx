@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
+import { useEnterToAccept } from '../utils/useEnterToAccept';
 import './Prompt.css';
 
 const Prompt = ({ promptConf, setPromptConf }) => {
@@ -10,18 +11,13 @@ const Prompt = ({ promptConf, setPromptConf }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') handleClose();
-      if (e.key === 'Enter') {
-        // Otherwise the same keystroke types a newline into whatever the confirm focuses, such as a new category's first task
-        e.preventDefault();
-        handleConfirm();
-      }
     };
 
     if (promptConf?.display) {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [promptConf, inputText]);
+  }, [promptConf]);
 
   const handleClose = () => {
     setPromptConf({ display: false });
@@ -31,6 +27,8 @@ const Prompt = ({ promptConf, setPromptConf }) => {
     promptConf?.callbackFunc?.(inputText);
     handleClose();
   };
+
+  useEnterToAccept(ref, handleConfirm, promptConf?.display);
 
   useOnClickOutside(ref, handleClose);
 
