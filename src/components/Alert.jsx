@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
+import { useEnterToAccept } from '../utils/useEnterToAccept';
 import './Prompt.css';
 
 const Alert = ({ alertConf, setAlertConf }) => {
@@ -8,6 +9,13 @@ const Alert = ({ alertConf, setAlertConf }) => {
   const closeAlert = () => {
     setAlertConf({ display: false });
   };
+
+  const handleAccept = () => {
+    closeAlert();
+    alertConf.onAction?.();
+  };
+
+  useEnterToAccept(ref, handleAccept, alertConf?.display);
 
   const handleKeyDown = (e) => {
     if (e.key === "Escape") closeAlert();
@@ -31,7 +39,7 @@ const Alert = ({ alertConf, setAlertConf }) => {
           <div className="prompt-button-wrapper">
             {alertConf.actionLabel ? (
               <>
-                <button className="prompt-button" onClick={() => { closeAlert(); alertConf.onAction(); }}>
+                <button className="prompt-button" onClick={handleAccept}>
                   {alertConf.actionLabel}
                 </button>
                 <button className="prompt-button-cancel" onClick={closeAlert}>

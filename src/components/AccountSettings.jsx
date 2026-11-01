@@ -15,6 +15,7 @@ import {
   deleteAccount,
   describeAccountError
 } from '../utils/accountService';
+import { useEnterToAccept } from '../utils/useEnterToAccept';
 import './Prompt.css';
 import './AccountSettings.css';
 
@@ -210,6 +211,7 @@ const PasswordForm = ({ email, onCancel }) => {
 
 const DeleteAccountModal = ({ email, onClose }) => {
   const ref = useRef(null);
+  const formRef = useRef(null);
   const [password, setPassword] = useState('');
   const { busy, error, run } = useAction();
 
@@ -218,6 +220,11 @@ const DeleteAccountModal = ({ email, onClose }) => {
   };
 
   useOnClickOutside(ref, close);
+
+  // requestSubmit ignores the disabled button, so the busy check is what stops a second delete
+  useEnterToAccept(ref, () => {
+    if (!busy) formRef.current?.requestSubmit();
+  });
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -236,7 +243,7 @@ const DeleteAccountModal = ({ email, onClose }) => {
     <div className="prompt-outer-wrapper fadeInPure-animation">
       <div className="prompt-inner-wrapper" ref={ref} role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
         <h1 id="delete-account-title">Delete your account?</h1>
-        <form className="account-form" onSubmit={handleSubmit}>
+        <form className="account-form" ref={formRef} onSubmit={handleSubmit}>
           <p>This permanently deletes your boards, tasks, scores and login. It can't be undone.</p>
           <Field label="Enter your password to confirm" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required autoFocus />
           <FormError error={error} />

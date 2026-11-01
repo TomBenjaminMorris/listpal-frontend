@@ -58,6 +58,8 @@ listpal-frontend/
 │   │   ├── syncEngine.js       Task and board settings outbox: queueing, merging, batching, retries, sync status hook and getter
 │   │   ├── syncEngine.test.js  Vitest tests for the outbox
 │   │   ├── themes.js           The list of themes: each one's ID and display name
+│   │   ├── useEnterToAccept.js Lets Enter accept the top open modal's default option
+│   │   ├── useEnterToAccept.test.js  Vitest tests for that key handling
 │   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
 │   └── components/             Pages and widgets (one .jsx and usually one .css each)
 ├── terraform/
@@ -371,6 +373,15 @@ flowchart LR
 ```
 
 Callers that already handle the failure (delete in `Board`) don't show a second alert of their own. `Board`'s task load passes `silent` and reports the failure itself, because the outbox reads in the same `try` can fail too. The `Alert` sits at `z-index: 3100`, above the targets modal at 3000.
+
+Enter accepts the default option of any open modal, through `useEnterToAccept`: Confirm in `Prompt` and `Confirm`, "Got it" or the action button (such as "Sign in") in `Alert`, Save in `TargetSetterModal` and Delete account in the delete account modal, which still needs its password. Escape cancels, as each modal handles that itself.
+
+- Enter goes only to the top modal, so an API error alert over an open `Confirm` closes without confirming it.
+- The listener runs in the capture phase and stops the event, because an alert can open with focus still in a task behind it, and the task would otherwise split. It also means the keystroke that opened a modal can't close it, as when Enter in an empty category title raises "Name, please!".
+- A button focused inside the modal, such as a tabbed-to Cancel, handles Enter itself.
+- A held key's repeats are swallowed without accepting, and Enter that an input method is using to compose is left alone.
+
+Target banners aren't modals: they don't block the page and close on their own, so Enter stays with the task being edited.
 
 `Prompt`, `Confirm` and `Alert` share `Prompt.css`. The box is 400px wide with a 30px title. Under 650px it fills the screen less a 16px gutter each side, and the title drops to 24px. Titles use `text-wrap: balance`, so one that must wrap splits into even lines rather than leaving its emoji alone on the second. Keep fixed titles short enough for one line on desktop (about 25 characters with an emoji).
 

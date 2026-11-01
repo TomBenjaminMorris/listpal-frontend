@@ -1,5 +1,6 @@
 import { useRef, useEffect, memo } from 'react';
 import { useOnClickOutside, useScrollLock } from 'usehooks-ts';
+import { useEnterToAccept } from '../utils/useEnterToAccept';
 import TargetSetter from './TargetSetter';
 import './TargetSetterModal.css';
 
@@ -31,6 +32,9 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
       document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [setDisplay]);
+
+  // No field has focus when the modal opens, so the browser's own Enter-to-submit wouldn't fire
+  useEnterToAccept(ref, () => ref.current?.querySelector('form')?.requestSubmit(), display);
 
   useOnClickOutside(ref, () => setDisplay(false));
 
