@@ -72,11 +72,13 @@
     border-style: dashed;
     border-width: 4px;
     font-size: 50px;
-    transition: background-color 150ms, opacity 150ms;
+    transition: background-color 150ms, opacity 300ms ease-out;
 }
 
+/* Fades in with the boards it waits for */
 .add-board-button-loading {
-    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 #addBoardButton:hover {

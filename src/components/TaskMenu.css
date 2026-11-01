@@ -119,6 +119,21 @@ a {
   animation: 200ms ease-out fadeInPure;
 }
 
+/* For content arriving where a placeholder was, which reads better a little slower than a plain entrance */
+.placeholderReveal-animation {
+  animation: 300ms ease-out fadeInPure;
+}
+
+/* Ends where the pulse starts, so the handover doesn't jump */
+@keyframes placeholderAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.08;
+  }
+}
+
 @keyframes placeholderPulse {
   from {
     opacity: 0.08;
@@ -129,10 +144,13 @@ a {
 }
 
 /* The resting opacity is for reduced motion, where the pulse is cut short. No height here, as each use sets its own
-   and CSS import order would otherwise decide which one wins */
+   and CSS import order would otherwise decide which one wins. The delay matches the page's 250ms entrance, so a fast
+   load replaces the bars before they can be seen */
 .placeholder-bar {
   border-radius: 4px;
   background-color: var(--text-colour);
   opacity: 0.14;
-  animation: 900ms ease-in-out infinite alternate placeholderPulse;
+  animation:
+    200ms ease-out 250ms backwards placeholderAppear,
+    900ms ease-in-out 450ms infinite alternate placeholderPulse;
 }

@@ -1,33 +1,51 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { setTokensFromCode } from "../utils/authService";
+import { describeApiError } from "../utils/apiErrors";
 import config from "../config.json";
+import "./Prompt.css";
+import "./RedirectPage.css";
 
 const RedirectPage = ({ isDev }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [failure, setFailure] = useState(null);
   const authCode = new URLSearchParams(location.search).get('code');
   const redirectUrl = isDev ? config.redirectLocal : config.redirectRemote;
 
   useEffect(() => {
     if (authCode) {
-      setTimeout(() => {
-        setTokensFromCode(authCode, redirectUrl);
-      }, 800);
+      setTokensFromCode(authCode, redirectUrl)
+        .catch((error) => setFailure(describeApiError(error, "finish signing you in")));
     } else {
       navigate("/home");
     }
   }, [authCode, redirectUrl, navigate]);
 
-  return (
-    <div className="loadingWrapper fullScreen fadeInPure-animation" data-theme="purple-haze" style={{ color: "white", fontSize: "35px", backgroundColor: "var(--background)" }}>
-      <div className="logo-text-wrapper">
-        <div className="logo-text-1">List</div>
-        <div className="logo-text-2">Pal</div>
+  if (failure) {
+    return (
+      <div className="redirect-page fadeInPure-animation">
+        <div className="prompt-inner-wrapper">
+          <h1>{failure.title}</h1>
+          <p>{failure.textValue}</p>
+          <div className="prompt-button-container">
+            <div className="prompt-button-wrapper">
+              {/* A code works only once, so retrying needs a fresh one from the sign-in page */}
+              <button className="prompt-button" onClick={() => window.location.assign("/logout")}>
+                Sign in again
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="redirect-page">
+      <div className="redirect-page-status" role="status">Signing you in…</div>
     </div>
   );
 };
 
 export default RedirectPage;
-

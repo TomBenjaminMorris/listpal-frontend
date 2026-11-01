@@ -1,18 +1,23 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { NEW_BOARD_DEFAULTS, queueBoardCreate } from '../utils/syncEngine';
 import './BoardList.css';
 
-const BoardCard = ({ board, onClick }) => {
+const BoardCard = ({ board, onClick, replacesPlaceholder }) => {
   const maxLength = 12;
   const truncatedText = board.Board.length > maxLength
     ? `${board.Board.substring(0, maxLength)}...`
     : board.Board;
 
+  // Fading the whole card over a placeholder would make its frame vanish and return, so only the contents fade
+  const cardFade = replacesPlaceholder ? "" : "fadeInPure-animation";
+  const contentFade = replacesPlaceholder ? "placeholderReveal-animation" : "";
+
   return (
-    <Link className="board-list-item-wrapper fadeInPure-animation" to={"/board/" + board.SK} onClick={onClick} >
-      <div className="board-list-item-score">{board.YScore}</div>
-      <div className="board-list-text-emoji-wrapper">
+    <Link className={`board-list-item-wrapper ${cardFade}`} to={"/board/" + board.SK} onClick={onClick} >
+      <div className={`board-list-item-score ${contentFade}`}>{board.YScore}</div>
+      <div className={`board-list-text-emoji-wrapper ${contentFade}`}>
         <div className="boardLink">{truncatedText}</div>
         <div className="boardLink">{board.Emoji}</div>
       </div>
@@ -34,6 +39,10 @@ const AddBoardButton = ({ onClick, hidden }) => (
 );
 
 const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
+  // Outlives the load, so a card's fade doesn't change, and restart, once the placeholder count drops to zero
+  const placeholdersShown = useRef(0);
+  if (placeholderBoardCount > 0) placeholdersShown.current = placeholderBoardCount;
+
   const handleNewBoard = (name) => {
     if (!name?.trim()) {
       setAlertConf({
@@ -64,10 +73,11 @@ const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromp
     <div className="flex-container-board-list">
       {placeholderBoardCount > 0
         ? Array.from({ length: placeholderBoardCount }, (_, i) => <BoardCardPlaceholder key={i} />)
-        : boards.map(board => (
+        : boards.map((board, i) => (
           <BoardCard
             key={board.SK}
             board={board}
+            replacesPlaceholder={i < placeholdersShown.current}
             onClick={() => setActiveBoardID(board.SK)}
           />
         ))}

@@ -32,7 +32,7 @@ const ScoreContent = ({ totalYScore, totalMScore, totalWScore, isLoading }) => {
             <div className="home-page-total-score-inner-score">
               {isLoading
                 ? <div className="placeholder-bar home-page-score-placeholder" aria-hidden="true" />
-                : <div className="fadeInPure-animation">{score}</div>}
+                : <div className="placeholderReveal-animation">{score}</div>}
             </div>
           </div>
         ))}
