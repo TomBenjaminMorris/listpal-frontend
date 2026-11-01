@@ -12,6 +12,7 @@
     flex-direction: column;
     justify-content: space-between;
     gap: 4px;
+    margin-top: 12px;
 }
 
 .page-heading + .date-pills {
@@ -71,6 +72,7 @@
 
     .home-totals {
         gap: 8px;
+        margin-top: 0;
     }
 
     .page-heading + .date-pills,

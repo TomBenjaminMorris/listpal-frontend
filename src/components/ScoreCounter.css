@@ -8,7 +8,7 @@
   height: 44px;
 }
 
-/* Marks a met target on the ring's corner. The shadow is the card's colour, which cuts it cleanly out of the ring. */
+/* Marks a met target on the ring's corner. The shadow is the page's colour, which cuts it cleanly out of the ring. */
 .score-star {
   position: absolute;
   top: -2px;
@@ -20,7 +20,7 @@
   height: 16px;
   border-radius: 50%;
   background-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--foreground);
+  box-shadow: 0 0 0 2px var(--background);
   color: var(--text-colour);
 }
 

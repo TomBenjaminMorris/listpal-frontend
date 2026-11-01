@@ -1,6 +1,7 @@
+/* 880px of content, which still fits three 280px cards with their 16px gaps */
 .page-column {
     box-sizing: border-box;
-    max-width: 1008px;
+    max-width: 928px;
     margin: 0 auto;
     padding: 80px 24px 120px;
     text-align: left;

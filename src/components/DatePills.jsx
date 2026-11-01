@@ -1,8 +1,8 @@
 import { getDaysRemaining, getWeek } from '../utils/utils';
 import './DatePills.css';
 
-// Pills showing the week of the year, and optionally today's date and the days remaining in the year
-const DatePills = ({ showDate = false, showDaysLeft = true }) => {
+// Pills showing the week of the year and the days remaining in it, and optionally today's date
+const DatePills = ({ showDate = false }) => {
   const now = new Date();
   const daysRemaining = getDaysRemaining(now);
 
@@ -18,12 +18,10 @@ const DatePills = ({ showDate = false, showDaysLeft = true }) => {
         <span>🗓️</span>
         {`Week ${getWeek(now)}`}
       </div>
-      {showDaysLeft && (
-        <div className="date-pill date-pill-days">
-          <span>⏳</span>
-          {`${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} left this year`}
-        </div>
-      )}
+      <div className="date-pill date-pill-days" title="Days left this year">
+        <span>⏳</span>
+        {`${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} left`}
+      </div>
     </div>
   );
 };

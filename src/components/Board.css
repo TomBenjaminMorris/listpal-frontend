@@ -59,9 +59,11 @@
     transition: background-color 120ms, color 120ms;
 }
 
+/* The negative margin offsets the space inside the 30px button, which made the icon look detached from the title */
 .board-rename {
     width: 30px;
     height: 30px;
+    margin-left: -5px;
     border-radius: 8px;
 }
 
@@ -72,9 +74,9 @@
 }
 
 .board-action>button {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
 }
 
 /* index.css rings every focused button, which would otherwise stay on after a mouse click */
@@ -96,7 +98,7 @@
     justify-content: center;
     align-items: center;
     gap: 4px;
-    padding: 8px;
+    padding: 4px 8px;
     background-color: var(--foreground);
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;

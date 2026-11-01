@@ -56,7 +56,7 @@ const HomePage = ({ boards = [], setBoards, placeholderBoardCount, setPromptConf
       <header className="home-header">
         <div>
           <h1 className="page-heading">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h1>
-          <DatePills showDate showDaysLeft={false} />
+          <DatePills showDate />
         </div>
 
         <ScoreContent
