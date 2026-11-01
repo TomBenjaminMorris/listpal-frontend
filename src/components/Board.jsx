@@ -408,26 +408,17 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
             </div>
           )}
           {tasksReady && (
-            <>
-              {
-                !sortedTasks || Object.keys(sortedTasks).length === 0 ? (
-                  <div className="fadeUp-animation" style={{ fontSize: "20px", marginTop: "40px", marginBottom: "30px", }}>
-                    Create a category to get going...
-                  </div>
-                ) : null
-              }
-              <CardList
-                key={boardID}
-                sortedTasks={sortedTasks}
-                setSortedTasks={setSortedTasks}
-                setBoards={setBoards}
-                setPromptConf={setPromptConf}
-                setConfirmConf={setConfirmConf}
-                setAlertConf={setAlertConf}
-                tickedCheckboxRef={tickedCheckbox}
-                remoteUpdateRef={remoteUpdateRef}
-              />
-            </>
+            <CardList
+              key={boardID}
+              sortedTasks={sortedTasks}
+              setSortedTasks={setSortedTasks}
+              setBoards={setBoards}
+              setPromptConf={setPromptConf}
+              setConfirmConf={setConfirmConf}
+              setAlertConf={setAlertConf}
+              tickedCheckboxRef={tickedCheckbox}
+              remoteUpdateRef={remoteUpdateRef}
+            />
           )}
         </div>
       </div>

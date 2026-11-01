@@ -21,8 +21,8 @@
     display: grid;
     align-items: center;
     opacity: 0.7;
-    /* Sized as one slot of a full row rather than growing into the leftover space, so it matches the card it creates.
-       The breakpoints are where .card-container (550px min-width plus 6px padding, 30% basis) fits 2 and 3 per row with the 20px gap */
+    /* Sized as one column rather than growing into the leftover space, like the cards, so a row that isn't full doesn't
+       stretch. The breakpoints are where .card-container's 556px min-width fits 2 and 3 per row with the 20px gap */
     flex: 0 0 100%;
     /* The flex-basis is a whole slot, so the border has to sit inside it */
     box-sizing: border-box;
@@ -31,13 +31,15 @@
 }
 
 @container (min-width: 1132px) {
-    #addCardButton {
+    #addCardButton,
+    .card-container {
         flex-basis: calc((100% - 20px) / 2);
     }
 }
 
 @container (min-width: 1708px) {
-    #addCardButton {
+    #addCardButton,
+    .card-container {
         flex-basis: calc((100% - 40px) / 3);
     }
 }
@@ -46,4 +48,93 @@
     background-color: rgb(86, 86, 86);
     opacity: 1;
     cursor: pointer;
+}
+
+.empty-board {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 480px;
+    margin: clamp(20px, 10vh, 100px) auto 0;
+    padding: 40px 40px 36px;
+    background-color: var(--foreground);
+    border-radius: 15px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.empty-board h2 {
+    font-family: CircularBold;
+    font-size: 25px;
+    line-height: 1.2;
+    margin: 20px 0 10px;
+}
+
+.empty-board p {
+    font-family: CircularBook;
+    font-size: 17px;
+    line-height: 1.5;
+    margin: 0 0 24px;
+    opacity: 0.75;
+    text-wrap: pretty;
+}
+
+.empty-board-art {
+    display: block;
+    width: 132px;
+    height: 104px;
+    margin: 0 auto;
+}
+
+.empty-board-art-back {
+    fill: var(--accent);
+    opacity: 0.45;
+}
+
+.empty-board-art-front {
+    fill: var(--background);
+}
+
+.empty-board-art-tick {
+    fill: var(--accent);
+}
+
+.empty-board-art-check {
+    fill: none;
+    stroke: var(--text-colour);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.empty-board-art-box {
+    fill: none;
+    stroke: var(--text-colour);
+    stroke-width: 2;
+    opacity: 0.5;
+}
+
+.empty-board-art-line {
+    fill: var(--text-colour);
+    opacity: 0.25;
+}
+
+.empty-board-button {
+    margin: 0;
+    padding: 0.7em 1.5em;
+    background-color: var(--accent);
+    transition: background-color 150ms;
+}
+
+.empty-board-button:hover {
+    background-color: var(--accent-2);
+}
+
+/* The global focus ring stays for keyboard users, but shouldn't linger on the button after a click */
+.empty-board-button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+@media screen and (max-width: 650px) {
+    .empty-board {
+        padding: 32px 24px 28px;
+    }
 }

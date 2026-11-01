@@ -43,7 +43,9 @@ const createdDateBeside = (list, SK, above) => {
   return midpoint > prev && midpoint < next ? String(midpoint) : String(Date.now());
 };
 
-const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, focusRequestRef, remoteUpdateRef }) => {
+const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, focusRequestRef, remoteUpdateRef, appearsInPlace }) => {
+  // Fixed when the card mounts, as gaining the fadeUp class on a later render would play the animation then
+  const entrance = useRef(appearsInPlace ? "" : "fadeUp-animation").current;
   const [titleEdited, setTitleEdited] = useState(title);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
@@ -340,10 +342,10 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     }
   };
 
-  // fadeUp stays on: a CSS animation only plays when its class is first applied, so re-renders don't replay it
+  // The entrance class stays on: a CSS animation only plays when its class is first applied, so re-renders don't replay it
   return (
     <div
-      className={`card-container ${isDeleting ? "fadeOutDown-animation" : "fadeUp-animation"}`}
+      className={`card-container ${isDeleting ? "fadeOutDown-animation" : entrance}`}
       onAnimationEnd={handleCardAnimationEnd}
       ref={containerRef}
     >

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { setCachedTasks } from '../utils/boardCache';
 import { NEW_BOARD_DEFAULTS, queueBoardCreate } from '../utils/syncEngine';
 import './BoardList.css';
 
@@ -39,6 +40,8 @@ const AddBoardButton = ({ onClick, hidden }) => (
 );
 
 const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromptConf, setAlertConf, setActiveBoardID }) => {
+  const navigate = useNavigate();
+
   // Outlives the load, so a card's fade doesn't change, and restart, once the placeholder count drops to zero
   const placeholdersShown = useRef(0);
   if (placeholderBoardCount > 0) placeholdersShown.current = placeholderBoardCount;
@@ -57,6 +60,10 @@ const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromp
 
     setBoards(prevBoards => [...prevBoards, newBoard]);
     queueBoardCreate(newBoard);
+    // A new board has no tasks, so it can show at once rather than waiting for its create to sync
+    setCachedTasks(newBoard.SK, {});
+    setActiveBoardID(newBoard.SK);
+    navigate("/board/" + newBoard.SK);
   };
 
   const handleAddBoardClick = () => {

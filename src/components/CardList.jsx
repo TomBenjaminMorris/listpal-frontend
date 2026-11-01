@@ -20,6 +20,15 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
     return cardKeys.current[title];
   };
 
+  const isEmpty = Object.keys(sortedTasks).length === 0;
+  // The first card and the add button take the place of the empty board panel, so they appear where they belong rather
+  // than rising into it. The add button stays flagged, as gaining the fadeUp class later would play the animation then
+  const wasEmptyRef = useRef(false);
+  const replacesEmptyBoard = wasEmptyRef.current;
+  wasEmptyRef.current = isEmpty;
+  const addButtonRises = useRef(true);
+  if (isEmpty) addButtonRises.current = false;
+
   const containerRef = useRef(null);
   const categoryOrder = Object.keys(sortedTasks).join('\u0000');
   const lastCategoryOrder = useRef(categoryOrder);
@@ -146,6 +155,14 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
     forceUpdate();
   };
 
+  const openNewCategoryPrompt = () => setPromptConf({
+    display: true,
+    isEdit: false,
+    defaultText: "",
+    title: "Name your new category ✏️",
+    callbackFunc: handleNewCard,
+  });
+
   return (
     <div className="card-list-container" ref={containerRef}>
       {Object.entries(sortedTasks).map(([key]) => (
@@ -164,19 +181,34 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
           tickedCheckboxRef={tickedCheckboxRef}
           focusRequestRef={focusRequestRef}
           remoteUpdateRef={remoteUpdateRef}
+          appearsInPlace={replacesEmptyBoard}
         />
       ))}
-      {sortedTasks && (
+      {isEmpty ? (
+        // Keyed so React doesn't reuse this element as the add button, which the card slide would carry across the page
+        <div key="empty-board" className="empty-board fadeInPure-animation">
+          <svg className="empty-board-art" viewBox="0 0 132 104" aria-hidden="true">
+            <rect className="empty-board-art-back" x="24" y="8" width="92" height="84" rx="11" transform="rotate(7 70 50)" />
+            <rect className="empty-board-art-front" x="16" y="12" width="92" height="84" rx="11" />
+            <rect className="empty-board-art-tick" x="28" y="26" width="14" height="14" rx="4" />
+            <path className="empty-board-art-check" d="M31.5 33l2.5 2.5 4.5-5" />
+            <rect className="empty-board-art-line" x="50" y="30" width="44" height="6" rx="3" />
+            <rect className="empty-board-art-tick" x="28" y="47" width="14" height="14" rx="4" />
+            <path className="empty-board-art-check" d="M31.5 54l2.5 2.5 4.5-5" />
+            <rect className="empty-board-art-line" x="50" y="51" width="32" height="6" rx="3" />
+            <rect className="empty-board-art-box" x="29" y="69" width="12" height="12" rx="3" />
+            <rect className="empty-board-art-line" x="50" y="72" width="38" height="6" rx="3" />
+          </svg>
+          <h2>Start with a category</h2>
+          <p>Categories keep related tasks together. Name your first one, such as “This week” or “Ideas”, then start adding tasks.</p>
+          <button className="empty-board-button" onClick={openNewCategoryPrompt}>New category</button>
+        </div>
+      ) : (
         <div
+          key="add-card-button"
           id="addCardButton"
-          className="fadeUp-animation"
-          onClick={() => setPromptConf({
-            display: true,
-            isEdit: false,
-            defaultText: "",
-            title: "Name your new category ✏️",
-            callbackFunc: handleNewCard,
-          })}
+          className={addButtonRises.current ? "fadeUp-animation" : ""}
+          onClick={openNewCategoryPrompt}
         >
           +
         </div>
