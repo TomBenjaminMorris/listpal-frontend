@@ -11,7 +11,7 @@
   box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
-/* The sign-in logo before it has no sidebar, so it would otherwise pop in at the handover to the loader */
+/* The sign-in page before it has no sidebar, so it would otherwise pop in as Home arrives */
 .sidebar-fade-in {
   animation: 250ms ease-out fadeInPure;
 }
@@ -175,7 +175,9 @@
   border-radius: 4px;
   background-color: var(--text-colour);
   opacity: 0.14;
-  animation: 900ms ease-in-out infinite alternate placeholderPulse;
+  animation:
+    200ms ease-out 250ms backwards placeholderAppear,
+    900ms ease-in-out 450ms infinite alternate placeholderPulse;
 }
 
 .sidenav-board-placeholder>.sidenav-boards-link-item>div:first-child {
