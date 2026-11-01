@@ -1,17 +1,37 @@
+/* The margin and padding put the checkbox in line with the card's emoji and divider */
 .task-container {
     display: flex;
-    padding: 5px;
-    padding-left: 20px;
+    margin: 0 8px;
+    /* With the 26px text box, every item below is centred on the same line: 15px from the top of the row */
+    padding: 2px 8px 2px 12px;
+    border-radius: 8px;
+    transition: background-color 120ms;
+}
+
+@media (hover: hover) {
+    .task-container:hover {
+        background-color: var(--surface-hover);
+    }
+}
+
+.task-container>input[type="checkbox"] {
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+/* An inline link leaves a gap under its icon, which makes a row with a link taller than the others */
+.task-container>a {
+    display: flex;
+    align-self: flex-start;
 }
 
 .task-textarea-wrapper {
     position: relative;
-    /* 88px rather than 92px because the textarea's 2px padding now sits inside the wrapper */
+    /* Leaves room for the checkbox, this margin and the icons on the right */
     width: -webkit-calc(100% - 88px);
     width: -moz-calc(100% - 88px);
     width: calc(100% - 88px);
     margin-left: 12px;
-    margin-top: -5px;
     display: grid;
 }
 
@@ -26,17 +46,18 @@
     width: 100%;
     margin: 0;
     padding: 2px;
-    font-size: 18px;
-    line-height: 25px;
-    letter-spacing: 0.1px;
+    font-size: 15px;
+    line-height: 22px;
     color: var(--text-colour);
     background-color: transparent;
     border: none;
     border-radius: 5px;
     resize: none;
+    /* A ticked task fades through an inline opacity */
+    transition: opacity 200ms ease-out;
     /* The sizer copy sets the height, so the textarea never needs to scroll */
     overflow: hidden;
-    font-family: CircularMedium;
+    font-family: CircularBook;
 }
 
 /* Must wrap exactly like the textarea above it, so it shares .task-textarea-box for typography and padding.
@@ -60,6 +81,8 @@
 .task-highlight-mirror {
     position: absolute;
     inset: 0;
+    /* The highlight overhangs the text by more than the box's padding, and clipping it would square off its corners */
+    overflow: visible;
 }
 
 .task-textarea-sizer {
@@ -68,7 +91,7 @@
 
 .task-highlight-mirror span {
     background-color: var(--accent-2);
-    /* No vertical padding, so the background stays shorter than the 25px line-height and wrapped lines show as
+    /* No vertical padding, so the background stays shorter than the 22px line-height and wrapped lines show as
        separate pills; if they touch, their rounded corners leave notches */
     border-radius: 4px;
     /* The negative margin cancels the padding so the highlight overhangs the text without changing where lines wrap */
@@ -92,6 +115,16 @@
 
 .no-background:hover {
     background-color: transparent !important;
+}
+
+/* Keeps its place in the row, but only shows on hover, as a faint icon on every task with no link is clutter */
+.task-three-dots-vertical.task-link-empty {
+    opacity: 0;
+    cursor: default;
+}
+
+.task-container:hover .task-three-dots-vertical.task-link-empty {
+    opacity: 0.25;
 }
 
 .task-textarea-box:focus {
@@ -119,16 +152,17 @@
 }
 
 .task-three-dots-vertical{
-    border-radius: 20px;
+    border-radius: 6px;
     padding: 3px !important;
-    margin-top: -2px;
-    opacity: 0.8;
+    margin-top: 2px;
+    opacity: 0.7;
     margin-left: 6px;
     margin-right: -8px;
+    transition: background-color 120ms, opacity 120ms;
 }
 
 .task-three-dots-vertical:hover{
-    background-color: var(--accent-2);
+    background-color: var(--surface-hover);
     opacity: 1;
 }
 
@@ -145,40 +179,43 @@ input[type="checkbox"] {
     margin: 0;
     font: inherit;
     color: currentColor;
-    width: 1.2em;
-    height: 1.2em;
-    border: 0.15em solid currentColor;
-    border-color: var(--accent);
-    border-radius: 0.3em;
-    transform: translateY(-0.075em);
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--accent);
+    border-radius: 5px;
     display: grid;
     place-content: center;
-    margin-top: 1px;
+    /* Transitions rather than keyframes, as keyframes would replay on every ticked box each time a board loads.
+       The overshoot on transform is a small spring when a press is released */
+    transition: background-color 140ms ease-out, opacity 200ms ease-out, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+input[type="checkbox"]:active {
+    transform: scale(0.88);
+    transition-duration: 140ms, 200ms, 80ms;
 }
 
 input[type="checkbox"]:checked {
     background-color: var(--accent);
 }
 
-input[type="checkbox"]:checked:hover {
-    background-color: var(--accent);
-    border-color: var(--accent);
-}
-
+/* The tick is a mask, so uncovering it from the left looks like it's being drawn */
 input[type="checkbox"]::before {
     content: "";
-    width: 0.6em;
-    height: 0.6em;
-    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-    transform: scale(0);
-    transform-origin: bottom left;
-    transition: 120ms transform ease-in-out;
-    box-shadow: inset 1em 1em var(--form-control-color);
-    background-color: CanvasText;
+    width: 12px;
+    height: 12px;
+    background-color: var(--form-control-color);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.5l5 5 10-11'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.5l5 5 10-11'/%3E%3C/svg%3E") center / contain no-repeat;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 90ms ease-in;
 }
 
+/* Waits for the box to start filling, so the tick is drawn onto colour rather than the empty box */
 input[type="checkbox"]:checked::before {
-    transform: scale(1);
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 200ms ease-out 50ms;
 }
 
 input[type="checkbox"]:disabled {
@@ -187,22 +224,11 @@ input[type="checkbox"]:disabled {
     cursor: not-allowed;
 }
 
+/* A full accent fill on hover would look ticked, so an unticked box only takes a tint. !important beats a ticked task's inline fade. */
 input[type="checkbox"]:hover {
-    background-color: var(--accent) !important;
     opacity: 1 !important;
 }
 
-.task-hover-indicator {
-    width: 20px;
-    height: 11px;
-    position: relative;
-    margin-left: -22px;
-    margin-top: 4px;
-    margin-right: 2px;
-    display: none;
-    opacity: 0.7;
-}
-
-.task-container:hover .task-hover-indicator{
-    display: block;
+input[type="checkbox"]:not(:checked):hover {
+    background-color: var(--accent-tint);
 }

@@ -1,7 +1,6 @@
 import { memo } from 'react';
 import ThemeCard from './ThemeCard';
 import { THEMES } from '../utils/themes';
-import './ThemeSetter.css';
 
 const ThemeCards = memo(({ userDetails, setUserDetails }) => (
   <div className="theme-card-outer-wrapper">
@@ -19,14 +18,15 @@ const ThemeCards = memo(({ userDetails, setUserDetails }) => (
 
 const ThemeSetter = ({ userDetails, setUserDetails }) => {
   return (
-    <div className="theme-setter-wrapper">
-      <h2 className="settings-headers">Themes</h2>
-      <hr className="settings-line" />
+    <section className="page-section">
+      <div className="page-section-header">
+        <h2>🎨 Themes</h2>
+      </div>
       <ThemeCards
         userDetails={userDetails}
         setUserDetails={setUserDetails}
       />
-    </div>
+    </section>
   );
 };
 

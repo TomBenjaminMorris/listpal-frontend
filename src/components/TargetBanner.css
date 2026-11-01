@@ -5,7 +5,7 @@
   z-index: 5000;
   display: flex;
   flex-direction: column-reverse; /* new banners appear above, so those already showing stay put */
-  width: min(480px, calc(100vw - 40px));
+  width: min(380px, calc(100vw - 40px));
   pointer-events: none; /* the gaps between banners must not block clicks on the board */
 }
 
@@ -22,25 +22,29 @@
   margin-top: 0;
 }
 
+/* Not clipped while the slot is open, as that would cut off the banner's shadow. Only a collapsing slot needs it. */
 .target-banner-slot-inner {
   min-height: 0;
+}
+
+.target-banner-slot-collapse > .target-banner-slot-inner {
+  overflow: hidden;
 }
 
 .target-banner {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 14px;
   box-sizing: border-box;
+  overflow: hidden;
   pointer-events: auto;
-  padding: 20px 22px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: color-mix(in srgb, var(--foreground) 85%, transparent);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  padding: 14px 40px 16px 14px;
+  border-radius: 12px;
+  background-color: var(--foreground);
+  box-shadow: rgba(0, 0, 0, 0.45) 0px 12px 32px;
   color: var(--text-colour);
+  text-align: left;
 }
 
 .target-banner-in {
@@ -51,51 +55,89 @@
   animation: bannerOut 400ms cubic-bezier(0.64, 0, 0.78, 0) forwards;
 }
 
-.target-banner-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  flex-shrink: 0;
+.target-banner-emoji {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: 12px;
+  background-color: var(--accent-tint);
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Waits for the banner to finish most of its slide, so the pop is seen */
+.target-banner-emoji > span {
+  animation: bannerEmojiPop 450ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms backwards;
 }
 
 .target-banner-text {
   min-width: 0;
   flex: 1;
-  padding-right: 20px; /* keeps text clear of the close button */
+}
+
+.target-banner-title {
+  font-family: CircularBold;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.target-banner-body {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-family: CircularBook;
+  font-size: 13.5px;
+  line-height: 19px;
 }
 
 .target-banner-close {
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 24px;
-  height: 24px;
-  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
   border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  border-radius: 7px;
+  background: none;
+  color: var(--text-muted);
   cursor: pointer;
+  transition: background-color 120ms, color 120ms;
 }
 
-.target-banner-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+.target-banner-close > .line-icon {
+  flex-basis: 16px;
+  width: 16px;
+  height: 16px;
 }
 
-.target-banner-close img {
-  width: 100%;
-  height: 100%;
-  display: block;
+/* index.css rings every focused button, which would otherwise stay on after a mouse click */
+.target-banner-close:focus:not(:focus-visible) {
+  outline: none;
 }
 
-.target-banner-title {
-  font-weight: 700;
-  font-size: 1.15rem;
+@media (hover: hover) {
+  .target-banner-close:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-colour);
+  }
 }
 
-.target-banner-body {
-  margin-top: 4px;
-  font-size: 0.98rem;
-  opacity: 0.85;
+/* Shows how long is left before the banner closes itself. Its duration is set in TargetBanner.jsx to match the timer. */
+.target-banner-countdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background-color: var(--accent);
+  transform-origin: left;
+  animation: bannerCountdown linear forwards;
 }
 
 @keyframes bannerIn {
@@ -113,5 +155,18 @@
   }
   100% {
     transform: translateX(calc(100% + 24px));
+  }
+}
+
+@keyframes bannerEmojiPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes bannerCountdown {
+  to {
+    transform: scaleX(0);
   }
 }

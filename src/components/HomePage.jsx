@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { parseJwt } from '../utils/utils';
+import { formatScore, parseJwt } from '../utils/utils';
 import BoardList from './BoardList';
 import DatePills from './DatePills';
 import './HomePage.css';
@@ -7,37 +7,34 @@ import './PageLayout.css';
 
 const getGreeting = () => {
   const hour = new Date().getHours();
-  return hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
+  return hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 };
 
-const getGreetingEmoji = () => {
-  const hour = new Date().getHours();
-  return hour < 18 ? "☀️" : "🌙";
-}
+const getGreetingEmoji = () => new Date().getHours() < 18 ? "☀️" : "🌙";
 
 const ScoreContent = ({ totalYScore, totalMScore, totalWScore, isLoading }) => {
   const SCORE_MAP = [
-    { name: "Weekly", score: totalWScore },
-    { name: "Monthly", score: totalMScore },
-    { name: "Yearly", score: totalYScore },
+    { name: "Week", score: totalWScore },
+    { name: "Month", score: totalMScore },
+    { name: "Year", score: totalYScore },
   ]
 
   return (
-    <>
-      <h2>✨ Total tasks completed across your boards...</h2>
-      <div className="home-page-total-score-wrapper">
+    <div className="home-totals" title="Tasks completed across all boards">
+      <div className="home-totals-caption">✨ Tasks completed</div>
+      <div className="home-stats">
         {SCORE_MAP.map(({ name, score }) => (
-          <div key={name} className="home-page-total-score-inner-wrapper">
-            <div className="home-page-total-score-inner-label">{name}</div>
-            <div className="home-page-total-score-inner-score">
+          <div key={name} className="home-stat">
+            <div className="home-stat-value">
               {isLoading
-                ? <div className="placeholder-bar home-page-score-placeholder" aria-hidden="true" />
-                : <div className="placeholderReveal-animation">{score}</div>}
+                ? <div className="placeholder-bar home-stat-placeholder" aria-hidden="true" />
+                : <div className="placeholderReveal-animation">{formatScore(score)}</div>}
             </div>
+            <div className="home-stat-label">{name}</div>
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
@@ -55,15 +52,11 @@ const HomePage = ({ boards = [], setBoards, placeholderBoardCount, setPromptConf
   }, []);
 
   return (
-    <div className="home-page-content-wrapper">
-      <div className="home-page-content-sub-wrapper fadeUp-animation">
-
-        <div className="page-title-wrapper">
-          <h2 className="page-title">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h2>
-        </div>
-
-        <div className="home-page-pills">
-          <DatePills />
+    <div className="page-column fadeUp-animation">
+      <header className="home-header">
+        <div>
+          <h1 className="page-heading">{`Good ${getGreeting()}${userName ? `, ${userName}` : ""} ${getGreetingEmoji()}`}</h1>
+          <DatePills showDate />
         </div>
 
         <ScoreContent
@@ -72,20 +65,21 @@ const HomePage = ({ boards = [], setBoards, placeholderBoardCount, setPromptConf
           totalWScore={totalWScore}
           isLoading={placeholderBoardCount > 0}
         />
+      </header>
 
-        <div className="homePageContent">
-          <h2 className="settings-headers">Your Boards</h2>
-          <hr className="settings-line" />
-          <BoardList
-            boards={boards}
-            placeholderBoardCount={placeholderBoardCount}
-            setBoards={setBoards}
-            setPromptConf={setPromptConf}
-            setAlertConf={setAlertConf}
-            setActiveBoardID={setActiveBoardID}
-          />
+      <section className="page-section">
+        <div className="page-section-header">
+          <h2>Your boards</h2>
         </div>
-      </div>
+        <BoardList
+          boards={boards}
+          placeholderBoardCount={placeholderBoardCount}
+          setBoards={setBoards}
+          setPromptConf={setPromptConf}
+          setAlertConf={setAlertConf}
+          setActiveBoardID={setActiveBoardID}
+        />
+      </section>
     </div>
   );
 };

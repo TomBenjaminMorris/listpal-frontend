@@ -3,14 +3,14 @@ import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-pro
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import { flushNow, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { applyManualScore, parseScoreInput } from '../utils/utils';
-import starIcon from '../assets/icons8-star-50.png';
+import { StarIcon } from './Icons';
 import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css';
 
 const TYPE_MAPPINGS = {
-  W: { detail: 'WScore', label: 'weekly' },
-  M: { detail: 'MScore', label: 'monthly' },
-  Y: { detail: 'YScore', label: 'yearly' }
+  W: { detail: 'WScore', label: 'weekly', name: 'This week' },
+  M: { detail: 'MScore', label: 'monthly', name: 'This month' },
+  Y: { detail: 'YScore', label: 'yearly', name: 'This year' }
 };
 
 // Returning the same object when nothing changes lets React skip re-rendering the whole board
@@ -84,30 +84,32 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
     prevRef.current.refreshCount = refreshCount;
   }, [refreshCount]);
 
+  const target = currentBoardScores?.[`${type}Target`];
+
   const progressBarStyles = buildStyles({
-    trailColor: 'var(--text-colour)',
+    trailColor: 'color-mix(in srgb, var(--text-colour) 14%, transparent)',
     textColor: 'var(--text-colour)',
-    pathColor: isExploding[TYPE_MAPPINGS[type].label] ? 'var(--accent-2)' : 'var(--accent)',
+    pathColor: 'var(--accent)',
     pathTransitionDuration: 0.5,
   });
 
   return (
     <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)}>
-      <div style={{ width: 45, height: 45 }}>
+      <div className="score-ring">
         {(percent || percent >= 0) && (
           <CircularProgressbarWithChildren value={percent} styles={progressBarStyles}>
-            <div style={{ fontSize: 15, marginTop: 0 }}>
+            <div>
               <input className="score-input" type="text" inputMode="numeric" value={scoreValue} onChange={e => {
                 const parsed = parseScoreInput(e.target.value);
                 if (parsed === null) return;
                 setScoreValue(parsed);
                 setScoreHasChanged(true);
               }} onBlur={handleScoreUpdate} />
-              {isExploding[TYPE_MAPPINGS[type].label] && <img className="star-icon" src={starIcon} alt="star icon" />}
             </div>
           </CircularProgressbarWithChildren>
         )}
-        <div className="score-type-tooltip">{type}</div>
+        {isExploding[TYPE_MAPPINGS[type].label] && <span className="score-star" aria-label="Target met"><StarIcon /></span>}
+        <div className="score-type-tooltip">{`${TYPE_MAPPINGS[type].name}: ${Number(score).toLocaleString()} of ${Number(target).toLocaleString()}`}</div>
       </div>
     </div>
   );

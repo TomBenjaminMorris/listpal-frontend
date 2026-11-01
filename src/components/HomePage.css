@@ -1,56 +1,82 @@
-.home-page-content-wrapper {
+/* Wraps rather than squeezing when the side bar leaves too little room for both */
+.home-header {
     display: flex;
-    justify-content: space-evenly;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 24px;
 }
 
-.home-page-pills {
-    margin-bottom: 23px;
-}
-
-.home-page-content-sub-wrapper {
-    margin-top: 100px;
-    margin-bottom: 100px;
-    flex-grow: 1;
-}
-
-.homePageContent {
-    margin-top: 70px;
-}
-
-.home-page-total-score-wrapper {
+/* Stretched to the greeting's height with the caption and card at either end, so the two sides start and finish level */
+.home-totals {
     display: flex;
-    font-size: 30px;
-    width: 300px;
-    gap: 10px;
-    margin: auto;
-    margin-top: -3px;
-    margin-bottom: 50px;
-}
-
-.home-page-total-score-inner-wrapper {
-    display: flex;
-    margin: auto;
     flex-direction: column;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 12px;
 }
 
-.home-page-total-score-inner-label {
-    font-size: 18px;
-    opacity: 0.5;
+.page-heading + .date-pills {
+    margin-top: 14px;
+}
+
+.home-totals-caption {
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+}
+
+.home-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 104px));
+    padding: 6px 0;
+    background-color: var(--foreground);
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.home-stat {
+    text-align: center;
+}
+
+.home-stat + .home-stat {
+    border-left: 1px solid var(--hairline);
+}
+
+.home-stat-label {
+    color: var(--text-muted);
+    font-family: CircularBook;
+    font-size: 12.5px;
+    line-height: 18px;
+}
+
+/* flow-root stops the placeholder's margins collapsing out of the box, which would make it grow when the score arrives */
+.home-stat-value {
+    display: flow-root;
+    font-family: CircularBold;
+    font-size: 24px;
+    line-height: 28px;
 }
 
 /* Margins make up the height of the score's line, so the box doesn't resize when the score arrives */
-.home-page-score-placeholder {
+.home-stat-placeholder {
     width: 40px;
-    height: 20px;
-    margin: 12.5px auto;
+    height: 18px;
+    margin: 5px auto;
 }
 
-.home-page-total-score-inner-score {
-    font-size: 30px;
-    padding: 4px;
-    width: 80px;
-    background-color: var(--foreground);
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+@media screen and (max-width: 650px) {
+    .home-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .home-totals {
+        gap: 8px;
+        margin-top: 0;
+    }
+
+    .page-heading + .date-pills,
+    .home-stats {
+        justify-content: center;
+    }
 }

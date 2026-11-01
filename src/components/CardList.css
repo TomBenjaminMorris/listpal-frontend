@@ -11,23 +11,9 @@
 }
 
 #addCardButton {
-    background-color: var(--foreground);
-    border-radius: 15px;
-    border-style: dashed;
-    border-color: var(--text-colour);
-    border-width: 4px;
-    font-size: 60px;
-    font-family: none;
-    display: grid;
-    align-items: center;
-    opacity: 0.7;
     /* Sized as one column rather than growing into the leftover space, like the cards, so a row that isn't full doesn't
        stretch. The breakpoints are where .card-container's 556px min-width fits 2 and 3 per row with the 20px gap */
     flex: 0 0 100%;
-    /* The flex-basis is a whole slot, so the border has to sit inside it */
-    box-sizing: border-box;
-    transition: background-color 150ms, opacity 150ms;
-    height: 128px;
 }
 
 @container (min-width: 1132px) {
@@ -44,36 +30,31 @@
     }
 }
 
-#addCardButton:hover {
-    background-color: rgb(86, 86, 86);
-    opacity: 1;
-    cursor: pointer;
-}
-
 .empty-board {
     box-sizing: border-box;
     width: 100%;
     max-width: 480px;
     margin: clamp(20px, 10vh, 100px) auto 0;
-    padding: 40px 40px 36px;
+    padding: 36px 36px 32px;
     background-color: var(--foreground);
-    border-radius: 15px;
+    border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .empty-board h2 {
     font-family: CircularBold;
-    font-size: 25px;
-    line-height: 1.2;
-    margin: 20px 0 10px;
+    font-size: 22px;
+    font-weight: normal;
+    line-height: 1.25;
+    margin: 20px 0 8px;
 }
 
 .empty-board p {
     font-family: CircularBook;
-    font-size: 17px;
+    font-size: 15px;
     line-height: 1.5;
     margin: 0 0 24px;
-    opacity: 0.75;
+    color: var(--text-muted);
     text-wrap: pretty;
 }
 
@@ -118,14 +99,21 @@
 }
 
 .empty-board-button {
+    min-height: 36px;
     margin: 0;
-    padding: 0.7em 1.5em;
+    padding: 0 16px;
+    border-radius: 9px;
     background-color: var(--accent);
-    transition: background-color 150ms;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 10px;
+    color: var(--text-colour);
+    font-family: CircularMedium;
+    font-size: 14px;
+    font-weight: normal;
+    transition: filter 150ms;
 }
 
 .empty-board-button:hover {
-    background-color: var(--accent-2);
+    filter: brightness(1.1);
 }
 
 /* The global focus ring stays for keyboard users, but shouldn't linger on the button after a click */

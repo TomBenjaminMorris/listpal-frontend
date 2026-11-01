@@ -1,7 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { useSyncStatus } from '../utils/syncEngine';
-import syncIcon from '../assets/icons8-sync-64.png';
-import tickIcon from '../assets/icons8-tick-64.png';
+import { CheckIcon, SyncIcon } from './Icons';
 
 const BACK_ONLINE_DURATION = 3000;
 
@@ -41,9 +40,9 @@ const SyncIndicator = memo(() => {
         className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
         title={syncStatus.lastError === "Offline" ? "Offline: changes are kept on this device until you're back" : syncStatus.lastError ? "Couldn't save just now, will retry..." : syncStatus.pending ? "Saving..." : "All saved"}
       >
-        {/* Both icons stay mounted so they load up front; swapping src would fetch the sync icon only once offline */}
-        <img className="sync-status-icon spin" src={syncIcon} alt="" hidden={!syncStatus.pending} />
-        <img className="sync-status-icon" src={tickIcon} alt="" hidden={!!syncStatus.pending} />
+        {syncStatus.pending
+          ? <SyncIcon className="sync-status-icon spin" />
+          : <CheckIcon className="sync-status-icon" />}
       </div>
     </>
   );

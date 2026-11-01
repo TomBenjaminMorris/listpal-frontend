@@ -32,7 +32,7 @@ const Alert = ({ alertConf, setAlertConf }) => {
 
   return (
     <div className={`prompt-outer-wrapper alert-outer-wrapper ${alertConf.replacesModal ? "" : "fadeInPure-animation"}`}>
-      <div className={`prompt-inner-wrapper ${alertConf.replacesModal ? "fadeInPure-animation" : ""}`} ref={ref}>
+      <div className="prompt-inner-wrapper" ref={ref} role="alertdialog" aria-modal="true" aria-label={alertConf.title}>
         <h1>{alertConf.title}</h1>
         <p>{alertConf.textValue}</p>
         <div className="prompt-button-container">

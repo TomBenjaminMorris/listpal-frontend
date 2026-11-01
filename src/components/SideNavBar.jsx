@@ -1,110 +1,150 @@
-import { Link, useNavigate } from 'react-router-dom';
-import menuIcon from '../assets/icons8-menu-50.png';
-import sidebarIcon from '../assets/icons8-sidebar-96.png';
-import homeIcon from '../assets/icons8-home-48.png';
-import settingsIcon from '../assets/icons8-settings-50-white.png';
-import listsIcon from '../assets/icons8-todo-list-50.png';
-import rightIcon from '../assets/icons8-right-arrow-64.png';
-import logoutIcon from '../assets/icons8-logout-48.png';
+import { useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { BoardsIcon, ChevronIcon, HomeIcon, LogOutIcon, LogoMark, MenuIcon, PanelIcon, SettingsIcon } from './Icons';
 import './SideNavBar.css';
 
-const SideNavBar = ({ 
-  sidebarIsOpen, 
-  handleSidebarCollapse, 
+const SideNavLink = ({ to, label, icon, isActive, onClick }) => (
+  <Link
+    to={to}
+    className={`sidenav-row ${isActive ? "sidenav-row-active" : ""}`}
+    data-tooltip={label}
+    aria-current={isActive ? "page" : undefined}
+    onClick={onClick}
+  >
+    {icon}
+    <span className="sidenav-label">{label}</span>
+  </Link>
+);
+
+const SideNavBar = ({
+  sidebarIsOpen,
+  handleSidebarCollapse,
   boards,
   placeholderBoardCount,
   setSidebarBoardsMenuIsOpen,
-  sidebarBoardsMenuIsOpen, 
-  isMobile, 
-  hideMobileSidebar,
+  sidebarBoardsMenuIsOpen,
+  isMobile,
+  closeMobileNav,
   setActiveBoardID,
-  activeBoard 
+  activeBoard
 }) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const onBoardPage = pathname.startsWith('/board/');
+  const boardsListIsOpen = sidebarIsOpen && sidebarBoardsMenuIsOpen;
+
+  // True only for the render that opens or collapses the sidebar, which is the one that must not animate the list
+  const previousSidebarIsOpen = useRef(sidebarIsOpen);
+  const sidebarJustToggled = previousSidebarIsOpen.current !== sidebarIsOpen;
+  useEffect(() => {
+    previousSidebarIsOpen.current = sidebarIsOpen;
+  }, [sidebarIsOpen]);
 
   // Board shows its own loader on a board change; setting it here would never clear when re-clicking the current board
   const handleBoardClick = (board) => {
     setActiveBoardID(board.SK)
+    closeMobileNav();
   };
 
   const handleBoardsMenuClick = () => {
-    if (!sidebarIsOpen && activeBoard) {
+    if (sidebarIsOpen) {
+      setSidebarBoardsMenuIsOpen(current => !current);
+    } else if (activeBoard) {
       navigate(`/board/${activeBoard.SK}`);
-      return;
+    } else {
+      // No board to go back to yet, so the rail has nothing to link to until the list is showing
+      setSidebarBoardsMenuIsOpen(true);
+      handleSidebarCollapse();
     }
-    setSidebarBoardsMenuIsOpen(current => !current);
   };
 
-  const boardsRendered = boards.map(board => (
-    <div key={board.SK} className={`placeholderReveal-animation ${activeBoard?.SK === board.SK ? "highlight-board-link" : ""}`}>
+  const boardsRendered = boards.map(board => {
+    // activeBoard outlives a visit to Home or Settings, where it's still the rail's link back but isn't the current page
+    const isCurrent = onBoardPage && activeBoard?.SK === board.SK;
+    return (
       <Link
+        key={board.SK}
         to={`/board/${board.SK}`}
-        className={`sidenav-boards-link-item ${activeBoard?.SK === board.SK ? "highlight-board-link-text" : ""}`}
+        className={`sidenav-board placeholderReveal-animation ${isCurrent ? "sidenav-row-active" : ""}`}
+        title={board.Board}
+        aria-current={isCurrent ? "page" : undefined}
         onClick={() => handleBoardClick(board)}
       >
-        <div>{board.Emoji}</div>
-        <div>{board.Board}</div>
+        <span className="sidenav-board-emoji">{board.Emoji}</span>
+        <span className="sidenav-label">{board.Board}</span>
       </Link>
-    </div>
-  ));
+    );
+  });
 
   const boardPlaceholders = Array.from({ length: placeholderBoardCount }, (_, i) => (
-    <div key={i} className="sidenav-board-placeholder" aria-hidden="true">
-      <div className="sidenav-boards-link-item">
-        <div />
-        <div />
-      </div>
+    <div key={i} className="sidenav-board sidenav-board-placeholder" aria-hidden="true">
+      <div className="placeholder-bar" />
+      <div className="placeholder-bar" />
     </div>
   ));
 
-  const navLinkClass = `sidenav-link ${sidebarIsOpen ? "open" : "collapsed"}`;
-  const textClass = sidebarIsOpen ? "sidenav-link-text" : "hidden";
+  const sidebarClass = [
+    "sidebar-wrapper",
+    sidebarIsOpen ? "sidebar-open" : "sidebar-collapsed",
+    isMobile ? "sidebar-mobile" : "sidebar-fade-in"
+  ].join(" ");
+  const toggleLabel = sidebarIsOpen ? (isMobile ? "Close menu" : "Collapse sidebar") : "Expand sidebar";
 
   return (
-    <div className={`sidebar-wrapper ${!isMobile ? "sidebar-fade-in" : ""}`} style={{
-      width: sidebarIsOpen ? "240px" : "80px", display: isMobile && hideMobileSidebar ? "none" : "flex"
-    }} >
+    <>
+      {isMobile && (
+        <>
+          <button className="sidenav-menu-button" aria-label="Open menu" onClick={handleSidebarCollapse}>
+            <MenuIcon />
+          </button>
+          <div className={`sidenav-scrim ${sidebarIsOpen ? "sidenav-scrim-visible" : ""}`} onClick={closeMobileNav} />
+        </>
+      )}
 
-      <div className="toggle-wrapper">
-        <img
-          className={sidebarIsOpen ? "sidebar-icon" : "menu-icon"}
-          src={sidebarIsOpen ? sidebarIcon : menuIcon}
-          alt="menu icon"
-          onClick={handleSidebarCollapse}
-        />
-      </div>
-
-      <div className="sidenav-links-wrapper">
-        <Link className={navLinkClass} to="/home">
-          <img src={homeIcon} alt="home" />
-          <div className={textClass}>Home</div>
-        </Link>
-
-        <div className={`sidenav-link-boards ${sidebarIsOpen ? "open" : "collapsed"}`} onClick={handleBoardsMenuClick}>
-          <img src={listsIcon} alt="boards" />
-          <div className={textClass}>Boards</div>
-          <img
-            className={`sidenav-board-link-arrow ${sidebarBoardsMenuIsOpen ? "rotate" : ""} ${textClass}`}
-            src={rightIcon}
-            alt="expand"
-          />
+      <nav className={sidebarClass} aria-label="Main">
+        <div className="sidenav-header">
+          <Link className="sidenav-brand" to="/home" onClick={closeMobileNav}>
+            <LogoMark />
+            <span>ListPal</span>
+          </Link>
+          <button
+            className="sidenav-row sidenav-toggle"
+            data-tooltip={toggleLabel}
+            aria-label={toggleLabel}
+            aria-expanded={sidebarIsOpen}
+            onClick={handleSidebarCollapse}
+          >
+            <PanelIcon />
+          </button>
         </div>
 
-        <div className={`sidenav-link-boards-sub ${textClass} ${sidebarBoardsMenuIsOpen ? "sidenav-link-text" : "hidden"}`}>
-          {placeholderBoardCount ? boardPlaceholders : boardsRendered}
+        <div className="sidenav-links-wrapper">
+          <SideNavLink to="/home" label="Home" icon={<HomeIcon />} isActive={pathname === '/home'} onClick={closeMobileNav} />
+
+          <button
+            className={`sidenav-row ${onBoardPage && !boardsListIsOpen ? "sidenav-row-active" : ""}`}
+            data-tooltip="Boards"
+            aria-expanded={boardsListIsOpen}
+            onClick={handleBoardsMenuClick}
+          >
+            <BoardsIcon />
+            <span className="sidenav-label">Boards</span>
+            <ChevronIcon className={`sidenav-chevron ${boardsListIsOpen ? "sidenav-chevron-open" : ""}`} />
+          </button>
+
+          <div className={`sidenav-boards ${boardsListIsOpen ? "sidenav-boards-open" : ""} ${sidebarJustToggled ? "sidenav-boards-instant" : ""}`}>
+            <div className="sidenav-boards-inner">
+              {placeholderBoardCount ? boardPlaceholders : boardsRendered}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <Link to="/logout" className={`sidenav-user sidenav-link sidenav-logout ${navLinkClass}`}>
-        <img src={logoutIcon} alt="logout" />
-        <div className={textClass}>Log Out</div>
-      </Link>
-
-      <Link className={navLinkClass} to="/settings">
-        <img src={settingsIcon} alt="settings" />
-        <div className={textClass}>Settings</div>
-      </Link>
-    </div>
+        <div className="sidenav-footer">
+          <SideNavLink to="/settings" label="Settings" icon={<SettingsIcon />} isActive={pathname === '/settings'} onClick={closeMobileNav} />
+          <SideNavLink to="/logout" label="Log Out" icon={<LogOutIcon />} />
+        </div>
+      </nav>
+    </>
   );
 };
 

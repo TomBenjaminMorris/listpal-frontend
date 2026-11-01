@@ -2,11 +2,8 @@ import { memo } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
 import { isUrlValid } from '../utils/utils';
 import { queueUpdate } from '../utils/syncEngine';
-import importantIcon from '../assets/icons8-important-30-white.png';
-import deleteIcon from '../assets/icons8-delete-48.png';
-import plusIcon from '../assets/icons8-plus-30.png';
-import editIcon from '../assets/icons8-edit-48.png';
-import duplicateIcon from '../assets/duplicate.svg';
+import { AlertIcon, CopyIcon, PencilIcon, PlusIcon, TrashIcon } from './Icons';
+import "./DropdownMenu.css";
 import "./TaskMenu.css";
 
 const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setAlertConf }) => {
@@ -54,32 +51,32 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, 
   };
 
   const linkAction = task.Link ? (
-    <li className="task-dropdown-li" onClick={handleEditLink}>
-      <img className="task-dropdown-icons" src={editIcon} alt="Edit Link" />
-      Edit Link
+    <li onClick={handleEditLink}>
+      <PencilIcon />
+      Edit link
     </li>
   ) : (
-    <li className="task-dropdown-li" onClick={handleAddLinkPrompt}>
-      <img className="task-dropdown-icons" src={plusIcon} alt="Add Link" />
-      Add Link
+    <li onClick={handleAddLinkPrompt}>
+      <PlusIcon />
+      Add link
     </li>
   );
 
   return (
-    <div className={`task-dropdown-menu fadeIn-animation ${isImportant ? 'important-menu' : ''}`}>
+    <div className="task-dropdown-menu fadeIn-animation">
       <ul>
-        <li className="task-dropdown-li" onClick={markAsImportant}>
-          <img className="task-dropdown-icons" src={importantIcon} alt="Important Icon" />
-          {`${isImportant ? "Unmark" : "Mark"} as Important`}
+        <li onClick={markAsImportant}>
+          <AlertIcon />
+          {`${isImportant ? "Unmark" : "Mark"} as important`}
         </li>
         {linkAction}
-        <li className="task-dropdown-li" onClick={duplicateTask}>
-          <img className="task-dropdown-icons" src={duplicateIcon} alt="Duplicate Icon" />
-          Duplicate Task
+        <li onClick={duplicateTask}>
+          <CopyIcon />
+          Duplicate
         </li>
-        <li className="task-dropdown-li" onClick={deleteAndHideTask}>
-          <img className="task-dropdown-icons" src={deleteIcon} alt="Delete Icon" />
-          Delete Task
+        <li className="menu-danger" onClick={deleteAndHideTask}>
+          <TrashIcon />
+          Delete
         </li>
       </ul>
     </div>

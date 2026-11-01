@@ -4,7 +4,7 @@ import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../uti
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import { moveCaretBetweenFields } from '../utils/caretNavigation';
 import addIcon from "../assets/icons8-plus-30.png";
-import dotsIcon from "../assets/icons8-dots-50.png";
+import { MoreIcon } from './Icons';
 import DropdownMenu from "./DropdownMenu";
 import Task from './Task';
 import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
@@ -364,7 +364,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} onBlur={handleCardTitleBlur} onKeyDown={handleCardTitleKeyDown} />
 
         <div className="menu" onClick={() => setDropdownVisible(prev => !prev)} ref={cardMenuRef}>
-          <img className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} src={dotsIcon} alt="menu icon" />
+          <MoreIcon className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} />
           {isDropdownVisible && (
             <DropdownMenu
               containerRef={cardMenuRef}

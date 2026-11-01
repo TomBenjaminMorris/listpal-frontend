@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
 import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import Card from './Card';
+import { PlusIcon } from './Icons';
 import './CardList.css'
 
 const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, remoteUpdateRef }) => {
@@ -204,14 +205,15 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
           <button className="empty-board-button" onClick={openNewCategoryPrompt}>New category</button>
         </div>
       ) : (
-        <div
+        <button
           key="add-card-button"
           id="addCardButton"
-          className={addButtonRises.current ? "fadeUp-animation" : ""}
+          className={`add-tile ${addButtonRises.current ? "fadeUp-animation" : ""}`}
           onClick={openNewCategoryPrompt}
         >
-          +
-        </div>
+          <span className="add-tile-icon"><PlusIcon /></span>
+          <span>New category</span>
+        </button>
       )}
     </div>
   );

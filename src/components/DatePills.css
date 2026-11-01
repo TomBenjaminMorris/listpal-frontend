@@ -1,21 +1,45 @@
 .date-pills {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .date-pill {
-    font-size: 17px;
-    background-color: var(--accent);
-    width: 190px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    padding: 4px 14px;
     border-radius: 20px;
-    padding: 1px;
+    font-size: 14px;
+    line-height: 22px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-.date-pill-days-remaining {
+.date-pill-date {
+    background-color: var(--accent);
+}
+
+.date-pill-week {
     background-color: var(--accent-2);
-    width: auto;
-    padding: 1px 16px;
+}
+
+/* A theme only has two accents, so this is a deeper shade of the first. Opaque, so the shadow doesn't show through it. */
+.date-pill-days {
+    background-color: color-mix(in srgb, var(--accent) 50%, var(--background));
+}
+
+/* Shares the board's header row with the title and actions */
+.board-filter-actions-wrapper .date-pill {
+    padding: 4px 13px;
+    font-size: 13.5px;
+    line-height: 22px;
+}
+
+.board-filter-actions-wrapper .date-pill-week {
+    background-color: var(--accent);
+}
+
+.board-filter-actions-wrapper .date-pill-days {
+    background-color: var(--accent-2);
 }

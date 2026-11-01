@@ -16,7 +16,7 @@ const EmojiPicker = ({ onEmojiSelect, containerRef, onClose }) => {
   useOnClickOutside(containerRef, onClose);
   return (
     <Suspense fallback={null}>
-      <Picker onEmojiSelect={onEmojiSelect} theme="light" autoFocus navPosition="none" previewPosition="none" perLine={8} />
+      <Picker onEmojiSelect={onEmojiSelect} theme="dark" autoFocus navPosition="none" previewPosition="none" perLine={8} />
     </Suspense>
   );
 };

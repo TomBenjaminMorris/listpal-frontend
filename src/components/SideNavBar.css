@@ -1,14 +1,25 @@
+/* The rail's width puts each icon exactly where it sits in the open sidebar, so nothing moves sideways on a toggle */
 .sidebar-wrapper {
+  box-sizing: border-box;
   background-color: var(--foreground);
-  height: 100vh;
-  width: 240px;
+  /* Not a border, which would take a pixel from the rail's rows and put its icons off the open sidebar's */
+  box-shadow: inset -1px 0 0 var(--hairline);
   position: fixed;
+  top: 0;
+  bottom: 0;
   left: 0;
   z-index: 2000;
   display: flex;
   flex-direction: column;
-  border-top-right-radius: 15px;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+  text-align: left;
+}
+
+.sidebar-open {
+  width: 220px;
+}
+
+.sidebar-collapsed {
+  width: 64px;
 }
 
 /* The sign-in page before it has no sidebar, so it would otherwise pop in as Home arrives */
@@ -16,170 +27,287 @@
   animation: 250ms ease-out fadeInPure;
 }
 
-.toggle-wrapper {
+/*///////////// HEADER /////////////*/
+
+.sidenav-header {
   display: flex;
-  flex-direction: row-reverse;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 12px;
 }
 
-.menu-icon:hover, .sidebar-icon:hover {
-  background-color: var(--background);
-  opacity: 1;
-  cursor: pointer;
+.sidenav-brand {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 10px;
+  padding-left: 9px;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--text-colour);
+  font-family: CircularBold;
+  font-size: 17px;
 }
 
-.menu-icon {
-  width: 25px;
-  height: 25px;
-  margin: auto;
-  margin-top: 24px;
-  padding: 10px;
+/* No padding here, or it would keep the brand wide enough to push the toggle out of line with the rail's icons */
+.sidebar-collapsed .sidenav-brand {
+  padding-left: 0;
+  opacity: 0;
+  visibility: hidden;
 }
 
-.menu-icon, .sidebar-icon {
-  opacity: 0.6;
-  border-radius: 10px;
+.sidenav-logo {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
 }
 
-.sidebar-icon {
-  padding: 8px;
-  margin-top: 23px;
-  height: 30px;
-  margin-right: 10px;
-}
+/*///////////// ROWS /////////////*/
 
 .sidenav-links-wrapper {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 2px;
+  padding: 4px 12px;
 }
 
-.sidenav-link, .sidenav-link-boards {
-  display: flex;
-  padding: 10px;
-  background-color: var(--background);
-  margin: auto;
-  gap: 15px;
-  border-radius: 10px;
-  color: var(--text-colour);
-  margin-bottom: 15px;
-  margin-top: 0px;
+/* Only while open: scrolling would clip the rail's tooltips, and the rail has too few rows to need it */
+.sidebar-open .sidenav-links-wrapper {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-.sidenav-link:hover, .sidenav-link-boards-sub>div:hover, .sidenav-link-boards:hover {
-  opacity: 0.5;
-  cursor: pointer;
-}
-
-.sidenav-link>img, .sidenav-link-boards>img {
-  width: 25px;
-  height: 25px;
-}
-
-.sidenav-link-text {
-  font-size: 16px;
-  font-family: CircularBook;
-}
-
-.sidenav-link-boards>div {
-  align-self: flex-start;
-}
-
-.sidenav-link-boards-sub>div {
-  margin-left: 10px;
-  border-left: solid var(--text-colour) 3px;
-}
-
-.sidenav-link-boards-sub>div>a {
-  color: var(--text-colour);
-  margin-left: 15px;
-  font-size: 15px;
-}
-
-.sidenav-link-boards-sub {
+.sidenav-footer {
   display: flex;
   flex-direction: column;
-  padding: 15px;
-  padding-left: 5px;
-  background-color: var(--background);
-  margin: auto;
-  gap: 20px;
-  border-radius: 10px;
-  color: var(--text-colour);
-  margin-bottom: 10px;
-  width: 175px;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid var(--hairline);
 }
 
-.sidenav-board-link-arrow {
-  margin: auto;
-  margin-right: 5px;
-  width: 20px !important;
-  height: 15px !important;
-}
-
-.highlight-board-link {
-  border-left: solid var(--accent) 3px !important;
-}
-
-.highlight-board-link-text {
-  color: var(--accent) !important;
-}
-
-.hidden {
-  display: none;
-}
-
-.open {
-  width: 185px;
-}
-
-.rotate {
-  transform: rotate(90deg);
-}
-
-.sidenav-logout {
-  margin-top: auto;
-}
-
-.sidenav-boards-link-item {
+.sidenav-row,
+.sidenav-board {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  box-sizing: border-box;
+  color: var(--text-muted);
+  border-radius: 8px;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
-.sidenav-boards-link-item>div:last-child {
+.sidenav-row {
+  position: relative;
+  flex-shrink: 0;
+  gap: 12px;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  background: none;
+  font-family: CircularBook;
+  font-size: 15px;
+  font-weight: normal;
+  text-align: left;
+}
+
+.sidenav-toggle {
+  flex: 0 0 40px;
+  width: 40px;
+}
+
+.sidenav-row:focus-visible,
+.sidenav-board:focus-visible,
+.sidenav-brand:focus-visible {
+  outline: 2px solid var(--text-colour);
+  outline-offset: -2px;
+}
+
+/* index.css gives every focused button a ring, which would otherwise stay on after a mouse click */
+.sidenav-row:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (hover: hover) {
+  .sidenav-row:hover,
+  .sidenav-board:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-colour);
+  }
+}
+
+/* The accent only tints the background: as text, several themes' accents are too dark to read on the sidebar */
+.sidenav-row-active,
+.sidenav-row-active:hover {
+  background-color: var(--accent-tint);
+  color: var(--text-colour);
+}
+
+.sidenav-label {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sidebar-collapsed .sidenav-label {
+  opacity: 0;
+}
+
+.sidenav-chevron {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  transition: transform 180ms ease;
+}
+
+.sidenav-chevron-open {
+  transform: rotate(90deg);
+}
+
+.sidebar-collapsed .sidenav-chevron {
+  display: none;
+}
+
+/*///////////// BOARDS LIST /////////////*/
+
+/* A 0fr to 1fr row animates to the list's natural height. Hidden too when shut, so its links can't take focus. */
+.sidenav-boards {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 180ms ease, visibility 0s linear 180ms;
+}
+
+.sidenav-boards-open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows 180ms ease, visibility 0s;
+}
+
+/* Only a click on the Boards row animates the list. Opening or collapsing the sidebar itself is instant. */
+.sidenav-boards-instant {
+  transition: none;
+}
+
+.sidenav-boards-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 2px;
+  padding-top: 2px;
+  overflow: hidden;
+}
+
+.sidenav-board {
+  flex-shrink: 0;
+  gap: 8px;
+  height: 34px;
+  /* Full width like the rows above it, with a small indent to show the boards belong to the row above */
+  padding: 0 10px 0 26px;
+  font-family: CircularBook;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.sidenav-board-emoji {
+  flex: 0 0 18px;
+  font-size: 15px;
+  line-height: 1;
 }
 
 .sidenav-board-placeholder {
   pointer-events: none;
 }
 
-.sidenav-board-placeholder>.sidenav-boards-link-item {
-  margin-left: 15px;
-  font-size: 15px;
-  align-items: center;
-}
-
-/* A real row's height comes from its emoji, which varies by platform, so a hidden one keeps the rows the same height */
-.sidenav-board-placeholder>.sidenav-boards-link-item::before {
-  content: "🏠";
-  visibility: hidden;
-  width: 0;
-  margin-right: -10px;
-}
-
-.sidenav-board-placeholder>.sidenav-boards-link-item>div {
-  height: 14px;
+.sidenav-board-placeholder>.placeholder-bar {
+  height: 12px;
   width: 95px;
-  border-radius: 4px;
-  background-color: var(--text-colour);
-  opacity: 0.14;
-  animation:
-    200ms ease-out 250ms backwards placeholderAppear,
-    900ms ease-in-out 450ms infinite alternate placeholderPulse;
 }
 
-.sidenav-board-placeholder>.sidenav-boards-link-item>div:first-child {
+.sidenav-board-placeholder>.placeholder-bar:first-child {
+  flex-shrink: 0;
   width: 20px;
+}
+
+/*///////////// RAIL TOOLTIPS /////////////*/
+
+@media (hover: hover) {
+  .sidebar-collapsed .sidenav-row:hover::after,
+  .sidebar-collapsed .sidenav-row:focus-visible::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background-color: var(--tooltip-background);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 4px 12px;
+    color: var(--text-colour);
+    font-size: 12.5px;
+    line-height: 18px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
+
+/*///////////// MOBILE DRAWER /////////////*/
+
+/* Above the sync indicator (2500), which would otherwise show through the scrim, but under the modal backdrop (3000) */
+.sidebar-mobile {
+  z-index: 2600;
+  width: min(280px, 85vw);
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 30px;
+  transition: transform 220ms ease, visibility 0s;
+}
+
+.sidebar-mobile.sidebar-collapsed {
+  transform: translateX(-100%);
+  visibility: hidden;
+  box-shadow: none;
+  transition: transform 220ms ease, visibility 0s linear 220ms;
+}
+
+.sidenav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.sidenav-scrim-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidenav-menu-button {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border-radius: 10px;
+  background-color: var(--foreground);
+  color: var(--text-colour);
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 4px 12px;
 }

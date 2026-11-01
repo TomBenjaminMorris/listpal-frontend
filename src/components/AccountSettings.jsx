@@ -292,9 +292,10 @@ const AccountSettings = () => {
   };
 
   return (
-    <div className="account-settings-wrapper">
-      <h2 className="settings-headers">Account</h2>
-      <hr className="settings-line" />
+    <section className="page-section">
+      <div className="page-section-header">
+        <h2>👤 Account</h2>
+      </div>
       <div className="account-rows">
         {notice && <p className="account-notice" role="status">{notice}</p>}
         <Row
@@ -331,7 +332,7 @@ const AccountSettings = () => {
         </div>
       </div>
       {deleting && <DeleteAccountModal email={details.email} onClose={() => setDeleting(false)} />}
-    </div>
+    </section>
   );
 };
 

@@ -1,8 +1,7 @@
 .card-container {
     background-color: var(--foreground);
-    padding: 3px;
-    padding-bottom: 40px;
-    border-radius: 15px;
+    padding-bottom: 12px;
+    border-radius: 12px;
     overflow: auto;
     /* Column widths are set with the add button's in CardList.css. The basis is a whole column, so the padding has to sit inside it */
     box-sizing: border-box;
@@ -11,87 +10,66 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+/* Lines up with the checkbox and text of a task row */
 .addTaskWrapper {
     display: flex;
-    gap: 13px;
-    padding-bottom: 10px;
-    padding-top: 2px;
+    align-items: center;
+    gap: 14px;
+    margin: 0 8px;
+    padding: 4px 8px 4px 12px;
 }
 
+/* 18px in all, the size of a task's checkbox */
 .addTask {
-    margin-top: -2px;
-    opacity: 0.4;
-    border-color: var(--text-colour) !important;
-    border: solid 2px;
-    border-radius: 5px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
     padding: 2px;
-    width: 12px;
-    height: 12px;
+    opacity: 0.4;
+    border: solid 2px var(--text-colour);
+    border-radius: 5px;
 }
 
 .addTaskText {
     opacity: 0.4;
-    margin-top: -6px;
-    font-size: 18px;
+    font-size: 15px;
+    line-height: 22px;
 }
 
 .addTaskWrapper:hover {
     cursor: pointer;
 }
 
-.addTaskWrapper:hover > .addTaskText {
-    opacity: 0.8;
-}
-
+.addTaskWrapper:hover > .addTaskText,
 .addTaskWrapper:hover > .addTask {
     opacity: 0.8;
 }
 
 hr {
     border: 0;
-    border-top: 1px solid var(--text-colour);
-    opacity: 0.5;
-    margin-bottom: 20px;
-    margin-top: 10px;
-    width: 95%;
+    border-top: 1px solid var(--hairline);
+    margin: 0 20px 10px;
 }
 
 .headingWrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.headingWrapper h2 {
-    font-family: CircularBold;
-    font-size: 25px;
-    margin: 0;
-    padding-left: 20px;
-    padding-top: 20px;
-    padding-bottom: 10px;
-    text-align: left;
-    line-height: normal;
-}
-
-.headingWrapper h2:hover {
-    opacity: 0.5;
-    cursor: text;
-}
-
-.headingWrapper .score {
-    margin-right: 30px;
-    margin-bottom: 0px;
+    gap: 8px;
+    padding: 12px 12px 12px 20px;
 }
 
 .edit-title-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 36px;
+    padding: 0;
     color: var(--text-colour);
-    background-color: var(--foreground);
+    background-color: transparent;
     border: none;
-    width: 100%;
     font-family: CircularBold;
-    font-size: 25px;
-    margin-left: 4px;
-    padding-top: 14px;
+    font-size: 20px;
 }
 
 .edit-title-input:focus {
@@ -99,51 +77,64 @@ hr {
 }
 
 .new-task-container {
-    display: flex;
-    flex-direction: column;
-    padding: 5px;
-    padding-left: 20px;
+    margin-top: 2px;
+    margin-bottom: 12px;
+}
+
+.menu {
+    flex-shrink: 0;
+    height: 36px;
 }
 
 .card-menu-dots {
-    opacity: 0.6;
-    width: 24px;
-    height: 24px;
-    margin-right: 18px;
-    margin-top: 12px;
-    padding: 6px;
-    border-radius: 10px;
+    box-sizing: border-box;
+    width: 36px;
+    height: 36px;
+    padding: 10px;
+    opacity: 0.7;
+    border-radius: 9px;
+    transition: background-color 120ms, opacity 120ms;
+}
+
+.card-menu-dots:hover,
+.card-menu-dots-bg-fill {
+    opacity: 1;
+    background-color: var(--surface-hover);
 }
 
 .card-menu-dots:hover {
-    opacity: 1;
     cursor: pointer;
-    background-color: var(--background);
 }
 
-.card-menu-dots-bg-fill {
-    background-color: var(--background);
-    opacity: 1;
-}
-
+/* 24px wide with the header's 8px gap, which lines the title up with the task text below it.
+   Centred rather than left-aligned, as the emoji picker's offsets in Board.css depend on it. */
 .card-emoji-picker-wrapper {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    margin-left: 12px;
-    margin-top: 12px;
-}
-
-.card-emoji-picker-wrapper:hover {
-    background-color: var(--text-colour);
+    width: 24px;
+    height: 36px;
     cursor: pointer;
 }
 
+/* Shrinks to the emoji, so the hover highlight is even around it. The auto margin keeps it in line with the checkboxes. */
 .card-emoji-icon {
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    font-size: 24px;
-    padding: 4px;
+    width: fit-content;
+    margin-right: auto;
+    border-radius: 6px;
+    font-size: 20px;
+    line-height: 20px;
+    transition: background-color 120ms, box-shadow 120ms;
+}
+
+/* A shadow rather than padding, so the highlight can reach past the emoji without moving it out of line with the checkboxes */
+.card-emoji-picker-wrapper:hover .card-emoji-icon,
+.card-emoji-picker-wrapper.emoji-highlight .card-emoji-icon {
+    background-color: var(--surface-hover);
+    box-shadow: 0 0 0 4px var(--surface-hover);
+}
+
+.card-emoji-picker-wrapper.emoji-highlight {
+    background: none;
 }
