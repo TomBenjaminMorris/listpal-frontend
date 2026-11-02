@@ -14,6 +14,16 @@
     }
 }
 
+/* A plain waiting state; the text and its highlight mirror dim together */
+.task-rewording .task-textarea-wrapper {
+    opacity: 0.55;
+    transition: opacity 150ms;
+}
+
+.task-rewording textarea {
+    cursor: progress;
+}
+
 .task-container>input[type="checkbox"] {
     flex-shrink: 0;
     margin-top: 4px;

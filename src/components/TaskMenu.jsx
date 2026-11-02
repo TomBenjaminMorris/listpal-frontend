@@ -2,11 +2,12 @@ import { memo } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
 import { isUrlValid } from '../utils/utils';
 import { queueUpdate } from '../utils/syncEngine';
-import { AlertIcon, CopyIcon, PencilIcon, PlusIcon, TrashIcon } from './Icons';
+import { AlertIcon, CopyIcon, PencilIcon, PlusIcon, SparklesIcon, TrashIcon } from './Icons';
 import "./DropdownMenu.css";
 import "./TaskMenu.css";
 
-const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setAlertConf }) => {
+// rewordTask is null when the task can't be reworded (ticked, blank or too long), which hides the item
+const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, rewordTask, deleteAndHideTask, isImportant, task, setTaskFields, setPromptConf, setAlertConf }) => {
   // Here rather than in Task, so only an open menu listens for outside clicks, not every task on the board
   useOnClickOutside(containerRef, onClose);
 
@@ -74,6 +75,12 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, 
           <CopyIcon />
           Duplicate
         </li>
+        {rewordTask && (
+          <li onClick={rewordTask}>
+            <SparklesIcon />
+            Reword
+          </li>
+        )}
         <li className="menu-danger" onClick={deleteAndHideTask}>
           <TrashIcon />
           Delete

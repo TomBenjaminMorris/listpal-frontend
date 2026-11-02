@@ -44,10 +44,10 @@ const apiGet = async (url, params = {}, { silent = false, action } = {}) => {
 };
 
 // Generic API request function for POST requests. Silent callers report failures themselves.
-const apiPost = async (url, body, { silent = false, action } = {}) => {
+const apiPost = async (url, body, { silent = false, action, timeout } = {}) => {
   try {
     await ensureToken();
-    const response = await axios.post(url, body, { headers: getHeaders() });
+    const response = await axios.post(url, body, { headers: getHeaders(), timeout });
     return response.data?.data;
   } catch (err) {
     console.error(`Error posting to ${url}:`, err);
@@ -84,6 +84,13 @@ export const deleteBoard = (boardID) =>
 
 export const updateBoardScoresAPI = (boardID, scores) =>
   apiPost('/board-scores', { boardID, scores }, { action: 'save the score' });
+
+// The server's limit on a task's text, after trimming. Longer tasks don't offer Reword
+export const REWORD_MAX_LENGTH = 500;
+
+// The task stays locked until this settles, so it gives up a little after the reword Lambda's own 10 s timeout
+export const rewordTask = async ({ text, category, board }) =>
+  (await apiPost('/reword-task', { text, category, board }, { action: 'reword this task', timeout: 12000 }))?.text;
 
 // Silent: the delete dialog stays open and shows the failure itself, so the user can retry
 export const deleteAccount = () =>

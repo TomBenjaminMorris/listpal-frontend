@@ -411,6 +411,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
           {tasksReady && (
             <CardList
               key={boardID}
+              boardName={board?.Board}
               sortedTasks={sortedTasks}
               setSortedTasks={setSortedTasks}
               setBoards={setBoards}
