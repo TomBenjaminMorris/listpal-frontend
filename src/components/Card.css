@@ -56,11 +56,14 @@ hr {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 12px 12px 12px 20px;
 }
 
+/* Centring alone leaves the title looking lower than the emoji beside it */
 .edit-title-input {
+    position: relative;
+    top: -1px;
     flex: 1 1 auto;
     min-width: 0;
     height: 36px;
@@ -106,7 +109,7 @@ hr {
     cursor: pointer;
 }
 
-/* 24px wide with the header's 8px gap, which lines the title up with the task text below it.
+/* 24px wide with the header's 6px gap, which sets where the title starts.
    Centred rather than left-aligned, as the emoji picker's offsets in Board.css depend on it. */
 .card-emoji-picker-wrapper {
     display: flex;
