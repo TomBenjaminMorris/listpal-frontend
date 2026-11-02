@@ -1,6 +1,6 @@
 /* The margin and padding put the checkbox in line with the card's emoji and divider */
 .task-container {
-    /* The reword shimmer's band, which the wipe shares. Task.jsx reads it to time both */
+    /* The reword shimmer's band. Task.jsx reads it to time the shimmer */
     --shimmer-band: 80px;
     display: flex;
     margin: 0 8px;
@@ -16,8 +16,8 @@
     }
 }
 
-/* Reword: a shimmer of colour runs through the text while the request runs, and its next pass after the reply wipes
-   the new text in. A textarea can't colour its own letters, so the shimmer is a copy of the text laid exactly over them, with a gradient
+/* Reword: a shimmer of colour runs through the text while the request runs, and once the reply is in and the pass
+   ends, the old text crossfades to the new. A textarea can't colour its own letters, so the shimmer is a copy of the text laid exactly over them, with a gradient
    clipped to its glyphs: in the band the letters take the accent colour, and elsewhere the copy is clear and the real
    text shows. Not cloned across lines, so the browser lays the gradient out as if the wrapped lines were one, and the
    band runs along each line in reading order */
@@ -56,28 +56,13 @@
     to { opacity: 0; }
 }
 
-/* The wipe. --wipe-x is the band's centre, measured along the text with its wrapped lines end to end, and moves at
-   the shimmer's speed from where a pass starts to just past the longer text. Registered, so it can be animated. The
-   new copy's letters show before it and the old copy's after it, each fading into the accent colour towards it, so
-   together they look like the shimmer's band writing the new text. The real text is hidden meanwhile */
-@property --wipe-x {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 0px;
-}
-
-/* The wipe holds its end, as --wipe-x falling back to 0 would show the old text again until React swaps the copies
-   for the real text. The row grows to the new text's height, if that's taller, as the wipe starts */
+/* The crossfade. The row grows to the new text's height, if that's taller, as it starts. The new copy holds its end,
+   as falling back to transparent would flash the old text's absence until React swaps the copies for the real text */
 .task-reword-revealing .task-textarea-wrapper {
-    animation: rewordWipe var(--wipe-duration, 2s) linear forwards, rewordGrow 300ms ease-in-out;
+    animation: rewordGrow 300ms ease-in-out;
 }
 
-@keyframes rewordWipe {
-    from { --wipe-x: calc(var(--shimmer-band) / -2); }
-    to { --wipe-x: var(--wipe-end, 1000px); }
-}
-
-/* After the wipe, a row that was taller for the old text closes up, eased like a task sliding into place. A separate
+/* After the crossfade, a row that was taller for the old text closes up, eased like a task sliding into place. A separate
    name from the grow's, as one that stayed in the list would carry on, finished, and its animationend would never
    come. Task.jsx measures both heights */
 .task-reword-settling .task-textarea-wrapper {
@@ -98,25 +83,33 @@
     color: transparent;
 }
 
-.task-wipe-mirror {
+.task-fade-mirror {
     z-index: 1;
 }
 
-.task-wipe-mirror span {
-    -webkit-background-clip: text;
-    background-clip: text;
+/* On the span, as the shared mirror rule further down makes the box's own colour transparent */
+.task-fade-mirror span {
+    color: var(--text-colour);
 }
 
-.task-wipe-new span {
-    background-image: linear-gradient(to right, var(--text-colour) calc(var(--wipe-x) - var(--shimmer-band) / 2), var(--accent) var(--wipe-x), transparent var(--wipe-x));
+.task-fade-old {
+    animation: rewordFadeOut 350ms ease-in-out forwards;
 }
 
-.task-wipe-old span {
-    background-image: linear-gradient(to right, transparent var(--wipe-x), var(--accent) var(--wipe-x), var(--text-colour) calc(var(--wipe-x) + var(--shimmer-band) / 2));
+.task-fade-new {
+    animation: rewordFadeIn 350ms ease-in-out forwards;
+}
+
+@keyframes rewordFadeOut {
+    to { opacity: 0; }
+}
+
+@keyframes rewordFadeIn {
+    from { opacity: 0; }
 }
 
 /* The reduced-motion rule would leave a looping sweep as a single flicker, so the whole text takes the accent
-   colour instead. The fade still runs, at 1 ms, so its animationend ends the phase. Task.jsx skips the wipe */
+   colour instead. The fade still runs, at 1 ms, so its animationend ends the phase. Task.jsx skips the crossfade */
 @media (prefers-reduced-motion: reduce) {
     .task-shimmer-mirror span {
         animation: none;
@@ -180,7 +173,7 @@
    A div inherits text styles from the card that the textarea's UA stylesheet resets, so reset them here too. */
 .task-highlight-mirror,
 .task-shimmer-mirror,
-.task-wipe-mirror,
+.task-fade-mirror,
 .task-textarea-sizer {
     text-align: start;
     text-indent: 0;
@@ -198,7 +191,7 @@
 
 .task-highlight-mirror,
 .task-shimmer-mirror,
-.task-wipe-mirror {
+.task-fade-mirror {
     position: absolute;
     inset: 0;
     /* The highlight overhangs the text by more than the box's padding, and clipping it would square off its corners */
