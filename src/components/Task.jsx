@@ -7,8 +7,8 @@ import { LinkIcon, MoreIcon } from './Icons';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
-// The reword shimmer, and the wipe that writes in the new text, move at one speed whatever the task's length, in px
-// per second. A short task's band carries on out of sight before the next sweep, so the loop doesn't flicker
+// The reword shimmer moves at one speed whatever the task's length, in px per second. A short task's band carries on
+// out of sight before the next sweep, so the loop doesn't flicker
 const SHIMMER_SPEED = 250;
 const SHIMMER_MIN_TRAVEL = 320;
 
@@ -21,22 +21,20 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   // Derived, not copied into state: a fresh copy of the board can replace a cached one in place, ticks included
   const checked = task.CompletedDate !== "nil";
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
-  // A reword runs "waiting" (the shimmer loops), then "revealing" (the band's next pass wipes the new text in), then
+  // A reword runs "waiting" (the shimmer loops), then "revealing" (the band's next pass ends and the new text crossfades in), then
   // "settling" if the new text is shorter by a line or more and the row has to close up. It goes to "fading" instead
   // when there's nothing to swap in. Animation events end each phase. The task is locked from waiting to settling: no
   // typing, splitting, joining, ticking or menu. "fading" only lets the shimmer fade, so it doesn't lock
   const [rewordPhase, setRewordPhase] = useState(null);
   const isRewording = rewordPhase === "waiting" || rewordPhase === "revealing" || rewordPhase === "settling";
-  // A reply waits here for the shimmer's loop to end, and the old text stays on screen while the wipe replaces it
+  // A reply waits here for the shimmer's loop to end, and the old text stays on screen until the crossfade starts
   const pendingRewordRef = useRef(null);
-  const [wipeFrom, setWipeFrom] = useState(null);
+  const [fadeFrom, setFadeFrom] = useState(null);
 
-  // The shimmer's and the wipe's distances and durations come from the texts' lengths, so the band keeps one speed.
-  // The band's width is set in Task.css
+  // The shimmer's distance and duration come from the text's length, so the band keeps one speed. The band's width is
+  // set in Task.css
   const wrapperRef = useRef(null);
   const shimmerRef = useRef(null);
-  const wipeOldRef = useRef(null);
-  const wipeNewRef = useRef(null);
   const sizerRef = useRef(null);
   useLayoutEffect(() => {
     const band = parseFloat(getComputedStyle(wrapperRef.current).getPropertyValue('--shimmer-band'));
@@ -46,16 +44,13 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       span.style.setProperty('--shimmer-end', `${travel}px`);
       span.style.setProperty('--shimmer-duration', `${(travel + band) / SHIMMER_SPEED}s`);
     }
-    if (wipeOldRef.current) {
-      const longer = Math.max(textLength(wipeOldRef.current), textLength(wipeNewRef.current));
-      wrapperRef.current.style.setProperty('--wipe-end', `${longer + band / 2}px`);
-      wrapperRef.current.style.setProperty('--wipe-duration', `${(longer + band) / SHIMMER_SPEED}s`);
+    if (fadeFrom !== null) {
       // The row grows to the new text's height, if that's taller, from the height handleShimmerIteration noted
       const from = parseFloat(wrapperRef.current.style.getPropertyValue('--reword-height-from'));
       const to = Math.max(from, sizerRef.current.getBoundingClientRect().height);
       wrapperRef.current.style.setProperty('--reword-height-to', `${to}px`);
     }
-  }, [rewordPhase, description, wipeFrom]);
+  }, [rewordPhase, description, fadeFrom]);
 
   useEffect(() => {
     if (task.Description !== description) {
@@ -136,7 +131,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           setRewordPhase(null);
           return;
         }
-        // The shimmer's next pass becomes the wipe, so the band carries on rather than jumping back to the start
+        // The crossfade waits for the shimmer's pass to finish, so the band isn't cut off midway
         pendingRewordRef.current = { requested, reworded };
         return;
       }
@@ -154,7 +149,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     if (e.animationName === "rewordShimmerFade") setRewordPhase(phase => phase === "fading" ? null : phase);
   };
 
-  // A loop ends with the band just past the text, so the wipe starts from the left like any other pass
+  // A loop ends with the band just past the text, so nothing is cut off by the crossfade starting
   const handleShimmerIteration = e => {
     const pending = pendingRewordRef.current;
     if (e.animationName !== "rewordShimmer" || !pending) return;
@@ -165,31 +160,32 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       return;
     }
     wrapperRef.current.style.setProperty('--reword-height-from', `${wrapperRef.current.getBoundingClientRect().height}px`);
-    setWipeFrom(pending.requested);
+    setFadeFrom(pending.requested);
     saveDescription(pending.reworded);
     setRewordPhase("revealing");
   };
 
-  // Events from inside the wrapper, such as the shimmer's, are ignored. The wipe holds its end until React has swapped
-  // the copies for the real text, which looks the same, so the handover doesn't show. A row that was taller for the
-  // old text then closes up rather than snapping, and the rows below slide with it
-  const handleWrapperAnimationEnd = e => {
-    if (e.target !== e.currentTarget) return;
-    if (e.animationName === "rewordSettle") {
-      setRewordPhase(phase => phase === "settling" ? null : phase);
-      return;
-    }
-    if (e.animationName !== "rewordWipe") return;
-    const from = e.currentTarget.getBoundingClientRect().height;
+  // The crossfade holds its end until React has swapped the copies for the real text, which looks the same, so the
+  // handover doesn't show. A row that was taller for the old text then closes up rather than snapping, and the rows
+  // below slide with it
+  const handleCrossfadeEnd = () => {
+    const wrapper = wrapperRef.current;
+    const from = wrapper.getBoundingClientRect().height;
     const to = sizerRef.current.getBoundingClientRect().height;
-    setWipeFrom(null);
+    setFadeFrom(null);
     if (to < from) {
-      e.currentTarget.style.setProperty('--reword-height-from', `${from}px`);
-      e.currentTarget.style.setProperty('--reword-height-to', `${to}px`);
+      wrapper.style.setProperty('--reword-height-from', `${from}px`);
+      wrapper.style.setProperty('--reword-height-to', `${to}px`);
       setRewordPhase("settling");
     } else {
       setRewordPhase(null);
     }
+  };
+
+  // Events from inside the wrapper, such as the shimmer's, are ignored
+  const handleWrapperAnimationEnd = e => {
+    if (e.target !== e.currentTarget || e.animationName !== "rewordSettle") return;
+    setRewordPhase(phase => phase === "settling" ? null : phase);
   };
   const trimmedLength = description.trim().length;
   const canReword = !checked && !isRewording && trimmedLength > 0 && trimmedLength <= REWORD_MAX_LENGTH;
@@ -304,18 +300,17 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             </span>
           </div>
         )}
-        {/* The wipe: the old and new texts laid over the textarea's, whose own text is hidden meanwhile. The band's
-            position moves along both, and each copy shows its letters on its own side of it, so the band writes the new
-            text in. The extra sizer keeps the row as tall as the old text until the wipe ends */}
-        {wipeFrom !== null && (
+        {/* The crossfade: the old and new texts laid over the textarea's, whose own text is hidden meanwhile. The extra
+            sizer keeps the row as tall as the old text until the fade ends */}
+        {fadeFrom !== null && (
           <>
-            <div className="task-textarea-box task-wipe-mirror task-wipe-old" aria-hidden="true">
-              <span ref={wipeOldRef}>{wipeFrom}</span>
+            <div className="task-textarea-box task-fade-mirror task-fade-old" aria-hidden="true">
+              <span>{fadeFrom}</span>
             </div>
-            <div className="task-textarea-box task-wipe-mirror task-wipe-new" aria-hidden="true">
-              <span ref={wipeNewRef}>{description}</span>
+            <div className="task-textarea-box task-fade-mirror task-fade-new" aria-hidden="true" onAnimationEnd={handleCrossfadeEnd}>
+              <span>{description}</span>
             </div>
-            <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{wipeFrom}{' '}</div>
+            <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{fadeFrom}{' '}</div>
           </>
         )}
         {/* Shares the textarea's grid cell, so the browser sizes the textarea to the wrapped text even when the card's
