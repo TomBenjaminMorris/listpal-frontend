@@ -2,8 +2,8 @@
 .task-container {
     display: flex;
     margin: 0 8px;
-    /* With the 26px text box, every item below is centred on the same line: 15px from the top of the row */
-    padding: 2px 8px 2px 12px;
+    /* With the 26px text box, every item below is centred on the same line: 14px from the top of the row */
+    padding: 1px 8px 1px 12px;
     border-radius: 8px;
     transition: background-color 120ms;
 }
