@@ -1,5 +1,26 @@
 export const SESSION_EXPIRED = 'SESSION_EXPIRED';
 
+// Failures a route explains itself, keyed on the error code in the response body. They come first, as a 429 or
+// 400 here means something more specific than the status alone
+const CODED_ERRORS = {
+  daily_limit: {
+    title: 'Daily rewords used up ✨',
+    textValue: "You've reworded 30 tasks today, which is the daily limit. It resets at midnight UTC, and this task is unchanged.",
+  },
+  busy_today: {
+    title: "Rewording's paused 😴",
+    textValue: "Everyone's rewords for today have run out. It resets at midnight UTC, so try again then. This task is unchanged.",
+  },
+  flagged: {
+    title: "Can't reword that one 🙅",
+    textValue: "This task tripped our content check, so it wasn't sent for rewording. It's unchanged.",
+  },
+  reword_unavailable: {
+    title: "Reword didn't land 🪄",
+    textValue: "We couldn't reword this task just now. It's unchanged, so give it another go in a moment.",
+  },
+};
+
 // Turns a failed API call into an alert the user can act on. `action` completes "we couldn't ...",
 // such as "load your boards". Raw axios messages ("Request failed with status code 500") mean nothing to users.
 export const describeApiError = (err, action = 'complete that') => {
@@ -30,6 +51,9 @@ export const describeApiError = (err, action = 'complete that') => {
         : `We couldn't reach ListPal to ${action}. Check your connection and give it another go.`,
     };
   }
+
+  const coded = CODED_ERRORS[err.response?.data?.error];
+  if (coded) return coded;
 
   if (status === 403) {
     return {

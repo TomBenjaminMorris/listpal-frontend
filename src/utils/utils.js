@@ -126,3 +126,9 @@ export function periodsContaining(completedMs, nowMs) {
     };
     return Object.keys(starts).filter(field => completedMs >= starts[field]);
 }
+
+// A reword replaces the text it was asked about, so it's dropped if that text has changed since (a join into the task,
+// or an edit from another device) or if the reply is no different. Returns the text to save, or null
+export function rewordToApply(requested, current, reworded) {
+    return reworded && current === requested && reworded !== requested ? reworded : null;
+}

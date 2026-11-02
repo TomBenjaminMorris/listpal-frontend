@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
+import { rewordTask as rewordTaskAPI } from '../utils/apiGatewayClient';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import { moveCaretBetweenFields } from '../utils/caretNavigation';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -43,7 +44,7 @@ const createdDateBeside = (list, SK, above) => {
   return midpoint > prev && midpoint < next ? String(midpoint) : String(Date.now());
 };
 
-const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, focusRequestRef, remoteUpdateRef, appearsInPlace }) => {
+const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, handleDeleteTask, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, focusRequestRef, remoteUpdateRef, appearsInPlace }) => {
   // Fixed when the card mounts, as gaining the fadeUp class on a later render would play the animation then
   const entrance = useRef(appearsInPlace ? "" : "fadeUp-animation").current;
   const [titleEdited, setTitleEdited] = useState(title);
@@ -237,6 +238,16 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
     });
   }, [handleDeleteTask, setConfirmConf]);
 
+  // The category and board names help the model ("Call" in a "Dentist" category), cut to the server's 100-character
+  // limit. The board name is read from a ref, so renaming the board doesn't give every Task a new callback
+  const boardNameRef = useRef(boardName);
+  boardNameRef.current = boardName;
+  const rewordTask = useCallback(text => rewordTaskAPI({
+    text,
+    category: title.slice(0, 100),
+    board: boardNameRef.current?.slice(0, 100)
+  }), [title]);
+
   const toggleTaskChecked = useCallback((SK, isChecked) => {
     const list = tasksRef.current ?? [];
     const task = list.find(t => t.SK === SK);
@@ -391,6 +402,7 @@ const Card = ({ title, onRename, tasks, setSortedTasks, sortedTasks, handleDelet
           toggleTaskChecked={toggleTaskChecked}
           addTask={addTask}
           joinTask={joinTask}
+          rewordTask={rewordTask}
           focusRequestRef={focusRequestRef}
           tickedCheckboxRef={tickedCheckboxRef}
           handleDeleteTask={deleteTask}

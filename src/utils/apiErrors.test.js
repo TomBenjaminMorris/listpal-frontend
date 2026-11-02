@@ -45,6 +45,30 @@ describe('describeApiError', () => {
     expect(describeApiError(httpError(status), 'save the targets').textValue).toMatch(pattern);
   });
 
+  it.each([
+    ['daily_limit', 429, /30 tasks today/],
+    ['busy_today', 429, /Everyone's rewords/],
+    ['flagged', 400, /content check/],
+    ['reword_unavailable', 502, /couldn't reword this task/],
+  ])('explains a %s reply in its own words rather than by status', (code, status, pattern) => {
+    const err = { isAxiosError: true, response: { status, data: { error: code } } };
+    const result = describeApiError(err, 'reword this task');
+    expect(result.textValue).toMatch(pattern);
+    expect(result.textValue).toMatch(/unchanged/);
+  });
+
+  it('falls back to the status for a code it does not know', () => {
+    const err = { isAxiosError: true, response: { status: 429, data: { message: 'Too Many Requests' } } };
+    expect(describeApiError(err, 'x').textValue).toMatch(/Too many requests/);
+  });
+
+  it('keeps reword alert titles short enough for one line', () => {
+    for (const code of ['daily_limit', 'busy_today', 'flagged', 'reword_unavailable']) {
+      const err = { isAxiosError: true, response: { status: 400, data: { error: code } } };
+      expect([...describeApiError(err, 'x').title].length).toBeLessThanOrEqual(25);
+    }
+  });
+
   it('never shows the raw axios message', () => {
     const err = { ...httpError(500), message: 'Request failed with status code 500' };
     expect(describeApiError(err, 'x').textValue).not.toContain('status code');

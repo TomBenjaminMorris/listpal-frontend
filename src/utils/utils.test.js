@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyManualScore, parseScoreInput } from './utils';
+import { applyManualScore, parseScoreInput, rewordToApply } from './utils';
 
 describe('parseScoreInput', () => {
   it.each([['05', '5'], ['0100', '100'], ['0234', '234'], ['00', '0']])('strips leading zeros from %s', (input, expected) => {
@@ -40,5 +40,24 @@ describe('applyManualScore', () => {
 
   it('compares numerically, as a saved score can be a string', () => {
     expect(applyManualScore(scores(0, '10', '9'), 'WScore', '9')).toEqual(scores('9', '10', '9'));
+  });
+});
+
+describe('rewordToApply', () => {
+  it('applies a different reply to unchanged text', () => {
+    expect(rewordToApply('dentist thing', 'dentist thing', 'Book the dentist')).toBe('Book the dentist');
+  });
+
+  it('drops the reply if the text changed while it was in flight', () => {
+    expect(rewordToApply('dentist thing', 'dentist thing and the vet', 'Book the dentist')).toBeNull();
+  });
+
+  it('drops a reply that is no different', () => {
+    expect(rewordToApply('Call the dentist', 'Call the dentist', 'Call the dentist')).toBeNull();
+  });
+
+  it('drops an empty reply', () => {
+    expect(rewordToApply('dentist thing', 'dentist thing', '')).toBeNull();
+    expect(rewordToApply('dentist thing', 'dentist thing', undefined)).toBeNull();
   });
 });

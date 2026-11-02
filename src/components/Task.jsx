@@ -1,16 +1,20 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo } from 'react';
 import { queueUpdate } from '../utils/syncEngine';
 import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caretNavigation';
+import { REWORD_MAX_LENGTH } from '../utils/apiGatewayClient';
+import { rewordToApply } from '../utils/utils';
 import { LinkIcon, MoreIcon } from './Icons';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
-const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
+const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, rewordTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   // Derived, not copied into state: a fresh copy of the board can replace a cached one in place, ticks included
   const checked = task.CompletedDate !== "nil";
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
+  // While a reword is in flight the task is locked: no typing, splitting, joining, ticking or menu
+  const [isRewording, setIsRewording] = useState(false);
 
   useEffect(() => {
     if (task.Description !== description) {
@@ -18,9 +22,20 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     }
   }, [task.Description]);
 
+  // A reword's reply arrives after an await, so it checks the latest text and whether this Task is still on screen.
+  // After a board switch, setTaskFields would write into the next board's tasks
+  const descriptionRef = useRef(description);
+  descriptionRef.current = description;
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
   // A target this tick meets bursts its confetti from here, wherever the task ends up
   const checkboxRef = useRef(null);
   const handleCheckBox = () => {
+    if (isRewording) return;
     tickedCheckboxRef.current = checked ? null : checkboxRef.current;
     toggleTaskChecked(task.SK, !checked);
   }
@@ -65,6 +80,24 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     setTaskMenuVisible(false);
   };
 
+  // The new text is saved like a typed edit, through the outbox. Focus stays where it is
+  const handleReword = async () => {
+    setTaskMenuVisible(false);
+    const requested = description;
+    setIsRewording(true);
+    try {
+      const reply = await rewordTask(requested);
+      const reworded = mountedRef.current && rewordToApply(requested, descriptionRef.current, reply);
+      if (reworded) saveDescription(reworded);
+    } catch {
+      // apiPost has already shown an alert explaining the failure, and the task is unchanged
+    } finally {
+      if (mountedRef.current) setIsRewording(false);
+    }
+  };
+  const trimmedLength = description.trim().length;
+  const canReword = !checked && !isRewording && trimmedLength > 0 && trimmedLength <= REWORD_MAX_LENGTH;
+
   // Keyboard shortcuts for creating, splitting, joining, ticking, deleting and moving between tasks, as with lines in
   // an editor
   const onKeyDown = (e, taskID, title) => {
@@ -72,6 +105,11 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     if (moveCaretBetweenFields(e)) return;
     // An input method uses Enter and Backspace to build its text, so they aren't meant for the list
     if (e.nativeEvent.isComposing) return;
+    // readOnly stops typing but not these, and a split, join or tick would change the text a reword is replacing
+    if (isRewording && (key === "Enter" || key === "Backspace" || key === "Delete")) {
+      e.preventDefault();
+      return;
+    }
     const { selectionStart: start, selectionEnd: end, value } = target;
 
     if ((key === "Backspace" || key === "Delete") && value === "") {
@@ -150,7 +188,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const isLinkAvailable = task.Link && task.Link !== "";
 
   return (
-    <div className="task-container">
+    <div className={`task-container ${isRewording ? "task-rewording" : ""}`} aria-busy={isRewording}>
 
       <input ref={checkboxRef} style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 
@@ -170,6 +208,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           rows={1}
           value={description}
           disabled={checked}
+          readOnly={isRewording}
           placeholder="new task..."
           onChange={handleTextUpdate}
           onKeyDown={(e) => onKeyDown(e, task.SK, title)}
@@ -186,13 +225,14 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       )}
 
       <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : ""}`} ref={taskMenuRef}>
-        <MoreIcon className="task-three-dots-vertical" onClick={() => setTaskMenuVisible(prev => !prev)} />
+        <MoreIcon className="task-three-dots-vertical" onClick={() => !isRewording && setTaskMenuVisible(prev => !prev)} />
         {taskMenuVisible && (
           <TaskMenu
             containerRef={taskMenuRef}
             onClose={() => setTaskMenuVisible(false)}
             markAsImportant={handleMarkAsImportant}
             duplicateTask={handleDuplicate}
+            rewordTask={canReword ? handleReword : null}
             deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
             isImportant={isImportant}
             task={task}

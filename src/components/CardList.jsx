@@ -6,7 +6,7 @@ import Card from './Card';
 import { PlusIcon } from './Icons';
 import './CardList.css'
 
-const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, remoteUpdateRef }) => {
+const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, remoteUpdateRef }) => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   // Where the caret goes once a task shows a given text: { SK, caret, description }. Task reads it, as React moves the
@@ -170,6 +170,7 @@ const CardList = ({ sortedTasks, setSortedTasks, setBoards, setPromptConf, setCo
         <Card
           key={getCardKey(key)}
           title={key}
+          boardName={boardName}
           onRename={handleRenameCard}
           tasks={sortedTasks[key]}
           setSortedTasks={setSortedTasks}
