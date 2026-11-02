@@ -66,6 +66,12 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, 
   return (
     <div className="task-dropdown-menu fadeIn-animation">
       <ul>
+        {rewordTask && (
+          <li onClick={rewordTask}>
+            <SparklesIcon />
+            Reword
+          </li>
+        )}
         <li onClick={markAsImportant}>
           <AlertIcon />
           {`${isImportant ? "Unmark" : "Mark"} as important`}
@@ -75,12 +81,6 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, 
           <CopyIcon />
           Duplicate
         </li>
-        {rewordTask && (
-          <li onClick={rewordTask}>
-            <SparklesIcon />
-            Reword
-          </li>
-        )}
         <li className="menu-danger" onClick={deleteAndHideTask}>
           <TrashIcon />
           Delete

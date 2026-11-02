@@ -7,14 +7,55 @@ import { LinkIcon, MoreIcon } from './Icons';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
+// The reword shimmer, and the wipe that writes in the new text, move at one speed whatever the task's length, in px
+// per second. A short task's band carries on out of sight before the next sweep, so the loop doesn't flicker
+const SHIMMER_SPEED = 250;
+const SHIMMER_MIN_TRAVEL = 320;
+
+// Wrapped lines laid end to end, as an inline element's background is
+const textLength = span => [...span.getClientRects()].reduce((sum, rect) => sum + rect.width, 0);
+
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
 const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, rewordTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
   // Derived, not copied into state: a fresh copy of the board can replace a cached one in place, ticks included
   const checked = task.CompletedDate !== "nil";
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
-  // While a reword is in flight the task is locked: no typing, splitting, joining, ticking or menu
-  const [isRewording, setIsRewording] = useState(false);
+  // A reword runs "waiting" (the shimmer loops), then "revealing" (the band's next pass wipes the new text in), then
+  // "settling" if the new text is shorter by a line or more and the row has to close up. It goes to "fading" instead
+  // when there's nothing to swap in. Animation events end each phase. The task is locked from waiting to settling: no
+  // typing, splitting, joining, ticking or menu. "fading" only lets the shimmer fade, so it doesn't lock
+  const [rewordPhase, setRewordPhase] = useState(null);
+  const isRewording = rewordPhase === "waiting" || rewordPhase === "revealing" || rewordPhase === "settling";
+  // A reply waits here for the shimmer's loop to end, and the old text stays on screen while the wipe replaces it
+  const pendingRewordRef = useRef(null);
+  const [wipeFrom, setWipeFrom] = useState(null);
+
+  // The shimmer's and the wipe's distances and durations come from the texts' lengths, so the band keeps one speed.
+  // The band's width is set in Task.css
+  const wrapperRef = useRef(null);
+  const shimmerRef = useRef(null);
+  const wipeOldRef = useRef(null);
+  const wipeNewRef = useRef(null);
+  const sizerRef = useRef(null);
+  useLayoutEffect(() => {
+    const band = parseFloat(getComputedStyle(wrapperRef.current).getPropertyValue('--shimmer-band'));
+    const span = shimmerRef.current;
+    if (span) {
+      const travel = Math.max(textLength(span), SHIMMER_MIN_TRAVEL - band);
+      span.style.setProperty('--shimmer-end', `${travel}px`);
+      span.style.setProperty('--shimmer-duration', `${(travel + band) / SHIMMER_SPEED}s`);
+    }
+    if (wipeOldRef.current) {
+      const longer = Math.max(textLength(wipeOldRef.current), textLength(wipeNewRef.current));
+      wrapperRef.current.style.setProperty('--wipe-end', `${longer + band / 2}px`);
+      wrapperRef.current.style.setProperty('--wipe-duration', `${(longer + band) / SHIMMER_SPEED}s`);
+      // The row grows to the new text's height, if that's taller, from the height handleShimmerIteration noted
+      const from = parseFloat(wrapperRef.current.style.getPropertyValue('--reword-height-from'));
+      const to = Math.max(from, sizerRef.current.getBoundingClientRect().height);
+      wrapperRef.current.style.setProperty('--reword-height-to', `${to}px`);
+    }
+  }, [rewordPhase, description, wipeFrom]);
 
   useEffect(() => {
     if (task.Description !== description) {
@@ -84,15 +125,70 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const handleReword = async () => {
     setTaskMenuVisible(false);
     const requested = description;
-    setIsRewording(true);
+    setRewordPhase("waiting");
     try {
       const reply = await rewordTask(requested);
       const reworded = mountedRef.current && rewordToApply(requested, descriptionRef.current, reply);
-      if (reworded) saveDescription(reworded);
+      if (reworded) {
+        // Under reduced motion there's no loop to wait for, so the new text goes straight in
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          saveDescription(reworded);
+          setRewordPhase(null);
+          return;
+        }
+        // The shimmer's next pass becomes the wipe, so the band carries on rather than jumping back to the start
+        pendingRewordRef.current = { requested, reworded };
+        return;
+      }
     } catch {
       // apiPost has already shown an alert explaining the failure, and the task is unchanged
-    } finally {
-      if (mountedRef.current) setIsRewording(false);
+    }
+    // Nothing to swap in, so the shimmer just fades away
+    if (mountedRef.current) setRewordPhase("fading");
+  };
+
+  // Driven by animation events rather than timers, so the CSS alone sets the timing. The reduced-motion rule shortens
+  // the fade to 1 ms rather than removing it, so it still fires. Only if still fading: a reword started during the
+  // fade has moved the phase on
+  const handleShimmerAnimationEnd = e => {
+    if (e.animationName === "rewordShimmerFade") setRewordPhase(phase => phase === "fading" ? null : phase);
+  };
+
+  // A loop ends with the band just past the text, so the wipe starts from the left like any other pass
+  const handleShimmerIteration = e => {
+    const pending = pendingRewordRef.current;
+    if (e.animationName !== "rewordShimmer" || !pending) return;
+    pendingRewordRef.current = null;
+    // An edit from another device could have landed while the loop finished
+    if (descriptionRef.current !== pending.requested) {
+      setRewordPhase("fading");
+      return;
+    }
+    wrapperRef.current.style.setProperty('--reword-height-from', `${wrapperRef.current.getBoundingClientRect().height}px`);
+    setWipeFrom(pending.requested);
+    saveDescription(pending.reworded);
+    setRewordPhase("revealing");
+  };
+
+  // Events from inside the wrapper, such as the shimmer's, are ignored. The wipe holds its end until React has swapped
+  // the copies for the real text, which looks the same, so the handover doesn't show. A row that was taller for the
+  // old text then closes up rather than snapping, and the rows below slide with it
+  const handleWrapperAnimationEnd = e => {
+    if (e.target !== e.currentTarget) return;
+    if (e.animationName === "rewordSettle") {
+      setRewordPhase(phase => phase === "settling" ? null : phase);
+      return;
+    }
+    if (e.animationName !== "rewordWipe") return;
+    const from = e.currentTarget.getBoundingClientRect().height;
+    const to = sizerRef.current.getBoundingClientRect().height;
+    setWipeFrom(null);
+    if (to < from) {
+      e.currentTarget.style.setProperty('--reword-height-from', `${from}px`);
+      e.currentTarget.style.setProperty('--reword-height-to', `${to}px`);
+      setRewordPhase("settling");
+    } else {
+      setRewordPhase(null);
     }
   };
   const trimmedLength = description.trim().length;
@@ -188,20 +284,43 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const isLinkAvailable = task.Link && task.Link !== "";
 
   return (
-    <div className={`task-container ${isRewording ? "task-rewording" : ""}`} aria-busy={isRewording}>
+    <div className={`task-container ${rewordPhase ? `task-reword-${rewordPhase}` : ""}`} aria-busy={isRewording}>
 
       <input ref={checkboxRef} style={taskExpiryOpacityStyle} type="checkbox" name="checkbox" checked={checked} onChange={handleCheckBox} />
 
-      <div className="task-textarea-wrapper">
+      <div className="task-textarea-wrapper" ref={wrapperRef} onAnimationEnd={handleWrapperAnimationEnd}>
         {/* A textarea can't style its own text runs, so the highlight is drawn on a hidden copy of the text behind it */}
         {isImportant && description && (
           <div className="task-textarea-box task-highlight-mirror" aria-hidden="true" style={taskExpiryOpacityStyle}>
             <span>{description}</span>
           </div>
         )}
+        {/* The reword shimmer: a copy of the text laid over the textarea's letters, coloured only where the band
+            passes, so the band runs through the letters from one wrapped line to the next */}
+        {(rewordPhase === "waiting" || rewordPhase === "fading") && (
+          <div className="task-textarea-box task-shimmer-mirror" aria-hidden="true">
+            <span ref={shimmerRef} onAnimationEnd={handleShimmerAnimationEnd} onAnimationIteration={handleShimmerIteration}>
+              {description}
+            </span>
+          </div>
+        )}
+        {/* The wipe: the old and new texts laid over the textarea's, whose own text is hidden meanwhile. The band's
+            position moves along both, and each copy shows its letters on its own side of it, so the band writes the new
+            text in. The extra sizer keeps the row as tall as the old text until the wipe ends */}
+        {wipeFrom !== null && (
+          <>
+            <div className="task-textarea-box task-wipe-mirror task-wipe-old" aria-hidden="true">
+              <span ref={wipeOldRef}>{wipeFrom}</span>
+            </div>
+            <div className="task-textarea-box task-wipe-mirror task-wipe-new" aria-hidden="true">
+              <span ref={wipeNewRef}>{description}</span>
+            </div>
+            <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{wipeFrom}{' '}</div>
+          </>
+        )}
         {/* Shares the textarea's grid cell, so the browser sizes the textarea to the wrapped text even when the card's
             width changes without a resize event. The trailing space keeps a final line break from collapsing. */}
-        <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{description}{' '}</div>
+        <div ref={sizerRef} className="task-textarea-box task-textarea-sizer" aria-hidden="true">{description}{' '}</div>
         <textarea
           ref={textareaRef}
           className={`task-textarea-box ${taskMenuVisible ? "highlight-2" : ""}`}
