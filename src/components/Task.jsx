@@ -12,8 +12,8 @@ import './Task.css'
 const SHIMMER_SPEED = 250;
 const SHIMMER_MIN_TRAVEL = 320;
 
-// Wrapped lines laid end to end, as an inline element's background is
-const textLength = span => [...span.getClientRects()].reduce((sum, rect) => sum + rect.width, 0);
+// The widest wrapped line: the band crosses every line at once, as each line fragment paints its own background
+const textLength = span => Math.max(0, ...[...span.getClientRects()].map(rect => rect.width));
 
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
 const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, rewordTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
