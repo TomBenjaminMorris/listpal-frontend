@@ -79,6 +79,9 @@ export const syncOpsKeepalive = (ops) => {
 export const updateThemeAPI = (theme) =>
   apiPost('/user-theme', { theme }, { action: 'save your theme' });
 
+export const updateRewordToneAPI = (tone) =>
+  apiPost('/user-reword-tone', { tone }, { action: 'save your reword tone' });
+
 export const deleteBoard = (boardID) =>
   apiPost('/delete-board', { boardID }, { action: 'delete the board' });
 
@@ -89,8 +92,8 @@ export const updateBoardScoresAPI = (boardID, scores) =>
 export const TASK_MAX_LENGTH = 500;
 
 // The task stays locked until this settles, so it gives up a little after the reword Lambda's own 10 s timeout
-export const rewordTask = async ({ text, category, board }) =>
-  (await apiPost('/reword-task', { text, category, board }, { action: 'reword this task', timeout: 12000 }))?.text;
+export const rewordTask = async ({ text, category, board, tone }) =>
+  (await apiPost('/reword-task', { text, category, board, tone }, { action: 'reword this task', timeout: 12000 }))?.text;
 
 // Silent: the delete dialog stays open and shows the failure itself, so the user can retry
 export const deleteAccount = () =>

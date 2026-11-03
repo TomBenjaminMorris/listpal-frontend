@@ -1,0 +1,17 @@
+/* On a phone the sample moves below the heading, rather than squeezing it onto two lines */
+.reword-tone-header {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.reword-tone-header>h2 {
+    white-space: nowrap;
+}
+
+/* Grows to the card's full height, so samples of different lengths still line their boxes up */
+.reword-tone-sample {
+    flex-grow: 1;
+    font-family: CircularBook;
+    font-size: 14px;
+    line-height: 20px;
+}
