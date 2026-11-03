@@ -244,6 +244,7 @@ button {
   }
 
   .board-name-content {
+    padding-left: 0;
     justify-content: center;
     flex-basis: 100%;
     margin-right: 0;
