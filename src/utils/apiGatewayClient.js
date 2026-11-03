@@ -85,8 +85,8 @@ export const deleteBoard = (boardID) =>
 export const updateBoardScoresAPI = (boardID, scores) =>
   apiPost('/board-scores', { boardID, scores }, { action: 'save the score' });
 
-// The server's limit on a task's text, after trimming. Longer tasks don't offer Reword
-export const REWORD_MAX_LENGTH = 500;
+// The server's limit on a task's text. Longer tasks can't be saved, and the reword route enforces it too
+export const TASK_MAX_LENGTH = 500;
 
 // The task stays locked until this settles, so it gives up a little after the reword Lambda's own 10 s timeout
 export const rewordTask = async ({ text, category, board }) =>
