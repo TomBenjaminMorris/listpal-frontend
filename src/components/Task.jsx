@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo } from 'react';
 import { queueUpdate } from '../utils/syncEngine';
 import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caretNavigation';
-import { REWORD_MAX_LENGTH } from '../utils/apiGatewayClient';
+import { TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
 import { rewordToApply } from '../utils/utils';
 import { LinkIcon, MoreIcon } from './Icons';
 import TaskMenu from './TaskMenu';
@@ -188,7 +188,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     setRewordPhase(phase => phase === "settling" ? null : phase);
   };
   const trimmedLength = description.trim().length;
-  const canReword = !checked && !isRewording && trimmedLength > 0 && trimmedLength <= REWORD_MAX_LENGTH;
+  const canReword = !checked && !isRewording && trimmedLength > 0 && trimmedLength <= TASK_MAX_LENGTH;
 
   // Keyboard shortcuts for creating, splitting, joining, ticking, deleting and moving between tasks, as with lines in
   // an editor
@@ -323,6 +323,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           ref={textareaRef}
           className={`task-textarea-box ${taskMenuVisible ? "highlight-2" : ""}`}
           rows={1}
+          maxLength={TASK_MAX_LENGTH}
           value={description}
           disabled={checked}
           readOnly={isRewording}

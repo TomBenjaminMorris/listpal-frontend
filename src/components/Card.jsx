@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
-import { rewordTask as rewordTaskAPI } from '../utils/apiGatewayClient';
+import { rewordTask as rewordTaskAPI, TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import { moveCaretBetweenFields } from '../utils/caretNavigation';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -202,7 +202,8 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
   // Joins a task to the unticked task above or below it, as deleting the break between two lines in an editor: the
   // lower one's text goes onto the end of the upper one, the lower one is deleted, and the caret sits at the join.
   // The upper one keeps its importance and link. A link on the lower one moves up if the upper one has
-  // none; with a link on each the join is refused rather than lose one. Returns whether it joined
+  // none; with a link on each, or a combined length over the task limit, the join is refused rather than lose one or fail to
+  // save. Returns whether it joined
   const joinTask = useCallback((SK, withAbove) => {
     const unticked = sortedUnticked(tasksRef.current);
     const index = unticked.findIndex(t => t.SK === SK);
@@ -210,6 +211,7 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
     const [upper, lower] = withAbove ? [unticked[index - 1], unticked[index]] : [unticked[index], unticked[index + 1]];
     if (!upper || !lower) return false;
     if (upper.Link && lower.Link) return false;
+    if (upper.Description.length + lower.Description.length > TASK_MAX_LENGTH) return false;
 
     const fields = { Description: upper.Description + lower.Description };
     if (lower.Link) fields.Link = lower.Link;
