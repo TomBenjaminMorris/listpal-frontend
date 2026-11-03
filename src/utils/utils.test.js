@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyManualScore, parseScoreInput, rewordToApply } from './utils';
+import { applyManualScore, parseScoreInput, nextRewordChoice, rewordToApply } from './utils';
 
 describe('parseScoreInput', () => {
   it.each([['05', '5'], ['0100', '100'], ['0234', '234'], ['00', '0']])('strips leading zeros from %s', (input, expected) => {
@@ -59,5 +59,29 @@ describe('rewordToApply', () => {
   it('drops an empty reply', () => {
     expect(rewordToApply('dentist thing', 'dentist thing', '')).toBeNull();
     expect(rewordToApply('dentist thing', 'dentist thing', undefined)).toBeNull();
+  });
+});
+
+describe('nextRewordChoice', () => {
+  it('reverts a first reword to the text that was sent', () => {
+    expect(nextRewordChoice(null, 'Renew passport', 'Update passport details'))
+      .toEqual({ original: 'Renew passport', reworded: 'Update passport details' });
+  });
+
+  it("keeps the user's own text through a second reword", () => {
+    const first = { original: 'Renew passport', reworded: 'Update passport details' };
+    expect(nextRewordChoice(first, 'Update passport details', 'Renew your passport'))
+      .toEqual({ original: 'Renew passport', reworded: 'Renew your passport' });
+  });
+
+  it('starts afresh when the text no longer matches the last reword', () => {
+    const stale = { original: 'Renew passport', reworded: 'Update passport details' };
+    expect(nextRewordChoice(stale, 'Call the vet', 'Phone the vet'))
+      .toEqual({ original: 'Call the vet', reworded: 'Phone the vet' });
+  });
+
+  it("offers nothing to revert when a reword gives back the user's own text", () => {
+    const first = { original: 'Renew passport', reworded: 'Update passport details' };
+    expect(nextRewordChoice(first, 'Update passport details', 'Renew passport')).toBeNull();
   });
 });

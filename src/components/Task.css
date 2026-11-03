@@ -59,9 +59,11 @@
     to { opacity: 0; }
 }
 
-/* The crossfade. The row grows to the new text's height, if that's taller, as it starts. The new copy holds its end,
-   as falling back to transparent would flash the old text's absence until React swaps the copies for the real text */
-.task-reword-revealing .task-textarea-wrapper {
+/* The crossfade, for a reword and for its revert. The row grows to the new text's height, if that's taller, as it
+   starts. The new copy holds its end, as falling back to transparent would flash the old text's absence until React
+   swaps the copies for the real text */
+.task-reword-revealing .task-textarea-wrapper,
+.task-reword-reverting .task-textarea-wrapper {
     animation: rewordGrow 300ms ease-in-out;
 }
 
@@ -82,7 +84,8 @@
     to { height: var(--reword-height-to, auto); }
 }
 
-.task-reword-revealing textarea {
+.task-reword-revealing textarea,
+.task-reword-reverting textarea {
     color: transparent;
 }
 
@@ -139,6 +142,61 @@
 
 .task-container[aria-busy="true"] textarea {
     cursor: progress;
+}
+
+/* Keep and revert, after a reword lands. They sit where the link icon does, and fade in once the crossfade is over.
+   Packed tighter than the row's other icons, as anything wider than the space left beside the menu button, which shows
+   on hover, would narrow the text and rewrap it */
+.task-reword-choice {
+    display: flex;
+    align-self: flex-start;
+    margin-top: 3px;
+    margin-left: 2px;
+    margin-right: -12px;
+    animation: rewordChoiceIn 200ms ease-out;
+}
+
+.task-reword-choice button {
+    display: flex;
+    margin: 0;
+    padding: 2px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-colour);
+    opacity: 0.7;
+    cursor: pointer;
+    transition: background-color 120ms, opacity 120ms;
+}
+
+.task-reword-choice button:hover {
+    background-color: var(--surface-hover);
+    opacity: 1;
+}
+
+.task-reword-choice button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    opacity: 1;
+}
+
+.task-reword-choice-icon {
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes rewordChoiceIn {
+    from { opacity: 0; }
+}
+
+/* Read out by screen readers, but not shown */
+.task-reword-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 .task-container>input[type="checkbox"] {
