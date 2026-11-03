@@ -1,7 +1,7 @@
 /* The margin and padding put the checkbox in line with the card's emoji and divider */
 .task-container {
     /* The reword shimmer's band. Task.jsx reads it to time the shimmer */
-    --shimmer-band: 80px;
+    --shimmer-band: 150px;
     display: flex;
     margin: 0 8px;
     /* With the 26px text box, every item below is centred on the same line: 14px from the top of the row */
@@ -21,8 +21,9 @@
    clipped to its glyphs: in the band the letters take the accent colour, and elsewhere the copy is clear and the real
    text shows. Not cloned across lines, so the browser lays the gradient out as if the wrapped lines were one, and the
    band runs along each line in reading order */
-.task-shimmer-mirror {
-    /* Over the textarea, which is positioned and comes later. Clicks pass through it */
+.task-shimmer-mirror,
+.task-fade-mirror {
+    /* Over the textarea, which is positioned and comes later. Clicks pass through them */
     z-index: 1;
 }
 
@@ -83,8 +84,23 @@
     color: transparent;
 }
 
-.task-fade-mirror {
-    z-index: 1;
+/* The swap is marked by the new text's letters taking the accent colour and fading back. It's a copy of the new text
+   laid over the crossfade's copies, so it colours the same glyphs. It waits for the crossfade to finish, so the change
+   is seen first and then marked, and its end ends the phase. The backwards fill keeps it clear during the wait */
+.task-flash-mirror {
+    z-index: 2;
+}
+
+/* On the span, as the shared mirror rule further down makes the box's own colour transparent */
+.task-flash-mirror span {
+    color: var(--accent);
+    animation: rewordFlash 750ms ease-out 400ms both;
+}
+
+@keyframes rewordFlash {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* On the span, as the shared mirror rule further down makes the box's own colour transparent */
@@ -174,6 +190,7 @@
 .task-highlight-mirror,
 .task-shimmer-mirror,
 .task-fade-mirror,
+.task-flash-mirror,
 .task-textarea-sizer {
     text-align: start;
     text-indent: 0;
@@ -191,7 +208,8 @@
 
 .task-highlight-mirror,
 .task-shimmer-mirror,
-.task-fade-mirror {
+.task-fade-mirror,
+.task-flash-mirror {
     position: absolute;
     inset: 0;
     /* The highlight overhangs the text by more than the box's padding, and clipping it would square off its corners */

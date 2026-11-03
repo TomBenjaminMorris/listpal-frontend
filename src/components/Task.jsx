@@ -37,9 +37,9 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const shimmerRef = useRef(null);
   const sizerRef = useRef(null);
   useLayoutEffect(() => {
-    const band = parseFloat(getComputedStyle(wrapperRef.current).getPropertyValue('--shimmer-band'));
     const span = shimmerRef.current;
     if (span) {
+      const band = parseFloat(getComputedStyle(wrapperRef.current).getPropertyValue('--shimmer-band'));
       const travel = Math.max(textLength(span), SHIMMER_MIN_TRAVEL - band);
       span.style.setProperty('--shimmer-end', `${travel}px`);
       span.style.setProperty('--shimmer-duration', `${(travel + band) / SHIMMER_SPEED}s`);
@@ -165,10 +165,10 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     setRewordPhase("revealing");
   };
 
-  // The crossfade holds its end until React has swapped the copies for the real text, which looks the same, so the
-  // handover doesn't show. A row that was taller for the old text then closes up rather than snapping, and the rows
-  // below slide with it
-  const handleCrossfadeEnd = () => {
+  // The flash follows the crossfade, which holds its end until the flash is over and React has swapped the copies for the
+  // real text, which looks the same, so the handover doesn't show. A row that was taller for the old text then closes
+  // up rather than snapping, and the rows below slide with it
+  const handleFlashEnd = () => {
     const wrapper = wrapperRef.current;
     const from = wrapper.getBoundingClientRect().height;
     const to = sizerRef.current.getBoundingClientRect().height;
@@ -307,8 +307,11 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             <div className="task-textarea-box task-fade-mirror task-fade-old" aria-hidden="true">
               <span>{fadeFrom}</span>
             </div>
-            <div className="task-textarea-box task-fade-mirror task-fade-new" aria-hidden="true" onAnimationEnd={handleCrossfadeEnd}>
+            <div className="task-textarea-box task-fade-mirror task-fade-new" aria-hidden="true">
               <span>{description}</span>
+            </div>
+            <div className="task-textarea-box task-flash-mirror" aria-hidden="true">
+              <span onAnimationEnd={handleFlashEnd}>{description}</span>
             </div>
             <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{fadeFrom}{' '}</div>
           </>
