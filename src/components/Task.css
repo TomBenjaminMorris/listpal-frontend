@@ -19,8 +19,8 @@
 /* Reword: a shimmer of colour runs through the text while the request runs, and once the reply is in and the pass
    ends, the old text crossfades to the new. A textarea can't colour its own letters, so the shimmer is a copy of the text laid exactly over them, with a gradient
    clipped to its glyphs: in the band the letters take the accent colour, and elsewhere the copy is clear and the real
-   text shows. Not cloned across lines, so the browser lays the gradient out as if the wrapped lines were one, and the
-   band runs along each line in reading order */
+   text shows. Cloned across lines, so each wrapped line paints its own gradient from its left edge and the band
+   crosses all the lines together, as one wall */
 .task-shimmer-mirror,
 .task-fade-mirror {
     /* Over the textarea, which is positioned and comes later. Clicks pass through them */
@@ -34,6 +34,8 @@
     background: linear-gradient(to right, transparent, var(--accent), transparent) calc(-1 * var(--shimmer-band)) 0 / var(--shimmer-band) 100% no-repeat;
     -webkit-background-clip: text;
     background-clip: text;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
     animation: rewordShimmer var(--shimmer-duration, 1.2s) linear infinite, rewordShimmerFadeIn 200ms ease-out;
 }
 
