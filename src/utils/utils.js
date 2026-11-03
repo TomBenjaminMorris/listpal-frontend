@@ -132,3 +132,10 @@ export function periodsContaining(completedMs, nowMs) {
 export function rewordToApply(requested, current, reworded) {
     return reworded && current === requested && reworded !== requested ? reworded : null;
 }
+
+// What a revert goes back to once a reword lands. Rewording again before deciding keeps the user's own text, not the
+// first reword's. Null when the new text is their own again, as there's nothing to revert
+export function nextRewordChoice(choice, requested, reworded) {
+    const original = choice?.reworded === requested ? choice.original : requested;
+    return original === reworded ? null : { original, reworded };
+}

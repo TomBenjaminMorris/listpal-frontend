@@ -2,8 +2,8 @@ import { useState, useEffect, useLayoutEffect, useRef, memo } from 'react';
 import { queueUpdate } from '../utils/syncEngine';
 import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caretNavigation';
 import { TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
-import { rewordToApply } from '../utils/utils';
-import { LinkIcon, MoreIcon } from './Icons';
+import { nextRewordChoice, rewordToApply } from '../utils/utils';
+import { CheckIcon, LinkIcon, MoreIcon, UndoIcon } from './Icons';
 import TaskMenu from './TaskMenu';
 import './Task.css'
 
@@ -15,6 +15,9 @@ const SHIMMER_MIN_TRAVEL = 320;
 // The widest wrapped line: the band crosses every line at once, as each line fragment paints its own background
 const textLength = span => Math.max(0, ...[...span.getClientRects()].map(rect => rect.width));
 
+// Under reduced motion there's no loop or crossfade to wait for, so text goes straight in
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
 const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, rewordTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
   const [description, setDescription] = useState(task.Description);
@@ -23,10 +26,14 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
   // A reword runs "waiting" (the shimmer loops), then "revealing" (the band's next pass ends and the new text crossfades in), then
   // "settling" if the new text is shorter by a line or more and the row has to close up. It goes to "fading" instead
-  // when there's nothing to swap in. Animation events end each phase. The task is locked from waiting to settling: no
-  // typing, splitting, joining, ticking or menu. "fading" only lets the shimmer fade, so it doesn't lock
+  // when there's nothing to swap in. A revert runs "reverting" (the same crossfade, unmarked), then "settling" if need
+  // be. Animation events end each phase. The task is locked from waiting to settling: no typing, splitting, joining,
+  // ticking or menu. "fading" only lets the shimmer fade, so it doesn't lock
   const [rewordPhase, setRewordPhase] = useState(null);
-  const isRewording = rewordPhase === "waiting" || rewordPhase === "revealing" || rewordPhase === "settling";
+  const isRewording = rewordPhase === "waiting" || rewordPhase === "revealing" || rewordPhase === "reverting" || rewordPhase === "settling";
+  // Once a reword lands, the user's own text waits here until they keep or revert the new one. Anything else that
+  // changes the text, or a tick, ends the choice and the reword stands. Memory only, so a reload or board switch ends it
+  const [rewordChoice, setRewordChoice] = useState(null);
   // A reply waits here for the shimmer's loop to end, and the old text stays on screen until the crossfade starts
   const pendingRewordRef = useRef(null);
   const [fadeFrom, setFadeFrom] = useState(null);
@@ -57,6 +64,12 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       setDescription(task.Description);
     }
   }, [task.Description]);
+
+  // Catches every way the text can change (typing, a split or join, a fresh copy from another device) without each
+  // one having to know about the choice. The reword and the revert set the text and the choice together
+  useEffect(() => {
+    if (rewordChoice && (checked || description !== rewordChoice.reworded)) setRewordChoice(null);
+  }, [description, checked]);
 
   // A reword's reply arrives after an await, so it checks the latest text and whether this Task is still on screen.
   // After a board switch, setTaskFields would write into the next board's tasks
@@ -117,6 +130,11 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   };
 
   // The new text is saved like a typed edit, through the outbox. Focus stays where it is
+  const applyReword = (requested, reworded) => {
+    setRewordChoice(choice => nextRewordChoice(choice, requested, reworded));
+    saveDescription(reworded);
+  };
+
   const handleReword = async () => {
     setTaskMenuVisible(false);
     const requested = description;
@@ -125,9 +143,8 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       const reply = await rewordTask(requested);
       const reworded = mountedRef.current && rewordToApply(requested, descriptionRef.current, reply);
       if (reworded) {
-        // Under reduced motion there's no loop to wait for, so the new text goes straight in
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          saveDescription(reworded);
+        if (prefersReducedMotion()) {
+          applyReword(requested, reworded);
           setRewordPhase(null);
           return;
         }
@@ -161,14 +178,37 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     }
     wrapperRef.current.style.setProperty('--reword-height-from', `${wrapperRef.current.getBoundingClientRect().height}px`);
     setFadeFrom(pending.requested);
-    saveDescription(pending.reworded);
+    applyReword(pending.requested, pending.reworded);
     setRewordPhase("revealing");
   };
 
+  // A key press reaches a button as a click with no detail. The buttons go once pressed, so a keyboard user's focus
+  // moves into the task rather than falling back to the page
+  const endRewordChoice = e => {
+    setRewordChoice(null);
+    if (e.detail === 0) textareaRef.current.focus();
+  };
+
+  // The revert is saved through the outbox like any edit. It crossfades back without the flash, which marks new
+  // wording, not the user's own
+  const handleRevertReword = e => {
+    const { original } = rewordChoice;
+    endRewordChoice(e);
+    if (prefersReducedMotion()) {
+      saveDescription(original);
+      return;
+    }
+    wrapperRef.current.style.setProperty('--reword-height-from', `${wrapperRef.current.getBoundingClientRect().height}px`);
+    setFadeFrom(description);
+    saveDescription(original);
+    setRewordPhase("reverting");
+  };
+
   // The flash follows the crossfade, which holds its end until the flash is over and React has swapped the copies for the
-  // real text, which looks the same, so the handover doesn't show. A row that was taller for the old text then closes
-  // up rather than snapping, and the rows below slide with it
-  const handleFlashEnd = () => {
+  // real text, which looks the same, so the handover doesn't show. A revert has no flash, so the crossfade's own end
+  // comes here. A row that was taller for the old text then closes up rather than snapping, and the rows below slide
+  // with it
+  const handleCrossfadeEnd = () => {
     const wrapper = wrapperRef.current;
     const from = wrapper.getBoundingClientRect().height;
     const to = sizerRef.current.getBoundingClientRect().height;
@@ -278,6 +318,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const taskExpiryOpacityStyle = checked ? { opacity: taskExpiryOpacity() } : null;
   const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 1.5px", opacity: taskExpiryOpacity() } : null;
   const isLinkAvailable = task.Link && task.Link !== "";
+  const showRewordChoice = rewordChoice !== null && !isRewording;
 
   return (
     <div className={`task-container ${rewordPhase ? `task-reword-${rewordPhase}` : ""}`} aria-busy={isRewording}>
@@ -307,12 +348,15 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             <div className="task-textarea-box task-fade-mirror task-fade-old" aria-hidden="true">
               <span>{fadeFrom}</span>
             </div>
-            <div className="task-textarea-box task-fade-mirror task-fade-new" aria-hidden="true">
+            <div className="task-textarea-box task-fade-mirror task-fade-new" aria-hidden="true"
+              onAnimationEnd={rewordPhase === "reverting" ? handleCrossfadeEnd : undefined}>
               <span>{description}</span>
             </div>
-            <div className="task-textarea-box task-flash-mirror" aria-hidden="true">
-              <span onAnimationEnd={handleFlashEnd}>{description}</span>
-            </div>
+            {rewordPhase === "revealing" && (
+              <div className="task-textarea-box task-flash-mirror" aria-hidden="true">
+                <span onAnimationEnd={handleCrossfadeEnd}>{description}</span>
+              </div>
+            )}
             <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{fadeFrom}{' '}</div>
           </>
         )}
@@ -332,9 +376,23 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           onKeyDown={(e) => onKeyDown(e, task.SK, title)}
           style={taskTextDecorationStyle}
         />
+        {/* Always present, as a live region only announces changes to one that's already on the page */}
+        <span className="task-reword-status" role="status">
+          {showRewordChoice ? `Reworded to: ${description}. Keep or revert buttons follow.` : ""}
+        </span>
       </div>
 
-      {isLinkAvailable ? (
+      {/* In the link's place, so the text keeps its width and doesn't rewrap. The link comes back once the user decides */}
+      {showRewordChoice ? (
+        <div className="task-reword-choice">
+          <button type="button" aria-label="Keep the reworded text" title="Keep" onClick={endRewordChoice}>
+            <CheckIcon className="task-reword-choice-icon" />
+          </button>
+          <button type="button" aria-label="Revert to your own wording" title="Revert" onClick={handleRevertReword}>
+            <UndoIcon className="task-reword-choice-icon" />
+          </button>
+        </div>
+      ) : isLinkAvailable ? (
         <a href={task.Link} target="_blank" rel="noreferrer">
           <LinkIcon className="task-dropdown-icons task-three-dots-vertical" />
         </a>
