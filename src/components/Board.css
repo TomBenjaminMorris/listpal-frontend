@@ -23,9 +23,11 @@
     flex-grow: 1;
 }
 
-/* margin-right: auto pushes everything else to the right, and min-width: 0 lets a long name shorten instead of wrapping the row */
+/* margin-right: auto pushes everything else to the right, and min-width: 0 lets a long name shorten instead of wrapping the row.
+   The left padding is a card header's less 4px, which lines the emoji up by eye with the first card's. */
 .board-name-content {
     display: flex;
+    padding-left: 16px;
     align-items: center;
     gap: 8px;
     min-width: 0;
@@ -157,15 +159,16 @@
     position: absolute !important;
     z-index: 2001;
     margin-top: 505px;
-    margin-left: 260px;
+    margin-left: 244px;
     box-shadow: rgba(0, 0, 0, 0.45) 0px 8px 24px;
     border-radius: 12px;
 }
 
-/* Shrinks to the emoji, so the hover highlight is even around it. The auto margin keeps it in line with the cards below. */
+/* Shrinks to the emoji, so the hover highlight is even around it. The auto margins centre it in the 24px wrapper, whose
+   middle is where a card's 20px emoji sits. */
 .emoji-icon {
     width: fit-content;
-    margin-right: auto;
+    margin: 0 auto;
     border-radius: 7px;
     font-size: 24px;
     line-height: 24px;
