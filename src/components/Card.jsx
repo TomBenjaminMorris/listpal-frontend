@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } fr
 import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { rewordTask as rewordTaskAPI, TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
+import { storedRewordTone } from '../utils/rewordTones';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import { moveCaretBetweenFields } from '../utils/caretNavigation';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -247,7 +248,8 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
   const rewordTask = useCallback(text => rewordTaskAPI({
     text,
     category: title.slice(0, 100),
-    board: boardNameRef.current?.slice(0, 100)
+    board: boardNameRef.current?.slice(0, 100),
+    tone: storedRewordTone()
   }), [title]);
 
   const toggleTaskChecked = useCallback((SK, isChecked) => {

@@ -18,12 +18,12 @@ describe('rewordTask', () => {
   it('posts the text with its context and returns the new text', async () => {
     axios.post.mockResolvedValue({ data: { data: { text: 'Call the dentist' } } });
 
-    const text = await rewordTask({ text: 'Call', category: 'Dentist', board: 'Life admin' });
+    const text = await rewordTask({ text: 'Call', category: 'Dentist', board: 'Life admin', tone: 'formal' });
 
     expect(text).toBe('Call the dentist');
     const [url, body, config] = axios.post.mock.calls[0];
     expect(url).toBe('/reword-task');
-    expect(body).toEqual({ text: 'Call', category: 'Dentist', board: 'Life admin' });
+    expect(body).toEqual({ text: 'Call', category: 'Dentist', board: 'Life admin', tone: 'formal' });
     expect(config.headers.Authorization).toBe('Bearer token');
   });
 
