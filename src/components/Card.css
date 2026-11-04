@@ -27,6 +27,9 @@
     height: 18px;
     padding: 2px;
     opacity: 0.4;
+    color: var(--text-colour);
+    /* The shared 1.75 is drawn at 10px here, too faint beside the 2px border */
+    stroke-width: 3.5;
     border: solid 2px var(--text-colour);
     border-radius: 5px;
 }
