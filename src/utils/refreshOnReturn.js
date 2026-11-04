@@ -33,17 +33,16 @@ export function watchForReturn(onReturn) {
     if (slept) refreshIfStale();
   }, WAKE_CHECK);
 
-  const inputEvents = ['pointermove', 'pointerdown', 'keydown'];
-  document.addEventListener('visibilitychange', refreshIfStale);
-  window.addEventListener('focus', refreshIfStale);
-  window.addEventListener('online', refreshIfStale);
-  inputEvents.forEach(type => window.addEventListener(type, handleInput, { passive: true }));
+  const listeners = [
+    [document, 'visibilitychange', refreshIfStale],
+    [window, 'focus', refreshIfStale],
+    [window, 'online', refreshIfStale],
+    ...['pointermove', 'pointerdown', 'keydown'].map(type => [window, type, handleInput, { passive: true }])
+  ];
+  listeners.forEach(([target, type, listener, options]) => target.addEventListener(type, listener, options));
 
   return () => {
     clearInterval(wakeCheck);
-    document.removeEventListener('visibilitychange', refreshIfStale);
-    window.removeEventListener('focus', refreshIfStale);
-    window.removeEventListener('online', refreshIfStale);
-    inputEvents.forEach(type => window.removeEventListener(type, handleInput));
+    listeners.forEach(([target, type, listener]) => target.removeEventListener(type, listener));
   };
 }

@@ -29,32 +29,27 @@ export const ensureToken = async () => {
   if (!ok) throw Object.assign(new Error("Session expired, please sign in again"), { code: SESSION_EXPIRED });
 };
 
-// Generic API request function for GET requests. Silent callers report failures themselves.
-// `action` finishes the sentence "we couldn't ..." in the alert, so the user knows what failed.
-const apiGet = async (url, params = {}, { silent = false, action } = {}) => {
+const send = {
+  get: (url, params, config) => axios.get(url, { ...config, params }),
+  post: (url, body, config) => axios.post(url, body, config),
+};
+
+// Silent callers report failures themselves. `action` finishes the sentence "we couldn't ..." in the alert, so the
+// user knows what failed.
+const request = async (method, url, payload, { silent = false, action, timeout } = {}) => {
   try {
     await ensureToken();
-    const response = await axios.get(url, { headers: getHeaders(), params });
+    const response = await send[method](url, payload, { headers: getHeaders(), timeout });
     return response.data?.data;
   } catch (err) {
-    console.error(`Error getting ${url}:`, err);
+    console.error(`Error calling ${method.toUpperCase()} ${url}:`, err);
     if (!silent) showAlert(apiErrorAlert(err, action));
     throw err;
   }
 };
 
-// Generic API request function for POST requests. Silent callers report failures themselves.
-const apiPost = async (url, body, { silent = false, action, timeout } = {}) => {
-  try {
-    await ensureToken();
-    const response = await axios.post(url, body, { headers: getHeaders(), timeout });
-    return response.data?.data;
-  } catch (err) {
-    console.error(`Error posting to ${url}:`, err);
-    if (!silent) showAlert(apiErrorAlert(err, action));
-    throw err;
-  }
-};
+const apiGet = (url, params = {}, options) => request('get', url, params, options);
+const apiPost = (url, body, options) => request('post', url, body, options);
 
 export const getActiveTasks = (boardID, { silent = false } = {}) =>
   apiGet('/active-tasks', { boardID }, { silent, action: "load this board's tasks" });

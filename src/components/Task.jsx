@@ -1,11 +1,11 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo } from 'react';
 import { queueUpdate } from '../utils/syncEngine';
-import { findAdjacentTaskTextarea, moveCaretBetweenFields } from '../utils/caretNavigation';
+import { findAdjacentTaskTextarea, focusAt, moveCaretBetweenFields } from '../utils/caretNavigation';
 import { TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
 import { nextRewordChoice, rewordToApply } from '../utils/utils';
 import { CheckIcon, LinkIcon, MoreIcon, UndoIcon } from './Icons';
 import TaskMenu from './TaskMenu';
-import './Task.css'
+import './Task.css';
 
 // The reword shimmer moves at one speed whatever the task's length, in px per second. A short task's band carries on
 // out of sight before the next sweep, so the loop doesn't flicker
@@ -17,6 +17,17 @@ const textLength = span => Math.max(0, ...[...span.getClientRects()].map(rect =>
 
 // Under reduced motion there's no loop or crossfade to wait for, so text goes straight in
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Moves the caret out of a task about to be deleted or ticked: to the end of the task above or the start of the one
+// below, trying the preferred side first. Found before the change, while the task is still in the DOM. Returns
+// whether there was one
+const focusNeighbour = (textarea, preferAbove) => {
+  const above = findAdjacentTaskTextarea(textarea, true);
+  const below = findAdjacentTaskTextarea(textarea, false);
+  const neighbour = preferAbove ? above ?? below : below ?? above;
+  if (neighbour) focusAt(neighbour, neighbour === above ? neighbour.value.length : 0);
+  return !!neighbour;
+};
 
 // Memoised: every prop is stable or this task's own object, so editing one task re-renders only that task
 const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joinTask, rewordTask, focusRequestRef, tickedCheckboxRef, handleDeleteTask, setPromptConf, setAlertConf }) => {
@@ -87,7 +98,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     if (isRewording) return;
     tickedCheckboxRef.current = checked ? null : checkboxRef.current;
     toggleTaskChecked(task.SK, !checked);
-  }
+  };
 
   // A task the user just created, split or joined asks for the caret here once it shows the text that produced. Run on
   // mount and on each new text, after React has written it to the textarea and so moved the caret to the end. Tasks that
@@ -97,8 +108,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     const request = focusRequestRef.current;
     if (request?.SK !== task.SK || request.description !== description) return;
     focusRequestRef.current = null;
-    textareaRef.current.focus();
-    textareaRef.current.setSelectionRange(request.caret, request.caret);
+    focusAt(textareaRef.current, request.caret);
   }, [description]);
 
   const saveDescription = (newDescription, options) => {
@@ -110,9 +120,8 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
   const handleTextUpdate = e => saveDescription(e.target.value, { typing: true });
 
-  // Delete the task and remove from the view
-  const handleDeleteAndHideTask = (taskID, title) => {
-    handleDeleteTask(taskID, title)
+  const handleDeleteAndHideTask = () => {
+    handleDeleteTask(task.SK, title);
     setTaskMenuVisible(false);
   };
 
@@ -232,7 +241,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
   // Keyboard shortcuts for creating, splitting, joining, ticking, deleting and moving between tasks, as with lines in
   // an editor
-  const onKeyDown = (e, taskID, title) => {
+  const onKeyDown = (e) => {
     const { key, target } = e;
     if (moveCaretBetweenFields(e)) return;
     // An input method uses Enter and Backspace to build its text, so they aren't meant for the list
@@ -245,24 +254,15 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     const { selectionStart: start, selectionEnd: end, value } = target;
 
     if ((key === "Backspace" || key === "Delete") && value === "") {
-      // Found before the delete, while this task is still in the DOM. Backspace prefers the task above and Delete the
-      // one below, falling back to the other. Neither means this is the last unticked task, which isn't simply
-      // deleted, so focus stays put
-      const above = findAdjacentTaskTextarea(target, true);
-      const below = findAdjacentTaskTextarea(target, false);
-      const neighbour = key === "Backspace" ? above ?? below : below ?? above;
-      if (neighbour) {
-        // The key's default action follows focus, so it would otherwise delete a character from the neighbour
-        e.preventDefault();
-        const caret = neighbour === above ? neighbour.value.length : 0;
-        neighbour.focus();
-        neighbour.setSelectionRange(caret, caret);
-      }
-      handleDeleteAndHideTask(taskID, title);
+      // Backspace prefers the task above and Delete the one below. Neither means this is the last unticked task,
+      // which isn't simply deleted, so focus stays put. The key's default action follows focus, so it would
+      // otherwise delete a character from the neighbour
+      if (focusNeighbour(target, key === "Backspace")) e.preventDefault();
+      handleDeleteAndHideTask();
       return;
     }
     if (start === end && ((key === "Backspace" && start === 0) || (key === "Delete" && start === value.length))) {
-      if (joinTask(taskID, key === "Backspace")) e.preventDefault();
+      if (joinTask(task.SK, key === "Backspace")) e.preventDefault();
       return;
     }
     if (key === "Escape") {
@@ -273,14 +273,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
     // the one above when this was the last. Ticking the card's last unticked task adds an empty one, which takes focus
     if (key === "Enter" && e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey) {
       e.preventDefault();
-      const above = findAdjacentTaskTextarea(target, true);
-      const below = findAdjacentTaskTextarea(target, false);
-      const next = below ?? above;
-      if (next) {
-        const caret = next === above ? next.value.length : 0;
-        next.focus();
-        next.setSelectionRange(caret, caret);
-      }
+      focusNeighbour(target, false);
       handleCheckBox();
       return;
     }
@@ -290,12 +283,12 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       e.preventDefault();
       // At the very start the whole task moves down a line, so it keeps its own link and importance
       if (end === 0 && value !== "") {
-        addTask(taskID, { above: true });
+        addTask(task.SK, { above: true });
         return;
       }
       // Otherwise the text after the caret, less any selection, moves into a new task below
       saveDescription(value.slice(0, start));
-      addTask(taskID, { description: value.slice(end) });
+      addTask(task.SK, { description: value.slice(end) });
     }
   };
 
@@ -317,7 +310,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   const isImportant = task.Important === "true";
   const taskExpiryOpacityStyle = checked ? { opacity: taskExpiryOpacity() } : null;
   const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 1.5px", opacity: taskExpiryOpacity() } : null;
-  const isLinkAvailable = task.Link && task.Link !== "";
   const showRewordChoice = rewordChoice !== null && !isRewording;
 
   return (
@@ -373,7 +365,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           readOnly={isRewording}
           placeholder="new task..."
           onChange={handleTextUpdate}
-          onKeyDown={(e) => onKeyDown(e, task.SK, title)}
+          onKeyDown={onKeyDown}
           style={taskTextDecorationStyle}
         />
         {/* Always present, as a live region only announces changes to one that's already on the page */}
@@ -392,7 +384,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             <UndoIcon className="task-reword-choice-icon" />
           </button>
         </div>
-      ) : isLinkAvailable ? (
+      ) : task.Link ? (
         <a href={task.Link} target="_blank" rel="noreferrer">
           <LinkIcon className="task-link-icon task-three-dots-vertical" />
         </a>
@@ -409,7 +401,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             markAsImportant={handleMarkAsImportant}
             duplicateTask={handleDuplicate}
             rewordTask={canReword ? handleReword : null}
-            deleteAndHideTask={() => handleDeleteAndHideTask(task.SK, title)}
+            deleteAndHideTask={handleDeleteAndHideTask}
             isImportant={isImportant}
             task={task}
             setTaskFields={setTaskFields}

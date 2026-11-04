@@ -1,10 +1,8 @@
-import { useRef, useEffect } from 'react';
-import { useOnClickOutside } from 'usehooks-ts';
-import { useEnterToAccept } from '../utils/useEnterToAccept';
+import { useRef } from 'react';
+import { useModalControls } from '../utils/useEnterToAccept';
 import './Prompt.css';
 
 const Confirm = ({ confirmConf, setConfirmConf }) => {
-
   const ref = useRef(null);
 
   const closeConfirm = () => {
@@ -16,18 +14,7 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
     closeConfirm();
   };
 
-  useEnterToAccept(ref, handleConfirm, confirmConf?.display);
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') closeConfirm();
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useOnClickOutside(ref, closeConfirm);
+  useModalControls(ref, { accept: handleConfirm, close: closeConfirm, active: confirmConf?.display });
 
   if (!confirmConf?.display) return null;
 

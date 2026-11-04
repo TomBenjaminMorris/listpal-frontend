@@ -1,16 +1,15 @@
-import { useCallback, useLayoutEffect, useReducer, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
+import { getBoardIdFromUrl, newTask, updateCategoryOrder } from '../utils/utils';
 import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import { suggestEmoji } from '../utils/categoryEmoji';
+import { CATEGORY_NAME_TAKEN_ALERT, nameRequiredAlert } from '../utils/nameAlerts';
 import Card from './Card';
 import { PlusIcon } from './Icons';
 import './Prompt.css';
-import './CardList.css'
+import './CardList.css';
 
 const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, remoteUpdateRef }) => {
-  const [, forceUpdate] = useReducer(x => x + 1, 0);
-
   // Where the caret goes once a task shows a given text: { SK, caret, description }. Task reads it, as React moves the
   // caret to the end whenever it changes a value. Held here because a new category's first task asks for it from a new Card
   const focusRequestRef = useRef(null);
@@ -76,14 +75,6 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
     delete cardKeys.current[oldTitle];
   };
 
-  const showAlert = useCallback((title, textValue) => {
-    setAlertConf({
-      display: true,
-      title,
-      textValue
-    });
-  }, [setAlertConf]);
-
   // For callbacks that outlive the render that made them: handleDeleteTask keeps one identity for every memoised Task,
   // and the new category prompt holds handleNewCard while a fresh copy of the board can land
   const sortedTasksRef = useRef(sortedTasks);
@@ -99,7 +90,11 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
     // Card handles a category's only task. Beside ticked tasks, the last unticked one stays, so there's a task to type into
     if (isLastUncheckedTask) {
       if (!task.Description) {
-        showAlert("This one has to stay 📌", "Every category needs one unticked task. If you're done with the category, delete it from its menu instead.");
+        setAlertConf({
+          display: true,
+          title: "This one has to stay 📌",
+          textValue: "Every category needs one unticked task. If you're done with the category, delete it from its menu instead.",
+        });
         return;
       }
 
@@ -118,49 +113,32 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
       ...prev,
       [title]: prev[title].filter(t => t.SK !== taskID)
     } : prev);
-  }, [setSortedTasks, showAlert]);
+  }, [setSortedTasks, setAlertConf]);
 
   // Synchronous, as the prompt closes as soon as this returns
   const handleNewCard = (typedName) => {
     // Trimmed, so " Car" can't sit beside "Car"
     const name = typedName.trim();
     const categories = Object.keys(sortedTasksRef.current);
-    if (!name || categories.includes(name)) {
-      if (name) showAlert("Already taken 👯", "This board already has a category with that name. Try another one.");
-      else showAlert("Name, please! ✏️", "Every category needs a name, even a short one.");
+    if (!name) {
+      setAlertConf(nameRequiredAlert('category'));
+      return;
+    }
+    if (categories.includes(name)) {
+      setAlertConf(CATEGORY_NAME_TAKEN_ALERT);
       return;
     }
 
-    const boardID = getBoardIdFromUrl();
-    const newCardDefaultTask = {
-      CreatedDate: String(Date.now()),
-      SK: "t#" + uuidv4(),
-      PK: "",
-      "GSI1-SK": "nil",
-      "GSI1-PK": boardID,
-      ExpiryDate: "nil",
-      Description: "",
-      CompletedDate: "nil",
-      Category: name,
-      EntityType: "Task",
-      Emoji: suggestEmoji(name),
-      Link: "",
-      Important: "false",
-      ExpiryDateTTL: 0
-    };
+    const newCardDefaultTask = newTask({ boardID: getBoardIdFromUrl(), category: name, emoji: suggestEmoji(name) });
 
     // From what's on screen, as the saved order can hold stale or missing names
     const sortArr = [...categories, name];
-    updateCategoryOrder(sortArr, setBoards)
+    updateCategoryOrder(sortArr, setBoards);
 
     focusRequestRef.current = { SK: newCardDefaultTask.SK, caret: 0, description: "" };
     queueCreate(newCardDefaultTask);
 
-    setSortedTasks(prev => ({
-      ...prev,
-      [name]: [newCardDefaultTask]
-    }), sortArr);
-    forceUpdate();
+    setSortedTasks(prev => ({ ...prev, [name]: [newCardDefaultTask] }), sortArr);
   };
 
   const openNewCategoryPrompt = () => setPromptConf({
@@ -173,13 +151,13 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
 
   return (
     <div className="card-list-container" ref={containerRef}>
-      {Object.entries(sortedTasks).map(([key]) => (
+      {Object.entries(sortedTasks).map(([category, tasks]) => (
         <Card
-          key={getCardKey(key)}
-          title={key}
+          key={getCardKey(category)}
+          title={category}
           boardName={boardName}
           onRename={handleRenameCard}
-          tasks={sortedTasks[key]}
+          tasks={tasks}
           setSortedTasks={setSortedTasks}
           sortedTasks={sortedTasks}
           handleDeleteTask={handleDeleteTask}

@@ -13,6 +13,13 @@ const TYPE_MAPPINGS = {
   Y: { detail: 'YScore', label: 'yearly', name: 'This year' }
 };
 
+const progressBarStyles = buildStyles({
+  trailColor: 'color-mix(in srgb, var(--text-colour) 14%, transparent)',
+  textColor: 'var(--text-colour)',
+  pathColor: 'var(--accent)',
+  pathTransitionDuration: 0.5,
+});
+
 // Returning the same object when nothing changes lets React skip re-rendering the whole board
 const setFlag = (setter, label, value) => setter(current => current[label] === value ? current : { ...current, [label]: value });
 
@@ -21,24 +28,21 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
   const [animate, setAnimate] = useState(false);
   const [scoreHasChanged, setScoreHasChanged] = useState(false);
   const prevRef = useRef({ boardSK: undefined, percent: undefined, refreshCount });
+  const { detail, label, name } = TYPE_MAPPINGS[type];
 
-  const validateAndUpdateScore = async () => {
+  const handleScoreUpdate = async () => {
+    if (!scoreHasChanged) return;
     if (scoreValue === "") {
       setAlertConf({
         display: true,
         title: "Missing a number 🔢",
         textValue: "The score can't be empty. Pop a number in and try again.",
       });
-      return false;
+      return;
     }
-    return true;
-  };
-
-  const handleScoreUpdate = async () => {
-    if (!scoreHasChanged || !(await validateAndUpdateScore())) return;
 
     const { SK, YScore, MScore, WScore } = currentBoardScores;
-    const scores = applyManualScore({ YScore, MScore, WScore }, TYPE_MAPPINGS[type].detail, scoreValue);
+    const scores = applyManualScore({ YScore, MScore, WScore }, detail, scoreValue);
 
     try {
       // The value typed already counts any tick still queued, and the server sets it outright, so a tick landing
@@ -47,11 +51,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
       await updateBoardScoresAPI(SK, scores);
 
       // An updater over the latest boards, as the flush can take seconds and settings may change meanwhile
-      setBoards(boards =>
-        boards.map(board =>
-          board.SK === SK ? { ...board, ...scores } : board
-        )
-      );
+      setBoards(boards => boards.map(board => board.SK === SK ? { ...board, ...scores } : board));
       setScoreHasChanged(false);
     } catch (error) {
       console.error('Failed to update score:', error);
@@ -59,8 +59,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
   };
 
   useEffect(() => {
-    setScoreValue(score)
-    const label = TYPE_MAPPINGS[type].label;
+    setScoreValue(score);
     const boardSK = currentBoardScores?.SK;
     // A celebration needs a real crossing: same board, previous percent known and below 100.
     // Loading a board that is already at or above target (or switching to one) must stay silent, and so must a
@@ -76,7 +75,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
     } else if (percent !== undefined && percent !== null) {
       setFlag(setIsExploding, label, false);
     }
-  }, [percent, score, currentBoardScores?.SK])
+  }, [percent, score, currentBoardScores?.SK]);
 
   // After the effect above, so it sees a refresh that arrived with the new score as different. Not one of its
   // dependencies, because a refresh that changes nothing mustn't bulge the counter.
@@ -85,13 +84,6 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
   }, [refreshCount]);
 
   const target = currentBoardScores?.[`${type}Target`];
-
-  const progressBarStyles = buildStyles({
-    trailColor: 'color-mix(in srgb, var(--text-colour) 14%, transparent)',
-    textColor: 'var(--text-colour)',
-    pathColor: 'var(--accent)',
-    pathTransitionDuration: 0.5,
-  });
 
   return (
     <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)}>
@@ -108,8 +100,8 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
             </div>
           </CircularProgressbarWithChildren>
         )}
-        {isExploding[TYPE_MAPPINGS[type].label] && <span className="score-star" aria-label="Target met"><StarIcon /></span>}
-        <div className="tooltip">{`${TYPE_MAPPINGS[type].name}: ${Number(score).toLocaleString()} of ${Number(target).toLocaleString()}`}</div>
+        {isExploding[label] && <span className="score-star" aria-label="Target met"><StarIcon /></span>}
+        <div className="tooltip">{`${name}: ${Number(score).toLocaleString()} of ${Number(target).toLocaleString()}`}</div>
       </div>
     </div>
   );

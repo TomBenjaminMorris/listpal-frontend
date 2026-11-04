@@ -1,23 +1,14 @@
 import { memo } from 'react';
 import { updateRewordToneAPI } from '../utils/apiGatewayClient';
 import { DEFAULT_REWORD_TONE, REWORD_SAMPLE_TASK, REWORD_TONES } from '../utils/rewordTones';
+import { saveUserSetting } from '../utils/userDetails';
 import './ThemeCard.css';
 import './RewordToneSetter.css';
 
 const RewordToneSetter = ({ userDetails, setUserDetails }) => {
   const selected = userDetails?.RewordTone ?? DEFAULT_REWORD_TONE;
 
-  const handleChoice = (tone) => {
-    setUserDetails(current => {
-      const updatedDetails = { ...current, RewordTone: tone };
-      localStorage.setItem('userDetails', JSON.stringify(updatedDetails));
-      return updatedDetails;
-    });
-
-    updateRewordToneAPI(tone).catch(error => {
-      console.error('Failed to update reword tone:', error);
-    });
-  };
+  const handleChoice = (tone) => saveUserSetting(setUserDetails, 'RewordTone', tone, updateRewordToneAPI);
 
   return (
     <section className="page-section">

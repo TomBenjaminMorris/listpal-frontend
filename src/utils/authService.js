@@ -66,8 +66,4 @@ async function requestRefresh(refreshToken) {
   }
 }
 
-function clearAuth() {
-  sessionStorage.clear();
-}
-
-export { setTokensFromCode, refreshTokens, clearAuth };
+export { setTokensFromCode, refreshTokens };

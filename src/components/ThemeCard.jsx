@@ -1,18 +1,9 @@
 import { updateThemeAPI } from '../utils/apiGatewayClient';
+import { saveUserSetting } from '../utils/userDetails';
 import './ThemeCard.css';
 
 const ThemeCard = ({ id, label, setUserDetails, highlight }) => {
-  const handleChoice = () => {
-    setUserDetails(current => {
-      const updatedDetails = { ...current, Theme: id };
-      localStorage.setItem('userDetails', JSON.stringify(updatedDetails));
-      return updatedDetails;
-    });
-
-    updateThemeAPI(id).catch(error => {
-      console.error('Failed to update theme:', error);
-    });
-  };
+  const handleChoice = () => saveUserSetting(setUserDetails, 'Theme', id, updateThemeAPI);
 
   return (
     <button className="theme-card-wrapper" data-theme={id} onClick={handleChoice} aria-pressed={highlight}>

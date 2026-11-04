@@ -1,23 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useOnClickOutside } from 'usehooks-ts';
-import { useEnterToAccept } from '../utils/useEnterToAccept';
+import { useState, useRef } from 'react';
+import { useModalControls } from '../utils/useEnterToAccept';
 import './Prompt.css';
 
 const Prompt = ({ promptConf, setPromptConf }) => {
-
   const ref = useRef(null);
   const [inputText, setInputText] = useState(promptConf?.defaultText || '');
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') handleClose();
-    };
-
-    if (promptConf?.display) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [promptConf]);
 
   const handleClose = () => {
     setPromptConf({ display: false });
@@ -28,9 +15,7 @@ const Prompt = ({ promptConf, setPromptConf }) => {
     handleClose();
   };
 
-  useEnterToAccept(ref, handleConfirm, promptConf?.display);
-
-  useOnClickOutside(ref, handleClose);
+  useModalControls(ref, { accept: handleConfirm, close: handleClose, active: promptConf?.display });
 
   if (!promptConf?.display) return null;
 

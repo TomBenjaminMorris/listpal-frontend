@@ -1,6 +1,6 @@
 import { useRef, useEffect, memo } from 'react';
-import { useOnClickOutside, useScrollLock } from 'usehooks-ts';
-import { useEnterToAccept } from '../utils/useEnterToAccept';
+import { useScrollLock } from 'usehooks-ts';
+import { useModalControls } from '../utils/useEnterToAccept';
 import TargetSetter from './TargetSetter';
 import './Prompt.css';
 
@@ -13,30 +13,16 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
   const ref = useRef(null);
 
   useEffect(() => {
-    if (display) {
-      lock();
-    } else {
-      unlock();
-    }
+    if (display) lock();
+    else unlock();
   }, [display]);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        setDisplay(false);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown, true);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, true);
-    };
-  }, [setDisplay]);
-
   // Focus can leave the fields, where the browser's own Enter-to-submit wouldn't fire
-  useEnterToAccept(ref, () => ref.current?.querySelector('form')?.requestSubmit(), display);
-
-  useOnClickOutside(ref, () => setDisplay(false));
+  useModalControls(ref, {
+    accept: () => ref.current?.querySelector('form')?.requestSubmit(),
+    close: () => setDisplay(false),
+    active: display
+  });
 
   if (!display) return null;
 
@@ -48,10 +34,7 @@ const TargetSetterModal = memo(({ display, setDisplay, boardID, boards, setBoard
           boards={boards}
           setBoards={setBoards}
           setAlertConf={setAlertConf}
-          handleClose={() => {
-            unlock();
-            setDisplay(false);
-          }}
+          handleClose={() => setDisplay(false)}
         />
       </div>
     </div>

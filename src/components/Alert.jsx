@@ -1,6 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { useOnClickOutside } from 'usehooks-ts';
-import { useEnterToAccept } from '../utils/useEnterToAccept';
+import { useRef } from 'react';
+import { useModalControls } from '../utils/useEnterToAccept';
 import './Prompt.css';
 
 const Alert = ({ alertConf, setAlertConf }) => {
@@ -15,18 +14,7 @@ const Alert = ({ alertConf, setAlertConf }) => {
     alertConf.onAction?.();
   };
 
-  useEnterToAccept(ref, handleAccept, alertConf?.display);
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") closeAlert();
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useOnClickOutside(ref, closeAlert);
+  useModalControls(ref, { accept: handleAccept, close: closeAlert, active: alertConf?.display });
 
   if (!alertConf?.display) return null;
 

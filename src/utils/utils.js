@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { queueBoardUpdate } from "./syncEngine";
 
 export function parseJwt(token) {
@@ -60,10 +61,32 @@ export function isUrlValid(userInput) {
     return urlPattern.test(userInput);
 }
 
+// On screen at once and through the outbox. CategoryOrder is held parsed but queued as the JSON string the server stores
+export function saveBoardSettings(setBoards, boardID, fields) {
+    setBoards(current => current.map(b => b.SK === boardID ? { ...b, ...fields } : b));
+    queueBoardUpdate(boardID, 'CategoryOrder' in fields ? { ...fields, CategoryOrder: JSON.stringify(fields.CategoryOrder) } : fields);
+}
+
 export function updateCategoryOrder(sortArr, setBoards) {
-    const boardID = getBoardIdFromUrl();
-    setBoards(current => current.map(b => b.SK === boardID ? { ...b, CategoryOrder: sortArr } : b));
-    queueBoardUpdate(boardID, { CategoryOrder: JSON.stringify(sortArr) });
+    saveBoardSettings(setBoards, getBoardIdFromUrl(), { CategoryOrder: sortArr });
+}
+
+export const UNTICKED = Object.freeze({ CompletedDate: 'nil', ExpiryDate: 'nil', 'GSI1-SK': 'nil', ExpiryDateTTL: 0 });
+
+export function newTask({ boardID, category, emoji, createdDate = String(Date.now()), description = '', link = '', important = 'false' }) {
+    return {
+        ...UNTICKED,
+        SK: 't#' + uuidv4(),
+        PK: '',
+        'GSI1-PK': boardID,
+        EntityType: 'Task',
+        CreatedDate: createdDate,
+        Category: category,
+        Emoji: emoji,
+        Description: description,
+        Link: link,
+        Important: important
+    };
 }
 
 export function getBoardIdFromUrl() {
