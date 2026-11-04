@@ -109,7 +109,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
           </CircularProgressbarWithChildren>
         )}
         {isExploding[TYPE_MAPPINGS[type].label] && <span className="score-star" aria-label="Target met"><StarIcon /></span>}
-        <div className="score-type-tooltip">{`${TYPE_MAPPINGS[type].name}: ${Number(score).toLocaleString()} of ${Number(target).toLocaleString()}`}</div>
+        <div className="tooltip">{`${TYPE_MAPPINGS[type].name}: ${Number(score).toLocaleString()} of ${Number(target).toLocaleString()}`}</div>
       </div>
     </div>
   );

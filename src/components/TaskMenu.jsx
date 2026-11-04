@@ -64,7 +64,7 @@ const TaskMenu = memo(({ containerRef, onClose, markAsImportant, duplicateTask, 
   );
 
   return (
-    <div className="task-dropdown-menu fadeIn-animation">
+    <div className="popup-menu task-dropdown-menu fadeIn-animation">
       <ul>
         {rewordTask && (
           <li onClick={rewordTask}>

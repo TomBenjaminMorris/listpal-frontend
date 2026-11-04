@@ -36,11 +36,9 @@ const Confirm = ({ confirmConf, setConfirmConf }) => {
       <div className="prompt-inner-wrapper" ref={ref} role="alertdialog" aria-modal="true" aria-label={confirmConf.title}>
         <h1>{confirmConf.title}</h1>
         <p>{confirmConf.textValue}</p>
-        <div className="prompt-button-container">
-          <div className="prompt-button-wrapper">
-            <button className="prompt-button" onClick={handleConfirm}>Confirm</button>
-            <button className="prompt-button-cancel" onClick={closeConfirm}>Cancel</button>
-          </div>
+        <div className="prompt-buttons">
+          <button className="prompt-button" onClick={handleConfirm}>Confirm</button>
+          <button className="prompt-button-cancel" onClick={closeConfirm}>Cancel</button>
         </div>
       </div>
     </div>

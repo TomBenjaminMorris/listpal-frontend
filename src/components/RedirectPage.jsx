@@ -28,13 +28,11 @@ const RedirectPage = ({ isDev }) => {
         <div className="prompt-inner-wrapper">
           <h1>{failure.title}</h1>
           <p>{failure.textValue}</p>
-          <div className="prompt-button-container">
-            <div className="prompt-button-wrapper">
-              {/* A code works only once, so retrying needs a fresh one from the sign-in page */}
-              <button className="prompt-button" onClick={() => window.location.assign("/logout")}>
-                Sign in again
-              </button>
-            </div>
+          <div className="prompt-buttons">
+            {/* A code works only once, so retrying needs a fresh one from the sign-in page */}
+            <button className="prompt-button" onClick={() => window.location.assign("/logout")}>
+              Sign in again
+            </button>
           </div>
         </div>
       </div>

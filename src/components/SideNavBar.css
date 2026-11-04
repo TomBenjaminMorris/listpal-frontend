@@ -97,6 +97,7 @@
   box-sizing: border-box;
   color: var(--text-muted);
   border-radius: 8px;
+  font-family: CircularBook;
   transition: background-color 120ms ease, color 120ms ease;
 }
 
@@ -106,13 +107,9 @@
   gap: 12px;
   width: 100%;
   height: 40px;
-  margin: 0;
   padding: 0 10px;
-  border: 0;
   background: none;
-  font-family: CircularBook;
   font-size: 15px;
-  font-weight: normal;
   text-align: left;
 }
 
@@ -126,11 +123,6 @@
 .sidenav-brand:focus-visible {
   outline: 2px solid var(--text-colour);
   outline-offset: -2px;
-}
-
-/* index.css gives every focused button a ring, which would otherwise stay on after a mouse click */
-.sidenav-row:focus:not(:focus-visible) {
-  outline: none;
 }
 
 @media (hover: hover) {
@@ -213,9 +205,7 @@
   height: 34px;
   /* Full width like the rows above it, with a small indent to show the boards belong to the row above */
   padding: 0 10px 0 26px;
-  font-family: CircularBook;
   font-size: 14px;
-  font-weight: normal;
 }
 
 .sidenav-board-emoji {
@@ -252,7 +242,7 @@
     padding: 3px 8px;
     border-radius: 6px;
     background-color: var(--tooltip-background);
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 4px 12px;
+    box-shadow: var(--shadow-tooltip);
     color: var(--text-colour);
     font-size: 12.5px;
     line-height: 18px;
@@ -304,8 +294,6 @@
   box-sizing: border-box;
   width: 40px;
   height: 40px;
-  margin: 0;
-  padding: 0;
   border-radius: 10px;
   background-color: var(--foreground);
   color: var(--text-colour);

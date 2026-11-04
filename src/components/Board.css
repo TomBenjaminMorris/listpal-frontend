@@ -1,6 +1,5 @@
 .board-content-wrapper {
     display: flex;
-    justify-content: space-evenly;
     padding: 0 24px;
 }
 
@@ -20,7 +19,6 @@
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
-    flex-grow: 1;
 }
 
 /* margin-right: auto pushes everything else to the right, and min-width: 0 lets a long name shorten instead of wrapping the row.
@@ -53,9 +51,7 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    border: none;
+    border-radius: 8px;
     background: none;
     color: var(--text-muted);
     transition: background-color 120ms, color 120ms;
@@ -66,7 +62,6 @@
     width: 30px;
     height: 30px;
     margin-left: -5px;
-    border-radius: 8px;
 }
 
 .board-rename>.line-icon {
@@ -78,13 +73,6 @@
 .board-action>button {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-}
-
-/* index.css rings every focused button, which would otherwise stay on after a mouse click */
-.board-rename:focus:not(:focus-visible),
-.board-action>button:focus:not(:focus-visible) {
-    outline: none;
 }
 
 @media (hover: hover) {
@@ -103,7 +91,7 @@
     padding: 4px 8px;
     background-color: var(--foreground);
     border-radius: 12px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: var(--shadow-card);
 }
 
 .board-action {
@@ -119,28 +107,8 @@
     transition: opacity 150ms 120ms;
 }
 
-.board-action:hover .board-action-tooltip {
+.board-action:hover>.tooltip {
     display: block;
-}
-
-/* Matches .score-type-tooltip in ScoreCounter.css */
-.board-action-tooltip {
-    display: none;
-    position: absolute;
-    z-index: 1000;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 12px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background-color: var(--tooltip-background);
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 4px 12px;
-    font-family: CircularBook;
-    font-size: 12.5px;
-    line-height: 18px;
-    white-space: nowrap;
-    pointer-events: none;
 }
 
 /* Matches a category card's emoji. Centred rather than left-aligned, as the emoji picker's offsets below depend on it. */
@@ -156,11 +124,11 @@
 
 /* No positioned parent, so it escapes the card's overflow. The margins put it just below the emoji. */
 .board-emoji-wrapper {
-    position: absolute !important;
+    position: absolute;
     z-index: 2001;
     margin-top: 505px;
     margin-left: 244px;
-    box-shadow: rgba(0, 0, 0, 0.45) 0px 8px 24px;
+    box-shadow: var(--shadow-popover);
     border-radius: 12px;
 }
 
@@ -182,7 +150,6 @@
 }
 
 .transparent_gradient {
-    display: block;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -204,10 +171,10 @@
     bottom: 20px;
     right: 20px;
     z-index: 2500;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: var(--shadow-card);
     width: 30px;
     height: 30px;
-    border-radius: 30px;
+    border-radius: 50%;
 }
 
 .sync-status-icon {
@@ -216,7 +183,7 @@
 }
 
 .sync-error {
-    box-shadow: 0 0 0 2px #e5484d, rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: 0 0 0 2px #e5484d, var(--shadow-card);
 }
 
 /* Sits just left of the sync indicator, at the same height */
@@ -232,7 +199,7 @@
     font-size: 15px;
     white-space: nowrap;
     color: #fff;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: var(--shadow-card);
 }
 
 .sync-pill-error {
@@ -244,15 +211,51 @@
 }
 
 .spin {
-    -webkit-animation: spin 3s infinite linear;
+    animation: spin 3s infinite linear;
 }
 
-@-webkit-keyframes spin {
-    0% {
-        -webkit-transform: rotate(0deg);
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media screen and (max-width: 650px) {
+    .board-content-wrapper {
+        padding: 0 16px;
     }
 
-    100% {
-        -webkit-transform: rotate(360deg);
+    /* Clears the fixed menu button */
+    .flex-container {
+        margin-top: 64px;
+    }
+
+    .board-filter-actions-wrapper {
+        justify-content: center;
+        margin-bottom: 4px;
+    }
+
+    .board-name-content {
+        flex-basis: 100%;
+        justify-content: center;
+        margin-right: 0;
+        padding-left: 0;
+    }
+
+    .board-title {
+        font-size: 20px;
+    }
+
+    .board-filter-actions-wrapper .date-pills {
+        display: none;
+    }
+
+    /* The desktop offsets assume room to the right of the emoji, which a phone doesn't have */
+    .board-emoji-wrapper {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
     }
 }

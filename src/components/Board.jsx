@@ -320,7 +320,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   };
 
   return (
-    <div className="wrapper" onMouseMove={trackPointer} onPointerDown={handlePointerDown} >
+    <div onMouseMove={trackPointer} onPointerDown={handlePointerDown} >
 
       <Suspense fallback={null}>
         {TARGET_TYPES.map((type) => renderConfetti(type))}
@@ -376,21 +376,21 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
                   })}>
                     <TrashIcon />
                   </button>
-                  <div className="board-action-tooltip">Delete board</div>
+                  <div className="tooltip">Delete board</div>
                 </div>
 
                 <div className="board-action">
                   <button aria-label="Clear tasks" onClick={handleClearClick}>
                     <EraserIcon />
                   </button>
-                  <div className="board-action-tooltip">Clear tasks</div>
+                  <div className="tooltip">Clear tasks</div>
                 </div>
 
                 <div className="board-action">
                   <button aria-label="Set targets" onClick={() => setDisplayTargetSetter(true)}>
                     <TargetIcon />
                   </button>
-                  <div className="board-action-tooltip">Set targets</div>
+                  <div className="tooltip">Set targets</div>
                 </div>
               </div>
 

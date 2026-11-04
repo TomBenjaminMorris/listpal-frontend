@@ -37,6 +37,14 @@
     font-weight: normal;
 }
 
+/* Home's boards and the Settings cards. A row that isn't full leaves its space empty, so a card's width doesn't depend
+   on how many there are */
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 16px;
+}
+
 .page-section-header>span {
     color: var(--text-muted);
     font-family: CircularBook;

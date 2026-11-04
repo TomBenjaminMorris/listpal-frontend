@@ -1,10 +1,3 @@
-/* A row that isn't full leaves its space empty, as on Home's board grid */
-.theme-card-outer-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: 16px;
-}
-
 /* Each card sets data-theme, so everything inside it shows that theme rather than the page's */
 .theme-card-wrapper {
     position: relative;
@@ -13,27 +6,22 @@
     gap: 12px;
     box-sizing: border-box;
     width: 100%;
-    margin: 0;
     padding: 14px;
     /* From the text colour rather than an accent, as some accent-2 shades nearly vanish against some page themes */
     border: 2px solid color-mix(in srgb, var(--text-colour) 35%, transparent);
     border-radius: 12px;
     background-color: var(--background);
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: var(--shadow-card);
     color: var(--text-colour);
     font-family: CircularMedium;
     font-size: 15px;
-    font-weight: normal;
     text-align: left;
     transition: transform 150ms;
 }
 
-/* index.css rings every focused button. Lifting the card shows keyboard users where they are without one. */
-.theme-card-wrapper:focus {
-    outline: none;
-}
-
+/* Lifted instead of the ring index.css gives a focused button, to show keyboard users where they are */
 .theme-card-wrapper:focus-visible {
+    outline: none;
     transform: translateY(-5px);
 }
 
@@ -96,18 +84,6 @@
     line-height: 18px;
 }
 
-.theme-card-meter {
-    display: block;
-    height: 5px;
-    overflow: hidden;
-    border-radius: 3px;
-    background-color: color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
 .theme-card-meter>span {
-    display: block;
     width: 57%;
-    height: 100%;
-    border-radius: 3px;
-    background-color: var(--accent);
 }

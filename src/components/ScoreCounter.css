@@ -31,76 +31,41 @@
 }
 
 .score-input {
+  width: 36px;
+  padding: 0;
+  border: none;
   background: transparent;
   color: var(--text-colour);
-  border: none;
-  padding: 0;
-  text-align: center;
-  width: 36px;
-  border-radius: 15px;
-  font-size: 13px;
-  font-weight: normal;
   font-family: CircularBold;
-  z-index: 200 !important;
+  font-size: 13px;
+  text-align: center;
 }
 
 .score-input:focus {
   outline: none;
 }
 
-.score-button:hover .score-type-tooltip {
+.score-button:hover .tooltip {
   display: block;
 }
 
-/* Matches .board-action-tooltip in Board.css */
-.score-type-tooltip {
-  display: none;
-  position: absolute;
-  z-index: 1000;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 12px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background-color: var(--tooltip-background);
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 4px 12px;
-  font-family: CircularBook;
-  font-size: 12.5px;
-  line-height: 18px;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
 /* The last ring sits at the page's right edge, where a centred tooltip would run off it */
-.score-button:last-child .score-type-tooltip {
+.score-button:last-child .tooltip {
   left: auto;
   right: 0;
   transform: none;
 }
 
 @keyframes bulge {
-  0% {
-    transform: scale(1);
-    color: var(--text-colour);
-  }
-
   10% {
     transform: scale(1.1);
-    color: var(--text-colour);
   }
 
   40% {
-    transform: scale(1);
-    color: var(--text-colour);
-  }
-
-  100% {
-    transform: scale(1);
+    transform: none;
   }
 }
 
 .bulge-now {
   animation: bulge 300ms ease-out;
 }
-

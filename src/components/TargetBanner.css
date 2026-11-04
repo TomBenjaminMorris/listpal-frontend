@@ -100,13 +100,9 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  margin: 0;
-  padding: 0;
-  border: none;
   border-radius: 7px;
   background: none;
   color: var(--text-muted);
-  cursor: pointer;
   transition: background-color 120ms, color 120ms;
 }
 
@@ -114,11 +110,6 @@
   flex-basis: 16px;
   width: 16px;
   height: 16px;
-}
-
-/* index.css rings every focused button, which would otherwise stay on after a mouse click */
-.target-banner-close:focus:not(:focus-visible) {
-  outline: none;
 }
 
 @media (hover: hover) {
@@ -141,25 +132,19 @@
 }
 
 @keyframes bannerIn {
-  0% {
+  from {
     transform: translateX(calc(100% + 24px));
-  }
-  100% {
-    transform: translateX(0);
   }
 }
 
 @keyframes bannerOut {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
+  to {
     transform: translateX(calc(100% + 24px));
   }
 }
 
 @keyframes bannerEmojiPop {
-  0% {
+  from {
     transform: scale(0.4);
     opacity: 0;
   }
