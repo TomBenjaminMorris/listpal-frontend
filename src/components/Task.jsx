@@ -163,7 +163,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
   // the fade to 1 ms rather than removing it, so it still fires. Only if still fading: a reword started during the
   // fade has moved the phase on
   const handleShimmerAnimationEnd = e => {
-    if (e.animationName === "rewordShimmerFade") setRewordPhase(phase => phase === "fading" ? null : phase);
+    if (e.animationName === "fadeOutPure") setRewordPhase(phase => phase === "fading" ? null : phase);
   };
 
   // A loop ends with the band just past the text, so nothing is cut off by the crossfade starting
@@ -328,14 +328,14 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
       <div className="task-textarea-wrapper" ref={wrapperRef} onAnimationEnd={handleWrapperAnimationEnd}>
         {/* A textarea can't style its own text runs, so the highlight is drawn on a hidden copy of the text behind it */}
         {isImportant && description && (
-          <div className="task-textarea-box task-highlight-mirror" aria-hidden="true" style={taskExpiryOpacityStyle}>
+          <div className="task-textarea-box task-mirror task-highlight-mirror" aria-hidden="true" style={taskExpiryOpacityStyle}>
             <span>{description}</span>
           </div>
         )}
         {/* The reword shimmer: a copy of the text laid over the textarea's letters, coloured only where the band
             passes, so the band runs through the letters from one wrapped line to the next */}
         {(rewordPhase === "waiting" || rewordPhase === "fading") && (
-          <div className="task-textarea-box task-shimmer-mirror" aria-hidden="true">
+          <div className="task-textarea-box task-mirror task-shimmer-mirror" aria-hidden="true">
             <span ref={shimmerRef} onAnimationEnd={handleShimmerAnimationEnd} onAnimationIteration={handleShimmerIteration}>
               {description}
             </span>
@@ -345,15 +345,15 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             sizer keeps the row as tall as the old text until the fade ends */}
         {fadeFrom !== null && (
           <>
-            <div className="task-textarea-box task-fade-mirror task-fade-old" aria-hidden="true">
+            <div className="task-textarea-box task-mirror task-fade-mirror task-fade-old" aria-hidden="true">
               <span>{fadeFrom}</span>
             </div>
-            <div className="task-textarea-box task-fade-mirror task-fade-new" aria-hidden="true"
+            <div className="task-textarea-box task-mirror task-fade-mirror task-fade-new" aria-hidden="true"
               onAnimationEnd={rewordPhase === "reverting" ? handleCrossfadeEnd : undefined}>
               <span>{description}</span>
             </div>
             {rewordPhase === "revealing" && (
-              <div className="task-textarea-box task-flash-mirror" aria-hidden="true">
+              <div className="task-textarea-box task-mirror task-flash-mirror" aria-hidden="true">
                 <span onAnimationEnd={handleCrossfadeEnd}>{description}</span>
               </div>
             )}
@@ -365,7 +365,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
         <div ref={sizerRef} className="task-textarea-box task-textarea-sizer" aria-hidden="true">{description}{' '}</div>
         <textarea
           ref={textareaRef}
-          className={`task-textarea-box ${taskMenuVisible ? "highlight-2" : ""}`}
+          className="task-textarea-box"
           rows={1}
           maxLength={TASK_MAX_LENGTH}
           value={description}
@@ -394,10 +394,10 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
         </div>
       ) : isLinkAvailable ? (
         <a href={task.Link} target="_blank" rel="noreferrer">
-          <LinkIcon className="task-dropdown-icons task-three-dots-vertical" />
+          <LinkIcon className="task-link-icon task-three-dots-vertical" />
         </a>
       ) : (
-        <LinkIcon className="task-dropdown-icons task-three-dots-vertical no-background task-link-empty" />
+        <LinkIcon className="task-link-icon task-three-dots-vertical task-link-empty" />
       )}
 
       <div className={`taskMenu ${taskMenuVisible ? "menu-background-display" : ""}`} ref={taskMenuRef}>

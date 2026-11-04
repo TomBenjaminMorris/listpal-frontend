@@ -26,7 +26,7 @@ const RewordToneSetter = ({ userDetails, setUserDetails }) => {
         <span>Sample task: “{REWORD_SAMPLE_TASK}”</span>
       </div>
       {/* The theme cards' look, without their data-theme, so these show the page's own theme */}
-      <div className="theme-card-outer-wrapper">
+      <div className="tile-grid">
         {REWORD_TONES.map(({ id, label, sample }) => (
           <button key={id} className="theme-card-wrapper" onClick={() => handleChoice(id)} aria-pressed={selected === id}>
             {selected === id && <span className="selected-indicator" aria-hidden="true" />}

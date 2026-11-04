@@ -35,23 +35,21 @@ const Alert = ({ alertConf, setAlertConf }) => {
       <div className="prompt-inner-wrapper" ref={ref} role="alertdialog" aria-modal="true" aria-label={alertConf.title}>
         <h1>{alertConf.title}</h1>
         <p>{alertConf.textValue}</p>
-        <div className="prompt-button-container">
-          <div className="prompt-button-wrapper">
-            {alertConf.actionLabel ? (
-              <>
-                <button className="prompt-button" onClick={handleAccept}>
-                  {alertConf.actionLabel}
-                </button>
-                <button className="prompt-button-cancel" onClick={closeAlert}>
-                  Not now
-                </button>
-              </>
-            ) : (
-              <button className="prompt-button" onClick={closeAlert}>
-                Got it
+        <div className="prompt-buttons">
+          {alertConf.actionLabel ? (
+            <>
+              <button className="prompt-button" onClick={handleAccept}>
+                {alertConf.actionLabel}
               </button>
-            )}
-          </div>
+              <button className="prompt-button-cancel" onClick={closeAlert}>
+                Not now
+              </button>
+            </>
+          ) : (
+            <button className="prompt-button" onClick={closeAlert}>
+              Got it
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ const BoardCard = ({ board, onClick, replacesPlaceholder }) => {
         <div className="board-card-figures">
           {weeklyScore.toLocaleString()}{weeklyTarget > 0 && ` of ${weeklyTarget.toLocaleString()}`} this week
         </div>
-        <div className="board-card-meter" aria-hidden="true">
+        <div className="meter" aria-hidden="true">
           <div style={{ width: `${weeklyPercent}%` }} />
         </div>
       </div>
@@ -47,7 +47,7 @@ const BoardCardPlaceholder = () => (
     </div>
     <div>
       <div className="board-card-figures"><div className="placeholder-bar" /></div>
-      <div className="board-card-meter" />
+      <div className="meter" />
     </div>
   </div>
 );
@@ -98,7 +98,7 @@ const BoardList = ({ boards = [], placeholderBoardCount = 0, setBoards, setPromp
   };
 
   return (
-    <div className="board-list">
+    <div className="tile-grid">
       {placeholderBoardCount > 0
         ? Array.from({ length: placeholderBoardCount }, (_, i) => <BoardCardPlaceholder key={i} />)
         : boards.map((board, i) => (

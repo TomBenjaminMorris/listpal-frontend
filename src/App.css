@@ -137,8 +137,12 @@
   --tooltip-background: color-mix(in srgb, var(--foreground) 85%, var(--text-colour));
 }
 
-button {
-  margin: 0.5em;
+/* Not theme colours, so :root alone is enough */
+:root {
+  --shadow-card: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  --shadow-button: rgba(0, 0, 0, 0.25) 0px 3px 10px;
+  --shadow-tooltip: rgba(0, 0, 0, 0.35) 0px 4px 12px;
+  --shadow-popover: rgba(0, 0, 0, 0.45) 0px 8px 24px;
 }
 
 .line-icon {
@@ -156,16 +160,12 @@ button {
   gap: 8px;
   box-sizing: border-box;
   height: 120px;
-  margin: 0;
-  padding: 0;
-  border: 0;
   border-radius: 12px;
   background-color: var(--foreground);
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  box-shadow: var(--shadow-card);
   color: var(--text-colour);
   font-family: CircularMedium;
   font-size: 16px;
-  font-weight: normal;
   line-height: 20px;
   transition: background-color 150ms, transform 150ms, opacity 300ms ease-out;
 }
@@ -187,11 +187,6 @@ button {
   stroke-width: 2.5;
 }
 
-/* index.css rings every focused button, which would otherwise stay on after a mouse click */
-.add-tile:focus:not(:focus-visible) {
-  outline: none;
-}
-
 .add-tile:focus-visible {
   outline: 2px solid var(--text-colour);
   outline-offset: 2px;
@@ -204,6 +199,42 @@ button {
   }
 }
 
+/* A label under a board button or score ring. Its parent is positioned and shows it on hover */
+.tooltip {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: var(--tooltip-background);
+  box-shadow: var(--shadow-tooltip);
+  font-family: CircularBook;
+  font-size: 12.5px;
+  line-height: 18px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* A board's weekly progress, on a board card and in a theme card's preview */
+.meter {
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.meter>* {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background-color: var(--accent);
+}
+
 .with-sidebar {
   padding-left: 220px;
 }
@@ -212,62 +243,93 @@ button {
   padding-left: 64px;
 }
 
-@media screen and (max-width: 650px) {
-  /* BOARD STYLES */
-  .board-content-wrapper {
-    padding: 0 16px;
-  }
+/*///////////// SHARED ANIMATIONS /////////////*/
+/* Fixed pixel offsets and short durations: content should settle quickly after it appears, and a percentage
+   offset slid tall wrappers a long way. Where there's no end keyframe, the animation finishes at the element's
+   own state instead of snapping to one */
 
-  /* Clears the fixed menu button */
-  .flex-container {
-    margin-top: 64px;
+@keyframes fadeIn {
+  from {
+    transform: translateX(8px);
+    opacity: 0;
   }
+}
 
-  .card-container {
-    min-width: 0px;
-    flex-basis: 100%;
-  }
+.fadeIn-animation {
+  animation: 150ms ease-out fadeIn;
+}
 
-  .task-textarea-wrapper {
-    width: -webkit-calc(100% - 57px);
-    width: -moz-calc(100% - 57px);
-    width: calc(100% - 57px);
+@keyframes fadeUp {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
   }
+}
 
-  .task-container:hover textarea {
-    opacity: 1;
-  }
+.fadeUp-animation {
+  animation: 250ms ease-out fadeUp;
+}
 
-  .board-filter-actions-wrapper {
-    justify-content: center;
-    margin-bottom: 4px;
+@keyframes fadeOutDown {
+  to {
+    transform: translateY(12px);
+    opacity: 0;
   }
+}
 
-  .board-name-content {
-    padding-left: 0;
-    justify-content: center;
-    flex-basis: 100%;
-    margin-right: 0;
-  }
+/* forwards stops the element snapping back into view before it is removed */
+.fadeOutDown-animation {
+  animation: 200ms ease-in fadeOutDown forwards;
+}
 
-  .board-title {
-    font-size: 20px;
+@keyframes fadeInPure {
+  from {
+    opacity: 0;
   }
+}
 
-  .board-filter-actions-wrapper .date-pills {
-    display: none;
+@keyframes fadeOutPure {
+  to {
+    opacity: 0;
   }
+}
 
-  /* The desktop offsets assume room to the right of the emoji, which a phone doesn't have */
-  .board-emoji-wrapper {
-    position: fixed !important;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-  }
+.fadeInPure-animation {
+  animation: 200ms ease-out fadeInPure;
+}
 
-  .task-dropdown-icons {
-    display: none;
+/* For content arriving where a placeholder was, which reads better a little slower than a plain entrance */
+.placeholderReveal-animation {
+  animation: 300ms ease-out fadeInPure;
+}
+
+/* Ends where the pulse starts, so the handover doesn't jump */
+@keyframes placeholderAppear {
+  from {
+    opacity: 0;
   }
+  to {
+    opacity: 0.08;
+  }
+}
+
+@keyframes placeholderPulse {
+  from {
+    opacity: 0.08;
+  }
+  to {
+    opacity: 0.2;
+  }
+}
+
+/* The resting opacity is for reduced motion, where the pulse is cut short. No height here, as each use sets its own
+   and CSS import order would otherwise decide which one wins. The delay matches the page's 250ms entrance, so a fast
+   load replaces the bars before they can be seen */
+.placeholder-bar {
+  border-radius: 4px;
+  background-color: var(--text-colour);
+  opacity: 0.14;
+  animation:
+    200ms ease-out 250ms backwards placeholderAppear,
+    900ms ease-in-out 450ms infinite alternate placeholderPulse;
 }

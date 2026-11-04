@@ -86,8 +86,7 @@
   outline: none;
 }
 
-.prompt-buttons,
-.prompt-button-wrapper {
+.prompt-buttons {
   display: flex;
   flex-direction: row-reverse;
   gap: 8px;
@@ -98,19 +97,16 @@
 .account-danger-button {
   box-sizing: border-box;
   min-height: 36px;
-  margin: 0;
   padding: 0 16px;
-  border: none;
   border-radius: 9px;
   font-family: "CircularMedium";
   font-size: 14px;
-  font-weight: normal;
   transition: background-color 150ms, filter 150ms;
 }
 
 .prompt-button {
   background-color: var(--accent);
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 10px;
+  box-shadow: var(--shadow-button);
   color: var(--text-colour);
 }
 
@@ -129,9 +125,9 @@
 
 /* No ring, overriding the one index.css gives every focused button. Keyboard users still need to see where they are,
    so the button they've tabbed to changes shade as it does on hover. */
-.prompt-button:focus,
-.prompt-button-cancel:focus,
-.account-danger-button:focus {
+.prompt-button:focus-visible,
+.prompt-button-cancel:focus-visible,
+.account-danger-button:focus-visible {
   outline: none;
 }
 

@@ -1,13 +1,22 @@
-ul {
-  list-style: none;
-  padding: unset;
-  margin: unset;
-  display: flex;
-  flex-direction: column;
+/* The looks of both the category menu and the task menu */
+.popup-menu {
+  position: absolute;
+  z-index: 100;
+  box-sizing: border-box;
+  padding: 5px;
+  background-color: var(--background);
   border-radius: 10px;
+  box-shadow: var(--shadow-popover);
+  text-align: left;
 }
 
-li {
+.popup-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.popup-menu li {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -17,15 +26,15 @@ li {
   font-family: CircularBook;
   font-size: 13.5px;
   white-space: nowrap;
+  cursor: pointer;
   transition: background-color 120ms;
 }
 
-li:hover {
+.popup-menu li:hover {
   background-color: var(--surface-hover);
-  cursor: pointer;
 }
 
-li>.line-icon {
+.popup-menu li>.line-icon {
   flex-basis: 16px;
   width: 16px;
   height: 16px;
@@ -33,13 +42,13 @@ li>.line-icon {
 }
 
 /* A little apart from the safe actions, with a divider in the gap. The colour is the one .account-error uses. */
-li.menu-danger {
+.menu-danger {
   position: relative;
   margin-top: 9px;
   color: rgb(255, 154, 139);
 }
 
-li.menu-danger::before {
+.menu-danger::before {
   content: "";
   position: absolute;
   top: -5px;
@@ -49,26 +58,9 @@ li.menu-danger::before {
   background-color: var(--hairline);
 }
 
-.dropdown-menu,
-.task-dropdown-menu {
-  position: absolute;
-  z-index: 100;
-  box-sizing: border-box;
-  padding: 5px;
-  background-color: var(--background);
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.45) 0px 8px 24px;
-  text-align: left;
-}
-
 /* The margin is this width plus a small gap, which puts the menu just left of its button */
 .dropdown-menu {
   width: 136px;
   margin-left: -144px;
   margin-top: -42px;
 }
-
-.rotate {
-  transform: rotate(90deg);
-}
-

@@ -5,6 +5,7 @@ import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
 import { suggestEmoji } from '../utils/categoryEmoji';
 import Card from './Card';
 import { PlusIcon } from './Icons';
+import './Prompt.css';
 import './CardList.css'
 
 const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPromptConf, setConfirmConf, setAlertConf, tickedCheckboxRef, remoteUpdateRef }) => {
@@ -209,7 +210,7 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
           </svg>
           <h2>Start with a category</h2>
           <p>Categories keep related tasks together. Name your first one, such as “This week” or “Ideas”, then start adding tasks.</p>
-          <button className="empty-board-button" onClick={openNewCategoryPrompt}>New category</button>
+          <button className="prompt-button" onClick={openNewCategoryPrompt}>New category</button>
         </div>
       ) : (
         <button

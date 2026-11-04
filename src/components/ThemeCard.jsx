@@ -24,7 +24,7 @@ const ThemeCard = ({ id, label, setUserDetails, highlight }) => {
           <span className="theme-card-pill theme-card-pill-accent-2">Week 44</span>
         </span>
         <span className="theme-card-figures">4 of 7 this week</span>
-        <span className="theme-card-meter"><span /></span>
+        <span className="theme-card-meter meter"><span /></span>
       </span>
     </button>
   );

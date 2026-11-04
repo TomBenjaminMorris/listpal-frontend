@@ -27,7 +27,7 @@ const DropdownMenu = memo(({ containerRef, onClose, handleDeleteCategory, title,
   };
 
   return (
-    <div className="dropdown-menu fadeIn-animation">
+    <div className="popup-menu dropdown-menu fadeIn-animation">
       <ul>
         <li onClick={() => updateCategoryOrder(-1)}>
           <ArrowUpIcon />

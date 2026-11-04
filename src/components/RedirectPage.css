@@ -6,15 +6,8 @@
     justify-content: center;
 }
 
-/* No end keyframe, so it finishes at the text's own opacity */
-@keyframes redirectStatusIn {
-    0% {
-        opacity: 0;
-    }
-}
-
 /* Delayed so a normal sign-in goes straight to Home without flashing this text */
 .redirect-page-status {
     opacity: 0.6;
-    animation: 200ms ease-out 1s backwards redirectStatusIn;
+    animation: 200ms ease-out 1s backwards fadeInPure;
 }

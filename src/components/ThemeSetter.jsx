@@ -3,7 +3,7 @@ import ThemeCard from './ThemeCard';
 import { THEMES } from '../utils/themes';
 
 const ThemeCards = memo(({ userDetails, setUserDetails }) => (
-  <div className="theme-card-outer-wrapper">
+  <div className="tile-grid">
     {THEMES.map(({ id, label }) => (
       <ThemeCard
         key={id}

@@ -16,7 +16,7 @@ const wordCaretFromEdge = (field, fromEnd) => {
 // same way and each caret position is read from there. Keyed by UTF-16 index to match selectionStart.
 const measureTaskCaretPositions = (textarea) => {
   const mirror = document.createElement('div');
-  mirror.className = 'task-textarea-box task-highlight-mirror task-caret-mirror';
+  mirror.className = 'task-textarea-box task-mirror task-caret-mirror';
   const markers = [];
   for (const { segment, index } of graphemeSegmenter.segment(textarea.value)) {
     const span = document.createElement('span');

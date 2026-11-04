@@ -389,7 +389,7 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
         <input className="edit-title-input" type="text" value={titleEdited} onChange={handleCardTitleEdit} onBlur={handleCardTitleBlur} onKeyDown={handleCardTitleKeyDown} />
 
         <div className="menu" onClick={() => setDropdownVisible(prev => !prev)} ref={cardMenuRef}>
-          <MoreIcon className={`rotate card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} />
+          <MoreIcon className={`card-menu-dots ${isDropdownVisible ? "card-menu-dots-bg-fill" : ""}`} />
           {isDropdownVisible && (
             <DropdownMenu
               containerRef={cardMenuRef}

@@ -1,14 +1,9 @@
-/* Looks are shared with .dropdown-menu in DropdownMenu.css. The margin is this width plus 2px, which, with the icon's own
+/* Looks come from .popup-menu in DropdownMenu.css. The margin is this width plus 2px, which, with the icon's own
    margin, leaves the same gap to its button as the category menu has */
 .task-dropdown-menu {
   width: 184px;
   margin-left: -186px;
   margin-top: -22px;
-}
-
-.task-dropdown-icons {
-  width: 16px;
-  height: 16px;
 }
 
 .taskMenu {
@@ -17,124 +12,20 @@
   height: 0px;
 }
 
-.taskMenu > svg:hover {
-  cursor: pointer;
-}
-
 /* Block, so it doesn't sit on a line of text whose spacing would lift it out of line with the rest of the row */
 .taskMenu > svg {
   display: block;
   width: 16px;
   height: 16px;
+  cursor: pointer;
 }
 
-.task-container:hover .taskMenu {
+.task-container:hover .taskMenu,
+.menu-background-display {
   display: block;
 }
 
 .menu-background-display .task-three-dots-vertical {
   background-color: var(--surface-hover);
   opacity: 1;
-}
-
-.menu-background-display {
-  display: block !important;
-}
-
-a {
-  color: var(--text-colour);
-}
-
-/* Fixed pixel offsets and short durations: content should settle quickly after it appears, and a percentage
-   offset slid tall wrappers a long way */
-@keyframes fadeIn {
-  0% {
-    transform: translateX(8px);
-    opacity: 0;
-  }
-  100% {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-.fadeIn-animation {
-  animation: 150ms ease-out fadeIn;
-}
-
-/* No end keyframe, so it finishes at the element's own opacity instead of snapping down to it from 1 */
-@keyframes fadeUp {
-  0% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-}
-
-.fadeUp-animation {
-  animation: 250ms ease-out fadeUp;
-}
-
-@keyframes fadeOutDown {
-  0% {
-    transform: none;
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-}
-
-/* forwards stops the element snapping back into view before it is removed */
-.fadeOutDown-animation {
-  animation: 200ms ease-in fadeOutDown forwards;
-}
-
-@keyframes fadeInPure {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.fadeInPure-animation {
-  animation: 200ms ease-out fadeInPure;
-}
-
-/* For content arriving where a placeholder was, which reads better a little slower than a plain entrance */
-.placeholderReveal-animation {
-  animation: 300ms ease-out fadeInPure;
-}
-
-/* Ends where the pulse starts, so the handover doesn't jump */
-@keyframes placeholderAppear {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 0.08;
-  }
-}
-
-@keyframes placeholderPulse {
-  from {
-    opacity: 0.08;
-  }
-  to {
-    opacity: 0.2;
-  }
-}
-
-/* The resting opacity is for reduced motion, where the pulse is cut short. No height here, as each use sets its own
-   and CSS import order would otherwise decide which one wins. The delay matches the page's 250ms entrance, so a fast
-   load replaces the bars before they can be seen */
-.placeholder-bar {
-  border-radius: 4px;
-  background-color: var(--text-colour);
-  opacity: 0.14;
-  animation:
-    200ms ease-out 250ms backwards placeholderAppear,
-    900ms ease-in-out 450ms infinite alternate placeholderPulse;
 }
