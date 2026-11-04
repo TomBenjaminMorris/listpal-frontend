@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { rewordTask as rewordTaskAPI, TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
 import { storedRewordTone } from '../utils/rewordTones';
+import { DEFAULT_CATEGORY_EMOJI } from '../utils/categoryEmoji';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import { moveCaretBetweenFields } from '../utils/caretNavigation';
 import addIcon from "../assets/icons8-plus-30.png";
@@ -52,7 +53,7 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [titleHasChanged, setTitleHasChanged] = useState(false);
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
-  const [cardEmoji, setCardEmoji] = useState(tasks?.[0]?.Emoji || "✅");
+  const [cardEmoji, setCardEmoji] = useState(tasks?.[0]?.Emoji || DEFAULT_CATEGORY_EMOJI);
   // A fresh copy of the board can replace a cached one in place, so follow an emoji changed elsewhere
   const firstTaskEmoji = tasks?.[0]?.Emoji;
   useEffect(() => {
@@ -125,13 +126,22 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
     }
   };
 
-  const renameCategory = newTitle => {
+  // Trimmed as CardList trims a new name. The emoji stays: the user may have picked it, and a card shouldn't change
+  // its look under them for a small edit to its name
+  const renameCategory = editedTitle => {
+    const newTitle = editedTitle.trim();
     if (!newTitle) {
       setAlertConf({
         display: true,
         title: "Name, please! ✏️",
         textValue: "Every category needs a name, even a short one.",
       });
+      setTitleEdited(title);
+      return;
+    }
+
+    // Edited back to how it was, or only spaces added
+    if (newTitle === title) {
       setTitleEdited(title);
       return;
     }
@@ -158,6 +168,7 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
     const sortArr = Object.keys(sortedTasks).map(category => category === title ? newTitle : category);
     updateCategoryOrder(sortArr, setBoards)
     onRename(title, newTitle);
+    setTitleEdited(newTitle);
     setSortedTasks(tmpSortedTasks, sortArr);
   };
 

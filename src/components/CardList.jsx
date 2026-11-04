@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useReducer, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { getBoardIdFromUrl, updateCategoryOrder } from '../utils/utils';
 import { queueCreate, queueDelete, queueUpdate } from '../utils/syncEngine';
+import { suggestEmoji } from '../utils/categoryEmoji';
 import Card from './Card';
 import { PlusIcon } from './Icons';
 import './CardList.css'
@@ -82,7 +83,8 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
     });
   }, [setAlertConf]);
 
-  // Passed to every memoised Task, so it keeps one identity and reads the latest tasks from a ref to validate
+  // For callbacks that outlive the render that made them: handleDeleteTask keeps one identity for every memoised Task,
+  // and the new category prompt holds handleNewCard while a fresh copy of the board can land
   const sortedTasksRef = useRef(sortedTasks);
   sortedTasksRef.current = sortedTasks;
 
@@ -117,8 +119,12 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
     } : prev);
   }, [setSortedTasks, showAlert]);
 
-  const handleNewCard = (name) => {
-    if (!name || Object.keys(sortedTasks).includes(name)) {
+  // Synchronous, as the prompt closes as soon as this returns
+  const handleNewCard = (typedName) => {
+    // Trimmed, so " Car" can't sit beside "Car"
+    const name = typedName.trim();
+    const categories = Object.keys(sortedTasksRef.current);
+    if (!name || categories.includes(name)) {
       if (name) showAlert("Already taken 👯", "This board already has a category with that name. Try another one.");
       else showAlert("Name, please! ✏️", "Every category needs a name, even a short one.");
       return;
@@ -136,23 +142,23 @@ const CardList = ({ boardName, sortedTasks, setSortedTasks, setBoards, setPrompt
       CompletedDate: "nil",
       Category: name,
       EntityType: "Task",
-      Emoji: "✅",
+      Emoji: suggestEmoji(name),
       Link: "",
       Important: "false",
       ExpiryDateTTL: 0
     };
 
     // From what's on screen, as the saved order can hold stale or missing names
-    const sortArr = [...Object.keys(sortedTasks), name];
+    const sortArr = [...categories, name];
     updateCategoryOrder(sortArr, setBoards)
 
     focusRequestRef.current = { SK: newCardDefaultTask.SK, caret: 0, description: "" };
     queueCreate(newCardDefaultTask);
 
-    setSortedTasks({
-      ...sortedTasks,
+    setSortedTasks(prev => ({
+      ...prev,
       [name]: [newCardDefaultTask]
-    }, sortArr);
+    }), sortArr);
     forceUpdate();
   };
 
