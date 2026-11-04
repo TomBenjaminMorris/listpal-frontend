@@ -62,8 +62,8 @@ export const MenuIcon = () => (
   </Icon>
 );
 
-export const PlusIcon = () => (
-  <Icon>
+export const PlusIcon = (props) => (
+  <Icon {...props}>
     <path d="M5 12h14" />
     <path d="M12 5v14" />
   </Icon>

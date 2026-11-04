@@ -41,7 +41,6 @@ listpal-frontend/
 │   ├── index.css               Global base styles and fonts (Circular)
 │   ├── config.json             Region, Cognito pool and client IDs, login URLs
 │   ├── fonts/                  Circular .woff2 files
-│   ├── assets/                 The new task row's plus icon. Other icons are inline SVGs in `components/Icons.jsx`
 │   ├── utils/
 │   │   ├── accountService.js   Account changes through Cognito's user API, and the plain-language messages for their failures
 │   │   ├── accountService.test.js  Vitest tests for those calls and messages
@@ -66,7 +65,7 @@ listpal-frontend/
 │   │   ├── useEnterToAccept.js Lets Enter accept the top open modal's default option
 │   │   ├── useEnterToAccept.test.js  Vitest tests for that key handling
 │   │   └── utils.js            JWT parsing, expiry check, percentages, dates, score periods, URL helpers
-│   └── components/             Pages and widgets (one .jsx and usually one .css each)
+│   └── components/             Pages and widgets (one .jsx and usually one .css each). Every icon is an inline SVG in `Icons.jsx`
 ├── terraform/
 │   ├── main.tf                 The whole stack: one static-website module call
 │   └── .terraform/             Provider and module cache (gitignored)

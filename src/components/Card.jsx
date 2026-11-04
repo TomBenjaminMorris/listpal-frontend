@@ -6,8 +6,7 @@ import { storedRewordTone } from '../utils/rewordTones';
 import { DEFAULT_CATEGORY_EMOJI } from '../utils/categoryEmoji';
 import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
 import { moveCaretBetweenFields } from '../utils/caretNavigation';
-import addIcon from "../assets/icons8-plus-30.png";
-import { MoreIcon } from './Icons';
+import { MoreIcon, PlusIcon } from './Icons';
 import DropdownMenu from "./DropdownMenu";
 import Task from './Task';
 import EmojiPicker, { preloadEmojiPicker } from './EmojiPicker';
@@ -428,7 +427,7 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
 
       <div className="new-task-container">
         <div className="addTaskWrapper" onClick={() => addTask()}>
-          <img className="addTask" src={addIcon} alt="add icon" />
+          <PlusIcon className="addTask" />
           <div className="addTaskText">new task...</div>
         </div>
       </div>
