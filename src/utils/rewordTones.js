@@ -1,3 +1,5 @@
+import { readStoredUserDetails } from './userDetails';
+
 // Each id is a tone the reword route accepts and the value saved on the user record. A user who never picked one
 // gets the default, here and on the server
 export const DEFAULT_REWORD_TONE = 'casual';
@@ -13,10 +15,4 @@ export const REWORD_TONES = [
 ];
 
 // Read when a reword starts rather than passed down through Board, which keeps userDetails out of every Card
-export const storedRewordTone = () => {
-  try {
-    return JSON.parse(localStorage.getItem('userDetails'))?.RewordTone ?? DEFAULT_REWORD_TONE;
-  } catch {
-    return DEFAULT_REWORD_TONE;
-  }
-};
+export const storedRewordTone = () => readStoredUserDetails()?.RewordTone ?? DEFAULT_REWORD_TONE;

@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { applyManualScore, parseScoreInput, nextRewordChoice, rewordToApply } from './utils';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('./syncEngine', () => ({ queueBoardUpdate: vi.fn() }));
+
+import { queueBoardUpdate } from './syncEngine';
+import { applyManualScore, parseScoreInput, nextRewordChoice, rewordToApply, newTask, saveBoardSettings, UNTICKED } from './utils';
 
 describe('parseScoreInput', () => {
   it.each([['05', '5'], ['0100', '100'], ['0234', '234'], ['00', '0']])('strips leading zeros from %s', (input, expected) => {
@@ -83,5 +87,42 @@ describe('nextRewordChoice', () => {
   it("offers nothing to revert when a reword gives back the user's own text", () => {
     const first = { original: 'Renew passport', reworded: 'Update passport details' };
     expect(nextRewordChoice(first, 'Update passport details', 'Renew passport')).toBeNull();
+  });
+});
+
+describe('newTask', () => {
+  it('has every field a task created through /sync has, unticked', () => {
+    const task = newTask({ boardID: 'b#1', category: 'Home', emoji: '🏠' });
+    expect(Object.keys(task).sort()).toEqual(['CompletedDate', 'CreatedDate', 'Description', 'Emoji', 'EntityType', 'ExpiryDate', 'ExpiryDateTTL', 'GSI1-PK', 'GSI1-SK', 'Important', 'Link', 'PK', 'SK', 'Category'].sort());
+    expect(task).toMatchObject({ ...UNTICKED, 'GSI1-PK': 'b#1', Category: 'Home', Emoji: '🏠', Description: '', Link: '', Important: 'false', EntityType: 'Task' });
+    expect(task.SK).toMatch(/^t#[0-9a-f-]{36}$/);
+    expect(Number(task.CreatedDate)).toBeGreaterThan(0);
+  });
+
+  it("takes a split or duplicate's text, link, importance and place", () => {
+    const task = newTask({ boardID: 'b#1', category: 'Home', emoji: '🏠', createdDate: '1.5', description: 'Call', link: 'https://x.dev', important: 'true' });
+    expect(task).toMatchObject({ CreatedDate: '1.5', Description: 'Call', Link: 'https://x.dev', Important: 'true' });
+  });
+
+  it('gives every task its own ID', () => {
+    expect(newTask({}).SK).not.toBe(newTask({}).SK);
+  });
+});
+
+describe('saveBoardSettings', () => {
+  const run = (fields) => {
+    let boards = [{ SK: 'b#1', Board: 'Old' }, { SK: 'b#2', Board: 'Other' }];
+    saveBoardSettings(update => { boards = update(boards); }, 'b#1', fields);
+    return boards;
+  };
+
+  it('changes only that board on screen and queues the same fields', () => {
+    expect(run({ Board: 'New', Emoji: '🎯' })).toEqual([{ SK: 'b#1', Board: 'New', Emoji: '🎯' }, { SK: 'b#2', Board: 'Other' }]);
+    expect(queueBoardUpdate).toHaveBeenLastCalledWith('b#1', { Board: 'New', Emoji: '🎯' });
+  });
+
+  it('keeps the category order parsed on screen but queues it as the JSON string the server stores', () => {
+    expect(run({ CategoryOrder: ['A', 'B'] })[0].CategoryOrder).toEqual(['A', 'B']);
+    expect(queueBoardUpdate).toHaveBeenLastCalledWith('b#1', { CategoryOrder: '["A","B"]' });
   });
 });

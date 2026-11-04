@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from 'react';
-import { queueBoardUpdate } from '../utils/syncEngine';
+import { saveBoardSettings } from '../utils/utils';
 import './TargetSetter.css';
 
 const TARGET_FIELDS = [
@@ -8,72 +8,50 @@ const TARGET_FIELDS = [
   { name: 'yearly', label: 'Yearly', placeholder: 'Y', dbField: 'YTarget' }
 ];
 
+// The first rule a set of targets breaks, in this order, is the one the alert explains
+const TARGET_RULES = [
+  {
+    broken: ({ WTarget, MTarget, YTarget }) => WTarget < 1 || MTarget < 1 || YTarget < 1,
+    title: "Aim a little higher 🎯",
+    textValue: "Targets need to be bigger than zero."
+  },
+  {
+    broken: ({ WTarget, MTarget }) => WTarget > MTarget,
+    title: "That doesn't add up 🧮",
+    textValue: "Your weekly target can't be bigger than your monthly one."
+  },
+  {
+    broken: ({ MTarget, YTarget }) => MTarget > YTarget,
+    title: "That doesn't add up 🧮",
+    textValue: "Your monthly target can't be bigger than your yearly one."
+  }
+];
+
+// Inputs hold raw strings so they can be blank while typing
+const toNumber = (value) => parseInt(value, 10) || 0;
+
 const TargetSetter = memo(({ boards, setBoards, setAlertConf, boardID, handleClose }) => {
   const [formData, setFormData] = useState({ weekly: 0, monthly: 0, yearly: 0 });
 
   useEffect(() => {
     const board = boards.find(b => b.SK === boardID);
     if (board) {
-      setFormData({
-        weekly: board.WTarget,
-        monthly: board.MTarget,
-        yearly: board.YTarget
-      });
+      setFormData(Object.fromEntries(TARGET_FIELDS.map(({ name, dbField }) => [name, board[dbField]])));
     }
   }, [boardID, boards]);
 
-  // Inputs hold raw strings so they can be blank while typing
-  const toNumber = (value) => parseInt(value, 10) || 0;
-
-  const validateTargets = () => {
-    const weekly = toNumber(formData.weekly);
-    const monthly = toNumber(formData.monthly);
-    const yearly = toNumber(formData.yearly);
-
-    if (weekly < 1 || monthly < 1 || yearly < 1) {
-      handleClose()
-      setAlertConf({
-        display: true,
-        title: "Aim a little higher 🎯",
-        textValue: "Targets need to be bigger than zero."
-      });
-      return false;
-    }
-    if (weekly > monthly) {
-      handleClose()
-      setAlertConf({
-        display: true,
-        title: "That doesn't add up 🧮",
-        textValue: "Your weekly target can't be bigger than your monthly one."
-      });
-      return false;
-    }
-    if (monthly > yearly) {
-      handleClose()
-      setAlertConf({
-        display: true,
-        title: "That doesn't add up 🧮",
-        textValue: "Your monthly target can't be bigger than your yearly one."
-      });
-      return false;
-    }
-    return true;
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!validateTargets()) return;
+    const targets = Object.fromEntries(TARGET_FIELDS.map(({ name, dbField }) => [dbField, toNumber(formData[name])]));
 
-    const targets = {
-      YTarget: toNumber(formData.yearly),
-      MTarget: toNumber(formData.monthly),
-      WTarget: toNumber(formData.weekly)
-    };
+    const broken = TARGET_RULES.find(rule => rule.broken(targets));
+    if (broken) {
+      handleClose();
+      setAlertConf({ display: true, title: broken.title, textValue: broken.textValue });
+      return;
+    }
 
-    setBoards(current => current.map(board =>
-      board.SK === boardID ? { ...board, ...targets } : board
-    ));
-    queueBoardUpdate(boardID, targets);
+    saveBoardSettings(setBoards, boardID, targets);
     handleClose();
   };
 

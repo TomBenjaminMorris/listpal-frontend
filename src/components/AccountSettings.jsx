@@ -1,5 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
-import { useOnClickOutside } from 'usehooks-ts';
+import { memo, useRef, useState } from 'react';
 import {
   getAccountDetails,
   saveName,
@@ -15,7 +14,7 @@ import {
   deleteAccount,
   describeAccountError
 } from '../utils/accountService';
-import { useEnterToAccept } from '../utils/useEnterToAccept';
+import { useModalControls } from '../utils/useEnterToAccept';
 import './Prompt.css';
 import './AccountSettings.css';
 
@@ -219,20 +218,13 @@ const DeleteAccountModal = ({ email, onClose }) => {
     if (!busy) onClose();
   };
 
-  useOnClickOutside(ref, close);
-
   // requestSubmit ignores the disabled button, so the busy check is what stops a second delete
-  useEnterToAccept(ref, () => {
-    if (!busy) formRef.current?.requestSubmit();
+  useModalControls(ref, {
+    accept: () => {
+      if (!busy) formRef.current?.requestSubmit();
+    },
+    close
   });
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') close();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [busy]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

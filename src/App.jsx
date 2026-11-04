@@ -6,6 +6,7 @@ import { isAuthenticated } from './utils/utils';
 import { applyPendingBoards, boardsWithQueuedTasks, flushNow, mergePending, startSync, getSyncStatus, readPending, LOAD_FLUSH_TIMEOUT } from './utils/syncEngine';
 import { setAlertListener } from './utils/alertBus';
 import { watchForReturn } from './utils/refreshOnReturn';
+import { readStoredUserDetails, storeUserDetails } from './utils/userDetails';
 import _debounce from 'lodash.debounce';
 import HomePage from './components/HomePage';
 import Board from './components/Board';
@@ -33,14 +34,10 @@ const parseBoards = (boardsData) => boardsData.map(board => ({
   CategoryOrder: board.CategoryOrder ? JSON.parse(board.CategoryOrder) : []
 }));
 
-let isDev = true;
-if (process.env.NODE_ENV === 'development') {
-  isDev = true;
-} else if (process.env.NODE_ENV === 'production') {
-  isDev = false;
-} else {
-  console.log('Unknown Environment');
-}
+const isDev = process.env.NODE_ENV !== 'production';
+
+// Signed-out visitors go through /logout, which clears any stale tokens and sends them to sign in
+const requireAuth = element => isAuthenticated() ? element : <Navigate replace to="/logout" />;
 
 const App = () => {
   const [boards, setBoards] = useState([]);
@@ -54,12 +51,7 @@ const App = () => {
   const [placeholderBoardCount] = useState(() => Number(localStorage.getItem(BOARD_COUNT_KEY)) || DEFAULT_PLACEHOLDER_BOARD_COUNT);
   const [refreshCount, setRefreshCount] = useState(0); // Moves on each refresh on return, after the boards have landed
   const [modalStates, setModalStates] = useState({ prompt: { callbackFunc: () => { } }, confirm: { callbackFunc: () => { } }, alert: {} });
-  const [userDetails, setUserDetails] = useState(() => {
-    const storedDetails = localStorage.getItem('userDetails');
-    return storedDetails && storedDetails !== "undefined"
-      ? JSON.parse(storedDetails)
-      : { Theme: DEFAULT_THEME };
-  });
+  const [userDetails, setUserDetails] = useState(() => readStoredUserDetails() ?? { Theme: DEFAULT_THEME });
   // An ID, not a copy of the board: a copy goes stale on every boards change, and refreshing it re-rendered the whole app
   const [activeBoardID, setActiveBoardID] = useState(null);
   const activeBoard = useMemo(() => boards.find(b => b.SK === activeBoardID) ?? null, [boards, activeBoardID]);
@@ -77,10 +69,6 @@ const App = () => {
   // Declared before the data load so API failures from it have somewhere to go
   useEffect(() => setAlertListener(modalSetters.setAlertConf), [modalSetters]);
 
-  const applyTheme = useCallback((theme) => {
-    document.documentElement.dataset.theme = theme;
-  }, []);
-
   // Queued edits survive a reload and are resent on the next load, so only warn while syncing is failing:
   // closing the tab then leaves them stranded on this device. A reload can't be told apart from a close here.
   useEffect(() => {
@@ -94,10 +82,7 @@ const App = () => {
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   // Server-confirmed scores replace the optimistic ones applied when a task was ticked
@@ -125,7 +110,7 @@ const App = () => {
         // The theme effect reads userDetails.Theme, so a missing user must leave the current details in place
         if (user) {
           setUserDetails(user);
-          localStorage.setItem('userDetails', JSON.stringify(user));
+          storeUserDetails(user);
         }
         setBoards(applyPendingBoards(parseBoards(boardsData), mergePending(before, after)));
       } catch (error) {
@@ -173,8 +158,8 @@ const App = () => {
 
   // A layout effect, so a theme arriving with the user's data is on screen in the same frame as that data
   useLayoutEffect(() => {
-    applyTheme(userDetails.Theme);
-  }, [userDetails]);
+    document.documentElement.dataset.theme = userDetails.Theme;
+  }, [userDetails.Theme]);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_OPEN_KEY, sidebarIsOpen);
@@ -220,10 +205,10 @@ const App = () => {
   const handleLogout = useCallback(() => {
     localStorage.clear();
     sessionStorage.clear();
-    window.location.replace(
-      isDev ? config.managedLoginLocal : config.managedLoginRemote
-    );
+    window.location.replace(isDev ? config.managedLoginLocal : config.managedLoginRemote);
   }, []);
+
+  const shownPlaceholderBoardCount = initialLoadDone ? 0 : placeholderBoardCount;
 
   return (
     <>
@@ -238,7 +223,7 @@ const App = () => {
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
           sidebarIsOpen={isMobile ? mobileNavIsOpen : sidebarIsOpen}
           boards={boards}
-          placeholderBoardCount={initialLoadDone ? 0 : placeholderBoardCount}
+          placeholderBoardCount={shownPlaceholderBoardCount}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
           isMobile={isMobile}
           closeMobileNav={closeMobileNav}
@@ -255,19 +240,19 @@ const App = () => {
 
             <Route
               path="/home"
-              element={isAuthenticated() ? (<HomePage
+              element={requireAuth(<HomePage
                 boards={boards}
                 setBoards={setBoards}
-                placeholderBoardCount={initialLoadDone ? 0 : placeholderBoardCount}
+                placeholderBoardCount={shownPlaceholderBoardCount}
                 setPromptConf={modalSetters.setPromptConf}
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoardID={setActiveBoardID}
-              />) : (<Navigate replace to="/logout" />)}
+              />)}
             />
 
             <Route
               path="/board/*"
-              element={isAuthenticated() ? (<Board
+              element={requireAuth(<Board
                 sortedTasks={sortedTasks}
                 setBoards={setBoards}
                 setSortedTasks={setOrderedSortedTasks}
@@ -277,18 +262,15 @@ const App = () => {
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoardID={setActiveBoardID}
-              />) : (<Navigate replace to="/logout" />)}
+              />)}
             />
 
             <Route
               path="/settings"
-              element={isAuthenticated() ? (<Settings
-                userDetails={userDetails}
-                setUserDetails={setUserDetails}
-              />) : (<Navigate replace to="/logout" />)}
+              element={requireAuth(<Settings userDetails={userDetails} setUserDetails={setUserDetails} />)}
             />
 
-            <Route path="*" element={isAuthenticated() ? <Navigate replace to="/home" /> : <Navigate replace to="/logout" />} />
+            <Route path="*" element={requireAuth(<Navigate replace to="/home" />)} />
           </Routes>
 
         </div>

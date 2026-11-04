@@ -1,11 +1,11 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { queueCreate, queueDeleteAll, queueUpdate, queueUpdateAll } from '../utils/syncEngine';
 import { rewordTask as rewordTaskAPI, TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
 import { storedRewordTone } from '../utils/rewordTones';
 import { DEFAULT_CATEGORY_EMOJI } from '../utils/categoryEmoji';
-import { getBoardIdFromUrl, getNextMondayAt5AM, periodsContaining, updateCategoryOrder } from '../utils/utils';
-import { moveCaretBetweenFields } from '../utils/caretNavigation';
+import { getBoardIdFromUrl, getNextMondayAt5AM, newTask, periodsContaining, UNTICKED, updateCategoryOrder } from '../utils/utils';
+import { focusAt, moveCaretBetweenFields } from '../utils/caretNavigation';
+import { CATEGORY_NAME_TAKEN_ALERT, nameRequiredAlert } from '../utils/nameAlerts';
 import { MoreIcon, PlusIcon } from './Icons';
 import DropdownMenu from "./DropdownMenu";
 import Task from './Task';
@@ -110,13 +110,12 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
 
   const handleDeleteCategory = () => {
     queueDeleteAll(sortedTasks[title] ?? []);
-    const newSortedTasks = { ...sortedTasks };
-    delete newSortedTasks[title];
+    const { [title]: _deleted, ...remaining } = sortedTasks;
     // From what's on screen, for the same reason as renameCategory
-    const sortArr = Object.keys(sortedTasks).filter(category => category !== title);
+    const sortArr = Object.keys(remaining);
     updateCategoryOrder(sortArr, setBoards);
-    setSortedTasks(newSortedTasks, sortArr);
-  }
+    setSortedTasks(remaining, sortArr);
+  };
 
   // Animation events bubble up from tasks and menus, so only react to the card's own exit animation
   const handleCardAnimationEnd = e => {
@@ -130,11 +129,7 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
   const renameCategory = editedTitle => {
     const newTitle = editedTitle.trim();
     if (!newTitle) {
-      setAlertConf({
-        display: true,
-        title: "Name, please! ✏️",
-        textValue: "Every category needs a name, even a short one.",
-      });
+      setAlertConf(nameRequiredAlert('category'));
       setTitleEdited(title);
       return;
     }
@@ -146,29 +141,21 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
     }
 
     if (sortedTasks[newTitle]) {
-      setAlertConf({
-        display: true,
-        title: "Already taken 👯",
-        textValue: "This board already has a category with that name. Try another one.",
-      });
+      setAlertConf(CATEGORY_NAME_TAKEN_ALERT);
       setTitleEdited(title);
       return;
     }
 
-    const renamedTasks = sortedTasks[title].map(t => t.Category === title ? { ...t, Category: newTitle } : t);
-
-    const tmpSortedTasks = { ...sortedTasks }
-    tmpSortedTasks[newTitle] = renamedTasks
-    delete tmpSortedTasks[title];
-    queueUpdateAll(sortedTasks[title].filter(t => t.Category === title), { Category: newTitle });
+    const { [title]: tasksToRename, ...others } = sortedTasks;
+    queueUpdateAll(tasksToRename.filter(t => t.Category === title), { Category: newTitle });
 
     // Build the order from what's on screen, as the saved order can hold stale or missing names and
     // anything missing from it sorts to the top
     const sortArr = Object.keys(sortedTasks).map(category => category === title ? newTitle : category);
-    updateCategoryOrder(sortArr, setBoards)
+    updateCategoryOrder(sortArr, setBoards);
     onRename(title, newTitle);
     setTitleEdited(newTitle);
-    setSortedTasks(tmpSortedTasks, sortArr);
+    setSortedTasks({ ...others, [newTitle]: tasksToRename.map(t => t.Category === title ? { ...t, Category: newTitle } : t) }, sortArr);
   };
 
   // The callbacks below are passed to every memoised Task, so they keep one identity while tasks change. They
@@ -187,22 +174,15 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
   // passes the text after the caret, and the caret follows it to the start of the new task. A duplicate also passes
   // the link and importance, with the caret at the end of the copied text
   const addTask = useCallback((besideSK, { above = false, description = "", caret = 0, link = "", important = "false" } = {}) => {
-    const newTaskData = {
-      CreatedDate: besideSK ? createdDateBeside(tasksRef.current, besideSK, above) : String(Date.now()),
-      SK: "t#" + uuidv4(),
-      PK: "",
-      "GSI1-SK": "nil",
-      "GSI1-PK": getBoardIdFromUrl(),
-      ExpiryDate: "nil",
-      Description: description,
-      CompletedDate: "nil",
-      Category: title,
-      EntityType: "Task",
-      Emoji: cardEmoji,
-      Link: link,
-      Important: important,
-      ExpiryDateTTL: 0
-    };
+    const newTaskData = newTask({
+      boardID: getBoardIdFromUrl(),
+      category: title,
+      emoji: cardEmoji,
+      createdDate: besideSK ? createdDateBeside(tasksRef.current, besideSK, above) : undefined,
+      description,
+      link,
+      important
+    });
 
     // An empty task above the caret's task is pushed in by Enter at its start, so the caret stays where it is
     if (!above) focusRequestRef.current = { SK: newTaskData.SK, caret, description };
@@ -266,11 +246,8 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
     const list = tasksRef.current ?? [];
     const task = list.find(t => t.SK === SK);
     if (!task) return;
-    let isLastUncheckedTask = false;
-    if (isChecked) {
-      const uncheckedTasks = list.filter(t => t.CompletedDate == "nil");
-      isLastUncheckedTask = uncheckedTasks.length === 1 && uncheckedTasks[0].SK == SK;
-    }
+    const uncheckedTasks = list.filter(t => t.CompletedDate === "nil");
+    const isLastUncheckedTask = isChecked && uncheckedTasks.length === 1 && uncheckedTasks[0].SK === SK;
 
     // Optimistic only: the server changes the scores in the same write as the tick and sends back the real values
     const updateBoardScores = (fields, increment) => {
@@ -294,30 +271,14 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
       };
       updateBoardScores(periodsContaining(Number(completion.CompletedDate), Date.now()), 1);
     } else {
-      completion = { CompletedDate: "nil", ExpiryDate: "nil", "GSI1-SK": "nil", ExpiryDateTTL: 0 };
+      completion = UNTICKED;
       // Only periods the completion counted in, so last week's untick can't eat this week's score
       updateBoardScores(periodsContaining(Number(task.CompletedDate), Date.now()), -1);
     }
     queueUpdate(task.SK, task["GSI1-PK"], completion);
 
-    let newCardDefaultTask = null;
-    if (isLastUncheckedTask) {
-      newCardDefaultTask = {
-        "CreatedDate": String(Date.now()),
-        "SK": "t#" + uuidv4(),
-        "PK": "",
-        "GSI1-SK": "nil",
-        "GSI1-PK": task["GSI1-PK"],
-        "ExpiryDate": "nil",
-        "Description": "",
-        "CompletedDate": "nil",
-        "Category": title,
-        "EntityType": "Task",
-        "Emoji": cardEmoji,
-        "Link": "",
-        "Important": "false",
-        "ExpiryDateTTL": 0
-      };
+    const newCardDefaultTask = isLastUncheckedTask ? newTask({ boardID: task["GSI1-PK"], category: title, emoji: cardEmoji }) : null;
+    if (newCardDefaultTask) {
       focusRequestRef.current = { SK: newCardDefaultTask.SK, caret: 0, description: "" };
       queueCreate(newCardDefaultTask);
     }
@@ -331,19 +292,15 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
 
   const handleEmojiSelect = (e) => {
     const newEmoji = e.native;
-    setCardEmoji(newEmoji)
-    const updatedCategoryArray = sortedTasks[title].map(t => ({ ...t, Emoji: newEmoji }));
-    const tmpSortedTasks = { ...sortedTasks }
-    tmpSortedTasks[title] = updatedCategoryArray
+    setCardEmoji(newEmoji);
     queueUpdateAll(tasks, { Emoji: newEmoji });
-    setSortedTasks(tmpSortedTasks);
-  }
+    setSortedTasks({ ...sortedTasks, [title]: sortedTasks[title].map(t => ({ ...t, Emoji: newEmoji })) });
+  };
 
   const handleCardTitleEdit = (e) => {
-    const newTitle = e.target.value
     setTitleHasChanged(true);
-    setTitleEdited(newTitle);
-  }
+    setTitleEdited(e.target.value);
+  };
 
   // Enter and Escape both leave the title, so both save a rename through blur. Enter carries on into the first task
   const handleCardTitleKeyDown = e => {
@@ -353,9 +310,8 @@ const Card = ({ title, boardName, onRename, tasks, setSortedTasks, sortedTasks, 
     } else if (e.key === "Enter") {
       e.preventDefault();
       const firstTask = containerRef.current.querySelector('textarea.task-textarea-box:not(:disabled)');
-      if (!firstTask) return e.target.blur();
-      firstTask.focus();
-      firstTask.setSelectionRange(0, 0);
+      if (firstTask) focusAt(firstTask, 0);
+      else e.target.blur();
     }
   };
 

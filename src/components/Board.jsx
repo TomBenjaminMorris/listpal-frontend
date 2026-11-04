@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { memo, useEffect, useLayoutEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
 import { deleteBoard, getActiveTasks } from '../utils/apiGatewayClient';
-import { applyPending, boardCreateQueued, flushNow, forgetBoard, mergePending, queueBoardUpdate, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
+import { applyPending, boardCreateQueued, flushNow, forgetBoard, mergePending, queueDeleteAll, readPending, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardCache';
-import { getBoardIdFromUrl } from '../utils/utils';
+import { getBoardIdFromUrl, saveBoardSettings } from '../utils/utils';
 import { apiErrorAlert } from '../utils/apiErrors';
+import { nameRequiredAlert } from '../utils/nameAlerts';
 import { EraserIcon, PencilIcon, TargetIcon, TrashIcon } from './Icons';
 import CardList from './CardList';
 import DatePills from './DatePills';
@@ -19,6 +20,7 @@ import './Board.css';
 const ConfettiExplosion = memo(lazy(() => import('react-confetti-explosion')));
 const SHOWING_CACHE = Symbol('showing cache');
 const TARGET_TYPES = ['weekly', 'monthly', 'yearly'];
+const targetFlags = value => Object.fromEntries(TARGET_TYPES.map(type => [type, value]));
 
 const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
@@ -27,8 +29,8 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   const [confettiOrigins, setConfettiOrigins] = useState({}); // Per target, so each burst stays where it started while later ones start elsewhere
   // Set by a tick and cleared by a press, so a burst the tick causes starts at the task and any other starts at the pointer
   const tickedCheckbox = useRef(null);
-  const [isTargetMet, setIsTargetMet] = useState({ weekly: true, monthly: true, yearly: true });
-  const [isExploding, setIsExploding] = useState({ weekly: false, monthly: false, yearly: false });
+  const [isTargetMet, setIsTargetMet] = useState(() => targetFlags(true));
+  const [isExploding, setIsExploding] = useState(() => targetFlags(false));
   const [banners, setBanners] = useState([]);
   const announced = useRef(new Set()); // Targets already given a banner, cleared when the score drops below target
   const [remoteData, setRemoteData] = useState(null); // { boardID, load, tasks, failed } so a late response can't land on another board or visit
@@ -41,11 +43,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   // True for the one commit in which a fresh copy replaces the board on screen, so the cards can animate what it changes
   const remoteUpdateRef = useRef(false);
   const boardID = getBoardIdFromUrl();
-  const board = boards.find(b => b.SK === boardID)
+  const board = boards.find(b => b.SK === boardID);
   const tasksReady = loadedBoardID === boardID && !isDeleting;
   const navigate = useNavigate();
-  const emojiMenuRef = useRef(null)
-  const deleteMessage = `Delete "${board?.Board}" for good?`;
+  const emojiMenuRef = useRef(null);
 
   // Keyed on the fields shown, so a rename or emoji change updates the title but a score change doesn't
   useEffect(() => {
@@ -94,10 +95,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
       shownFromCache.current = null;
     }
     getTasks({ load, background: !!(cached && board) });
-    setIsTargetMet({ weekly: true, monthly: true, yearly: true }) // Reset this to the original state to stop confetti explosion on board switch
-    setIsExploding({ weekly: false, monthly: false, yearly: false }) // Stale state from the previous board must not leak into the new one
-    announced.current.clear()
-    setBanners([])
+    // Stale state from the previous board must not leak into the new one, or its confetti would play on the switch
+    setIsTargetMet(targetFlags(true));
+    setIsExploding(targetFlags(false));
+    announced.current.clear();
+    setBanners([]);
   }, [boardID]);
 
   // Picks up tasks changed on another device, the same way as a background refresh of a cached board. A board still
@@ -118,7 +120,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   // Show a banner whenever confetti starts for a target, mirroring the confetti re-arm rules
   useEffect(() => {
     const newlyHit = [];
-    ['weekly', 'monthly', 'yearly'].forEach((type) => {
+    TARGET_TYPES.forEach((type) => {
       if (isExploding[type] && !isTargetMet[type] && !announced.current.has(type)) {
         announced.current.add(type);
         newlyHit.push(type);
@@ -171,15 +173,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
 
   const handleEditBoard = (name) => {
     if (!name) {
-      setAlertConf({
-        display: true,
-        title: "Name, please! ✏️",
-        textValue: "Every board needs a name, even a short one.",
-      });
+      setAlertConf(nameRequiredAlert('board'));
       return;
     }
-    setBoards(current => current.map(b => b.SK === boardID ? { ...b, Board: name } : b));
-    queueBoardUpdate(boardID, { Board: name });
+    saveBoardSettings(setBoards, boardID, { Board: name });
   };
 
   const handleDeleteBoard = async () => {
@@ -236,19 +233,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   };
 
   const sortTasks = (data) => {
-    if (!data || data.length === 0) {
-      setSortedTasks({});
-      return;
-    }
-    const sortedData = data.reduce((acc, item) => {
-      if (!acc[item.Category]) {
-        acc[item.Category] = [item];
-      } else {
-        acc[item.Category].push(item);
-      }
-      return acc;
-    }, {});
-    setSortedTasks(sortedData, board.CategoryOrder);
+    const byCategory = {};
+    data.forEach(task => (byCategory[task.Category] ??= []).push(task));
+    setSortedTasks(byCategory, board.CategoryOrder);
   };
 
   // In the background a cached copy is already on screen, so a failure leaves that copy in place
@@ -279,27 +266,12 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
     }
   };
 
-  const handleEmojiSelect = (e) => {
-    const selectedEmoji = e.native;
-    setBoards(current =>
-      current.map(b =>
-        b.SK === boardID ? { ...b, Emoji: selectedEmoji } : b
-      )
-    );
-    queueBoardUpdate(boardID, { Emoji: selectedEmoji });
-  };
-
-  const handleConfettiComplete = (type) => {
-    setIsTargetMet(current => ({
-      ...current,
-      [type]: true,
-    }));
-  };
+  const handleEmojiSelect = (e) => saveBoardSettings(setBoards, boardID, { Emoji: e.native });
 
   // Stable, because the library restarts its completion timer whenever onComplete changes, and the board re-renders
   // during a burst. A new handler each render kept a finished burst counted as playing.
   const confettiCompleteHandlers = useMemo(
-    () => Object.fromEntries(TARGET_TYPES.map(type => [type, () => handleConfettiComplete(type)])),
+    () => Object.fromEntries(TARGET_TYPES.map(type => [type, () => setIsTargetMet(current => ({ ...current, [type]: true }))])),
     []
   );
 
@@ -323,7 +295,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
     <div onMouseMove={trackPointer} onPointerDown={handlePointerDown} >
 
       <Suspense fallback={null}>
-        {TARGET_TYPES.map((type) => renderConfetti(type))}
+        {TARGET_TYPES.map(renderConfetti)}
       </Suspense>
 
       <TargetBanner banners={banners} onDone={type => setBanners(current => current.filter(t => t !== type))} />
@@ -370,7 +342,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
                 <div className="board-action">
                   <button aria-label="Delete board" onClick={() => setConfirmConf({
                     display: true,
-                    title: deleteMessage,
+                    title: `Delete "${board.Board}" for good?`,
                     textValue: "🚨 No take-backs: this can't be undone 🚨",
                     callbackFunc: handleDeleteBoard,
                   })}>
@@ -425,7 +397,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
         </div>
       </div>
       <SyncIndicator />
-    </div >
+    </div>
   );
 };
 

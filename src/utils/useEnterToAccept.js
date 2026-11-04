@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useOnClickOutside } from 'usehooks-ts';
 
 // Modals can stack, such as an API error alert over an open Confirm, and Enter belongs to the top one
 const openModals = [];
@@ -38,4 +39,24 @@ export const useEnterToAccept = (modalRef, accept, active = true) => {
   useEffect(() => {
     if (active) return acceptOnEnter(() => modalRef.current, () => acceptRef.current());
   }, [active]);
+};
+
+// Every modal's keys and clicks: Enter accepts, and Escape or a click outside closes. Both callbacks are read when
+// they fire, so they may change on every render
+export const useModalControls = (modalRef, { accept, close, active = true }) => {
+  useEnterToAccept(modalRef, accept, active);
+
+  const closeRef = useRef(close);
+  closeRef.current = close;
+
+  useEffect(() => {
+    if (!active) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closeRef.current();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [active]);
+
+  useOnClickOutside(modalRef, () => closeRef.current());
 };

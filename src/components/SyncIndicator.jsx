@@ -4,6 +4,12 @@ import { CheckIcon, SyncIcon } from './Icons';
 
 const BACK_ONLINE_DURATION = 3000;
 
+const statusTitle = ({ lastError, pending }) => {
+  if (lastError === "Offline") return "Offline: changes are kept on this device until you're back";
+  if (lastError) return "Couldn't save just now, will retry...";
+  return pending ? "Saving..." : "All saved";
+};
+
 // Owns the sync status subscription so a status change re-renders only this, not the board
 const SyncIndicator = memo(() => {
   const syncStatus = useSyncStatus();
@@ -38,7 +44,7 @@ const SyncIndicator = memo(() => {
       )}
       <div
         className={`board-local-sync-indicator-wrapper ${syncStatus.lastError ? "sync-error" : ""}`}
-        title={syncStatus.lastError === "Offline" ? "Offline: changes are kept on this device until you're back" : syncStatus.lastError ? "Couldn't save just now, will retry..." : syncStatus.pending ? "Saving..." : "All saved"}
+        title={statusTitle(syncStatus)}
       >
         {syncStatus.pending
           ? <SyncIcon className="sync-status-icon spin" />

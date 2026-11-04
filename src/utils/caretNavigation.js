@@ -67,7 +67,7 @@ const findAdjacentField = (field, up) => {
   return fields[fields.indexOf(field) + (up ? -1 : 1)] ?? null;
 };
 
-const focusAt = (field, caret) => {
+export const focusAt = (field, caret) => {
   field.focus();
   field.setSelectionRange(caret, caret);
 };

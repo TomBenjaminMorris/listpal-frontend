@@ -180,13 +180,15 @@ export function queueDelete(SK, boardID) {
   return queue([{ SK, boardID, kind: 'delete' }], ACTION_DELAY);
 }
 
+const changesFor = (tasks, kind, fields) => tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind, fields }));
+
 // Same fields on every task, e.g. a category rename or card emoji
 export function queueUpdateAll(tasks, fields) {
-  return queue(tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind: 'update', fields })), ACTION_DELAY);
+  return queue(changesFor(tasks, 'update', fields), ACTION_DELAY);
 }
 
 export function queueDeleteAll(tasks) {
-  return queue(tasks.map(t => ({ SK: t.SK, boardID: t['GSI1-PK'], kind: 'delete' })), ACTION_DELAY);
+  return queue(changesFor(tasks, 'delete'), ACTION_DELAY);
 }
 
 // Later settings merge into the create, as task edits merge into a queued task create
@@ -348,7 +350,7 @@ function flushOnExit() {
   syncOpsKeepalive(pendingRecords.slice(0, MAX_BATCH).map(toOp));
 }
 
-export const readPending = () => readAll();
+export { readAll as readPending };
 
 export function startSync(options = {}) {
   if (options.onBoardScores) onBoardScores = options.onBoardScores;
