@@ -10,12 +10,12 @@ beforeEach(() => {
 
 describe('storedRewordTone', () => {
   it('reads the tone saved with the user details', () => {
-    stored.userDetails = JSON.stringify({ Theme: 'nord', RewordTone: 'formal' });
+    stored.userDetails = JSON.stringify({ Theme: 'monokai', RewordTone: 'formal' });
     expect(storedRewordTone()).toBe('formal');
   });
 
   it('is casual for a user who never picked one', () => {
-    stored.userDetails = JSON.stringify({ Theme: 'nord' });
+    stored.userDetails = JSON.stringify({ Theme: 'monokai' });
     expect(storedRewordTone()).toBe('casual');
   });
 
