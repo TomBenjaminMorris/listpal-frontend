@@ -10,8 +10,8 @@ beforeEach(() => {
 
 describe('readStoredUserDetails', () => {
   it('reads the details saved by the last load', () => {
-    stored.userDetails = JSON.stringify({ Theme: 'nord' });
-    expect(readStoredUserDetails()).toEqual({ Theme: 'nord' });
+    stored.userDetails = JSON.stringify({ Theme: 'monokai' });
+    expect(readStoredUserDetails()).toEqual({ Theme: 'monokai' });
   });
 
   it.each([['nothing saved', undefined], ['the string "undefined"', 'undefined'], ['broken JSON', '{"Theme"']])('is null with %s', (_, value) => {
@@ -27,12 +27,12 @@ describe('readStoredUserDetails', () => {
 
 describe('saveUserSetting', () => {
   it('applies and stores the setting at once, and saves it to the server', () => {
-    let details = { Theme: 'nord', RewordTone: 'casual' };
+    let details = { Theme: 'monokai', RewordTone: 'casual' };
     const save = vi.fn().mockResolvedValue();
-    saveUserSetting(update => { details = update(details); }, 'Theme', 'dracula', save);
-    expect(details).toEqual({ Theme: 'dracula', RewordTone: 'casual' });
+    saveUserSetting(update => { details = update(details); }, 'Theme', 'tokyo-night', save);
+    expect(details).toEqual({ Theme: 'tokyo-night', RewordTone: 'casual' });
     expect(JSON.parse(stored.userDetails)).toEqual(details);
-    expect(save).toHaveBeenCalledWith('dracula');
+    expect(save).toHaveBeenCalledWith('tokyo-night');
   });
 
   it('keeps the setting when the server save fails', async () => {

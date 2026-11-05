@@ -62,30 +62,6 @@
 /* Text sits on the accent colours, so each accent is the deepest shade
    the scheme offers rather than its most recognisable pastel. */
 
-[data-theme="dracula"] {
-  --foreground: #343746;
-  --background: #21222c;
-  --text-colour: #f8f8f2;
-  --accent: #ff5555;
-  --accent-2: rgba(189, 147, 249, 0.5);
-}
-
-[data-theme="nord"] {
-  --foreground: #3b4252;
-  --background: #2e3440;
-  --text-colour: #eceff4;
-  --accent: #5e81ac;
-  --accent-2: rgba(191, 97, 106, 0.6);
-}
-
-[data-theme="gruvbox"] {
-  --foreground: #32302f;
-  --background: #1d2021;
-  --text-colour: #ebdbb2;
-  --accent: #d65d0e;
-  --accent-2: rgba(69, 133, 136, 0.7);
-}
-
 [data-theme="tokyo-night"] {
   --foreground: #24283b;
   --background: #1a1b26;
