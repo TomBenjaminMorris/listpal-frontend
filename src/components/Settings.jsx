@@ -2,6 +2,7 @@ import { memo, useEffect } from 'react';
 import AccountSettings from './AccountSettings';
 import ThemeSetter from './ThemeSetter';
 import RewordToneSetter from './RewordToneSetter';
+import FeedbackSettings from './FeedbackSettings';
 import './PageLayout.css';
 
 const Settings = ({
@@ -19,6 +20,7 @@ const Settings = ({
       <AccountSettings />
       <ThemeSetter setUserDetails={setUserDetails} userDetails={userDetails} />
       <RewordToneSetter setUserDetails={setUserDetails} userDetails={userDetails} />
+      <FeedbackSettings />
     </div>
   );
 };

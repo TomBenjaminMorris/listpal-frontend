@@ -190,3 +190,14 @@
     font-size: 16px;
   }
 }
+
+/* The Feedback section's only row, so it needs no divider below it */
+.feedback-row {
+  border-bottom: none;
+}
+
+/* A link dressed as the rows' buttons, which centre their text as buttons do by default */
+.feedback-link {
+  display: inline-flex;
+  align-items: center;
+}
