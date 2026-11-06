@@ -28,6 +28,7 @@ listpal-frontend/
 ├── README.md                   Links only (Cognito, React libraries, CSS)
 ├── ARCHITECTURE.md             This file
 ├── CLAUDE.md                   Working rules for AI assistants
+├── .claude/agents/             AI reviewers the pr skill runs when a change needs them: security, performance and bugs, complexity
 ├── .github/workflows/          CI: build and test on PRs, build, test and deploy on merge (section 11)
 ├── index.html                  Vite entry; mounts #root and loads src/main.tsx
 ├── package.json                Scripts: dev, build, preview, deploy, test
@@ -574,7 +575,7 @@ Rules the workflows follow, because the repo and its Actions logs are public:
 
 `main` is protected: a PR can't merge until `build / Build and test` passes. Admins can still bypass with `gh pr merge --admin`, which the `/merge` skill uses only for "Force merge". No review is required. The rule was set with `gh api -X PUT repos/TomBenjaminMorris/listpal-frontend/branches/main/protection`, and a renamed CI job needs its check name updated there.
 
-The `/deploy` skill (`.claude/skills/deploy/SKILL.md`) is now a fallback for when CI can't run. Getting a change onto `main` has its own skills: `/pr` (`.claude/skills/pr/SKILL.md`) raises a PR with a description written for later auditing and leaves it open, and `/merge` (`.claude/skills/merge/SKILL.md`) does the same and merges it, which now releases it.
+The `/deploy` skill (`.claude/skills/deploy/SKILL.md`) is now a fallback for when CI can't run. Getting a change onto `main` has its own skills: `/pr` (`.claude/skills/pr/SKILL.md`) raises a PR with a description written for later auditing and leaves it open, and `/merge` (`.claude/skills/merge/SKILL.md`) does the same and merges it, which now releases it. Before committing, `/pr` runs whichever of the reviewer agents in `.claude/agents/` (security, performance and bugs, complexity) the diff calls for, and an open high finding stops a merge.
 
 ```sh
 npm install
@@ -626,5 +627,6 @@ These are things a reader should know before changing the app. They are not fixe
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |
 | Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.github/workflows/` |
 | Change how PRs are raised or merged | `.claude/skills/pr/SKILL.md` (steps and description format), `.claude/skills/merge/SKILL.md` (merging and forcing) |
+| Change what the AI reviewers check, or when they run | `.claude/agents/` (what each checks), step 3 of `.claude/skills/pr/SKILL.md` (when) |
 | Change when or how a page left open picks up changes from other devices | `src/utils/refreshOnReturn.js` (triggers and timings), `App.jsx` (boards), `Board.jsx` (tasks), `ScoreCounter.jsx` (no confetti for a refresh) |
 | Change the API address or Cognito pool | `src/utils/apiGatewayClient.js`, `src/config.json` |
