@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { readStoredUserDetails, saveUserSetting } from './userDetails';
+import { readStoredUserDetails, saveEnforcedUserSetting, saveUserSetting } from './userDetails';
 
 let stored;
 
@@ -42,5 +42,31 @@ describe('saveUserSetting', () => {
     await new Promise(resolve => setTimeout(resolve));
     expect(details).toEqual({ RewordTone: 'formal' });
     expect(log).toHaveBeenCalled();
+  });
+});
+
+describe('saveEnforcedUserSetting', () => {
+  it('applies and stores the setting at once, and keeps it once the server has it', async () => {
+    let details = { Theme: 'monokai' };
+    const save = vi.fn().mockResolvedValue();
+    const saving = saveEnforcedUserSetting(update => { details = update(details); }, 'AIEnabled', false, true, save);
+    expect(details).toEqual({ Theme: 'monokai', AIEnabled: false });
+    await saving;
+    expect(save).toHaveBeenCalledWith(false);
+    expect(details).toEqual({ Theme: 'monokai', AIEnabled: false });
+    expect(JSON.parse(stored.userDetails)).toEqual(details);
+  });
+
+  it.each([[true, false], [false, true]])('flips back to %s when saving %s fails, here and in storage', async (previous, value) => {
+    vi.spyOn(console, 'error').mockImplementation(() => { });
+    let details = { Theme: 'monokai', AIEnabled: previous };
+    await saveEnforcedUserSetting(update => { details = update(details); }, 'AIEnabled', value, previous, () => Promise.reject(new Error('timeout')));
+    expect(details).toEqual({ Theme: 'monokai', AIEnabled: previous });
+    expect(JSON.parse(stored.userDetails)).toEqual(details);
+  });
+
+  it('settles rather than throwing when the save fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => { });
+    await expect(saveEnforcedUserSetting(() => { }, 'AIEnabled', false, true, () => Promise.reject(new Error('offline')))).resolves.toBeUndefined();
   });
 });

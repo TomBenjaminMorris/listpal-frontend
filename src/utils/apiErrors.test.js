@@ -50,6 +50,7 @@ describe('describeApiError', () => {
     ['busy_today', 429, /Everyone's rewords/],
     ['flagged', 400, /content check/],
     ['reword_unavailable', 502, /couldn't reword this task/],
+    ['ai_disabled', 403, /turned off AI features/],
   ])('explains a %s reply in its own words rather than by status', (code, status, pattern) => {
     const err = { isAxiosError: true, response: { status, data: { error: code } } };
     const result = describeApiError(err, 'reword this task');
@@ -63,7 +64,7 @@ describe('describeApiError', () => {
   });
 
   it('keeps reword alert titles short enough for one line', () => {
-    for (const code of ['daily_limit', 'busy_today', 'flagged', 'reword_unavailable']) {
+    for (const code of ['daily_limit', 'busy_today', 'flagged', 'reword_unavailable', 'ai_disabled']) {
       const err = { isAxiosError: true, response: { status: 400, data: { error: code } } };
       expect([...describeApiError(err, 'x').title].length).toBeLessThanOrEqual(25);
     }

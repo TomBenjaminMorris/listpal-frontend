@@ -15,3 +15,13 @@
     font-size: 14px;
     line-height: 20px;
 }
+
+/* AI features are off: the cards stay readable but can't be picked or lifted */
+.reword-tone-disabled {
+    opacity: 0.45;
+}
+
+.reword-tone-disabled .theme-card-wrapper:disabled {
+    cursor: default;
+    transform: none;
+}

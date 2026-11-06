@@ -1,0 +1,46 @@
+/* The section's only row, so it needs no divider below it */
+.ai-settings-row {
+  border-bottom: none;
+}
+
+.ai-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  /* From the text colour when off, as with the theme cards' border, so it shows against every theme */
+  background-color: color-mix(in srgb, var(--text-colour) 25%, transparent);
+  transition: background-color 150ms;
+}
+
+.ai-switch[aria-disabled="true"] {
+  cursor: progress;
+}
+
+.ai-switch[aria-checked="true"] {
+  background-color: var(--accent);
+}
+
+.ai-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 150ms;
+}
+
+.ai-switch[aria-checked="true"] .ai-switch-thumb {
+  transform: translateX(18px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-switch,
+  .ai-switch-thumb {
+    transition: none;
+  }
+}
