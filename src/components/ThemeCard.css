@@ -36,17 +36,16 @@
     line-height: 24px;
 }
 
-/* A bookmark: a transparent bottom border cuts the notch between the two side borders */
+/* A bookmark. One clipped shape rather than two borders meeting in the middle, as Safari and Firefox round those
+   apart at some zooms and leave a seam down the centre */
 .selected-indicator {
     position: absolute;
     top: -5px;
     right: 14px;
-    box-sizing: border-box;
     width: 14px;
     height: 28px;
-    border-left: 7px solid var(--accent);
-    border-right: 7px solid var(--accent);
-    border-bottom: 7px solid transparent;
+    background-color: var(--accent);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
 }
 
 .theme-card-preview {

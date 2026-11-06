@@ -262,6 +262,17 @@
     box-decoration-break: clone;
 }
 
+/* The letters stay clear, so only the line shows over the textarea's own text. Longhands, as Safari drops a
+   text-decoration shorthand that includes a thickness */
+.task-strike-mirror {
+    z-index: 1;
+    -webkit-text-decoration-line: line-through;
+    text-decoration-line: line-through;
+    -webkit-text-decoration-color: var(--accent);
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1.5px;
+}
+
 /* Built and removed within one keypress by Task.jsx to find which line the caret is on. It wraps like the other
    copies, and its spans mark caret positions */
 .task-caret-mirror {

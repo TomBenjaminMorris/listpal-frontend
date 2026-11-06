@@ -8,6 +8,37 @@
   height: 44px;
 }
 
+.score-ring-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The arc starts at the top */
+  transform: rotate(-90deg);
+}
+
+.score-ring-svg circle {
+  fill: none;
+  stroke-width: 8;
+}
+
+.score-ring-trail {
+  stroke: color-mix(in srgb, var(--text-colour) 14%, transparent);
+}
+
+.score-ring-path {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.score-ring-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Marks a met target on the ring's corner. The shadow is the page's colour, which cuts it cleanly out of the ring. */
 .score-star {
   position: absolute;

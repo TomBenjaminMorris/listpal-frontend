@@ -310,7 +310,6 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
 
   const isImportant = task.Important === "true";
   const taskExpiryOpacityStyle = checked ? { opacity: taskExpiryOpacity() } : null;
-  const taskTextDecorationStyle = checked ? { textDecoration: "line-through var(--accent) 1.5px", opacity: taskExpiryOpacity() } : null;
   const showRewordChoice = rewordChoice !== null && !isRewording;
 
   return (
@@ -353,6 +352,12 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             <div className="task-textarea-box task-textarea-sizer" aria-hidden="true">{fadeFrom}{' '}</div>
           </>
         )}
+        {/* Safari draws no text decoration inside a textarea, so the strikethrough is drawn on a copy laid over it */}
+        {checked && description && (
+          <div className="task-textarea-box task-mirror task-strike-mirror" aria-hidden="true" style={taskExpiryOpacityStyle}>
+            <span>{description}</span>
+          </div>
+        )}
         {/* Shares the textarea's grid cell, so the browser sizes the textarea to the wrapped text even when the card's
             width changes without a resize event. The trailing space keeps a final line break from collapsing. */}
         <div ref={sizerRef} className="task-textarea-box task-textarea-sizer" aria-hidden="true">{description}{' '}</div>
@@ -367,7 +372,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
           placeholder="new task..."
           onChange={handleTextUpdate}
           onKeyDown={onKeyDown}
-          style={taskTextDecorationStyle}
+          style={taskExpiryOpacityStyle}
         />
         {/* Always present, as a live region only announces changes to one that's already on the page */}
         <span className="task-reword-status" role="status">
