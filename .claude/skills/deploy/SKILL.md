@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Deploy the ListPal frontend
 
-The site is a static Vite build served from S3 through CloudFront. There is no pipeline, so a release is done by hand with the AWS CLI. This skill repeats the steps used for the weekly-roundups removal release.
+The site is a static Vite build served from S3 through CloudFront. GitHub Actions normally deploys every merge to `main` (`.github/workflows/deploy.yml`). This skill is the fallback for when CI can't run. Check first with `gh run list --workflow deploy.yml --limit 3`, and don't run it while a Deploy run is in progress. It repeats the steps used for the weekly-roundups removal release.
 
 ## Rules
 

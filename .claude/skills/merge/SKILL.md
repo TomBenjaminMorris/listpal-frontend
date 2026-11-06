@@ -5,7 +5,7 @@ description: Raise a pull request for the current ListPal frontend work and merg
 
 # Raise and merge a frontend PR
 
-The user types "Merge" when the work is finished. That one word authorises committing, pushing, opening the PR and merging it. Merging does not release anything: the site only changes through `/deploy`, which stays a separate decision.
+The user types "Merge" when the work is finished. That one word authorises committing, pushing, opening the PR and merging it. Merging also releases it: the Deploy workflow (`.github/workflows/deploy.yml`) builds `main` and publishes it straight after, with no approval step.
 
 ## Steps
 
@@ -66,4 +66,13 @@ git branch --show-current
 
 Only report success if the state is `MERGED`. `gh` normally leaves the checkout on an up-to-date `main`. If it doesn't, say so, and don't discard or stash the user's edits to fix it.
 
-Report the PR link, the merge commit, anything left uncommitted, whether it was forced, and that the change isn't live until `/deploy` runs. Don't run the deploy.
+Then watch the deploy that the merge started:
+
+```sh
+RUN=$(gh run list --workflow deploy.yml --branch main --limit 1 --json databaseId,headSha --jq '.[0].databaseId')
+gh run watch "$RUN" --exit-status
+```
+
+Check that the run's `headSha` is the merge commit. If the run fails, show the failing step from `gh run view "$RUN" --log-failed` and stop. Don't run `/deploy` to work around it unless the user asks.
+
+Report the PR link, the merge commit, anything left uncommitted, whether it was forced, and the deploy result.
