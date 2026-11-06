@@ -3,6 +3,7 @@ import { queueUpdate } from '../utils/syncEngine';
 import { findAdjacentTaskTextarea, focusAt, moveCaretBetweenFields } from '../utils/caretNavigation';
 import { TASK_MAX_LENGTH } from '../utils/apiGatewayClient';
 import { nextRewordChoice, rewordToApply } from '../utils/utils';
+import { storedAIFeaturesEnabled } from '../utils/aiFeatures';
 import { CheckIcon, LinkIcon, MoreIcon, UndoIcon } from './Icons';
 import TaskMenu from './TaskMenu';
 import './Task.css';
@@ -400,7 +401,7 @@ const Task = memo(({ title, task, setTaskFields, toggleTaskChecked, addTask, joi
             onClose={() => setTaskMenuVisible(false)}
             markAsImportant={handleMarkAsImportant}
             duplicateTask={handleDuplicate}
-            rewordTask={canReword ? handleReword : null}
+            rewordTask={canReword && storedAIFeaturesEnabled() ? handleReword : null}
             deleteAndHideTask={handleDeleteAndHideTask}
             isImportant={isImportant}
             task={task}

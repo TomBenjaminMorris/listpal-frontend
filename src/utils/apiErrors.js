@@ -15,6 +15,10 @@ const CODED_ERRORS = {
     title: "Can't reword that one 🙅",
     textValue: "This task tripped our content check, so it wasn't sent for rewording. It's unchanged.",
   },
+  ai_disabled: {
+    title: 'AI features are off 🤖',
+    textValue: "You've turned off AI features, so this task wasn't sent. It's unchanged. Turn them back on in Settings to reword tasks.",
+  },
   reword_unavailable: {
     title: "Reword didn't land 🪄",
     textValue: "We couldn't reword this task just now. It's unchanged, so give it another go in a moment.",

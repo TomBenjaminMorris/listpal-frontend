@@ -77,6 +77,10 @@ export const updateThemeAPI = (theme) =>
 export const updateRewordToneAPI = (tone) =>
   apiPost('/user-reword-tone', { tone }, { action: 'save your reword tone' });
 
+// The switch is locked and flips back on failure, so a request that hangs must give up rather than leave it stuck
+export const updateAIEnabledAPI = (enabled) =>
+  apiPost('/user-ai-enabled', { enabled }, { action: 'save your AI setting', timeout: 10000 });
+
 export const deleteBoard = (boardID) =>
   apiPost('/delete-board', { boardID }, { action: 'delete the board' });
 
