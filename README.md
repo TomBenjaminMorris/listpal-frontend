@@ -9,7 +9,6 @@
 * https://medium.com/@ravindu.18/authentication-using-amazon-cognito-hosted-ui-for-simple-react-application-part-2-fc8e44272f6e
 
 ### ReactJS
-* https://www.npmjs.com/package/react-circular-progressbar
 * https://www.npmjs.com/package/react-textarea-autosize
 * https://www.npmjs.com/package/react-confetti-explosion
 * https://stackoverflow.com/questions/68175873/detect-element-reference-height-change

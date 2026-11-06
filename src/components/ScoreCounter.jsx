@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { updateBoardScoresAPI } from '../utils/apiGatewayClient';
 import { flushNow, LOAD_FLUSH_TIMEOUT } from '../utils/syncEngine';
 import { applyManualScore, parseScoreInput } from '../utils/utils';
 import { StarIcon } from './Icons';
-import 'react-circular-progressbar/dist/styles.css';
 import './ScoreCounter.css';
 
 const TYPE_MAPPINGS = {
@@ -13,12 +11,10 @@ const TYPE_MAPPINGS = {
   Y: { detail: 'YScore', label: 'yearly', name: 'This year' }
 };
 
-const progressBarStyles = buildStyles({
-  trailColor: 'color-mix(in srgb, var(--text-colour) 14%, transparent)',
-  textColor: 'var(--text-colour)',
-  pathColor: 'var(--accent)',
-  pathTransitionDuration: 0.5,
-});
+// In the SVG's own units. A dash length in CSS px, as react-circular-progressbar used, is scaled by page zoom in
+// Safari while the circle is not, which broke the arc up at any zoom other than 100%
+const RING_RADIUS = 46;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 // Returning the same object when nothing changes lets React skip re-rendering the whole board
 const setFlag = (setter, label, value) => setter(current => current[label] === value ? current : { ...current, [label]: value });
@@ -89,8 +85,16 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
     <div className={`score-button ${animate ? "bulge-now" : ""}`} onAnimationEnd={() => setAnimate(false)}>
       <div className="score-ring">
         {(percent || percent >= 0) && (
-          <CircularProgressbarWithChildren value={percent} styles={progressBarStyles}>
-            <div>
+          <>
+            {/* The arc is hidden when empty, as its round cap would still draw a dot */}
+            <svg className="score-ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+              <circle className="score-ring-trail" cx="50" cy="50" r={RING_RADIUS} />
+              <circle className="score-ring-path" cx="50" cy="50" r={RING_RADIUS}
+                strokeDasharray={RING_CIRCUMFERENCE}
+                strokeDashoffset={RING_CIRCUMFERENCE * (1 - Math.min(Math.max(percent, 0), 100) / 100)}
+                strokeOpacity={percent > 0 ? 1 : 0} />
+            </svg>
+            <div className="score-ring-centre">
               <input className="score-input" type="text" inputMode="numeric" value={scoreValue} onChange={e => {
                 const parsed = parseScoreInput(e.target.value);
                 if (parsed === null) return;
@@ -98,7 +102,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
                 setScoreHasChanged(true);
               }} onBlur={handleScoreUpdate} />
             </div>
-          </CircularProgressbarWithChildren>
+          </>
         )}
         {isExploding[label] && <span className="score-star" aria-label="Target met"><StarIcon /></span>}
         <div className="tooltip">{`${name}: ${Number(score).toLocaleString()} of ${Number(target).toLocaleString()}`}</div>
