@@ -558,6 +558,9 @@ Rules the workflows follow, because the repo and its Actions logs are public:
 - Never add a `pull_request_target`, `issue_comment` or `workflow_run` workflow, as any workflow running on `main` can assume the role.
 - The workflow doesn't fetch the live site after deploying. CloudFront only serves GB, so the runner would get a 403.
 - `FRONTEND_CONFIG_JSON` is a copy of the local `src/config.json`. If the backend's Cognito pool, client or login domain ever changes, update both.
+- CI builds on Node 24. The backend runs Node 22 until its AWS provider upgrade allows `nodejs24.x`.
+
+`main` is protected: a PR can't merge until `build / Build and test` passes. Admins can still bypass with `gh pr merge --admin`, which the `/merge` skill uses only for "Force merge". No review is required. The rule was set with `gh api -X PUT repos/TomBenjaminMorris/listpal-frontend/branches/main/protection`, and a renamed CI job needs its check name updated there.
 
 The `/deploy` skill (`.claude/skills/deploy/SKILL.md`) is now a fallback for when CI can't run. Getting a change onto `main` has its own skills: `/pr` (`.claude/skills/pr/SKILL.md`) raises a PR with a description written for later auditing and leaves it open, and `/merge` (`.claude/skills/merge/SKILL.md`) does the same and merges it, which now releases it.
 
