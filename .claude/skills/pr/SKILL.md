@@ -5,7 +5,7 @@ description: Raise a pull request for the current ListPal frontend work and leav
 
 # Raise a frontend PR
 
-The user types "PR" when the work is ready for a pull request. That one word authorises committing, pushing and opening the PR. It stops there: don't merge or deploy.
+The user types "PR" when the work is ready for a pull request. That one word authorises committing, pushing and opening the PR. It stops there: don't merge, as merging deploys.
 
 The `merge` skill follows these same steps before it merges.
 
@@ -70,7 +70,7 @@ The problem or goal, in terms of what a user saw or needed.
 What was actually run and the result, and what was not tested. Say so if something was only checked against a mock API rather than a signed-in board.
 
 ## Deploy and follow-ups
-Whether it needs `/deploy`, any order it depends on with a backend PR (link it), and any known gaps.
+That merging deploys it, any order it depends on with a backend PR (link it), and any known gaps.
 ```
 
 End with the attribution lines the session specifies, if any. Keep to observed facts: don't claim a test ran unless it did. Leave out session details such as "as discussed", and anything personal or secret.

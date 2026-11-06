@@ -28,6 +28,7 @@ listpal-frontend/
 ├── README.md                   Links only (Cognito, React libraries, CSS)
 ├── ARCHITECTURE.md             This file
 ├── CLAUDE.md                   Working rules for AI assistants
+├── .github/workflows/          CI: build and test on PRs, build, test and deploy on merge (section 11)
 ├── index.html                  Vite entry; mounts #root and loads src/main.tsx
 ├── package.json                Scripts: dev, build, preview, deploy, test
 ├── vite.config.ts              React plugin only
@@ -535,16 +536,30 @@ Key points:
 
 ## 11. Deployment and local development
 
-There is no pipeline. Releases are run by hand with the `/deploy` skill in `.claude/skills/deploy/SKILL.md`. It builds a clean worktree of `origin/main`, syncs `dist/` to the bucket and invalidates CloudFront. It asks before each step that changes something. Getting a change onto `main` comes first and has its own skills: `/pr` (`.claude/skills/pr/SKILL.md`) raises a PR with a description written for later auditing and leaves it open, and `/merge` (`.claude/skills/merge/SKILL.md`) does the same and merges it. Neither one releases anything.
+GitHub Actions releases `main`. Merging a PR deploys it, with no approval step. The workflows are in `.github/workflows/`:
+
+- `test.yml` runs on every pull request. It builds and tests.
+- `deploy.yml` runs on every push to `main`. It builds and tests, then syncs `dist/` to the bucket without `--delete`, invalidates `/*` on the www distribution, and waits for the invalidation to finish.
+- `build.yml` is the reusable build both call. It writes `src/config.json` from the `FRONTEND_CONFIG_JSON` Actions variable, then runs `npm ci`, `npm run build` and `npm test`.
 
 ```mermaid
 flowchart LR
-    A["PR merged to main"] --> B["Clean worktree of origin/main<br/>+ copy src/config.json"]
-    B --> C["npm ci && npm run build"]
-    C --> D["aws s3 sync --dryrun<br/>then the real sync"]
-    D --> E["CloudFront invalidation /*<br/>on the www distribution"]
-    E --> F["Check the live index.html<br/>references the new bundle"]
+    A["Merge to main"] --> B["Build job, no AWS access<br/>config.json from Actions variable<br/>npm ci, build, test"]
+    B -->|"dist/ artifact"| C["Deploy job<br/>listpal-frontend-deploy role"]
+    C --> D["aws s3 sync<br/>(no --delete)"]
+    D --> E["CloudFront invalidation /*<br/>on the www distribution, then wait"]
 ```
+
+Rules the workflows follow, because the repo and its Actions logs are public:
+
+- Each workflow starts from `permissions: {}`, and every action is pinned to a full commit SHA.
+- npm packages run only in the build job, which has no AWS access. The deploy job runs no project code, and only it can assume `listpal-frontend-deploy`.
+- The role is defined in the backend repo (`terraform/github_actions.tf`). It can put objects in the bucket and invalidate the www distribution, nothing else. It is trusted only from this repo's `main`.
+- Never add a `pull_request_target`, `issue_comment` or `workflow_run` workflow, as any workflow running on `main` can assume the role.
+- The workflow doesn't fetch the live site after deploying. CloudFront only serves GB, so the runner would get a 403.
+- `FRONTEND_CONFIG_JSON` is a copy of the local `src/config.json`. If the backend's Cognito pool, client or login domain ever changes, update both.
+
+The `/deploy` skill (`.claude/skills/deploy/SKILL.md`) is now a fallback for when CI can't run. Getting a change onto `main` has its own skills: `/pr` (`.claude/skills/pr/SKILL.md`) raises a PR with a description written for later auditing and leaves it open, and `/merge` (`.claude/skills/merge/SKILL.md`) does the same and merges it, which now releases it.
 
 ```sh
 npm install
@@ -555,7 +570,7 @@ npm test           # Vitest
 
 Things to know:
 
-- `npm run deploy` still exists, but it builds the working tree and does not invalidate CloudFront. The cache TTL is one year, so use the deploy skill instead.
+- `npm run deploy` still exists, but it builds the working tree and does not invalidate CloudFront. The cache TTL is one year, so let CI deploy, or use the deploy skill.
 - Local dev signs in through the same Cognito pool and calls the same production API. Changes that write data affect the live Dev data.
 - Terraform changes are applied from `terraform/` with `terraform plan` and `terraform apply`, using AWS credentials for the target account.
 
@@ -594,7 +609,7 @@ These are things a reader should know before changing the app. They are not fixe
 | Change sign-in, tokens or logout | `src/utils/authService.js`, `src/utils/utils.js` (`isTokenExpired`), `src/components/RedirectPage.jsx`, `src/config.json` |
 | Add a theme | `src/App.css` (new `[data-theme]` block), `src/utils/themes.js` |
 | Change hosting, domains or caching | `terraform/main.tf` (module inputs), `README.md` |
-| Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.claude/skills/deploy/SKILL.md` |
+| Change the build or deploy | `package.json`, `vite.config.ts`, `tsconfig.json`, `.github/workflows/` |
 | Change how PRs are raised or merged | `.claude/skills/pr/SKILL.md` (steps and description format), `.claude/skills/merge/SKILL.md` (merging and forcing) |
 | Change when or how a page left open picks up changes from other devices | `src/utils/refreshOnReturn.js` (triggers and timings), `App.jsx` (boards), `Board.jsx` (tasks), `ScoreCounter.jsx` (no confetti for a refresh) |
 | Change the API address or Cognito pool | `src/utils/apiGatewayClient.js`, `src/config.json` |
