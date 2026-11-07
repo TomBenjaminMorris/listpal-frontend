@@ -23,8 +23,9 @@ const ConfettiExplosion = memo(lazy(() => import('react-confetti-explosion')));
 const SHOWING_CACHE = Symbol('showing cache');
 const TARGET_TYPES = ['weekly', 'monthly', 'yearly'];
 const targetFlags = value => Object.fromEntries(TARGET_TYPES.map(type => [type, value]));
+const SCREEN_CENTRE = Symbol('screen centre'); // A confetti origin fixed to the viewport rather than the page
 
-const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID, isMobile }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
   const [displayBoardMenu, setDisplayBoardMenu] = useState(false);
@@ -156,8 +157,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
 
   // A ticked task moves up to the done tasks, and the page can scroll to follow it, so where the pointer was may now
   // be off screen. The task has only just started sliding, and getBoundingClientRect includes the slide, so take that
-  // off to find where it ends up.
+  // off to find where it ends up. On a phone, where the task fills the width and its move is a big jump, a burst
+  // following it looked odd, so there every burst plays in the middle of the screen instead.
   const confettiOrigin = () => {
+    if (isMobile) return SCREEN_CENTRE;
     const checkbox = tickedCheckbox.current;
     if (!checkbox?.isConnected) return { ...cursorPosition.current };
     const rect = checkbox.getBoundingClientRect();
@@ -299,8 +302,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
 
   const renderConfetti = (type) => {
     const origin = confettiOrigins[type];
+    const position = origin === SCREEN_CENTRE
+      ? { position: 'fixed', top: 'calc(50% - 25px)', left: 'calc(50% - 25px)' }
+      : { position: 'absolute', top: origin?.y - 25, left: origin?.x - 25 };
     return isExploding[type] && !isTargetMet[type] && origin && (
-      <div key={type} style={{ position: 'absolute', top: origin.y - 25, left: origin.x - 25 }}>
+      <div key={type} style={position}>
         <ConfettiExplosion
           zIndex={10000}
           duration={3000}

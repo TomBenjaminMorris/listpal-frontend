@@ -261,6 +261,7 @@ const App = () => {
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoardID={setActiveBoardID}
+                isMobile={isMobile}
               />)}
             />
 
