@@ -18,7 +18,7 @@ const FeedbackSettings = () => (
             <span className="account-row-label">Send feedback</span>
             <span className="account-row-value">Found a bug or have an idea? Email us at {FEEDBACK_EMAIL}.</span>
           </div>
-          <a className="prompt-button-cancel account-row-button feedback-link" href={FEEDBACK_HREF}>Email us</a>
+          <a className="prompt-button-cancel account-row-button account-row-link" href={FEEDBACK_HREF}>Email us</a>
         </div>
       </div>
     </div>

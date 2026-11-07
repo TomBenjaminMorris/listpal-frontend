@@ -283,6 +283,12 @@
     outline: none;
 }
 
+/* Safari sends no click for a disabled control, so a tap on a ticked task's text goes to the row instead, where
+   utils/lastTappedTask.js picks it up and shows the task's dots */
+.task-textarea-box:disabled {
+    pointer-events: none;
+}
+
 .task-link-icon {
     width: 16px;
     height: 16px;
@@ -298,9 +304,11 @@
     transition: background-color 120ms, opacity 120ms;
 }
 
-.task-three-dots-vertical:hover {
-    background-color: var(--surface-hover);
-    opacity: 1;
+@media (hover: hover) {
+    .task-three-dots-vertical:hover {
+        background-color: var(--surface-hover);
+        opacity: 1;
+    }
 }
 
 /* Keeps its place in the row, but only shows on hover, as a faint icon on every task with no link is clutter */
@@ -374,6 +382,12 @@ input[type="checkbox"]:not(:checked):hover {
 @media screen and (max-width: 650px) {
     .task-textarea-wrapper {
         width: calc(100% - 57px);
+    }
+
+    /* iOS Safari zooms the page into any field under 16px when it takes focus. On the shared class, so the copies
+       laid over the textarea keep wrapping exactly as it does. */
+    .task-textarea-box {
+        font-size: 16px;
     }
 
     /* Task links stay hidden on phones */

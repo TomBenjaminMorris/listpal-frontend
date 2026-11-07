@@ -19,6 +19,13 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 // Returning the same object when nothing changes lets React skip re-rendering the whole board
 const setFlag = (setter, label, value) => setter(current => current[label] === value ? current : { ...current, [label]: value });
 
+// The ring's number is short, so editing it means typing at its end. On click as well as focus, because Safari and
+// iOS put the caret where the click landed after focus has already run.
+const moveCaretToEnd = (e) => {
+  const end = e.target.value.length;
+  e.target.setSelectionRange(end, end);
+};
+
 const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCount, setBoards, setAlertConf, setIsExploding, setIsTargetMet, isExploding }) => {
   const [scoreValue, setScoreValue] = useState(score);
   const [animate, setAnimate] = useState(false);
@@ -100,7 +107,7 @@ const ScoreCounter = memo(({ score, percent, type, currentBoardScores, refreshCo
                 if (parsed === null) return;
                 setScoreValue(parsed);
                 setScoreHasChanged(true);
-              }} onBlur={handleScoreUpdate} />
+              }} onFocus={moveCaretToEnd} onClick={moveCaretToEnd} onBlur={handleScoreUpdate} />
             </div>
           </>
         )}

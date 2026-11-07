@@ -6,10 +6,12 @@
   margin-top: -22px;
 }
 
+/* Hidden with visibility rather than display: iOS Safari repaints only the hidden element's own box, which the icon
+   overflows, so with display it left the dots on screen after they went. Laid out either way, which moves nothing, as
+   the text's width is fixed and the icon is shorter than the shortest row. */
 .taskMenu {
-  display: none;
+  visibility: hidden;
   margin-left: 8px;
-  height: 0px;
 }
 
 /* Block, so it doesn't sit on a line of text whose spacing would lift it out of line with the rest of the row */
@@ -20,9 +22,22 @@
   cursor: pointer;
 }
 
-.task-container:hover .taskMenu,
 .menu-background-display {
-  display: block;
+  visibility: visible;
+}
+
+@media (hover: hover) {
+  .task-container:hover .taskMenu {
+    visibility: visible;
+  }
+}
+
+/* A touch screen leaves :hover on the last thing tapped, so the dots stayed on old tasks. There they show for the task
+   utils/lastTappedTask.js marks as last tapped instead. Not :focus-within, as iOS Safari often leaves focus where it was on a tap. */
+@media (hover: none) {
+  .task-container[data-touched] .taskMenu {
+    visibility: visible;
+  }
 }
 
 .menu-background-display .task-three-dots-vertical {
