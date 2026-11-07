@@ -1,4 +1,5 @@
 import { memo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   getAccountDetails,
   saveName,
@@ -318,6 +319,15 @@ const AccountSettings = () => {
         >
           <PasswordForm email={details.email} onCancel={closeRow} />
         </Row>
+        <div className="account-row">
+          <div className="account-row-summary">
+            <div className="account-row-text">
+              <span className="account-row-label">Log out</span>
+              <span className="account-row-value">Sign out of ListPal on this device.</span>
+            </div>
+            <Link className="prompt-button-cancel account-row-button account-row-link" to="/logout">Log out</Link>
+          </div>
+        </div>
         <div className="account-delete">
           <span className="account-row-sub">Permanently delete your boards, tasks and login.</span>
           <button className="account-danger-button" onClick={() => setDeleting(true)}>Delete account</button>

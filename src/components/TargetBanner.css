@@ -1,7 +1,7 @@
 .target-banner-stack {
   position: fixed;
   right: 20px;
-  bottom: 70px; /* clears the sync indicator in Board.css (bottom 20px, 30px tall) */
+  bottom: calc(70px + var(--bottom-nav-offset)); /* clears the sync indicator in Board.css (bottom 20px, 30px tall) */
   z-index: 5000;
   display: flex;
   flex-direction: column-reverse; /* new banners appear above, so those already showing stay put */

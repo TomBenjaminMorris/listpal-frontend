@@ -197,7 +197,7 @@
 }
 
 /* A link dressed as the rows' buttons, which centre their text as buttons do by default */
-.feedback-link {
+.account-row-link {
   display: inline-flex;
   align-items: center;
 }

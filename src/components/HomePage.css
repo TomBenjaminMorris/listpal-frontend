@@ -75,7 +75,10 @@
         margin-top: 0;
     }
 
-    .page-heading + .date-pills,
+    .page-heading + .date-pills {
+        display: none;
+    }
+
     .home-stats {
         justify-content: center;
     }

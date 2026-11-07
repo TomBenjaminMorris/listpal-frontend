@@ -119,6 +119,22 @@
   --shadow-button: rgba(0, 0, 0, 0.25) 0px 3px 10px;
   --shadow-tooltip: rgba(0, 0, 0, 0.35) 0px 4px 12px;
   --shadow-popover: rgba(0, 0, 0, 0.45) 0px 8px 24px;
+  /* Space taken by the mobile bottom bar. The page's padding keeps it while the bar is hidden for typing, so nothing
+     jumps. Anything fixed to the bottom of the screen sits the offset above it, which drops to 0 while it's hidden. */
+  --bottom-nav-height: 0px;
+  --bottom-nav-offset: var(--bottom-nav-height);
+}
+
+/* Includes the home indicator's area on phones that have one. It's 0 unless the page extends behind it. */
+@media screen and (max-width: 650px) {
+  :root {
+    --bottom-nav-height: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Set by BottomNavBar.jsx */
+:root[data-bottom-nav-hidden] {
+  --bottom-nav-offset: 0px;
 }
 
 .line-icon {

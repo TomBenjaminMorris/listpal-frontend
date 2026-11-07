@@ -1,0 +1,218 @@
+/* Above the sheet and its scrim, which slide out from behind it, but under the modal backdrop (3000) */
+.bottomnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2700;
+  display: flex;
+  box-sizing: border-box;
+  height: var(--bottom-nav-height);
+  padding: 0 8px env(safe-area-inset-bottom);
+  background-color: var(--foreground);
+  border-top: 1px solid var(--hairline);
+  /* The sign-in page before it has no bar, so it would otherwise pop in as Home arrives */
+  animation: 250ms ease-out fadeInPure;
+  transition: transform 180ms ease, visibility 0s;
+}
+
+.bottomnav-hidden {
+  transform: translateY(100%);
+  visibility: hidden;
+  transition: transform 180ms ease, visibility 0s linear 180ms;
+}
+
+/* The whole slot takes the tap, so a thumb that misses the icon still lands on the tab */
+.bottomnav-tab {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: var(--text-muted);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottomnav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 34px;
+  border-radius: 17px;
+  transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.bottomnav-pill>.line-icon {
+  flex-basis: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+/* The accent only tints the background, as in the side bar: several themes' accents are too dark to read as an icon */
+.bottomnav-tab-active {
+  color: var(--text-colour);
+}
+
+.bottomnav-tab-active>.bottomnav-pill {
+  background-color: var(--accent-tint);
+}
+
+.bottomnav-tab:active>.bottomnav-pill {
+  transform: scale(0.92);
+}
+
+/* On the pill rather than the slot, which is far wider than anything the user can see */
+.bottomnav-tab:focus-visible {
+  outline: none;
+}
+
+.bottomnav-tab:focus-visible>.bottomnav-pill {
+  outline: 2px solid var(--text-colour);
+  outline-offset: -2px;
+}
+
+/*///////////// BOARDS SHEET /////////////*/
+
+/* touch-action stops a swipe on the dimmed page from scrolling the page underneath */
+.bottomnav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transition: opacity 220ms ease;
+}
+
+.bottomnav-scrim-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Above the sync indicator (2500), which would otherwise show through the scrim */
+.bottomnav-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--bottom-nav-height);
+  z-index: 2610;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  max-height: 70vh;
+  border-radius: 16px 16px 0 0;
+  background-color: var(--foreground);
+  box-shadow: var(--shadow-popover);
+  text-align: left;
+  transition: transform 220ms ease, visibility 0s;
+}
+
+/* Its own height takes it down behind the bar. No shadow, which would otherwise show along the bar's top edge.
+   Hidden too when shut, so its links can't take focus. */
+.bottomnav-sheet-closed {
+  transform: translateY(100%);
+  visibility: hidden;
+  box-shadow: none;
+  transition: transform 220ms ease, visibility 0s linear 220ms;
+}
+
+/* The drag area. touch-action hands the gesture to the app instead of scrolling or pull-to-refresh. */
+.bottomnav-sheet-header {
+  flex-shrink: 0;
+  padding: 8px 24px 6px;
+  touch-action: none;
+  cursor: grab;
+}
+
+.bottomnav-sheet-handle {
+  width: 36px;
+  height: 5px;
+  margin: 0 auto 12px;
+  border-radius: 3px;
+  background-color: color-mix(in srgb, var(--text-colour) 25%, transparent);
+}
+
+.bottomnav-sheet-title {
+  margin: 0;
+  font-family: CircularBold;
+  font-size: 17px;
+  font-weight: normal;
+}
+
+.bottomnav-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  padding: 6px 12px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.bottomnav-sheet-empty {
+  margin: 8px 12px;
+  color: var(--text-muted);
+  font-family: CircularBook;
+  font-size: 15px;
+}
+
+.bottomnav-board {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: var(--text-colour);
+  font-family: CircularBook;
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease;
+}
+
+.bottomnav-board:active {
+  background-color: var(--surface-hover);
+}
+
+.bottomnav-board:focus-visible {
+  outline: 2px solid var(--text-colour);
+  outline-offset: -2px;
+}
+
+.bottomnav-board-active,
+.bottomnav-board-active:active {
+  background-color: var(--accent-tint);
+}
+
+.bottomnav-board-emoji {
+  flex: 0 0 22px;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+
+.bottomnav-board-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bottomnav-board-placeholder {
+  pointer-events: none;
+}
+
+.bottomnav-board-placeholder>.placeholder-bar {
+  height: 14px;
+  width: 120px;
+}
+
+.bottomnav-board-placeholder>.placeholder-bar:first-child {
+  flex-shrink: 0;
+  width: 22px;
+}

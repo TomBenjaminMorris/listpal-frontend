@@ -6,7 +6,9 @@ import { dropCachedTasks, getCachedTasks, setCachedTasks } from '../utils/boardC
 import { getBoardIdFromUrl, saveBoardSettings } from '../utils/utils';
 import { apiErrorAlert } from '../utils/apiErrors';
 import { nameRequiredAlert } from '../utils/nameAlerts';
-import { EraserIcon, PencilIcon, TargetIcon, TrashIcon } from './Icons';
+import { markLastTappedTask } from '../utils/lastTappedTask';
+import { EraserIcon, MoreIcon, PencilIcon, TargetIcon, TrashIcon } from './Icons';
+import BoardMenu from './BoardMenu';
 import CardList from './CardList';
 import DatePills from './DatePills';
 import ScoreBoard from './ScoreBoard';
@@ -21,10 +23,12 @@ const ConfettiExplosion = memo(lazy(() => import('react-confetti-explosion')));
 const SHOWING_CACHE = Symbol('showing cache');
 const TARGET_TYPES = ['weekly', 'monthly', 'yearly'];
 const targetFlags = value => Object.fromEntries(TARGET_TYPES.map(type => [type, value]));
+const SCREEN_CENTRE = Symbol('screen centre'); // A confetti origin fixed to the viewport rather than the page
 
-const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID }) => {
+const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, setPromptConf, setConfirmConf, setAlertConf, setActiveBoardID, isMobile }) => {
   const [displayEmojiPicker, setDisplayEmojiPicker] = useState(false);
   const [displayTargetSetter, setDisplayTargetSetter] = useState(false);
+  const [displayBoardMenu, setDisplayBoardMenu] = useState(false);
   const cursorPosition = useRef({ x: 0, y: 0 }); // Read only when confetti starts, so moving the pointer never re-renders the board
   const [confettiOrigins, setConfettiOrigins] = useState({}); // Per target, so each burst stays where it started while later ones start elsewhere
   // Set by a tick and cleared by a press, so a burst the tick causes starts at the task and any other starts at the pointer
@@ -47,6 +51,7 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
   const tasksReady = loadedBoardID === boardID && !isDeleting;
   const navigate = useNavigate();
   const emojiMenuRef = useRef(null);
+  const boardMenuRef = useRef(null);
 
   // Keyed on the fields shown, so a rename or emoji change updates the title but a score change doesn't
   useEffect(() => {
@@ -134,6 +139,9 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
     }
   }, [isExploding, isTargetMet]);
 
+  // Only while a board is open, as nowhere else has tasks
+  useEffect(markLastTappedTask, []);
+
   // Also on pointer down, so a tap on a touch screen (which sends no mousemove) still places the confetti
   const trackPointer = (e) => {
     cursorPosition.current = {
@@ -149,8 +157,10 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
 
   // A ticked task moves up to the done tasks, and the page can scroll to follow it, so where the pointer was may now
   // be off screen. The task has only just started sliding, and getBoundingClientRect includes the slide, so take that
-  // off to find where it ends up.
+  // off to find where it ends up. On a phone, where the task fills the width and its move is a big jump, a burst
+  // following it looked odd, so there every burst plays in the middle of the screen instead.
   const confettiOrigin = () => {
+    if (isMobile) return SCREEN_CENTRE;
     const checkbox = tickedCheckbox.current;
     if (!checkbox?.isConnected) return { ...cursorPosition.current };
     const rect = checkbox.getBoundingClientRect();
@@ -178,6 +188,21 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
     }
     saveBoardSettings(setBoards, boardID, { Board: name });
   };
+
+  const openRenamePrompt = () => setPromptConf({
+    display: true,
+    isEdit: true,
+    defaultText: board.Board,
+    title: "Rename this board ✏️",
+    callbackFunc: handleEditBoard,
+  });
+
+  const confirmDeleteBoard = () => setConfirmConf({
+    display: true,
+    title: `Delete "${board.Board}" for good?`,
+    textValue: "🚨 No take-backs: this can't be undone 🚨",
+    callbackFunc: handleDeleteBoard,
+  });
 
   const handleDeleteBoard = async () => {
     setIsDeleting(true);
@@ -277,8 +302,11 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
 
   const renderConfetti = (type) => {
     const origin = confettiOrigins[type];
+    const position = origin === SCREEN_CENTRE
+      ? { position: 'fixed', top: 'calc(50% - 25px)', left: 'calc(50% - 25px)' }
+      : { position: 'absolute', top: origin?.y - 25, left: origin?.x - 25 };
     return isExploding[type] && !isTargetMet[type] && origin && (
-      <div key={type} style={{ position: 'absolute', top: origin.y - 25, left: origin.x - 25 }}>
+      <div key={type} style={position}>
         <ConfettiExplosion
           zIndex={10000}
           duration={3000}
@@ -289,6 +317,14 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
         />
       </div>
     );
+  };
+
+  // Each defined once for the desktop buttons and the phone's menu, which list them in different orders
+  const boardActions = {
+    rename: { label: "Rename board", icon: <PencilIcon />, onClick: openRenamePrompt },
+    clear: { label: "Clear tasks", icon: <EraserIcon />, onClick: handleClearClick },
+    targets: { label: "Set targets", icon: <TargetIcon />, onClick: () => setDisplayTargetSetter(true) },
+    delete: { label: "Delete board", icon: <TrashIcon />, onClick: confirmDeleteBoard, danger: true },
   };
 
   return (
@@ -325,44 +361,40 @@ const Board = ({ sortedTasks, setSortedTasks, setBoards, boards, refreshCount, s
                   }
                 </div>
                 <h1 className="board-title" title={board.Board}>{board.Board}</h1>
-                <button className="board-rename" aria-label="Rename board" onClick={() => setPromptConf({
-                  display: true,
-                  isEdit: true,
-                  defaultText: board.Board,
-                  title: "Rename this board ✏️",
-                  callbackFunc: handleEditBoard,
-                })}>
-                  <PencilIcon />
+                <button className="board-rename" aria-label={boardActions.rename.label} onClick={boardActions.rename.onClick}>
+                  {boardActions.rename.icon}
                 </button>
               </div>
 
               <DatePills />
 
               <div className={`board-actions-wrapper ${tasksReady ? "" : "board-actions-loading"}`}>
-                <div className="board-action">
-                  <button aria-label="Delete board" onClick={() => setConfirmConf({
-                    display: true,
-                    title: `Delete "${board.Board}" for good?`,
-                    textValue: "🚨 No take-backs: this can't be undone 🚨",
-                    callbackFunc: handleDeleteBoard,
-                  })}>
-                    <TrashIcon />
-                  </button>
-                  <div className="tooltip">Delete board</div>
-                </div>
+                {[boardActions.delete, boardActions.clear, boardActions.targets].map(action => (
+                  <div key={action.label} className="board-action">
+                    <button aria-label={action.label} onClick={action.onClick}>
+                      {action.icon}
+                    </button>
+                    <div className="tooltip">{action.label}</div>
+                  </div>
+                ))}
 
-                <div className="board-action">
-                  <button aria-label="Clear tasks" onClick={handleClearClick}>
-                    <EraserIcon />
+                {/* Shown in place of the buttons above, and the rename button, on a phone */}
+                <div className="board-action board-menu" ref={boardMenuRef}>
+                  <button
+                    className={displayBoardMenu ? "board-menu-open" : ""}
+                    aria-label="Board options"
+                    aria-expanded={displayBoardMenu}
+                    onClick={() => setDisplayBoardMenu(current => !current)}
+                  >
+                    <MoreIcon />
                   </button>
-                  <div className="tooltip">Clear tasks</div>
-                </div>
-
-                <div className="board-action">
-                  <button aria-label="Set targets" onClick={() => setDisplayTargetSetter(true)}>
-                    <TargetIcon />
-                  </button>
-                  <div className="tooltip">Set targets</div>
+                  {displayBoardMenu && (
+                    <BoardMenu
+                      containerRef={boardMenuRef}
+                      onClose={() => setDisplayBoardMenu(false)}
+                      actions={[boardActions.rename, boardActions.clear, boardActions.targets, boardActions.delete]}
+                    />
+                  )}
                 </div>
               </div>
 

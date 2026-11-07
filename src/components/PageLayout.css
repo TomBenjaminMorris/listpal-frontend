@@ -51,10 +51,9 @@
     font-size: 14px;
 }
 
-/* The fixed menu button sits at the top left, so the heading starts below it */
 @media screen and (max-width: 650px) {
     .page-column {
-        padding: 76px 16px 100px;
+        padding: 24px 16px calc(100px + var(--bottom-nav-height));
         text-align: center;
     }
 

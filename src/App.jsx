@@ -15,12 +15,15 @@ import Prompt from './components/Prompt';
 import Confirm from './components/Confirm';
 import Alert from './components/Alert';
 import SideNavBar from './components/SideNavBar';
+import BottomNavBar from './components/BottomNavBar';
 import RedirectPage from './components/RedirectPage';
 import Logout from './components/Logout';
 import config from "./config.json";
 import './App.css';
 
 const DEFAULT_THEME = 'purple-haze';
+// Swaps SideNavBar for BottomNavBar. The CSS's `max-width: 650px` queries, --bottom-nav-height in App.css among them,
+// must match, or the page gets the bar's padding with no bar.
 const MOBILE_BREAKPOINT = 650;
 const SIDEBAR_OPEN_KEY = 'sidebarIsOpen';
 const SIDEBAR_BOARDS_MENU_OPEN_KEY = 'sidebarBoardsMenuIsOpen';
@@ -45,8 +48,6 @@ const App = () => {
   const [sidebarIsOpen, setSidebarIsOpen] = useState(() => readStoredFlag(SIDEBAR_OPEN_KEY));
   const [sidebarBoardsMenuIsOpen, setSidebarBoardsMenuIsOpen] = useState(() => readStoredFlag(SIDEBAR_BOARDS_MENU_OPEN_KEY));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
-  // Separate from sidebarIsOpen and never stored: the drawer covers the page, so it must always start shut
-  const [mobileNavIsOpen, setMobileNavIsOpen] = useState(false);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [placeholderBoardCount] = useState(() => Number(localStorage.getItem(BOARD_COUNT_KEY)) || DEFAULT_PLACEHOLDER_BOARD_COUNT);
   const [refreshCount, setRefreshCount] = useState(0); // Moves on each refresh on return, after the boards have landed
@@ -195,12 +196,7 @@ const App = () => {
     });
   }, []);
 
-  const handleSidebarCollapse = useCallback(() => {
-    const setOpen = isMobile ? setMobileNavIsOpen : setSidebarIsOpen;
-    setOpen(prev => !prev);
-  }, [isMobile]);
-
-  const closeMobileNav = useCallback(() => setMobileNavIsOpen(false), []);
+  const handleSidebarCollapse = useCallback(() => setSidebarIsOpen(prev => !prev), []);
 
   const handleLogout = useCallback(() => {
     localStorage.clear();
@@ -218,18 +214,21 @@ const App = () => {
         {Object.keys(modalStates.confirm).length > 1 && (<Confirm confirmConf={modalStates.confirm} setConfirmConf={modalSetters.setConfirmConf} />)}
         {Object.keys(modalStates.alert).length > 1 && (<Alert alertConf={modalStates.alert} setAlertConf={modalSetters.setAlertConf} />)}
 
-        {isAuthenticated() ? (<SideNavBar
+        {isAuthenticated() ? (isMobile ? (<BottomNavBar
+          boards={boards}
+          placeholderBoardCount={shownPlaceholderBoardCount}
+          setActiveBoardID={setActiveBoardID}
+          activeBoard={activeBoard}
+        />) : (<SideNavBar
           handleSidebarCollapse={handleSidebarCollapse}
           setSidebarBoardsMenuIsOpen={setSidebarBoardsMenuIsOpen}
-          sidebarIsOpen={isMobile ? mobileNavIsOpen : sidebarIsOpen}
+          sidebarIsOpen={sidebarIsOpen}
           boards={boards}
           placeholderBoardCount={shownPlaceholderBoardCount}
           sidebarBoardsMenuIsOpen={sidebarBoardsMenuIsOpen}
-          isMobile={isMobile}
-          closeMobileNav={closeMobileNav}
           setActiveBoardID={setActiveBoardID}
           activeBoard={activeBoard}
-        />) : null}
+        />)) : null}
 
         <div className={isMobile ? '' : sidebarIsOpen ? 'with-sidebar' : 'without-sidebar'} >
 
@@ -262,6 +261,7 @@ const App = () => {
                 setConfirmConf={modalSetters.setConfirmConf}
                 setAlertConf={modalSetters.setAlertConf}
                 setActiveBoardID={setActiveBoardID}
+                isMobile={isMobile}
               />)}
             />
 

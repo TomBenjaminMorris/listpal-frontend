@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BoardsIcon, ChevronIcon, HomeIcon, LogOutIcon, LogoMark, MenuIcon, PanelIcon, SettingsIcon } from './Icons';
+import { BoardsIcon, ChevronIcon, HomeIcon, LogoMark, PanelIcon, SettingsIcon } from './Icons';
 import './SideNavBar.css';
 
-const SideNavLink = ({ to, label, icon, isActive, onClick }) => (
+const SideNavLink = ({ to, label, icon, isActive }) => (
   <Link
     to={to}
     className={`sidenav-row ${isActive ? "sidenav-row-active" : ""}`}
     data-tooltip={label}
     aria-current={isActive ? "page" : undefined}
-    onClick={onClick}
   >
     {icon}
     <span className="sidenav-label">{label}</span>
@@ -23,8 +22,6 @@ const SideNavBar = ({
   placeholderBoardCount,
   setSidebarBoardsMenuIsOpen,
   sidebarBoardsMenuIsOpen,
-  isMobile,
-  closeMobileNav,
   setActiveBoardID,
   activeBoard
 }) => {
@@ -43,7 +40,6 @@ const SideNavBar = ({
   // Board shows its own loader on a board change; setting it here would never clear when re-clicking the current board
   const handleBoardClick = (board) => {
     setActiveBoardID(board.SK)
-    closeMobileNav();
   };
 
   const handleBoardsMenuClick = () => {
@@ -83,68 +79,52 @@ const SideNavBar = ({
     </div>
   ));
 
-  const sidebarClass = [
-    "sidebar-wrapper",
-    sidebarIsOpen ? "sidebar-open" : "sidebar-collapsed",
-    isMobile ? "sidebar-mobile" : "sidebar-fade-in"
-  ].join(" ");
-  const toggleLabel = sidebarIsOpen ? (isMobile ? "Close menu" : "Collapse sidebar") : "Expand sidebar";
+  const sidebarClass = `sidebar-wrapper sidebar-fade-in ${sidebarIsOpen ? "sidebar-open" : "sidebar-collapsed"}`;
+  const toggleLabel = sidebarIsOpen ? "Collapse sidebar" : "Expand sidebar";
 
   return (
-    <>
-      {isMobile && (
-        <>
-          <button className="sidenav-menu-button" aria-label="Open menu" onClick={handleSidebarCollapse}>
-            <MenuIcon />
-          </button>
-          <div className={`sidenav-scrim ${sidebarIsOpen ? "sidenav-scrim-visible" : ""}`} onClick={closeMobileNav} />
-        </>
-      )}
+    <nav className={sidebarClass} aria-label="Main">
+      <div className="sidenav-header">
+        <Link className="sidenav-brand" to="/home">
+          <LogoMark />
+          <span>ListPal</span>
+        </Link>
+        <button
+          className="sidenav-row sidenav-toggle"
+          data-tooltip={toggleLabel}
+          aria-label={toggleLabel}
+          aria-expanded={sidebarIsOpen}
+          onClick={handleSidebarCollapse}
+        >
+          <PanelIcon />
+        </button>
+      </div>
 
-      <nav className={sidebarClass} aria-label="Main">
-        <div className="sidenav-header">
-          <Link className="sidenav-brand" to="/home" onClick={closeMobileNav}>
-            <LogoMark />
-            <span>ListPal</span>
-          </Link>
-          <button
-            className="sidenav-row sidenav-toggle"
-            data-tooltip={toggleLabel}
-            aria-label={toggleLabel}
-            aria-expanded={sidebarIsOpen}
-            onClick={handleSidebarCollapse}
-          >
-            <PanelIcon />
-          </button>
-        </div>
+      <div className="sidenav-links-wrapper">
+        <SideNavLink to="/home" label="Home" icon={<HomeIcon />} isActive={pathname === '/home'} />
 
-        <div className="sidenav-links-wrapper">
-          <SideNavLink to="/home" label="Home" icon={<HomeIcon />} isActive={pathname === '/home'} onClick={closeMobileNav} />
+        <button
+          className={`sidenav-row ${onBoardPage && !boardsListIsOpen ? "sidenav-row-active" : ""}`}
+          data-tooltip="Boards"
+          aria-expanded={boardsListIsOpen}
+          onClick={handleBoardsMenuClick}
+        >
+          <BoardsIcon />
+          <span className="sidenav-label">Boards</span>
+          <ChevronIcon className={`sidenav-chevron ${boardsListIsOpen ? "sidenav-chevron-open" : ""}`} />
+        </button>
 
-          <button
-            className={`sidenav-row ${onBoardPage && !boardsListIsOpen ? "sidenav-row-active" : ""}`}
-            data-tooltip="Boards"
-            aria-expanded={boardsListIsOpen}
-            onClick={handleBoardsMenuClick}
-          >
-            <BoardsIcon />
-            <span className="sidenav-label">Boards</span>
-            <ChevronIcon className={`sidenav-chevron ${boardsListIsOpen ? "sidenav-chevron-open" : ""}`} />
-          </button>
-
-          <div className={`sidenav-boards ${boardsListIsOpen ? "sidenav-boards-open" : ""} ${sidebarJustToggled ? "sidenav-boards-instant" : ""}`}>
-            <div className="sidenav-boards-inner">
-              {placeholderBoardCount ? boardPlaceholders : boardsRendered}
-            </div>
+        <div className={`sidenav-boards ${boardsListIsOpen ? "sidenav-boards-open" : ""} ${sidebarJustToggled ? "sidenav-boards-instant" : ""}`}>
+          <div className="sidenav-boards-inner">
+            {placeholderBoardCount ? boardPlaceholders : boardsRendered}
           </div>
         </div>
+      </div>
 
-        <div className="sidenav-footer">
-          <SideNavLink to="/settings" label="Settings" icon={<SettingsIcon />} isActive={pathname === '/settings'} onClick={closeMobileNav} />
-          <SideNavLink to="/logout" label="Log Out" icon={<LogOutIcon />} />
-        </div>
-      </nav>
-    </>
+      <div className="sidenav-footer">
+        <SideNavLink to="/settings" label="Settings" icon={<SettingsIcon />} isActive={pathname === '/settings'} />
+      </div>
+    </nav>
   );
 };
 
